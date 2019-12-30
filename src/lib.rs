@@ -1,10 +1,11 @@
 #![feature(decl_macro)]
+#![feature(never_type)]
 
 pub mod el;
 // pub mod layout;
 pub mod macros;
 pub mod model;
-pub mod properties;
+pub mod css;
 pub mod routable;
 pub mod theme;
 pub mod view;
@@ -14,11 +15,3 @@ extern crate seed;
 
 #[macro_use]
 extern crate derive_more;
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
-}

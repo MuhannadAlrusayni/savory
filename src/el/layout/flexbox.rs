@@ -1,54 +1,56 @@
 use crate::{
     macros::*,
-    properties::{
+    css::{
+        self,
+        flexbox::*,
         background::Background, border::Border, box_align::*, gap::Gap, margin::Margin,
         padding::Padding, size::Size, unit::*,
     },
     theme::Theme,
     view::View,
 };
+use derive_rich::Rich;
 use seed::prelude::*;
+use std::default::Default;
 
-#[derive(Clone, Copy, PartialEq, Eq, Display)]
-pub enum Direction {
-    #[display(fmt = "row")]
-    Row,
-    #[display(fmt = "row-reverse")]
-    RowReverse,
-    #[display(fmt = "column")]
-    Column,
-    #[display(fmt = "column-reverse")]
-    ColumnReverse,
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, Display)]
-pub enum Wrap {
-    #[display(fmt = "wrap")]
-    Wrap,
-    #[display(fmt = "nowrap")]
-    NoWrap,
-    #[display(fmt = "wrap-reverse")]
-    WrapReverse,
-}
-
-#[derive(Clone)]
-pub struct Flexbox<Msg: 'static + Clone> {
-    items: Vec<Item<Msg>>,
+#[derive(Clone, Rich, Default)]
+pub struct Flexbox<ParentMsg: 'static> {
+    pub items: Vec<Item<ParentMsg>>,
     // properties
-    direction: Option<Direction>,
-    wrap: Option<Wrap>,
-    justify_content: Option<JustifyContent>,
-    align_items: Option<AlignItems>,
-    align_content: Option<AlignContent>,
-    gap: Option<Gap>,
-    size: Size,
-    border: Border,
-    background: Background,
-    margin: Margin,
-    padding: Padding,
+    #[rich(value_fns(take) = {
+        row = css::Row,
+        reversed_row = css::RowReverse,
+        column = css::Column,
+        reversed_column = css::ColumnReverse,
+    })]
+    pub direction: Option<Direction>,
+    #[rich(value_fns(take) = {
+        wrap = css::Wrap,
+        no_wrap = css::NoWrap,
+        reversed_wrap = css::WrapReverse,
+    })]
+    pub wrap: Option<Wrap>,
+    #[rich(write(take))]
+    pub justify_content: Option<JustifyContent>,
+    #[rich(write(take))]
+    pub align_items: Option<AlignItems>,
+    #[rich(write(take))]
+    pub align_content: Option<AlignContent>,
+    #[rich(write(take))]
+    pub gap: Option<Gap>,
+    #[rich(write(take, style = compose))]
+    pub size: Size,
+    #[rich(write(take, style = compose))]
+    pub border: Border,
+    #[rich(write(take, style = compose))]
+    pub background: Background,
+    #[rich(write(take, style = compose))]
+    pub margin: Margin,
+    #[rich(write(take, style = compose))]
+    pub padding: Padding,
 }
 
-impl<Msg: 'static + Clone> Flexbox<Msg> {
+impl<ParentMsg: 'static> Flexbox<ParentMsg> {
     pub fn new() -> Self {
         Self {
             items: vec![],
@@ -66,200 +68,116 @@ impl<Msg: 'static + Clone> Flexbox<Msg> {
         }
     }
 
-    pub fn item(child: impl Into<Node<Msg>>) -> Item<Msg> {
-        Item::new(child)
+    pub fn item(content: impl IntoIterator<Item = impl Into<Node<ParentMsg>>>) -> Item<ParentMsg> {
+        Item::with_content(content)
     }
 
-    pub fn add(mut self, get_child: impl FnOnce(Item<Msg>) -> Item<Msg>) -> Self {
-        self.items.push(get_child(Item::empty()));
+    pub fn add(mut self, get_child: impl FnOnce(Item<ParentMsg>) -> Item<ParentMsg>) -> Self {
+        self.items.push(get_child(Item::new()));
         self
     }
 
-    pub fn adds(mut self, children: impl IntoIterator<Item = Item<Msg>>) -> Self {
-        self.items.extend(children);
+    pub fn items(mut self, items: impl IntoIterator<Item = Item<ParentMsg>>) -> Self {
+        self.items.extend(items);
         self
     }
 
     pub fn normal(self) -> Self {
-        self.justify_content(JustifyContent::Normal)
-            .align_content(AlignContent::Normal)
-            .align_items(AlignItems::Normal)
+        self.justify_content(css::Normal)
+            .align_content(css::Normal)
+            .align_items(css::Normal)
     }
 
     pub fn stretch(self) -> Self {
-        self.justify_content(JustifyContent::Stretch)
-            .align_content(AlignContent::Stretch)
-            .align_items(AlignItems::Stretch)
+        self.justify_content(css::Stretch)
+            .align_content(css::Stretch)
+            .align_items(css::Stretch)
     }
 
     pub fn center(self) -> Self {
-        self.justify_content(JustifyContent::Center)
-            .align_content(AlignContent::Center)
-            .align_items(AlignItems::Center)
+        self.justify_content(css::Center)
+            .align_content(css::Center)
+            .align_items(css::Center)
     }
 
     pub fn start(self) -> Self {
-        self.justify_content(JustifyContent::Start)
-            .align_content(AlignContent::Start)
-            .align_items(AlignItems::Start)
+        self.justify_content(css::Start)
+            .align_content(css::Start)
+            .align_items(css::Start)
     }
 
     pub fn end(self) -> Self {
-        self.justify_content(JustifyContent::End)
-            .align_content(AlignContent::End)
-            .align_items(AlignItems::End)
+        self.justify_content(css::End)
+            .align_content(css::End)
+            .align_items(css::End)
     }
 
     pub fn space_between(self) -> Self {
-        self.justify_content(JustifyContent::SpaceBetween)
-            .align_content(AlignContent::SpaceBetween)
+        self.justify_content(css::SpaceBetween)
+            .align_content(css::SpaceBetween)
     }
 
     pub fn space_around(self) -> Self {
-        self.justify_content(JustifyContent::SpaceAround)
-            .align_content(AlignContent::SpaceAround)
+        self.justify_content(css::SpaceAround)
+            .align_content(css::SpaceAround)
     }
 
     pub fn space_evenly(self) -> Self {
-        self.justify_content(JustifyContent::SpaceEvenly)
-            .align_content(AlignContent::SpaceEvenly)
-    }
-
-    builder_enum_functions! {
-        direction {
-            row() => Direction::Row,
-            reversed_row() => Direction::RowReverse,
-            column() => Direction::Column,
-            reversed_column() => Direction::ColumnReverse,
-        }
-        wrap {
-            wrap() => Wrap::Wrap,
-            no_wrap() => Wrap::NoWrap,
-            reversed_wrap() => Wrap::WrapReverse,
-        }
-    }
-
-    builder_functions! {
-        gap(Gap),
-        align_content(AlignContent),
-        justify_content(JustifyContent),
-        align_items(AlignItems),
-    }
-
-    composition_functions! {
-        size: Size,
-        border: Border,
-        background: Background,
-        margin: Margin,
-        padding: Padding,
+        self.justify_content(css::SpaceEvenly)
+            .align_content(css::SpaceEvenly)
     }
 }
 
-impl<Msg: 'static + Clone> View<Msg> for Flexbox<Msg> {
-    fn view(&self, theme: &impl Theme) -> Node<Msg> {
-        // flex container style
-        let mut style = style![
-            St::Display => "flex",
-            St::FlexDirection => self.direction,
-            St::FlexWrap => self.wrap,
-            St::JustifyContent => self.justify_content,
-            St::AlignItems => self.align_items,
-            St::AlignContent => self.align_content,
-            St::Gap => self.gap,
-        ];
-        style.merge((&self.size).into());
-        style.merge((&self.border).into());
-        style.merge((&self.background).into());
-        style.merge((&self.margin).into());
-        style.merge((&self.padding).into());
-
+impl<ParentMsg: Clone + 'static> View<ParentMsg> for Flexbox<ParentMsg> {
+    fn view(&self, theme: &impl Theme) -> Node<ParentMsg> {
         div![
-            style,
+            theme.flexbox(self),
             // items
-            // self.items.iter().map(|item| item.view(theme))
+            self.items.iter().map(|item| item.view(theme)),
         ]
     }
 }
 
 // ---- Flexbox Item ----
 
-#[derive(Clone, Debug, Copy, PartialEq, Display, From)]
-pub enum Basis {
-    #[display(fmt = "content")]
-    Content,
-    #[display(fmt = "auto")]
-    Auto,
-    #[display(fmt = "inherit")]
-    Inherit,
-    #[from]
-    Em(Em),
-    #[from]
-    Ex(Ex),
-    #[from]
-    Cap(Cap),
-    #[from]
-    Ch(Ch),
-    #[from]
-    Ic(Ic),
-    #[from]
-    Rem(Rem),
-    #[from]
-    Rlh(Rlh),
-    #[from]
-    Vm(Vm),
-    #[from]
-    Vh(Vh),
-    #[from]
-    Vi(Vi),
-    #[from]
-    Vb(Vb),
-    #[from]
-    Vmin(Vmin),
-    #[from]
-    Vmax(Vmax),
-    #[from]
-    Cm(Cm),
-    #[from]
-    Mm(Mm),
-    #[from]
-    Q(Q),
-    #[from]
-    In(In),
-    #[from]
-    Pc(Pc),
-    #[from]
-    Pt(Pt),
-    #[from]
-    Px(Px),
-    #[from(forward)]
-    Percent(Percent),
-}
-
 // TODO: add collapse propertie
-#[derive(Clone)]
-pub struct Item<Msg: 'static + Clone> {
-    child: Option<Node<Msg>>,
+#[derive(Clone, Rich, Default)]
+pub struct Item<ParentMsg: 'static> {
+    pub content: Vec<Node<ParentMsg>>,
     // propertie
-    order: Option<i32>,
-    grow: Option<f32>,
-    shrink: Option<f32>,
-    basis: Option<Basis>,
-    align_self: Option<AlignSelf>,
-    size: Size,
-    border: Border,
-    background: Background,
-    margin: Margin,
-    padding: Padding,
+    #[rich(write(take))]
+    pub order: Option<i32>,
+    #[rich(write(take))]
+    pub grow: Option<f32>,
+    #[rich(write(take))]
+    pub shrink: Option<f32>,
+    #[rich(write(take))]
+    pub basis: Option<Basis>,
+    #[rich(value_fns(take) = {
+        auto = css::Auto,
+        normal = css::Normal,
+        stretch = css::Stretch,
+        center = css::Center,
+        start = css::Start,
+        end = css::End,
+    })]
+    pub align_self: Option<AlignSelf>,
+    #[rich(write(take, style = compose))]
+    pub size: Size,
+    #[rich(write(take, style = compose))]
+    pub border: Border,
+    #[rich(write(take, style = compose))]
+    pub background: Background,
+    #[rich(write(take, style = compose))]
+    pub margin: Margin,
+    #[rich(write(take, style = compose))]
+    pub padding: Padding,
 }
 
-impl<Msg: 'static + Clone> Item<Msg> {
-    pub fn new(child: impl Into<Node<Msg>>) -> Self {
-        Self::empty().child(child)
-    }
-
-    pub fn empty() -> Self {
+impl<ParentMsg: 'static> Item<ParentMsg> {
+    pub fn new() -> Self {
         Self {
-            child: None,
+            content: vec![],
             order: None,
             grow: None,
             shrink: None,
@@ -273,6 +191,18 @@ impl<Msg: 'static + Clone> Item<Msg> {
         }
     }
 
+    pub fn with_content(content: impl IntoIterator<Item = impl Into<Node<ParentMsg>>>) -> Self {
+        Self::new().content(content)
+    }
+
+    pub fn content(
+        mut self,
+        content: impl IntoIterator<Item = impl Into<Node<ParentMsg>>>,
+    ) -> Self {
+        self.content = content.into_iter().map(|c| c.into()).collect();
+        self
+    }
+
     pub fn auto_margin(self) -> Self {
         self.margin(|margin| margin.auto())
     }
@@ -280,57 +210,48 @@ impl<Msg: 'static + Clone> Item<Msg> {
     pub fn group(self, group_id: impl Into<i32>) -> Self {
         self.order(group_id)
     }
+}
 
-    builder_functions! {
-        child(Node<Msg>),
-        order(i32),
-        grow(f32),
-        shrink(f32),
-        basis(Basis),
-        align_self(AlignSelf),
-    }
-
-    builder_enum_functions! {
-        align_self {
-            auto() => AlignSelf::Auto,
-            normal() => AlignSelf::Normal,
-            stretch() => AlignSelf::Stretch,
-            center() => AlignSelf::Center,
-            start() => AlignSelf::Start,
-            end() => AlignSelf::End,
-        }
-    }
-
-    composition_functions! {
-        size: Size,
-        border: Border,
-        background: Background,
-        margin: Margin,
-        padding: Padding,
+impl<ParentMsg: Clone + 'static> View<ParentMsg> for Item<ParentMsg> {
+    fn view(&self, theme: &impl Theme) -> Node<ParentMsg> {
+        div![
+            theme.flexbox_item(self),
+            // child
+            self.content.clone()
+        ]
     }
 }
 
-impl<Msg: 'static + Clone> View<Msg> for Item<Msg> {
-    fn view(&self, _: &impl Theme) -> Node<Msg> {
-        // flex item style
-        let mut style = style![
-            St::Order => self.order,
-            St::FlexGrow => self.grow,
-            St::FlexShrink => self.shrink,
-            St::FlexBasis => self.basis,
-            St::AlignSelf => self.align_self,
-            // St::Visibility => self.collapse,
-        ];
-        style.merge((&self.size).into());
-        style.merge((&self.border).into());
-        style.merge((&self.background).into());
-        style.merge((&self.margin).into());
-        style.merge((&self.padding).into());
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-        div![
-            style,
-            // child
-            self.child.as_ref().map_or(empty![], |item| item.clone()),
-        ]
+    #[derive(Clone, Debug)]
+    pub enum Msg {
+        Home,
+        AboutUs,
+    }
+
+    #[derive(Debug)]
+    pub struct Flexbox {
+        items: Vec<Node<Msg>>,
+    }
+
+    fn view_flexbox(flexbox: &Flexbox) -> Node<Msg> {
+        div![flexbox.items.clone()]
+    }
+
+    #[test]
+    fn test_listeners() {
+        let items = vec![
+            button![simple_ev(Ev::Click, Msg::Home), "Home"],
+            button![simple_ev(Ev::Click, Msg::AboutUs), "About us"],
+        ];
+
+        let flexbox = Flexbox { items };
+        //
+        panic!("{:#?}", flexbox);
+        let node = view_flexbox(&flexbox);
+        panic!("{:#?}", node);
     }
 }

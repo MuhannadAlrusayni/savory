@@ -1,5 +1,4 @@
-use crate::{macros::*, properties::unit::*};
-use seed::{dom_types::Style, prelude::*};
+use crate::css::{St, unit::*, ToStyle, Style};
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum LengthPercent {
@@ -50,8 +49,14 @@ pub enum LengthPercent {
 #[derive(Clone, Debug, Copy, PartialEq, Display, From)]
 pub enum Gap {
     #[from(forward)]
-    RowAndColumn(LengthPercent),
+    Value(LengthPercent),
     #[display(fmt = "{} {}", _0, _1)]
     #[from]
     RowColumn(LengthPercent, LengthPercent),
+}
+
+impl ToStyle for Gap {
+    fn to_style(&self) -> Style {
+        Style::new().add(St::Gap, self)
+    }
 }

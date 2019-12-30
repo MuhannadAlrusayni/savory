@@ -1,24 +1,36 @@
 use crate::{
-    macros::*,
-    properties::{color::Color, size::Size},
+    css::{color::Color, size::Size},
     theme::Theme,
     view::View,
 };
-use seed::{dom_types::Style, prelude::*};
+use derive_rich::Rich;
+use seed::prelude::*;
 use std::borrow::Cow;
 
-#[derive(Clone, Debug, From)]
-pub enum Icon<Msg: 'static + Clone> {
-    Svg(SvgIcon<Msg>),
+#[derive(Debug, From)]
+pub enum Icon<ParentMsg: 'static> {
+    Svg(SvgIcon<ParentMsg>),
     Html(HtmlIcon),
     Url(UrlIcon),
 }
 
-impl<Msg: 'static + Clone> Icon<Msg> {
-    pub fn svg(draw: impl IntoIterator<Item = El<Msg>>) -> SvgIcon<Msg> {
+impl<ParentMsg: Clone + 'static> View<ParentMsg> for Icon<ParentMsg> {
+    fn view(&self, theme: &impl Theme) -> Node<ParentMsg> {
+        match self {
+            Self::Svg(icon) => icon.view(theme),
+            Self::Html(icon) => icon.view(theme),
+            Self::Url(icon) => icon.view(theme),
+        }
+    }
+}
+
+impl<ParentMsg: 'static> Icon<ParentMsg> {
+    pub fn svg(draw: impl IntoIterator<Item = Node<ParentMsg>>) -> SvgIcon<ParentMsg> {
         SvgIcon::new(draw)
     }
+}
 
+impl Icon<!> {
     pub fn html(html: impl Into<Cow<'static, str>>) -> HtmlIcon {
         HtmlIcon::new(html)
     }
@@ -28,43 +40,34 @@ impl<Msg: 'static + Clone> Icon<Msg> {
     }
 }
 
-#[derive(Clone, Debug)]
-pub struct SvgIcon<Msg: 'static + Clone> {
-    draw: Vec<El<Msg>>,
-    color: Option<Color>,
-    size: Size,
+#[derive(Debug, Rich)]
+pub struct SvgIcon<ParentMsg: 'static> {
+    pub draw: Vec<Node<ParentMsg>>,
+    #[rich(write(take))]
+    pub color: Option<Color>,
+    #[rich(write(take, style = compose))]
+    pub size: Size,
 }
 
-impl<Msg: 'static + Clone> SvgIcon<Msg> {
-    pub fn new(draw: impl IntoIterator<Item = El<Msg>>) -> Self {
+impl<ParentMsg: 'static> SvgIcon<ParentMsg> {
+    pub fn new(draw: impl IntoIterator<Item = Node<ParentMsg>>) -> Self {
         Self {
             draw: draw.into_iter().collect(),
             color: None,
             size: Size::default(),
         }
     }
-    pub fn draw(mut self, draw: impl IntoIterator<Item = El<Msg>>) -> Self {
+
+    pub fn draw(mut self, draw: impl IntoIterator<Item = Node<ParentMsg>>) -> Self {
         self.draw = draw.into_iter().collect();
         self
     }
-
-    builder_functions! {
-        color(Color),
-    }
-
-    composition_functions! {
-        size: Size,
-    }
 }
 
-impl<Msg: 'static + Clone> View<Msg> for SvgIcon<Msg> {
-    fn view(&self, _: &impl Theme) -> Node<Msg> {
-        let mut style = style![
-            St::Color => self.color,
-        ];
-        style.merge((&self.size).into());
-
+impl<ParentMsg: Clone + 'static> View<ParentMsg> for SvgIcon<ParentMsg> {
+    fn view(&self, theme: &impl Theme) -> Node<ParentMsg> {
         svg![
+            theme.svg_icon(self),
             attrs![
                 At::ViewBox => "0 0 100 100",
             ],
@@ -73,11 +76,14 @@ impl<Msg: 'static + Clone> View<Msg> for SvgIcon<Msg> {
     }
 }
 
-#[derive(Clone, Debug)]
+
+#[derive(Debug, Rich)]
 pub struct HtmlIcon {
-    html: Cow<'static, str>,
-    color: Option<Color>,
-    size: Size,
+    pub html: Cow<'static, str>,
+    #[rich(write(take))]
+    pub color: Option<Color>,
+    #[rich(write(take, style = compose))]
+    pub size: Size,
 }
 
 impl HtmlIcon {
@@ -93,24 +99,12 @@ impl HtmlIcon {
         self.html = html.into();
         self
     }
-
-    builder_functions! {
-        color(Color),
-    }
-
-    composition_functions! {
-        size: Size,
-    }
 }
 
-impl<Msg: 'static + Clone> View<Msg> for HtmlIcon {
-    fn view(&self, _theme: &impl Theme) -> Node<Msg> {
-        let mut style = style![
-            St::Color => self.color,
-        ];
-        style.merge((&self.size).into());
-
+impl<ParentMsg: Clone + 'static> View<ParentMsg> for HtmlIcon {
+    fn view(&self, theme: &impl Theme) -> Node<ParentMsg> {
         svg![
+            theme.html_icon(self),
             attrs![
                 At::ViewBox => "0 0 100 100",
             ],
@@ -119,10 +113,12 @@ impl<Msg: 'static + Clone> View<Msg> for HtmlIcon {
     }
 }
 
-#[derive(Clone, Debug)]
+
+#[derive(Debug, Rich)]
 pub struct UrlIcon {
-    url: Cow<'static, str>,
-    size: Size,
+    pub url: Cow<'static, str>,
+    #[rich(write(take, style = compose))]
+    pub size: Size,
 }
 
 impl UrlIcon {
@@ -137,16 +133,12 @@ impl UrlIcon {
         self.url = url.into();
         self
     }
-
-    composition_functions! {
-        size: Size,
-    }
 }
 
-impl<Msg: 'static + Clone> View<Msg> for UrlIcon {
-    fn view(&self, _theme: &impl Theme) -> Node<Msg> {
+impl<ParentMsg: Clone + 'static> View<ParentMsg> for UrlIcon {
+    fn view(&self, theme: &impl Theme) -> Node<ParentMsg> {
         img![
-            Style::from(&self.size),
+            theme.url_icon(self),
             attrs![
                 At::Src => self.url,
             ]

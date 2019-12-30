@@ -1,18 +1,26 @@
 use crate::theme::Theme;
-use seed::{dom_types::Style, prelude::*};
+use seed::prelude::*;
 
-pub trait View<Msg: 'static + Clone> {
+pub trait View<Msg: 'static> {
     fn view(&self, theme: &impl Theme) -> Node<Msg>;
 }
 
-impl<Msg: 'static + Clone> View<Msg> for Node<Msg> {
+impl<Msg: Clone + 'static> View<Msg> for Node<Msg> {
     fn view(&self, _: &impl Theme) -> Node<Msg> {
         self.clone()
     }
 }
 
-impl<Msg: 'static + Clone> View<Msg> for El<Msg> {
+impl<Msg: Clone + 'static> View<Msg> for El<Msg> {
     fn view(&self, _: &impl Theme) -> Node<Msg> {
         Node::Element(self.clone())
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_name() {}
 }

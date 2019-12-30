@@ -1,4 +1,4 @@
-use crate::properties::unit::*;
+use super::{St, ToStyle, Style};
 use palette::{
     rgb::{Rgb, Rgba},
     Hsl, Hsla,
@@ -359,4 +359,10 @@ pub enum Color {
     Yellow,
     #[display(fmt = "yellowgreen")]
     YellowGreen,
+}
+
+impl ToStyle for Color {
+    fn to_style(&self) -> Style {
+        Style::new().add(St::Color, self)
+    }
 }
