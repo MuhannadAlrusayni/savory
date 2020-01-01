@@ -1,4 +1,4 @@
-use crate::{model::Model, view::View, theme::Theme};
+use crate::{model::Model, render::Render, theme::Theme};
 use seed::prelude::*;
 
 
@@ -57,8 +57,8 @@ impl<GMsg: 'static> Model<Msg, GMsg> for Ripple {
     }
 }
 
-impl View<Msg> for Ripple {
-    fn view(&self, theme: &impl Theme) -> Node<Msg> {
+impl Render<Msg> for Ripple {
+    fn render(&self, theme: &impl Theme) -> Node<Msg> {
         if self.animating {
             div! [
                 style! [

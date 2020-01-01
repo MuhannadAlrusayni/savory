@@ -8,7 +8,7 @@ pub mod model;
 pub mod css;
 pub mod routable;
 pub mod theme;
-pub mod view;
+pub mod render;
 
 #[macro_use]
 extern crate seed;

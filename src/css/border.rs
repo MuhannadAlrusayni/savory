@@ -5,13 +5,13 @@ use derive_rich::Rich;
 #[derive(Rich, Clone, Debug, PartialEq, Default)]
 pub struct Border {
     #[rich(read, write(take, style = compose))]
-    left: Option<Side>,
+    left: Side,
     #[rich(read, write(take, style = compose))]
-    top: Option<Side>,
+    top: Side,
     #[rich(read, write(take, style = compose))]
-    right: Option<Side>,
+    right: Side,
     #[rich(read, write(take, style = compose))]
-    bottom: Option<Side>,
+    bottom: Side,
     #[rich(read, write(take))]
     top_left: Option<Radius>,
     #[rich(read, write(take))]
@@ -25,10 +25,23 @@ pub struct Border {
 impl ToStyle for Border {
     fn to_style(&self) -> css::Style {
         css::Style::new()
-            .try_add(St::BorderLeft, self.left.as_ref())
-            .try_add(St::BorderTop, self.top.as_ref())
-            .try_add(St::BorderRight, self.right.as_ref())
-            .try_add(St::BorderBottom, self.bottom.as_ref())
+            // left side
+            .try_add(St::BorderLeftColor, self.left.color)
+            .try_add(St::BorderLeftWidth, self.left.width)
+            .try_add(St::BorderLeftStyle, self.left.style)
+            // top side
+            .try_add(St::BorderTopColor, self.top.color)
+            .try_add(St::BorderTopWidth, self.top.width)
+            .try_add(St::BorderTopStyle, self.top.style)
+            // right side
+            .try_add(St::BorderRightColor, self.right.color)
+            .try_add(St::BorderRightWidth, self.right.width)
+            .try_add(St::BorderRightStyle, self.right.style)
+            // bottom side
+            .try_add(St::BorderBottomColor, self.bottom.color)
+            .try_add(St::BorderBottomWidth, self.bottom.width)
+            .try_add(St::BorderBottomStyle, self.bottom.style)
+            // radius
             .try_add(St::BorderTopLeftRadius, self.top_left)
             .try_add(St::BorderTopRightRadius, self.top_right)
             .try_add(St::BorderBottomLeftRadius, self.bottom_left)
@@ -50,14 +63,6 @@ impl Border {
             .top(value)
             .right(value)
             .bottom(value)
-    }
-
-    pub fn all_corners(self, value: impl Into<Radius>) -> Self {
-        let value = value.into();
-        self.top_left(value)
-            .top_right(value)
-            .bottom_left(value)
-            .bottom_right(value)
     }
 
     pub fn style(self, style: impl Into<Style>) -> Self {
@@ -89,18 +94,8 @@ impl Border {
     }
 }
 
-pub fn display_helper(value: &Option<impl ToString>) -> String {
-    value
-        .as_ref()
-        .map_or("".into(), |v| format!("{} ", v.to_string()))
-}
-
-#[derive(Rich, Clone, Debug, PartialEq, From, Default, Display)]
-#[display(fmt = "{}{}{}",
-          "display_helper(style)",
-          "display_helper(width)",
-          "display_helper(color).trim()")]
-pub struct SideProps {
+#[derive(Rich, Clone, Debug, PartialEq, From, Default)]
+pub struct Side {
     #[rich(write(take), read, value_fns(take) = {
         none = css::None,
         hidden = css::Hidden,
@@ -126,69 +121,6 @@ pub struct SideProps {
     width: Option<Width>,
     #[rich(read, write(take))]
     color: Option<Color>,
-}
-
-#[derive(Clone, Debug, PartialEq, Display, From)]
-pub enum Side {
-    #[from]
-    Props(SideProps),
-    #[from]
-    Initial(css::Initial),
-    #[from]
-    Inherit(css::Inherit),
-}
-
-impl Default for Side {
-    fn default() -> Self {
-        css::Initial.into()
-    }
-}
-
-macro style_shortcut_functions( $( $fn:ident() => $value:expr $(,)? )* ) {
-    $(
-        pub fn $fn(self) -> Self {
-            self.style($value)
-        }
-    )*
-}
-
-impl Side {
-    pub fn style(mut self, style: impl Into<Style>) -> Self {
-        match self {
-            Self::Props(side_props) => self = side_props.style(style).into(),
-            _ => self = SideProps::default().style(style).into(),
-        };
-        self
-    }
-
-    pub fn width(mut self, width: impl Into<Width>) -> Self {
-        match self {
-            Self::Props(side_props) => self = side_props.width(width).into(),
-            _ => self = SideProps::default().width(width).into(),
-        };
-        self
-    }
-
-    pub fn color(mut self, color: impl Into<Color>) -> Self {
-        match self {
-            Self::Props(side_props) => self = side_props.color(color).into(),
-            _ => self = SideProps::default().color(color).into(),
-        };
-        self
-    }
-
-    style_shortcut_functions! {
-        none() => css::None,
-        hidden() => css::Hidden,
-        dotted() => css::Dotted,
-        dashed() => css::Dashed,
-        solid() => css::Solid,
-        double() => css::Double,
-        groove() => css::Groove,
-        ridge() => css::Ridge,
-        inset() => css::Inset,
-        outset() => css::Outset,
-    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]

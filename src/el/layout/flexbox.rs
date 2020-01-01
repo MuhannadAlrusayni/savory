@@ -7,7 +7,7 @@ use crate::{
         padding::Padding, size::Size, unit::*,
     },
     theme::Theme,
-    view::View,
+    render::Render,
 };
 use derive_rich::Rich;
 use seed::prelude::*;
@@ -128,12 +128,12 @@ impl<ParentMsg: 'static> Flexbox<ParentMsg> {
     }
 }
 
-impl<ParentMsg: Clone + 'static> View<ParentMsg> for Flexbox<ParentMsg> {
-    fn view(&self, theme: &impl Theme) -> Node<ParentMsg> {
+impl<ParentMsg: Clone + 'static> Render<ParentMsg> for Flexbox<ParentMsg> {
+    fn render(&self, theme: &impl Theme) -> Node<ParentMsg> {
         div![
             theme.flexbox(self),
             // items
-            self.items.iter().map(|item| item.view(theme)),
+            self.items.iter().map(|item| item.render(theme)),
         ]
     }
 }
@@ -212,8 +212,8 @@ impl<ParentMsg: 'static> Item<ParentMsg> {
     }
 }
 
-impl<ParentMsg: Clone + 'static> View<ParentMsg> for Item<ParentMsg> {
-    fn view(&self, theme: &impl Theme) -> Node<ParentMsg> {
+impl<ParentMsg: Clone + 'static> Render<ParentMsg> for Item<ParentMsg> {
+    fn render(&self, theme: &impl Theme) -> Node<ParentMsg> {
         div![
             theme.flexbox_item(self),
             // child

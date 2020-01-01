@@ -171,12 +171,6 @@ pub fn variant(base_color: impl Into<Hsl>) -> [Hsl; 10] {
             }
         };
         hue % 360.
-        // if hue < 0. {
-        //     hue += 360.
-        // } else if hue >= 360. {
-        //     hue -= 360.
-        // }
-        // hue
     };
 
     let get_saturation = |hsv: &Hsv, i, light| {
@@ -483,47 +477,66 @@ impl Theme for Ant {
     }
 
     fn button(&self, btn: &Button) -> Style {
-        let (bg_color, border_color, text_color): (Hsla, Hsla, Hsla) =
-            match (btn.is_focused(), btn.is_disabled(), btn.is_mouse_over()) {
-                (_, true, _) => (
-                    self.gray(Variant::L200),
-                    self.gray(Variant::L400),
-                    self.gray(Variant::L400),
-                ),
-                (true, false, _) | (_, false, true) => {
-                    match btn.kind {
-                        button::Kind::Normal => (self.white(), self.border(false), self.title(false)),
-                        button::Kind::Suggestion => (self.brand(Variant::L500), self.brand(Variant::L500), self.title(false)),
-                        button::Kind::Destructive => (self.dust_red(Variant::L500), self.dust_red(Variant::L500), self.title(false)),
-                    }
+        let gray_l2 = self.gray(Variant::L200);
+        let gray_l4 = self.gray(Variant::L400);
+        let white = self.white();
+        let brand_l5 = self.brand(Variant::L500);
+        let brand_l4 = self.brand(Variant::L400);
+        let dust_red_l4 = self.dust_red(Variant::L400);
+        let dust_red_l5 = self.dust_red(Variant::L500);
+
+        let (bg_color, border_color, text_color) = if btn.is_disabled() {
+            (gray_l2, gray_l4, gray_l4)
+        } else {
+            match (btn.is_focused(), btn.is_mouse_over()) {
+                (true, _) | (_, true) => match btn.kind {
+                    button::Kind::Normal => (white, brand_l5, brand_l5),
+                    button::Kind::Suggestion => (brand_l4, brand_l4, self.title(true)),
+                    button::Kind::Destructive => (dust_red_l4, dust_red_l4, self.title(true)),
                 },
-                (false, false, false) => {
-                    match btn.kind {
-                        button::Kind::Normal => (self.white(), self.border(false), self.title(false)),
-                        button::Kind::Suggestion => (self.brand(Variant::D600), self.brand(Variant::D600), self.title(false)),
-                        button::Kind::Destructive => (self.dust_red(Variant::D600), self.dust_red(Variant::D600), self.title(false)),
-                    }
-                },
-            };
+                (false, false) => match btn.kind {
+                    button::Kind::Normal => (white, self.border(false), self.title(false)),
+                    button::Kind::Suggestion => (brand_l5, brand_l5, self.title(true)),
+                    button::Kind::Destructive => (dust_red_l5, dust_red_l5, self.title(true)),
+                }
+            }
+        };
 
         let border = css::Border::default()
-            .width(px(1.));
+            .width(px(1.))
+            .solid()
+            .radius(px(4.))
+            .color(border_color);
+
+        let background = css::Background::default()
+            .color(bg_color);
+
+        let padding = css::Padding::default()
+            .x(px(15.))
+            .y(px(0.));
+
+        let size = css::Size::default()
+            .height(px(32.));
+
+        let cursor = if btn.is_disabled() {
+            "not-allowed"
+        } else {
+            "pointer"
+        };
 
         let style = &btn.style;
         Style::default()
-            .add(St::Border, "1px solid transparent")
-            .add(St::BackgroundColor, Color::from(bg_color))
-            .add(St::BorderColor, Color::from(border_color))
+            .merge(&border)
+            .merge(&background)
+            .merge(&padding)
+            .merge(&size)
             .add(St::Color, Color::from(text_color))
             .add(St::Transition, "all .3s cubic-bezier(.645, .045, .355, 1)")
             .add(St::TextDecoration, css::None)
-            .add(St::Outline, "0")
-            .add(St::Cursor, "pointer")
+            .add(St::Outline, css::None)
+            .add(St::Cursor, cursor)
             .add(St::UserSelect, css::None)
-            .add(St::Height, px(32.))
-            .add(St::Padding, "0 15px")
             .add(St::FontSize, px(14.))
-            .add(St::BorderRadius, px(4.))
             .add(St::BoxSizing, "border-box")
             .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
             .add(St::LineHeight, "1.499")

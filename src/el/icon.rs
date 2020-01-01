@@ -1,7 +1,7 @@
 use crate::{
     css::{color::Color, size::Size},
     theme::Theme,
-    view::View,
+    render::Render,
 };
 use derive_rich::Rich;
 use seed::prelude::*;
@@ -9,17 +9,26 @@ use std::borrow::Cow;
 
 #[derive(Debug, From)]
 pub enum Icon<ParentMsg: 'static> {
+    #[from]
     Svg(SvgIcon<ParentMsg>),
+    #[from]
     Html(HtmlIcon),
+    #[from]
     Url(UrlIcon),
 }
 
-impl<ParentMsg: Clone + 'static> View<ParentMsg> for Icon<ParentMsg> {
-    fn view(&self, theme: &impl Theme) -> Node<ParentMsg> {
+// impl<ParentMsg: 'static, T: Into<UrlIcon>> From<T> for Icon<ParentMsg> {
+//     fn from(url: T) -> Self {
+//         url.into().into()
+//     }
+// }
+
+impl<ParentMsg: Clone + 'static> Render<ParentMsg> for Icon<ParentMsg> {
+    fn render(&self, theme: &impl Theme) -> Node<ParentMsg> {
         match self {
-            Self::Svg(icon) => icon.view(theme),
-            Self::Html(icon) => icon.view(theme),
-            Self::Url(icon) => icon.view(theme),
+            Self::Svg(icon) => icon.render(theme),
+            Self::Html(icon) => icon.render(theme),
+            Self::Url(icon) => icon.render(theme),
         }
     }
 }
@@ -64,8 +73,8 @@ impl<ParentMsg: 'static> SvgIcon<ParentMsg> {
     }
 }
 
-impl<ParentMsg: Clone + 'static> View<ParentMsg> for SvgIcon<ParentMsg> {
-    fn view(&self, theme: &impl Theme) -> Node<ParentMsg> {
+impl<ParentMsg: Clone + 'static> Render<ParentMsg> for SvgIcon<ParentMsg> {
+    fn render(&self, theme: &impl Theme) -> Node<ParentMsg> {
         svg![
             theme.svg_icon(self),
             attrs![
@@ -101,8 +110,8 @@ impl HtmlIcon {
     }
 }
 
-impl<ParentMsg: Clone + 'static> View<ParentMsg> for HtmlIcon {
-    fn view(&self, theme: &impl Theme) -> Node<ParentMsg> {
+impl<ParentMsg: Clone + 'static> Render<ParentMsg> for HtmlIcon {
+    fn render(&self, theme: &impl Theme) -> Node<ParentMsg> {
         svg![
             theme.html_icon(self),
             attrs![
@@ -121,6 +130,12 @@ pub struct UrlIcon {
     pub size: Size,
 }
 
+impl<T: ToString> From<T> for UrlIcon {
+    fn from(url: T) -> Self {
+        Self::new(url.to_string())
+    }
+}
+
 impl UrlIcon {
     pub fn new(url: impl Into<Cow<'static, str>>) -> Self {
         Self {
@@ -135,8 +150,8 @@ impl UrlIcon {
     }
 }
 
-impl<ParentMsg: Clone + 'static> View<ParentMsg> for UrlIcon {
-    fn view(&self, theme: &impl Theme) -> Node<ParentMsg> {
+impl<ParentMsg: Clone + 'static> Render<ParentMsg> for UrlIcon {
+    fn render(&self, theme: &impl Theme) -> Node<ParentMsg> {
         img![
             theme.url_icon(self),
             attrs![

@@ -3,11 +3,12 @@ use crate::{
     el::{
         icon::Icon,
         propertie::{Size, Shape},
+        layout::flexbox::Flexbox,
     },
     macros::*,
     model::Model,
     theme::Theme,
-    view::View,
+    render::Render,
 };
 use derive_rich::Rich;
 use seed::prelude::*;
@@ -163,37 +164,40 @@ impl Button {
 impl<GMsg: 'static> Model<Msg, GMsg> for Button {
     fn update(&mut self, msg: Msg, _: &mut impl Orders<Msg, GMsg>) {
         match msg {
-            Msg::MouseEnter => {
-                self.mouse_over = true;
-                log!("btn mouse enter");
-            }
+            Msg::MouseEnter => self.mouse_over = true,
             Msg::MouseLeave => self.mouse_over = false,
-            Msg::Focus => {
-                self.focus = true;
-                log!("btn focused");
-            }
+            Msg::Focus => self.focus = true,
             Msg::Blur => self.focus = false,
         }
     }
 }
 
-impl View<Msg> for Button {
-    fn view(&self, theme: &impl Theme) -> Node<Msg> {
+impl Render<Msg> for Button {
+    fn render(&self, theme: &impl Theme) -> Node<Msg> {
         let inner: Vec<Node<Msg>> = match self.inner {
             Inner::Child(ref children) => children.clone(),
             Inner::Common(ref lbl, ref icon) => {
                 let icon = icon
                     .as_ref()
-                    .map(|icon| icon.view(theme))
+                    .map(|icon| icon.render(theme))
                     .unwrap_or(empty![]);
                 let lbl = lbl
                     .as_ref()
                     .map(|lbl| plain![lbl.clone()])
                     .unwrap_or(empty![]);
-                vec![icon, lbl]
+                vec![
+                    Flexbox::new()
+                        .add(|item| item.content(vec![icon]))
+                        .add(|item| item.content(vec![lbl]))
+                        .center()
+                        .render(theme)
+                ]
             }
         };
         button![
+            attrs![
+                At::Disabled => self.disabled.as_at_value()
+            ],
             simple_ev(Ev::Focus, Msg::Focus),
             simple_ev(Ev::Blur, Msg::Blur),
             simple_ev(Ev::MouseEnter, Msg::MouseEnter),

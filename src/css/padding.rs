@@ -3,13 +3,13 @@ use derive_rich::Rich;
 
 #[derive(Rich, Clone, Debug, Copy, PartialEq, From, Default)]
 pub struct Padding {
-    #[rich(read, write(take, style = compose))]
+    #[rich(read, write(take))]
     top: Option<Length>,
-    #[rich(read, write(take, style = compose))]
+    #[rich(read, write(take))]
     right: Option<Length>,
-    #[rich(read, write(take, style = compose))]
+    #[rich(read, write(take))]
     bottom: Option<Length>,
-    #[rich(read, write(take, style = compose))]
+    #[rich(read, write(take))]
     left: Option<Length>,
 }
 
@@ -32,10 +32,28 @@ impl ToStyle for Padding {
 impl Padding {
     pub fn all(self, value: impl Into<Length>) -> Self {
         let value = value.into();
-        self.right(|_| value)
-            .top(|_| value)
-            .left(|_| value)
-            .bottom(|_| value)
+        self.right(value)
+            .top(value)
+            .left(value)
+            .bottom(value)
+    }
+
+    pub fn x(self, value: impl Into<Length>) -> Self {
+        let value = value.into();
+        self.left(value).right(value)
+    }
+
+    pub fn y(self, value: impl Into<Length>) -> Self {
+        let value = value.into();
+        self.top(value).bottom(value)
+    }
+
+    pub fn horizontal(self, value: impl Into<Length>) -> Self {
+        self.y(value)
+    }
+
+    pub fn vertical(self, value: impl Into<Length>) -> Self {
+        self.x(value)
     }
 }
 
@@ -88,15 +106,5 @@ pub enum Length {
 impl Default for Length {
     fn default() -> Self {
         px(0.0).into()
-    }
-}
-
-impl Length {
-    pub fn full() -> Self {
-        Self::Percent(1.0.into())
-    }
-
-    pub fn half() -> Self {
-        Self::Percent(0.5.into())
     }
 }

@@ -1,7 +1,7 @@
 macro css_values( $( ($name:ident, $cssvalue:literal) $(,)? )* ) {
     $(
         #[derive(Clone, Copy, Debug, PartialEq, Eq, Display)]
-        #[display($cssvalue)]
+        #[display(fmt = $cssvalue)]
         pub struct $name;
     )*
 }
