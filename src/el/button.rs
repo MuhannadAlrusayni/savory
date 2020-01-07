@@ -1,14 +1,14 @@
 use crate::{
-    css,
+    css::{self, unit::px},
     el::{
         icon::Icon,
-        propertie::{Size, Shape},
         layout::flexbox::Flexbox,
+        propertie::{Shape, Size},
     },
     macros::*,
     model::Model,
-    theme::Theme,
     render::Render,
+    theme::Theme,
 };
 use derive_rich::Rich;
 use seed::prelude::*;
@@ -33,6 +33,8 @@ pub enum Kind {
     Normal,
     Suggestion,
     Destructive,
+    Link,
+    Dashed,
 }
 
 #[derive(Debug)]
@@ -47,6 +49,7 @@ pub enum Msg {
     MouseLeave,
     Focus,
     Blur,
+    Route,
 }
 
 #[derive(Debug, Rich)]
@@ -54,33 +57,26 @@ pub struct Button {
     // children
     pub inner: Inner,
     // properties
-    #[rich(write(take, style = compose))]
-    pub style: Style,
-    // #[rich(write(take, style = compose))]
-    // events: Events<Msg>,
     #[rich(value_fns(take) = {
         small = Size::Small,
         medium = Size::Medium,
         large = Size::Large,
     })]
-    size: Size,
+    pub size: Option<Size>,
     #[rich(value_fns(take) = {
         normal = Kind::Normal,
         suggestion = Kind::Suggestion,
         destructive = Kind::Destructive,
+        link = Kind::Link,
+        dashed = Kind::Dashed,
     })]
-    pub kind: Kind,
+    pub kind: Option<Kind>,
     #[rich(value_fns(take) = {
         circle = Shape::Circle,
         round = Shape::Round,
         rectangle = Shape::Rectangle
     })]
-    pub shape: Shape,
-    #[rich(
-        read(copy, rename = is_disabled),
-        value_fns(take) = { disable = true, enable = false }
-    )]
-    pub disabled: bool,
+    pub shape: Option<Shape>,
     #[rich(value_fns(take) = { block = true, inline = false })]
     pub block: bool,
     #[rich(
@@ -88,13 +84,20 @@ pub struct Button {
         value_fns(take) = { loading = true, loading_off = false }
     )]
     pub loading: bool,
-    #[rich(
-        read(copy, rename = is_ghost),
-        value_fns(take) = { ghost = true, ghost_off = false }
-    )]
+    #[rich(value_fns(take) = { ghost = true, ghost_off = false })]
     pub ghost: bool,
+    #[rich(write(take, style = compose))]
+    pub style: Style,
+
+    // #[rich(write(take, style = compose))]
+    // events: Events<Msg>,
+    #[rich(
+        read(copy, rename = is_disabled),
+        value_fns(take) = { disable = true, enable = false }
+    )]
+    pub disabled: bool,
     #[rich(write(take))]
-    pub href: Option<Cow<'static, str>>,
+    pub route: Option<Cow<'static, str>>,
 
     // read only properties, these shouldn't be editable from out side of this
     // module, this may changed later.
@@ -115,16 +118,16 @@ impl Button {
     pub fn new() -> Self {
         Button {
             inner: Inner::Common(None, None),
-            style: Style::default(),
-            disabled: false,
+            size: None,
+            kind: None,
+            shape: None,
             block: false,
-            shape: Shape::Round,
-            size: Size::Medium,
-            kind: Kind::Normal,
             loading: false,
             ghost: false,
-            href: None,
+            style: Style::default(),
+            route: None,
             // events: Self::create_events(),
+            disabled: false,
             focus: false,
             mouse_over: false,
         }
@@ -159,6 +162,17 @@ impl Button {
         };
         self
     }
+
+    fn handle_route_msg(&mut self) {
+        if let Some(ref route) = self.route {
+            seed::browser::service::routing::push_route(
+                route
+                    .split('/')
+                    .map(|s| s.to_string())
+                    .collect::<Vec<String>>(),
+            );
+        }
+    }
 }
 
 impl<GMsg: 'static> Model<Msg, GMsg> for Button {
@@ -168,12 +182,16 @@ impl<GMsg: 'static> Model<Msg, GMsg> for Button {
             Msg::MouseLeave => self.mouse_over = false,
             Msg::Focus => self.focus = true,
             Msg::Blur => self.focus = false,
+            Msg::Route => self.handle_route_msg(),
         }
     }
 }
 
 impl Render<Msg> for Button {
-    fn render(&self, theme: &impl Theme) -> Node<Msg> {
+    type View = Node<Msg>;
+    type StyleMap = css::Style;
+
+    fn render(&self, theme: &impl Theme) -> Self::View {
         let inner: Vec<Node<Msg>> = match self.inner {
             Inner::Child(ref children) => children.clone(),
             Inner::Common(ref lbl, ref icon) => {
@@ -185,15 +203,16 @@ impl Render<Msg> for Button {
                     .as_ref()
                     .map(|lbl| plain![lbl.clone()])
                     .unwrap_or(empty![]);
-                vec![
-                    Flexbox::new()
-                        .add(|item| item.content(vec![icon]))
-                        .add(|item| item.content(vec![lbl]))
-                        .center()
-                        .render(theme)
-                ]
+                vec![Flexbox::new()
+                    .center()
+                    .full_size()
+                    .gap(px(4.))
+                    .add(|item| item.content(vec![icon]))
+                    .add(|item| item.content(vec![lbl]).wrapped())
+                    .render(theme)]
             }
         };
+
         button![
             attrs![
                 At::Disabled => self.disabled.as_at_value()
@@ -202,6 +221,7 @@ impl Render<Msg> for Button {
             simple_ev(Ev::Blur, Msg::Blur),
             simple_ev(Ev::MouseEnter, Msg::MouseEnter),
             simple_ev(Ev::MouseLeave, Msg::MouseLeave),
+            simple_ev(Ev::Click, Msg::Route),
             theme.button(self),
             inner,
         ]

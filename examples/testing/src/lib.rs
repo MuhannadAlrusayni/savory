@@ -9,8 +9,8 @@ use khalas::{
         layout::flexbox::Flexbox,
     },
     model::Model,
-    theme::{self, Theme},
     render::Render,
+    theme::{self, Theme},
 };
 use seed::{prelude::*, App};
 
@@ -39,9 +39,16 @@ impl MyApp {
         Self {
             theme: theme::ant::Ant::default(),
             buttons: vec![
-                Button::with_label("Home").href("/").suggestion().icon(Icon::url(url).size(|s| s.resize(px(32.), px(32.)))),
-                Button::with_label("98 About Us").href("/about-us").destructive(),
-                Button::with_label("Contact Us").href("/contact-us"),
+                Button::with_label("Home")
+                    .route("home")
+                    .suggestion()
+                    .icon(Icon::url(url).size(|s| s.resize(px(18.), px(18.)))),
+                Button::with_label("98 About Us")
+                    .route("about-us")
+                    .destructive(),
+                Button::with_label("Add new btn").ghost(),
+                Button::with_label("DockDuckGo").link(),
+                Button::with_label("Contact Us").route("contact-us"),
             ],
         }
     }
@@ -66,7 +73,9 @@ impl Model<Msg, GlobalMsg> for MyApp {
 }
 
 impl Render<Msg> for MyApp {
-    fn render(&self, theme: &impl Theme) -> Node<Msg> {
+    type View = Node<Msg>;
+
+    fn render(&self, theme: &impl Theme) -> Self::View {
         self.buttons
             .iter()
             .enumerate()

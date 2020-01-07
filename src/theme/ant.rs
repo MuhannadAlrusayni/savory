@@ -1,5 +1,5 @@
 use crate::{
-    css::{self, St, unit::px, color::Color, Style},
+    css::{self, color::Color, unit::px, St, Style},
     el::{
         button::{self, Button},
         icon::{HtmlIcon, SvgIcon, UrlIcon},
@@ -219,7 +219,8 @@ pub fn variant(base_color: impl Into<Hsl>) -> [Hsl; 10] {
             get_hue(&hsv, i as f32, true),
             get_saturation(&hsv, i as f32, true),
             get_value(&hsv, i as f32, true),
-        ).into();
+        )
+        .into();
         variants[(i as f32 - light_color_count).abs() as usize] = hsl;
     }
     // dark variants
@@ -229,7 +230,8 @@ pub fn variant(base_color: impl Into<Hsl>) -> [Hsl; 10] {
             get_hue(&hsv, i as f32, false),
             get_saturation(&hsv, i as f32, false),
             get_value(&hsv, i as f32, false),
-        ).into();
+        )
+        .into();
         variants[i + 5] = hsl;
     }
 
@@ -423,6 +425,104 @@ impl Ant {
     fn on_color(base_color: impl Into<Hsla>, variant: Variant) -> Hsla {
         unimplemented!()
     }
+
+    fn button_normal(&self, btn: &Button) -> Style {
+        let border = css::Border::default().width(px(1.)).solid().radius(px(4.));
+        let background = css::Background::default();
+
+        // colors
+        let (fg, border_color) = match (btn.is_focused(), btn.is_mouse_over()) {
+            // btn is not focused or hovered
+            (false, false) => (self.primary_text(false), self.border(false)),
+            // btn is hovered or focused
+            _ => (self.brand(Variant::L500), self.brand(Variant::L500)),
+        };
+        Style::default()
+            .merge(&border.color(border_color))
+            .merge(&background.color(self.white()))
+            .add(St::Color, Color::from(fg))
+            .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
+    }
+
+    fn button_suggestion(&self, btn: &Button) -> Style {
+        let border = css::Border::default().width(px(1.)).solid().radius(px(4.));
+        let background = css::Background::default();
+
+        // colors
+        let fg = self.white();
+        let bg = match (btn.is_focused(), btn.is_mouse_over()) {
+            // btn is not focused or hovered
+            (false, false) => self.brand(Variant::L500),
+            // btn is hovered or focused
+            _ => self.brand(Variant::L400),
+        };
+
+        Style::default()
+            .merge(&border.color(bg))
+            .merge(&background.color(bg))
+            .add(St::Color, Color::from(fg))
+            .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
+    }
+
+    fn button_destructive(&self, btn: &Button) -> Style {
+        let border = css::Border::default().width(px(1.)).solid().radius(px(4.));
+        let background = css::Background::default();
+
+        // colors
+        let fg = self.white();
+        let bg = match (btn.is_focused(), btn.is_mouse_over()) {
+            // btn is not focused or hovered
+            (false, false) => self.dust_red(Variant::L500),
+            // btn is hovered or focused
+            _ => self.dust_red(Variant::L400),
+        };
+
+        Style::default()
+            .merge(&border.color(bg))
+            .merge(&background.color(bg))
+            .add(St::Color, Color::from(fg))
+            .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
+    }
+
+    fn button_link(&self, btn: &Button) -> Style {
+        let border = css::Border::default().width(px(0.)).solid().radius(px(4.));
+        let background = css::Background::default();
+
+        // colors
+        let (bg, fg) = match (btn.is_focused(), btn.is_mouse_over()) {
+            // btn is not focused or hovered
+            (false, false) => (self.white(), self.brand(Variant::L500)),
+            // btn is hovered or focused
+            _ => (self.white(), self.brand(Variant::L400)),
+        };
+        Style::default()
+            .add(St::Color, Color::from(fg))
+            .merge(&border.color(bg))
+            .merge(&background.color(bg))
+    }
+
+    fn button_dashed(&self, btn: &Button) -> Style {
+        // colors
+        let (fg, border_color) = match (btn.is_focused(), btn.is_mouse_over()) {
+            // btn is not focused or hovered
+            (false, false) => (self.primary_text(false), self.gray(Variant::D600)),
+            // btn is hovered or focused
+            _ => (self.brand(Variant::L500), self.brand(Variant::L500)),
+        };
+
+        let border = css::Border::default()
+            .width(px(1.))
+            .dashed()
+            .radius(px(4.))
+            .color(border_color);
+        let background = css::Background::default().color(self.white());
+
+        Style::default()
+            .merge(&border)
+            .merge(&background)
+            .add(St::Color, Color::from(fg))
+            .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
+    }
 }
 
 impl Theme for Ant {
@@ -476,47 +576,15 @@ impl Theme for Ant {
         Style::default().merge(&icon.size)
     }
 
+    // TODO: handle btn.size
+    // TODO: handle is_loading()
+    // TODO: handle btn.shape()
+    // TODO: handle btn.is_block()
+    // TODO: handle btn.is_ghost()
     fn button(&self, btn: &Button) -> Style {
-        let gray_l2 = self.gray(Variant::L200);
-        let gray_l4 = self.gray(Variant::L400);
-        let white = self.white();
-        let brand_l5 = self.brand(Variant::L500);
-        let brand_l4 = self.brand(Variant::L400);
-        let dust_red_l4 = self.dust_red(Variant::L400);
-        let dust_red_l5 = self.dust_red(Variant::L500);
+        let padding = css::Padding::default().x(px(15.)).y(px(0.));
 
-        let (bg_color, border_color, text_color) = if btn.is_disabled() {
-            (gray_l2, gray_l4, gray_l4)
-        } else {
-            match (btn.is_focused(), btn.is_mouse_over()) {
-                (true, _) | (_, true) => match btn.kind {
-                    button::Kind::Normal => (white, brand_l5, brand_l5),
-                    button::Kind::Suggestion => (brand_l4, brand_l4, self.title(true)),
-                    button::Kind::Destructive => (dust_red_l4, dust_red_l4, self.title(true)),
-                },
-                (false, false) => match btn.kind {
-                    button::Kind::Normal => (white, self.border(false), self.title(false)),
-                    button::Kind::Suggestion => (brand_l5, brand_l5, self.title(true)),
-                    button::Kind::Destructive => (dust_red_l5, dust_red_l5, self.title(true)),
-                }
-            }
-        };
-
-        let border = css::Border::default()
-            .width(px(1.))
-            .solid()
-            .radius(px(4.))
-            .color(border_color);
-
-        let background = css::Background::default()
-            .color(bg_color);
-
-        let padding = css::Padding::default()
-            .x(px(15.))
-            .y(px(0.));
-
-        let size = css::Size::default()
-            .height(px(32.));
+        let size = css::Size::default().height(px(32.));
 
         let cursor = if btn.is_disabled() {
             "not-allowed"
@@ -524,28 +592,38 @@ impl Theme for Ant {
             "pointer"
         };
 
-        let style = &btn.style;
-        Style::default()
-            .merge(&border)
-            .merge(&background)
-            .merge(&padding)
-            .merge(&size)
-            .add(St::Color, Color::from(text_color))
-            .add(St::Transition, "all .3s cubic-bezier(.645, .045, .355, 1)")
-            .add(St::TextDecoration, css::None)
-            .add(St::Outline, css::None)
-            .add(St::Cursor, cursor)
-            .add(St::UserSelect, css::None)
-            .add(St::FontSize, px(14.))
-            .add(St::BoxSizing, "border-box")
-            .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
-            .add(St::LineHeight, "1.499")
-            .add(St::FontWeight, "400")
-            .add(St::WhiteSpace, css::NoWrap)
-            .merge(&style.size)
-            .merge(&style.border)
-            .merge(&style.background)
-            .merge(&style.margin)
-            .merge(&style.padding)
+        if btn.is_disabled() {
+            let bg_disabled = self.gray(Variant::L200);
+            let fg_disabled = self.gray(Variant::L400);
+            Style::default()
+                .merge(&css::Border::default().color(fg_disabled))
+                .merge(&css::Background::default().color(bg_disabled))
+                .add(St::Color, Color::from(fg_disabled))
+        } else {
+            match btn.kind {
+                Some(button::Kind::Normal) | None => self.button_normal(btn),
+                Some(button::Kind::Suggestion) => self.button_suggestion(btn),
+                Some(button::Kind::Destructive) => self.button_destructive(btn),
+                Some(button::Kind::Link) => self.button_link(btn),
+                Some(button::Kind::Dashed) => self.button_dashed(btn),
+            }
+        }
+        .merge(&padding)
+        .merge(&size)
+        .add(St::Transition, "all .3s cubic-bezier(.645, .045, .355, 1)")
+        .add(St::TextDecoration, css::None)
+        .add(St::Outline, css::None)
+        .add(St::Cursor, cursor)
+        .add(St::UserSelect, css::None)
+        .add(St::FontSize, px(14.))
+        .add(St::BoxSizing, "border-box")
+        .add(St::LineHeight, "1.499")
+        .add(St::FontWeight, "400")
+        .add(St::WhiteSpace, css::NoWrap)
+        .merge(&btn.style.size)
+        .merge(&btn.style.border)
+        .merge(&btn.style.background)
+        .merge(&btn.style.margin)
+        .merge(&btn.style.padding)
     }
 }

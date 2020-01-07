@@ -2,18 +2,45 @@ use crate::theme::Theme;
 use seed::prelude::*;
 
 pub trait Render<Msg: 'static> {
-    fn render(&self, theme: &impl Theme) -> Node<Msg>;
+    type View: View<Msg>;
+    type StyleMap;
+
+    fn render(&self, theme: &impl Theme) -> Self::View;
 }
 
 impl<Msg: Clone + 'static> Render<Msg> for Node<Msg> {
-    fn render(&self, _: &impl Theme) -> Node<Msg> {
+    type View = Node<Msg>;
+    type StyleMap = ();
+
+    fn render(&self, _: &impl Theme) -> Self::View {
+        self.clone()
+    }
+}
+
+impl<Msg: Clone + 'static> Render<Msg> for Vec<Node<Msg>> {
+    type View = Vec<Node<Msg>>;
+    type StyleMap = ();
+
+    fn render(&self, _: &impl Theme) -> Self::View {
         self.clone()
     }
 }
 
 impl<Msg: Clone + 'static> Render<Msg> for El<Msg> {
-    fn render(&self, _: &impl Theme) -> Node<Msg> {
-        Node::Element(self.clone())
+    type View = El<Msg>;
+    type StyleMap = ();
+
+    fn render(&self, _: &impl Theme) -> Self::View {
+        self.clone()
+    }
+}
+
+impl<Msg: Clone + 'static> Render<Msg> for Vec<El<Msg>> {
+    type View = Vec<El<Msg>>;
+    type StyleMap = ();
+
+    fn render(&self, _: &impl Theme) -> Self::View {
+        self.clone()
     }
 }
 

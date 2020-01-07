@@ -8,23 +8,27 @@ use seed::prelude::*;
 use std::borrow::Cow;
 
 #[derive(Debug, From)]
-pub enum Icon<ParentMsg: 'static> {
+pub enum Icon<Msg: 'static> {
     #[from]
-    Svg(SvgIcon<ParentMsg>),
+    Svg(SvgIcon<Msg>),
     #[from]
     Html(HtmlIcon),
     #[from]
     Url(UrlIcon),
 }
 
-// impl<ParentMsg: 'static, T: Into<UrlIcon>> From<T> for Icon<ParentMsg> {
+// impl<Msg: 'static, T: Into<UrlIcon>> From<T> for Icon<Msg> {
 //     fn from(url: T) -> Self {
 //         url.into().into()
 //     }
 // }
 
-impl<ParentMsg: Clone + 'static> Render<ParentMsg> for Icon<ParentMsg> {
-    fn render(&self, theme: &impl Theme) -> Node<ParentMsg> {
+impl<Msg: Clone + 'static> Render<Msg> for Icon<Msg> {
+    type View = Node<Msg>;
+type StyleMap = css::Style;
+
+
+    fn render(&self, theme: &impl Theme) -> Self::View {
         match self {
             Self::Svg(icon) => icon.render(theme),
             Self::Html(icon) => icon.render(theme),
@@ -33,8 +37,8 @@ impl<ParentMsg: Clone + 'static> Render<ParentMsg> for Icon<ParentMsg> {
     }
 }
 
-impl<ParentMsg: 'static> Icon<ParentMsg> {
-    pub fn svg(draw: impl IntoIterator<Item = Node<ParentMsg>>) -> SvgIcon<ParentMsg> {
+impl<Msg: 'static> Icon<Msg> {
+    pub fn svg(draw: impl IntoIterator<Item = Node<Msg>>) -> SvgIcon<Msg> {
         SvgIcon::new(draw)
     }
 }
@@ -50,16 +54,16 @@ impl Icon<!> {
 }
 
 #[derive(Debug, Rich)]
-pub struct SvgIcon<ParentMsg: 'static> {
-    pub draw: Vec<Node<ParentMsg>>,
+pub struct SvgIcon<Msg: 'static> {
+    pub draw: Vec<Node<Msg>>,
     #[rich(write(take))]
     pub color: Option<Color>,
     #[rich(write(take, style = compose))]
     pub size: Size,
 }
 
-impl<ParentMsg: 'static> SvgIcon<ParentMsg> {
-    pub fn new(draw: impl IntoIterator<Item = Node<ParentMsg>>) -> Self {
+impl<Msg: 'static> SvgIcon<Msg> {
+    pub fn new(draw: impl IntoIterator<Item = Node<Msg>>) -> Self {
         Self {
             draw: draw.into_iter().collect(),
             color: None,
@@ -67,14 +71,18 @@ impl<ParentMsg: 'static> SvgIcon<ParentMsg> {
         }
     }
 
-    pub fn draw(mut self, draw: impl IntoIterator<Item = Node<ParentMsg>>) -> Self {
+    pub fn draw(mut self, draw: impl IntoIterator<Item = Node<Msg>>) -> Self {
         self.draw = draw.into_iter().collect();
         self
     }
 }
 
-impl<ParentMsg: Clone + 'static> Render<ParentMsg> for SvgIcon<ParentMsg> {
-    fn render(&self, theme: &impl Theme) -> Node<ParentMsg> {
+impl<Msg: Clone + 'static> Render<Msg> for SvgIcon<Msg> {
+    type View = Node<Msg>;
+type StyleMap = css::Style;
+
+
+    fn render(&self, theme: &impl Theme) -> Self::View {
         svg![
             theme.svg_icon(self),
             attrs![
@@ -110,8 +118,12 @@ impl HtmlIcon {
     }
 }
 
-impl<ParentMsg: Clone + 'static> Render<ParentMsg> for HtmlIcon {
-    fn render(&self, theme: &impl Theme) -> Node<ParentMsg> {
+impl<Msg: Clone + 'static> Render<Msg> for HtmlIcon {
+    type View = Node<Msg>;
+type StyleMap = css::Style;
+
+
+    fn render(&self, theme: &impl Theme) -> Self::View {
         svg![
             theme.html_icon(self),
             attrs![
@@ -150,8 +162,12 @@ impl UrlIcon {
     }
 }
 
-impl<ParentMsg: Clone + 'static> Render<ParentMsg> for UrlIcon {
-    fn render(&self, theme: &impl Theme) -> Node<ParentMsg> {
+impl<Msg: Clone + 'static> Render<Msg> for UrlIcon {
+    type View = Node<Msg>;
+type StyleMap = css::Style;
+
+
+    fn render(&self, theme: &impl Theme) -> Self::View {
         img![
             theme.url_icon(self),
             attrs![

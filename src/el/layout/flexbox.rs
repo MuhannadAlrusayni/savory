@@ -1,21 +1,19 @@
 use crate::{
-    macros::*,
     css::{
-        self,
-        flexbox::*,
-        background::Background, border::Border, box_align::*, gap::Gap, margin::Margin,
-        padding::Padding, size::Size, unit::*,
+        self, background::Background, border::Border, box_align::*, flexbox::*, gap::Gap,
+        margin::Margin, padding::Padding, size::Size, unit::*,
     },
-    theme::Theme,
+    macros::*,
     render::Render,
+    theme::Theme,
 };
 use derive_rich::Rich;
 use seed::prelude::*;
 use std::default::Default;
 
 #[derive(Clone, Rich, Default)]
-pub struct Flexbox<ParentMsg: 'static> {
-    pub items: Vec<Item<ParentMsg>>,
+pub struct Flexbox<Msg: 'static> {
+    pub items: Vec<Item<Msg>>,
     // properties
     #[rich(value_fns(take) = {
         row = css::Row,
@@ -50,7 +48,7 @@ pub struct Flexbox<ParentMsg: 'static> {
     pub padding: Padding,
 }
 
-impl<ParentMsg: 'static> Flexbox<ParentMsg> {
+impl<Msg: 'static> Flexbox<Msg> {
     pub fn new() -> Self {
         Self {
             items: vec![],
@@ -68,16 +66,16 @@ impl<ParentMsg: 'static> Flexbox<ParentMsg> {
         }
     }
 
-    pub fn item(content: impl IntoIterator<Item = impl Into<Node<ParentMsg>>>) -> Item<ParentMsg> {
+    pub fn item(content: impl IntoIterator<Item = impl Into<Node<Msg>>>) -> Item<Msg> {
         Item::with_content(content)
     }
 
-    pub fn add(mut self, get_child: impl FnOnce(Item<ParentMsg>) -> Item<ParentMsg>) -> Self {
+    pub fn add(mut self, get_child: impl FnOnce(Item<Msg>) -> Item<Msg>) -> Self {
         self.items.push(get_child(Item::new()));
         self
     }
 
-    pub fn items(mut self, items: impl IntoIterator<Item = Item<ParentMsg>>) -> Self {
+    pub fn items(mut self, items: impl IntoIterator<Item = Item<Msg>>) -> Self {
         self.items.extend(items);
         self
     }
@@ -126,10 +124,17 @@ impl<ParentMsg: 'static> Flexbox<ParentMsg> {
         self.justify_content(css::SpaceEvenly)
             .align_content(css::SpaceEvenly)
     }
+
+    pub fn full_size(self) -> Self {
+        self.size(|size| size.full())
+    }
 }
 
-impl<ParentMsg: Clone + 'static> Render<ParentMsg> for Flexbox<ParentMsg> {
-    fn render(&self, theme: &impl Theme) -> Node<ParentMsg> {
+impl<Msg: Clone + 'static> Render<Msg> for Flexbox<Msg> {
+    type View = Node<Msg>;
+    type StyleMap = css::Style;
+
+    fn render(&self, theme: &impl Theme) -> Self::View {
         div![
             theme.flexbox(self),
             // items
@@ -142,8 +147,8 @@ impl<ParentMsg: Clone + 'static> Render<ParentMsg> for Flexbox<ParentMsg> {
 
 // TODO: add collapse propertie
 #[derive(Clone, Rich, Default)]
-pub struct Item<ParentMsg: 'static> {
-    pub content: Vec<Node<ParentMsg>>,
+pub struct Item<Msg: 'static> {
+    pub content: Vec<Node<Msg>>,
     // propertie
     #[rich(write(take))]
     pub order: Option<i32>,
@@ -172,9 +177,11 @@ pub struct Item<ParentMsg: 'static> {
     pub margin: Margin,
     #[rich(write(take, style = compose))]
     pub padding: Padding,
+    #[rich(read(copy, rename = is_flatten), value_fns(take) = { flatten = true, wrapped = false })]
+    flatten: bool,
 }
 
-impl<ParentMsg: 'static> Item<ParentMsg> {
+impl<Msg: 'static> Item<Msg> {
     pub fn new() -> Self {
         Self {
             content: vec![],
@@ -188,17 +195,15 @@ impl<ParentMsg: 'static> Item<ParentMsg> {
             background: Background::default(),
             margin: Margin::default(),
             padding: Padding::default(),
+            flatten: true,
         }
     }
 
-    pub fn with_content(content: impl IntoIterator<Item = impl Into<Node<ParentMsg>>>) -> Self {
+    pub fn with_content(content: impl IntoIterator<Item = impl Into<Node<Msg>>>) -> Self {
         Self::new().content(content)
     }
 
-    pub fn content(
-        mut self,
-        content: impl IntoIterator<Item = impl Into<Node<ParentMsg>>>,
-    ) -> Self {
+    pub fn content(mut self, content: impl IntoIterator<Item = impl Into<Node<Msg>>>) -> Self {
         self.content = content.into_iter().map(|c| c.into()).collect();
         self
     }
@@ -212,13 +217,32 @@ impl<ParentMsg: 'static> Item<ParentMsg> {
     }
 }
 
-impl<ParentMsg: Clone + 'static> Render<ParentMsg> for Item<ParentMsg> {
-    fn render(&self, theme: &impl Theme) -> Node<ParentMsg> {
-        div![
-            theme.flexbox_item(self),
-            // child
-            self.content.clone()
-        ]
+impl<Msg: Clone + 'static> Render<Msg> for Item<Msg> {
+    type View = Vec<Node<Msg>>;
+    type StyleMap = css::Style;
+
+    fn render(&self, theme: &impl Theme) -> Self::View {
+        let style = theme.flexbox_item(self);
+        if self.is_flatten() {
+            self.content
+                .clone()
+                .into_iter()
+                .map(|mut node| {
+                    if let Some(style) = style.to_seed_style() {
+                        for (key, value) in style.vals.into_iter() {
+                            node.add_style(key, value);
+                        }
+                    }
+                    node
+                })
+                .collect::<Self::View>()
+        } else {
+            vec![div![
+                style,
+                // child
+                self.content.clone()
+            ]]
+        }
     }
 }
 

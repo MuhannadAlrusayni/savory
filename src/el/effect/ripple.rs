@@ -1,35 +1,39 @@
-use crate::{model::Model, render::Render, theme::Theme};
+use crate::{css::{self, Background, Border, Size, Style}, model::Model, render::Render, theme::Theme};
 use seed::prelude::*;
+use palette::Hsla;
 
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub enum Msg {
-    Clicked(f32, f32),
+    Clicked(f64, f64),
     Render(Option<RenderTimestampDelta>),
     Done,
 }
 
+#[derive(Debug, Clone)]
 pub struct Ripple {
     animating: bool,
-    orgin: (f32, f32),
-    size: f32,
+    orgin: (f64, f64),
+    size: f64,
+    start: f64,
 }
 
 impl Ripple {
-    pub fn new(x: f32, y: f32) -> Self {
+    pub fn new(x: f64, y: f64) -> Self {
         Self {
             animating: false,
             orgin: (x, y),
-            size: 0.0
+            size: 0.0,
+            start: 0.,
         }
     }
 
-    fn orgin(&mut self, point: impl Into<(f32, f32)>) -> &mut Self {
+    fn orgin(&mut self, point: impl Into<(f64, f64)>) -> &mut Self {
         self.orgin = point.into();
         self
     }
 
-    fn scale(&mut self, scale: impl Into<f32>) -> &mut Self {
+    fn scale(&mut self, scale: impl Into<f64>) -> &mut Self {
         self.size += scale.into();
         self
     }
@@ -40,17 +44,24 @@ impl<GMsg: 'static> Model<Msg, GMsg> for Ripple {
         match msg {
             Msg::Clicked(x, y) => {
                 *self = Ripple::new(x, y);
+                self.animating = true;
                 orders.after_next_render(Msg::Render);
             }
             Msg::Render(delta) => {
-                if self.size < 20.0 {
-                    self.scale(2.0);
+                let delta: f64 = delta.unwrap_or_default().into();
+                if self.start == 0. {
+                    self.start = delta;
+                }
+                let progress = delta - self.start;
+                if self.size < 1.0 {
+                    self.scale(progress / 1000.);
                     orders.after_next_render(Msg::Render);
                 } else {
                     orders.send_msg(Msg::Done);
                 }
             }
             Msg::Done => {
+                self.start = 0.;
                 self.animating = false;
             }
         }
@@ -58,15 +69,30 @@ impl<GMsg: 'static> Model<Msg, GMsg> for Ripple {
 }
 
 impl Render<Msg> for Ripple {
-    fn render(&self, theme: &impl Theme) -> Node<Msg> {
+    type View = Node<Msg>;
+type StyleMap = css::Style;
+
+
+    fn render(&self, theme: &impl Theme) -> Self::View {
+        let background = Background::default()
+            .color(Hsla::new(0., 0., 1., 0.8));
+
+        let border = Border::default()
+            .radius(1.);
+
+        let size = Size::default()
+            .resize(self.size as f32, self.size as f32);
+
+        let style = Style::default()
+            .add(St::Position, "relative")
+            .add(St::Left, self.orgin.0)
+            .add(St::Top, self.orgin.1)
+            .merge(&background)
+            .merge(&border)
+            .merge(&size);
+
         if self.animating {
-            div! [
-                style! [
-                    St::Position => "relative",
-                    St::AnimationName => "slide",
-                    St::AnimationDuration => "3s",
-                ]
-            ]
+            div! [style]
         } else {
             empty![]
         }
