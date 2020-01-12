@@ -1,13 +1,13 @@
 use crate::{
-    css::{color::Color, size::Size},
-    theme::Theme,
+    css::{self, color::Color, size::Size},
     render::Render,
+    theme::{Theme, Themeable},
 };
 use derive_rich::Rich;
 use seed::prelude::*;
 use std::borrow::Cow;
 
-#[derive(Debug, From)]
+#[derive(Clone, Debug, From)]
 pub enum Icon<Msg: 'static> {
     #[from]
     Svg(SvgIcon<Msg>),
@@ -25,8 +25,6 @@ pub enum Icon<Msg: 'static> {
 
 impl<Msg: Clone + 'static> Render<Msg> for Icon<Msg> {
     type View = Node<Msg>;
-type StyleMap = css::Style;
-
 
     fn render(&self, theme: &impl Theme) -> Self::View {
         match self {
@@ -53,7 +51,7 @@ impl Icon<!> {
     }
 }
 
-#[derive(Debug, Rich)]
+#[derive(Clone, Debug, Rich)]
 pub struct SvgIcon<Msg: 'static> {
     pub draw: Vec<Node<Msg>>,
     #[rich(write(take))]
@@ -79,8 +77,6 @@ impl<Msg: 'static> SvgIcon<Msg> {
 
 impl<Msg: Clone + 'static> Render<Msg> for SvgIcon<Msg> {
     type View = Node<Msg>;
-type StyleMap = css::Style;
-
 
     fn render(&self, theme: &impl Theme) -> Self::View {
         svg![
@@ -93,8 +89,11 @@ type StyleMap = css::Style;
     }
 }
 
+impl<Msg: 'static> Themeable for SvgIcon<Msg> {
+    type StyleMap = css::Style;
+}
 
-#[derive(Debug, Rich)]
+#[derive(Debug, Clone, Rich)]
 pub struct HtmlIcon {
     pub html: Cow<'static, str>,
     #[rich(write(take))]
@@ -120,8 +119,6 @@ impl HtmlIcon {
 
 impl<Msg: Clone + 'static> Render<Msg> for HtmlIcon {
     type View = Node<Msg>;
-type StyleMap = css::Style;
-
 
     fn render(&self, theme: &impl Theme) -> Self::View {
         svg![
@@ -134,8 +131,11 @@ type StyleMap = css::Style;
     }
 }
 
+impl Themeable for HtmlIcon {
+    type StyleMap = css::Style;
+}
 
-#[derive(Debug, Rich)]
+#[derive(Debug, Rich, Clone)]
 pub struct UrlIcon {
     pub url: Cow<'static, str>,
     #[rich(write(take, style = compose))]
@@ -164,8 +164,6 @@ impl UrlIcon {
 
 impl<Msg: Clone + 'static> Render<Msg> for UrlIcon {
     type View = Node<Msg>;
-type StyleMap = css::Style;
-
 
     fn render(&self, theme: &impl Theme) -> Self::View {
         img![
@@ -175,4 +173,8 @@ type StyleMap = css::Style;
             ]
         ]
     }
+}
+
+impl Themeable for UrlIcon {
+    type StyleMap = css::Style;
 }

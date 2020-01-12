@@ -5,8 +5,11 @@ use khalas::{
     css::{self, unit::px},
     el::{
         button::{self as btn, Button},
+        checkbox::{self, Checkbox},
         icon::Icon,
         layout::flexbox::Flexbox,
+        radio::{self, Radio},
+        switch::{self, Switch},
     },
     model::Model,
     render::Render,
@@ -16,7 +19,10 @@ use seed::{prelude::*, App};
 
 #[derive(Clone, Debug)]
 pub enum Msg {
+    Switch(usize, switch::Msg),
     Btn(usize, btn::Msg),
+    Checkbox(usize, checkbox::Msg),
+    Radio(usize, radio::Msg),
     Clicked,
 }
 
@@ -25,6 +31,9 @@ type GlobalMsg = ();
 pub struct MyApp {
     theme: theme::ant::Ant,
     buttons: Vec<Button>,
+    switchs: Vec<Switch>,
+    checkboxs: Vec<Checkbox>,
+    radios: Vec<Radio>,
 }
 
 impl Default for MyApp {
@@ -36,19 +45,49 @@ impl Default for MyApp {
 impl MyApp {
     pub fn new() -> Self {
         let url = "http://icons.iconarchive.com/icons/blackvariant/button-ui-requests-2/1024/BattleBears-icon.png";
+        let buttons = vec![
+            Button::with_label("Home")
+                .route("home")
+                .suggestion()
+                .icon(Icon::url(url).size(|s| s.resize(px(18.), px(18.)))),
+            Button::with_label("98 About Us")
+                .route("about-us")
+                .destructive(),
+            Button::with_label("Add new btn").ghost(),
+            Button::with_label("DockDuckGo").link(),
+            Button::with_label("Add Firend +").dashed(),
+            Button::with_label("Contact Us").route("contact-us"),
+        ];
+        let buttons = [
+            buttons
+                .clone()
+                .into_iter()
+                .map(|btn| btn.disable())
+                .collect(),
+            buttons,
+        ]
+        .concat();
         Self {
             theme: theme::ant::Ant::default(),
-            buttons: vec![
-                Button::with_label("Home")
-                    .route("home")
-                    .suggestion()
-                    .icon(Icon::url(url).size(|s| s.resize(px(18.), px(18.)))),
-                Button::with_label("98 About Us")
-                    .route("about-us")
-                    .destructive(),
-                Button::with_label("Add new btn").ghost(),
-                Button::with_label("DockDuckGo").link(),
-                Button::with_label("Contact Us").route("contact-us"),
+            buttons,
+            switchs: vec![
+                Switch::default(),
+                Switch::default().toggle(),
+                Switch::default().disable(),
+                Switch::default().toggle().disable(),
+            ],
+            checkboxs: vec![
+                Checkbox::default().label("Dark theme"),
+                Checkbox::default().toggle().label("Use 5G"),
+                Checkbox::default().label("Use pen").disable(),
+                Checkbox::default().toggle().disable(),
+            ],
+            radios: vec![
+                Radio::default().label("Selecte A"),
+                Radio::default().label("Selte B").toggle(),
+                Radio::default().label("Lectex V").disable(),
+                Radio::default().label("Selecte A"),
+                Radio::default().label("Selte B").toggle().disable(),
             ],
         }
     }
@@ -57,12 +96,24 @@ impl MyApp {
 impl Model<Msg, GlobalMsg> for MyApp {
     fn update(&mut self, msg: Msg, orders: &mut impl Orders<Msg, GlobalMsg>) {
         match msg {
+            Msg::Radio(index, msg) => {
+                if let Some(radio) = self.radios.get_mut(index) {
+                    radio.update(msg, &mut orders.proxy(move |msg| Msg::Radio(index, msg)))
+                }
+            }
+            Msg::Checkbox(index, msg) => {
+                if let Some(checkbox) = self.checkboxs.get_mut(index) {
+                    checkbox.update(msg, &mut orders.proxy(move |msg| Msg::Checkbox(index, msg)))
+                }
+            }
+            Msg::Switch(index, msg) => {
+                if let Some(switch) = self.switchs.get_mut(index) {
+                    switch.update(msg, &mut orders.proxy(move |msg| Msg::Switch(index, msg)))
+                }
+            }
             Msg::Btn(index, btn_msg) => {
                 if let Some(btn) = self.buttons.get_mut(index) {
-                    btn.update(
-                        btn_msg,
-                        &mut orders.proxy(move |child_msg| Msg::Btn(index, child_msg)),
-                    );
+                    btn.update(btn_msg, &mut orders.proxy(move |msg| Msg::Btn(index, msg)));
                 }
             }
             Msg::Clicked => {
@@ -76,7 +127,18 @@ impl Render<Msg> for MyApp {
     type View = Node<Msg>;
 
     fn render(&self, theme: &impl Theme) -> Self::View {
-        self.buttons
+        let switchs = self
+            .switchs
+            .iter()
+            .enumerate()
+            .map(|(index, switch)| {
+                switch
+                    .render(theme)
+                    .map_msg(move |msg| Msg::Switch(index, msg))
+            })
+            .collect::<Vec<Node<Msg>>>();
+        let btns = self
+            .buttons
             .iter()
             .enumerate()
             .map(|(index, btn)| btn.render(theme).map_msg(move |msg| Msg::Btn(index, msg)))
@@ -84,6 +146,31 @@ impl Render<Msg> for MyApp {
                 btn.add_listener(simple_ev(Ev::Click, Msg::Clicked));
                 btn
             })
+            .collect::<Vec<Node<Msg>>>();
+        let checkboxs = self
+            .checkboxs
+            .iter()
+            .enumerate()
+            .map(|(index, checkbox)| {
+                checkbox
+                    .render(theme)
+                    .map_msg(move |msg| Msg::Checkbox(index, msg))
+            })
+            .collect::<Vec<Node<Msg>>>();
+        let radios = self
+            .radios
+            .iter()
+            .enumerate()
+            .map(|(index, radio)| {
+                radio
+                    .render(theme)
+                    .map_msg(move |msg| Msg::Radio(index, msg))
+            })
+            .collect::<Vec<Node<Msg>>>();
+
+        [switchs, btns, checkboxs, radios]
+            .concat()
+            .into_iter()
             .fold(Flexbox::new(), |flexbox, btn| flexbox.add(|item| item.content(vec![btn])))
             .add(|item| {
                 let url = "http://icons.iconarchive.com/icons/blackvariant/button-ui-requests-2/1024/BattleBears-icon.png";
@@ -96,6 +183,7 @@ impl Render<Msg> for MyApp {
             .gap(px(8.))
             .size(|size| size.full())
             .center()
+            .wrap()
             .render(theme)
     }
 }

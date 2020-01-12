@@ -27,5 +27,6 @@ css_values! {
     (RepeatX, "repeat-x"), (RepeatY, "repeat-y"), (Repeat, "repeat"), (Space, "space"), (Round, "round"),
     (NoRepeat, "no-repeat"), (Scroll, "scroll"), (Fixed, "fixed"), (Local, "local"), (BorderBox, "border-box"),
     (PaddingBox, "padding-box"), (ContentBox, "content-box"), (Cover, "cover"), (Contain, "contain"),
-    (Top, "top"), (Bottom, "bottom"), (Flex, "flex")
+    (Top, "top"), (Bottom, "bottom"), (Flex, "flex"), (Relative, "relative"), (Absolute, "absolute"),
+    (InlineBlock, "inline-block"), (Block, "block")
 }

@@ -1,4 +1,4 @@
-use crate::css::{St, self, unit::*, ToStyle, Style};
+use crate::css::{self, unit::*, St, Style, ToStyle};
 use derive_rich::Rich;
 
 #[derive(Rich, Clone, Debug, Copy, PartialEq, From, Default)]
@@ -24,6 +24,16 @@ impl ToStyle for Margin {
 }
 
 impl Margin {
+    pub fn x(self, len: impl Fn(Length) -> Length + Clone) -> Self {
+        self.left(|left| len.clone()(left))
+            .right(|right| len(right))
+    }
+
+    pub fn y(self, len: impl Fn(Length) -> Length + Clone) -> Self {
+        self.top(|top| len.clone()(top))
+            .bottom(|bottom| len.clone()(bottom))
+    }
+
     pub fn auto(self) -> Self {
         self.all(|m| m.auto())
     }
@@ -37,10 +47,7 @@ impl Margin {
     }
 
     pub fn all(self, value: impl Fn(Length) -> Length + Copy) -> Self {
-        self.right(value)
-            .top(value)
-            .left(value)
-            .bottom(value)
+        self.right(value).top(value).left(value).bottom(value)
     }
 }
 

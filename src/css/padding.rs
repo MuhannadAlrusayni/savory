@@ -1,4 +1,4 @@
-use super::{St, unit::*, ToStyle, Style};
+use super::{unit::*, St, Style, ToStyle};
 use derive_rich::Rich;
 
 #[derive(Rich, Clone, Debug, Copy, PartialEq, From, Default)]
@@ -32,10 +32,11 @@ impl ToStyle for Padding {
 impl Padding {
     pub fn all(self, value: impl Into<Length>) -> Self {
         let value = value.into();
-        self.right(value)
-            .top(value)
-            .left(value)
-            .bottom(value)
+        self.right(value).top(value).left(value).bottom(value)
+    }
+
+    pub fn zero(self) -> Self {
+        self.all(px(0.))
     }
 
     pub fn x(self, value: impl Into<Length>) -> Self {

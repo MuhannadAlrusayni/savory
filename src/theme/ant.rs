@@ -1,15 +1,11 @@
 use crate::{
     css::{self, color::Color, unit::px, St, Style},
-    el::{
-        button::{self, Button},
-        icon::{HtmlIcon, SvgIcon, UrlIcon},
-        layout::flexbox::{self, Flexbox},
-        propertie::*,
-    },
-    theme::Theme,
+    el::prelude::*,
+    propertie::*,
+    theme::{Theme, Themeable},
 };
 
-use palette::{luma::GammaLuma, rgb::Rgb, FromColor, Hsl, Hsla, Limited, Mix, Saturate, Shade};
+use palette::{Hsl, Hsla};
 // use seed::prelude::*;
 
 pub fn contrast_ratio(background_light: f32, foreground_light: f32) -> f32 {
@@ -431,15 +427,28 @@ impl Ant {
         let background = css::Background::default();
 
         // colors
-        let (fg, border_color) = match (btn.is_focused(), btn.is_mouse_over()) {
-            // btn is not focused or hovered
-            (false, false) => (self.primary_text(false), self.border(false)),
-            // btn is hovered or focused
-            _ => (self.brand(Variant::L500), self.brand(Variant::L500)),
-        };
+        let (bg, fg, border_color) =
+            match (btn.is_disabled(), btn.is_focused(), btn.is_mouse_over()) {
+                // btn is disabled
+                (true, _, _) => (
+                    self.gray(Variant::L200),
+                    self.disable(false),
+                    self.gray(Variant::L400),
+                ),
+                // btn is not focused or hovered
+                (false, false, false) => {
+                    (self.white(), self.primary_text(false), self.border(false))
+                }
+                // btn is hovered or focused
+                _ => (
+                    self.white(),
+                    self.brand(Variant::L500),
+                    self.brand(Variant::L500),
+                ),
+            };
         Style::default()
             .merge(&border.color(border_color))
-            .merge(&background.color(self.white()))
+            .merge(&background.color(bg))
             .add(St::Color, Color::from(fg))
             .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
     }
@@ -449,16 +458,29 @@ impl Ant {
         let background = css::Background::default();
 
         // colors
-        let fg = self.white();
-        let bg = match (btn.is_focused(), btn.is_mouse_over()) {
-            // btn is not focused or hovered
-            (false, false) => self.brand(Variant::L500),
-            // btn is hovered or focused
-            _ => self.brand(Variant::L400),
-        };
-
+        let (bg, fg, border_color) =
+            match (btn.is_disabled(), btn.is_focused(), btn.is_mouse_over()) {
+                // btn is disabled
+                (true, _, _) => (
+                    self.gray(Variant::L200),
+                    self.disable(false),
+                    self.gray(Variant::L400),
+                ),
+                // btn is not focused or hovered
+                (false, false, false) => (
+                    self.brand(Variant::L500),
+                    self.white(),
+                    self.brand(Variant::L500),
+                ),
+                // btn is hovered or focused
+                _ => (
+                    self.brand(Variant::L400),
+                    self.white(),
+                    self.brand(Variant::L400),
+                ),
+            };
         Style::default()
-            .merge(&border.color(bg))
+            .merge(&border.color(border_color))
             .merge(&background.color(bg))
             .add(St::Color, Color::from(fg))
             .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
@@ -469,16 +491,29 @@ impl Ant {
         let background = css::Background::default();
 
         // colors
-        let fg = self.white();
-        let bg = match (btn.is_focused(), btn.is_mouse_over()) {
-            // btn is not focused or hovered
-            (false, false) => self.dust_red(Variant::L500),
-            // btn is hovered or focused
-            _ => self.dust_red(Variant::L400),
-        };
-
+        let (bg, fg, border_color) =
+            match (btn.is_disabled(), btn.is_focused(), btn.is_mouse_over()) {
+                // btn is disabled
+                (true, _, _) => (
+                    self.gray(Variant::L200),
+                    self.disable(false),
+                    self.gray(Variant::L400),
+                ),
+                // btn is not focused or hovered
+                (false, false, false) => (
+                    self.dust_red(Variant::L500),
+                    self.white(),
+                    self.dust_red(Variant::L500),
+                ),
+                // btn is hovered or focused
+                _ => (
+                    self.dust_red(Variant::L400),
+                    self.white(),
+                    self.dust_red(Variant::L400),
+                ),
+            };
         Style::default()
-            .merge(&border.color(bg))
+            .merge(&border.color(border_color))
             .merge(&background.color(bg))
             .add(St::Color, Color::from(fg))
             .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
@@ -489,9 +524,10 @@ impl Ant {
         let background = css::Background::default();
 
         // colors
-        let (bg, fg) = match (btn.is_focused(), btn.is_mouse_over()) {
+        let (bg, fg) = match (btn.is_disabled(), btn.is_focused(), btn.is_mouse_over()) {
+            (true, _, _) => (self.white(), self.disable(false)),
             // btn is not focused or hovered
-            (false, false) => (self.white(), self.brand(Variant::L500)),
+            (false, false, false) => (self.white(), self.brand(Variant::L500)),
             // btn is hovered or focused
             _ => (self.white(), self.brand(Variant::L400)),
         };
@@ -503,19 +539,33 @@ impl Ant {
 
     fn button_dashed(&self, btn: &Button) -> Style {
         // colors
-        let (fg, border_color) = match (btn.is_focused(), btn.is_mouse_over()) {
-            // btn is not focused or hovered
-            (false, false) => (self.primary_text(false), self.gray(Variant::D600)),
-            // btn is hovered or focused
-            _ => (self.brand(Variant::L500), self.brand(Variant::L500)),
-        };
+        let (bg, fg, border_color) =
+            match (btn.is_disabled(), btn.is_focused(), btn.is_mouse_over()) {
+                (true, _, _) => (
+                    self.gray(Variant::L200),
+                    self.disable(false),
+                    self.gray(Variant::L400),
+                ),
+                // btn is not focused or hovered
+                (false, false, false) => (
+                    self.white(),
+                    self.primary_text(false),
+                    self.gray(Variant::D600),
+                ),
+                // btn is hovered or focused
+                _ => (
+                    self.white(),
+                    self.brand(Variant::L500),
+                    self.brand(Variant::L500),
+                ),
+            };
 
         let border = css::Border::default()
             .width(px(1.))
             .dashed()
             .radius(px(4.))
             .color(border_color);
-        let background = css::Background::default().color(self.white());
+        let background = css::Background::default().color(bg);
 
         Style::default()
             .merge(&border)
@@ -542,6 +592,7 @@ impl Theme for Ant {
             .merge(&flex.border)
             .merge(&flex.margin)
             .merge(&flex.padding)
+            .merge(&flex.style)
     }
 
     fn flexbox_item<PMsg: 'static>(&self, item: &flexbox::Item<PMsg>) -> Style {
@@ -592,21 +643,12 @@ impl Theme for Ant {
             "pointer"
         };
 
-        if btn.is_disabled() {
-            let bg_disabled = self.gray(Variant::L200);
-            let fg_disabled = self.gray(Variant::L400);
-            Style::default()
-                .merge(&css::Border::default().color(fg_disabled))
-                .merge(&css::Background::default().color(bg_disabled))
-                .add(St::Color, Color::from(fg_disabled))
-        } else {
-            match btn.kind {
-                Some(button::Kind::Normal) | None => self.button_normal(btn),
-                Some(button::Kind::Suggestion) => self.button_suggestion(btn),
-                Some(button::Kind::Destructive) => self.button_destructive(btn),
-                Some(button::Kind::Link) => self.button_link(btn),
-                Some(button::Kind::Dashed) => self.button_dashed(btn),
-            }
+        match btn.kind {
+            Some(button::Kind::Normal) | None => self.button_normal(btn),
+            Some(button::Kind::Suggestion) => self.button_suggestion(btn),
+            Some(button::Kind::Destructive) => self.button_destructive(btn),
+            Some(button::Kind::Link) => self.button_link(btn),
+            Some(button::Kind::Dashed) => self.button_dashed(btn),
         }
         .merge(&padding)
         .merge(&size)
@@ -616,14 +658,247 @@ impl Theme for Ant {
         .add(St::Cursor, cursor)
         .add(St::UserSelect, css::None)
         .add(St::FontSize, px(14.))
-        .add(St::BoxSizing, "border-box")
+        .add(St::BoxSizing, css::BorderBox)
         .add(St::LineHeight, "1.499")
         .add(St::FontWeight, "400")
         .add(St::WhiteSpace, css::NoWrap)
-        .merge(&btn.style.size)
-        .merge(&btn.style.border)
-        .merge(&btn.style.background)
-        .merge(&btn.style.margin)
-        .merge(&btn.style.padding)
+        .merge(&btn.style)
+    }
+
+    fn switch(&self, switch: &Switch) -> <Switch as Themeable>::StyleMap {
+        let width = 44.;
+        let height = 22.;
+        let btn_size = height - 3.;
+        let top = 3. / 2.;
+        let left = 3. / 2.;
+
+        let cursor = if switch.is_disabled() {
+            "not-allowed"
+        } else {
+            "pointer"
+        };
+
+        let bg_color = if switch.is_toggled() {
+            self.brand(Variant::L500)
+        } else {
+            self.gray(Variant::L500)
+        };
+
+        let opacity = if switch.is_disabled() {
+            Some(0.4)
+        } else {
+            None
+        };
+
+        let bg_style = Style::default()
+            .try_add(St::Opacity, opacity)
+            .add(St::Cursor, cursor)
+            .add(St::Position, css::Relative)
+            .merge(&css::Background::default().color(bg_color))
+            .add(St::Transition, "all .3s cubic-bezier(.645, .045, .355, 1)")
+            .merge(
+                &css::Border::default()
+                    .color(css::Color::Transparent)
+                    .width(px(0.))
+                    .radius(px(height / 2.))
+                    .none(),
+            )
+            .add(St::Display, css::InlineBlock)
+            .add(St::TextDecoration, css::None)
+            // .add(St::Outline, css::None)
+            .add(St::UserSelect, css::None)
+            .add(St::BoxSizing, css::BorderBox)
+            .merge(&css::Size::default().height(px(height)).min_width(px(width)));
+
+        let translatex = if switch.is_toggled() {
+            Some(format!("translateX({})", px(width / 2.)))
+        } else {
+            None
+        };
+
+        let btn_style = Style::default()
+            .add(St::Position, css::Absolute)
+            .add(St::Top, px(top))
+            .add(St::Left, px(left))
+            .try_add(St::Transform, translatex)
+            .add(St::Transition, "all .3s cubic-bezier(.645, .045, .355, 1)")
+            .merge(&css::Background::default().color(self.white()))
+            .merge(
+                &css::Border::default()
+                    .width(px(0.))
+                    .color(css::Color::Transparent)
+                    .none()
+                    .radius(0.5),
+            )
+            .add(St::BoxShadow, "0 2px 4px 0 rgba(0, 35, 11, 0.2)")
+            .merge(&css::Size::default().resize(px(btn_size), px(btn_size)));
+
+        (bg_style, btn_style)
+    }
+
+    fn checkbox(&self, checkbox: &Checkbox) -> <Checkbox as Themeable>::StyleMap {
+        let (bg, fg, border) = match (
+            checkbox.is_disabled(),
+            checkbox.is_focused(),
+            checkbox.is_mouse_over(),
+        ) {
+            (true, _, _) => (
+                self.gray(Variant::L200),
+                self.disable(false),
+                self.gray(Variant::L400),
+            ),
+            (false, false, false) => {
+                if checkbox.is_toggled() {
+                    (
+                        self.brand(Variant::L500),
+                        self.white(),
+                        self.brand(Variant::L500),
+                    )
+                } else {
+                    (self.white(), self.white(), self.border(false))
+                }
+            }
+            _ => {
+                if checkbox.is_toggled() {
+                    (
+                        self.brand(Variant::L500),
+                        self.white(),
+                        self.brand(Variant::L500),
+                    )
+                } else {
+                    (self.white(), self.white(), self.brand(Variant::L500))
+                }
+            }
+        };
+
+        let cursor = if checkbox.is_disabled() {
+            "not-allowed"
+        } else {
+            "pointer"
+        };
+
+        let input_style = Style::default()
+            .add(St::Cursor, cursor)
+            .add(St::Display, css::Flex)
+            .add(St::JustifyContent, css::Center)
+            .add(St::AlignItems, css::Center)
+            .add(St::WebkitAppearance, css::None)
+            // .add(St::Appearance, css::None)
+            .merge(&css::Size::default().resize(px(16.), px(16.)))
+            .merge(
+                &css::Border::default()
+                    .solid()
+                    .width(px(1.))
+                    .color(border)
+                    .radius(px(2.)),
+            )
+            .merge(&css::Background::default().color(bg))
+            .add(St::Color, Color::from(fg));
+
+        let btn_style = if checkbox.is_toggled() {
+            Style::default()
+                .add(St::Cursor, cursor)
+                .merge(&css::Size::default().resize(0.2, 0.55))
+                .merge(
+                    &css::Border::default()
+                        .bottom(|side| side.solid().width(px(2.)).color(fg))
+                        .right(|side| side.solid().width(px(2.)).color(fg)),
+                )
+                .merge(&css::Margin::default().bottom(|_| px(2.).into()))
+                .add(St::Transform, "rotate(45deg)")
+        } else {
+            Style::default()
+        };
+
+        let lbl_style = if checkbox.is_disabled() {
+            Style::default().add(St::Color, Color::from(self.disable(false)))
+        } else {
+            Style::default()
+        }
+        .add(St::Cursor, cursor)
+        .add(St::Display, css::Flex)
+        .merge(&css::Gap::from(px(4.)));
+
+        (input_style, btn_style, lbl_style)
+    }
+
+    fn radio(&self, radio: &Radio) -> <Radio as Themeable>::StyleMap {
+        let (bg, fg, border) = match (
+            radio.is_disabled(),
+            radio.is_focused(),
+            radio.is_mouse_over(),
+        ) {
+            (true, _, _) => (
+                self.gray(Variant::L200),
+                self.disable(false),
+                self.gray(Variant::L400),
+            ),
+            (false, false, false) => {
+                if radio.is_toggled() {
+                    (
+                        self.white(),
+                        self.brand(Variant::L500),
+                        self.brand(Variant::L500),
+                    )
+                } else {
+                    (self.white(), self.white(), self.border(false))
+                }
+            }
+            _ => {
+                if radio.is_toggled() {
+                    (
+                        self.white(),
+                        self.brand(Variant::L500),
+                        self.brand(Variant::L500),
+                    )
+                } else {
+                    (self.white(), self.white(), self.brand(Variant::L500))
+                }
+            }
+        };
+
+        let cursor = if radio.is_disabled() {
+            "not-allowed"
+        } else {
+            "pointer"
+        };
+
+        let input_style = Style::default()
+            .add(St::Cursor, cursor)
+            .add(St::Display, css::Flex)
+            .add(St::JustifyContent, css::Center)
+            .add(St::AlignItems, css::Center)
+            .add(St::WebkitAppearance, css::None)
+            .merge(&css::Size::default().resize(px(16.), px(16.)))
+            .merge(
+                &css::Border::default()
+                    .solid()
+                    .width(px(1.))
+                    .color(border)
+                    .radius(0.5),
+            )
+            .merge(&css::Background::default().color(bg))
+            .add(St::Color, Color::from(fg));
+
+        let btn_style = if radio.is_toggled() {
+            Style::default()
+                .add(St::Cursor, cursor)
+                .merge(&css::Size::default().resize(0.6, 0.6))
+                .merge(&css::Border::default().none().radius(0.5))
+                .merge(&css::Background::default().color(fg))
+        } else {
+            Style::default()
+        };
+
+        let lbl_style = if radio.is_disabled() {
+            Style::default().add(St::Color, Color::from(self.disable(false)))
+        } else {
+            Style::default()
+        }
+        .add(St::Cursor, cursor)
+        .add(St::Display, css::Flex)
+        .merge(&css::Gap::from(px(4.)));
+
+        (input_style, btn_style, lbl_style)
     }
 }

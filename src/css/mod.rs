@@ -1,31 +1,29 @@
-pub mod common;
-pub mod border;
 pub mod background;
+pub mod border;
 pub mod color;
+pub mod common;
 // pub mod event;
+pub mod box_align;
+pub mod flexbox;
+pub mod gap;
 pub mod margin;
 pub mod padding;
 pub mod size;
 pub mod unit;
-pub mod gap;
-pub mod box_align;
-pub mod flexbox;
 
 pub use self::{
-    common::*,
-    border::Border,
-    background::Background,
-    color::Color,
-    margin::Margin,
-    padding::Padding,
-    size::Size,
-    gap::Gap,
+    background::Background, border::Border, color::Color, common::*, gap::Gap, margin::Margin,
+    padding::Padding, size::Size,
 };
 
+pub use seed::{
+    prelude::{St, UpdateEl},
+    virtual_dom::node::el::El,
+};
 use std::collections::HashMap;
-pub use seed::{prelude::{St, UpdateEl}, virtual_dom::node::el::El};
 
-#[derive(Default)]
+// TODO: add compose function for every css::* style (e.g. border(|border| ..))
+#[derive(Default, Debug, Clone)]
 pub struct Style(HashMap<St, String>);
 
 impl Style {
@@ -60,20 +58,19 @@ impl Style {
     }
 
     pub fn to_css(&self) -> Option<String> {
-        self.0.iter()
-            .fold(Option::None, |mut css, (key, value)| {
-                *css.get_or_insert(String::default()) += &format!("{}: {};", key.as_str(), value);
-                css
-            })
+        self.0.iter().fold(Option::None, |mut css, (key, value)| {
+            *css.get_or_insert(String::default()) += &format!("{}: {};", key.as_str(), value);
+            css
+        })
     }
 
     pub fn to_seed_style(&self) -> Option<seed::virtual_dom::Style> {
-        self.0.iter()
-              .fold(Option::None, |mut style, (key, value)| {
-                  style.get_or_insert(seed::virtual_dom::Style::empty())
-                      .add(key.clone(), value);
-                  style
-              })
+        self.0.iter().fold(Option::None, |mut style, (key, value)| {
+            style
+                .get_or_insert(seed::virtual_dom::Style::empty())
+                .add(key.clone(), value);
+            style
+        })
     }
 }
 
@@ -87,4 +84,10 @@ impl<Msg> UpdateEl<El<Msg>> for Style {
 
 pub trait ToStyle {
     fn to_style(&self) -> Style;
+}
+
+impl ToStyle for Style {
+    fn to_style(&self) -> Style {
+        self.clone()
+    }
 }

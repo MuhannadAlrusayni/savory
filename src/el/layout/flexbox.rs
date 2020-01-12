@@ -5,7 +5,7 @@ use crate::{
     },
     macros::*,
     render::Render,
-    theme::Theme,
+    theme::{Theme, Themeable},
 };
 use derive_rich::Rich;
 use seed::prelude::*;
@@ -38,14 +38,18 @@ pub struct Flexbox<Msg: 'static> {
     pub gap: Option<Gap>,
     #[rich(write(take, style = compose))]
     pub size: Size,
+    // TODO: remove this in favor for style
     #[rich(write(take, style = compose))]
     pub border: Border,
+    // TODO: remove this in favor for style
     #[rich(write(take, style = compose))]
     pub background: Background,
     #[rich(write(take, style = compose))]
     pub margin: Margin,
     #[rich(write(take, style = compose))]
     pub padding: Padding,
+    #[rich(write(take, style = compose))]
+    pub style: css::Style,
 }
 
 impl<Msg: 'static> Flexbox<Msg> {
@@ -63,6 +67,7 @@ impl<Msg: 'static> Flexbox<Msg> {
             background: Background::default(),
             margin: Margin::default(),
             padding: Padding::default(),
+            style: css::Style::default(),
         }
     }
 
@@ -132,7 +137,6 @@ impl<Msg: 'static> Flexbox<Msg> {
 
 impl<Msg: Clone + 'static> Render<Msg> for Flexbox<Msg> {
     type View = Node<Msg>;
-    type StyleMap = css::Style;
 
     fn render(&self, theme: &impl Theme) -> Self::View {
         div![
@@ -141,6 +145,10 @@ impl<Msg: Clone + 'static> Render<Msg> for Flexbox<Msg> {
             self.items.iter().map(|item| item.render(theme)),
         ]
     }
+}
+
+impl<Msg: 'static> Themeable for Flexbox<Msg> {
+    type StyleMap = css::Style;
 }
 
 // ---- Flexbox Item ----
@@ -219,7 +227,6 @@ impl<Msg: 'static> Item<Msg> {
 
 impl<Msg: Clone + 'static> Render<Msg> for Item<Msg> {
     type View = Vec<Node<Msg>>;
-    type StyleMap = css::Style;
 
     fn render(&self, theme: &impl Theme) -> Self::View {
         let style = theme.flexbox_item(self);
@@ -244,6 +251,10 @@ impl<Msg: Clone + 'static> Render<Msg> for Item<Msg> {
             ]]
         }
     }
+}
+
+impl<Msg: 'static> Themeable for Item<Msg> {
+    type StyleMap = css::Style;
 }
 
 #[cfg(test)]

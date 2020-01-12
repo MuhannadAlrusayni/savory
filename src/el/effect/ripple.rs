@@ -70,7 +70,6 @@ impl<GMsg: 'static> Model<Msg, GMsg> for Ripple {
 
 impl Render<Msg> for Ripple {
     type View = Node<Msg>;
-type StyleMap = css::Style;
 
 
     fn render(&self, theme: &impl Theme) -> Self::View {

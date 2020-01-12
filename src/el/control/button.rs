@@ -1,32 +1,14 @@
 use crate::{
-    css::{self, unit::px},
-    el::{
-        icon::Icon,
-        layout::flexbox::Flexbox,
-        propertie::{Shape, Size},
-    },
-    macros::*,
+    css::{self, unit::px, Style},
+    el::{Flexbox, Icon},
     model::Model,
+    propertie::{Shape, Size},
     render::Render,
-    theme::Theme,
+    theme::{Theme, Themeable},
 };
 use derive_rich::Rich;
 use seed::prelude::*;
 use std::borrow::Cow;
-
-#[derive(Rich, Debug, Clone, Default)]
-pub struct Style {
-    #[rich(write(take, style = compose))]
-    pub size: css::Size,
-    #[rich(write(take, style = compose))]
-    pub border: css::Border,
-    #[rich(write(take, style = compose))]
-    pub background: css::Background,
-    #[rich(write(take, style = compose))]
-    pub margin: css::Margin,
-    #[rich(write(take, style = compose))]
-    pub padding: css::Padding,
-}
 
 #[derive(Debug, Copy, Clone)]
 pub enum Kind {
@@ -37,7 +19,7 @@ pub enum Kind {
     Dashed,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Inner {
     Child(Vec<Node<Msg>>),
     Common(Option<String>, Option<Icon<Msg>>),
@@ -52,7 +34,7 @@ pub enum Msg {
     Route,
 }
 
-#[derive(Debug, Rich)]
+#[derive(Clone, Debug, Rich)]
 pub struct Button {
     // children
     pub inner: Inner,
@@ -189,7 +171,6 @@ impl<GMsg: 'static> Model<Msg, GMsg> for Button {
 
 impl Render<Msg> for Button {
     type View = Node<Msg>;
-    type StyleMap = css::Style;
 
     fn render(&self, theme: &impl Theme) -> Self::View {
         let inner: Vec<Node<Msg>> = match self.inner {
@@ -226,6 +207,10 @@ impl Render<Msg> for Button {
             inner,
         ]
     }
+}
+
+impl Themeable for Button {
+    type StyleMap = Style;
 }
 
 #[cfg(test)]
