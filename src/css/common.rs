@@ -28,5 +28,6 @@ css_values! {
     (NoRepeat, "no-repeat"), (Scroll, "scroll"), (Fixed, "fixed"), (Local, "local"), (BorderBox, "border-box"),
     (PaddingBox, "padding-box"), (ContentBox, "content-box"), (Cover, "cover"), (Contain, "contain"),
     (Top, "top"), (Bottom, "bottom"), (Flex, "flex"), (Relative, "relative"), (Absolute, "absolute"),
-    (InlineBlock, "inline-block"), (Block, "block")
+    (InlineBlock, "inline-block"), (Block, "block"), (Ease, "ease"), (Linear, "linear"), (EaseIn, "ease-in"),
+    (EaseOut, "ease-out"), (EaseInOut, "ease-in-out"), (StepStart, "step-start"), (StepEnd, "step-end"),
 }

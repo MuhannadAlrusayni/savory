@@ -1,4 +1,4 @@
-use super::{St, ToStyle, Style};
+use super::{St, Style, ToStyle};
 use palette::{
     rgb::{Rgb, Rgba},
     Hsl, Hsla,

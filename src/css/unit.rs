@@ -86,6 +86,15 @@ pub struct Px(f32);
 #[display(fmt = "{}%", "_0 * 100.0")]
 pub struct Percent(f32);
 
+// Time units
+#[derive(Clone, Debug, Copy, PartialEq, Display, From)]
+#[display(fmt = "{}ms", _0)]
+pub struct Ms(f32);
+
+#[derive(Clone, Debug, Copy, PartialEq, Display, From)]
+#[display(fmt = "{}s", _0)]
+pub struct Sec(f32);
+
 macro construct_fn( $( $fn:ident() -> $ty:ident $(,)? )* ) {
     $(
         pub fn $fn(value: impl Into<f32>) -> $ty {
@@ -100,4 +109,7 @@ construct_fn! {
     cm() -> Cm,
     inch() -> In,
     percent() -> Percent,
+    // time fns
+    ms() -> Ms,
+    sec() -> Sec,
 }

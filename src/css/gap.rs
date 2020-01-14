@@ -1,4 +1,4 @@
-use crate::css::{St, unit::*, ToStyle, Style};
+use crate::css::{unit::*, St, Style, ToStyle};
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum LengthPercent {

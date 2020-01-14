@@ -31,6 +31,8 @@ pub trait Theme {
     fn checkbox(&self, _: &Checkbox) -> <Checkbox as Themeable>::StyleMap;
 
     fn radio(&self, _: &Radio) -> <Radio as Themeable>::StyleMap;
+
+    fn entry(&self, _: &Entry) -> <Entry as Themeable>::StyleMap;
 }
 
 pub trait Themeable {

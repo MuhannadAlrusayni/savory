@@ -1,5 +1,10 @@
 use crate::{
-    css::{self, color::Color, unit::px, St, Style},
+    css::{
+        self,
+        color::Color,
+        unit::{px, rem},
+        St, Style,
+    },
     el::prelude::*,
     propertie::*,
     theme::{Theme, Themeable},
@@ -423,9 +428,6 @@ impl Ant {
     }
 
     fn button_normal(&self, btn: &Button) -> Style {
-        let border = css::Border::default().width(px(1.)).solid().radius(px(4.));
-        let background = css::Background::default();
-
         // colors
         let (bg, fg, border_color) =
             match (btn.is_disabled(), btn.is_focused(), btn.is_mouse_over()) {
@@ -447,16 +449,13 @@ impl Ant {
                 ),
             };
         Style::default()
-            .merge(&border.color(border_color))
-            .merge(&background.color(bg))
-            .add(St::Color, Color::from(fg))
+            .border(|b| b.width(px(1.)).solid().radius(px(4.)).color(border_color))
+            .background(|b| b.color(bg))
+            .color(fg)
             .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
     }
 
     fn button_suggestion(&self, btn: &Button) -> Style {
-        let border = css::Border::default().width(px(1.)).solid().radius(px(4.));
-        let background = css::Background::default();
-
         // colors
         let (bg, fg, border_color) =
             match (btn.is_disabled(), btn.is_focused(), btn.is_mouse_over()) {
@@ -480,16 +479,13 @@ impl Ant {
                 ),
             };
         Style::default()
-            .merge(&border.color(border_color))
-            .merge(&background.color(bg))
-            .add(St::Color, Color::from(fg))
+            .border(|b| b.width(px(1.)).solid().radius(px(4.)).color(border_color))
+            .background(|b| b.color(bg))
+            .color(fg)
             .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
     }
 
     fn button_destructive(&self, btn: &Button) -> Style {
-        let border = css::Border::default().width(px(1.)).solid().radius(px(4.));
-        let background = css::Background::default();
-
         // colors
         let (bg, fg, border_color) =
             match (btn.is_disabled(), btn.is_focused(), btn.is_mouse_over()) {
@@ -513,16 +509,13 @@ impl Ant {
                 ),
             };
         Style::default()
-            .merge(&border.color(border_color))
-            .merge(&background.color(bg))
-            .add(St::Color, Color::from(fg))
+            .border(|b| b.width(px(1.)).solid().radius(px(4.)).color(border_color))
+            .background(|b| b.color(bg))
+            .color(fg)
             .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
     }
 
     fn button_link(&self, btn: &Button) -> Style {
-        let border = css::Border::default().width(px(0.)).solid().radius(px(4.));
-        let background = css::Background::default();
-
         // colors
         let (bg, fg) = match (btn.is_disabled(), btn.is_focused(), btn.is_mouse_over()) {
             (true, _, _) => (self.white(), self.disable(false)),
@@ -532,9 +525,9 @@ impl Ant {
             _ => (self.white(), self.brand(Variant::L400)),
         };
         Style::default()
-            .add(St::Color, Color::from(fg))
-            .merge(&border.color(bg))
-            .merge(&background.color(bg))
+            .color(fg)
+            .border(|b| b.width(px(0.)).solid().radius(px(4.)).color(bg))
+            .background(|b| b.color(bg))
     }
 
     fn button_dashed(&self, btn: &Button) -> Style {
@@ -560,17 +553,10 @@ impl Ant {
                 ),
             };
 
-        let border = css::Border::default()
-            .width(px(1.))
-            .dashed()
-            .radius(px(4.))
-            .color(border_color);
-        let background = css::Background::default().color(bg);
-
         Style::default()
-            .merge(&border)
-            .merge(&background)
-            .add(St::Color, Color::from(fg))
+            .border(|b| b.width(px(1.)).dashed().radius(px(4.)).color(border_color))
+            .background(|b| b.color(bg))
+            .color(fg)
             .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
     }
 }
@@ -694,21 +680,20 @@ impl Theme for Ant {
             .try_add(St::Opacity, opacity)
             .add(St::Cursor, cursor)
             .add(St::Position, css::Relative)
-            .merge(&css::Background::default().color(bg_color))
+            .background(|b| b.color(bg_color))
             .add(St::Transition, "all .3s cubic-bezier(.645, .045, .355, 1)")
-            .merge(
-                &css::Border::default()
-                    .color(css::Color::Transparent)
+            .border(|b| {
+                b.color(css::Color::Transparent)
                     .width(px(0.))
                     .radius(px(height / 2.))
-                    .none(),
-            )
+                    .none()
+            })
             .add(St::Display, css::InlineBlock)
             .add(St::TextDecoration, css::None)
             // .add(St::Outline, css::None)
             .add(St::UserSelect, css::None)
             .add(St::BoxSizing, css::BorderBox)
-            .merge(&css::Size::default().height(px(height)).min_width(px(width)));
+            .size(|s| s.height(px(height)).min_width(px(width)));
 
         let translatex = if switch.is_toggled() {
             Some(format!("translateX({})", px(width / 2.)))
@@ -722,16 +707,15 @@ impl Theme for Ant {
             .add(St::Left, px(left))
             .try_add(St::Transform, translatex)
             .add(St::Transition, "all .3s cubic-bezier(.645, .045, .355, 1)")
-            .merge(&css::Background::default().color(self.white()))
-            .merge(
-                &css::Border::default()
-                    .width(px(0.))
+            .background(|b| b.color(self.white()))
+            .border(|b| {
+                b.width(px(0.))
                     .color(css::Color::Transparent)
                     .none()
-                    .radius(0.5),
-            )
+                    .radius(0.5)
+            })
             .add(St::BoxShadow, "0 2px 4px 0 rgba(0, 35, 11, 0.2)")
-            .merge(&css::Size::default().resize(px(btn_size), px(btn_size)));
+            .size(|s| s.resize(px(btn_size), px(btn_size)));
 
         (bg_style, btn_style)
     }
@@ -778,46 +762,43 @@ impl Theme for Ant {
         };
 
         let input_style = Style::default()
+            .add(St::Transition, "all .3s cubic-bezier(.645, .045, .355, 1)")
             .add(St::Cursor, cursor)
             .add(St::Display, css::Flex)
             .add(St::JustifyContent, css::Center)
             .add(St::AlignItems, css::Center)
             .add(St::WebkitAppearance, css::None)
             // .add(St::Appearance, css::None)
-            .merge(&css::Size::default().resize(px(16.), px(16.)))
-            .merge(
-                &css::Border::default()
-                    .solid()
-                    .width(px(1.))
-                    .color(border)
-                    .radius(px(2.)),
-            )
-            .merge(&css::Background::default().color(bg))
-            .add(St::Color, Color::from(fg));
+            .size(|s| s.resize(px(16.), px(16.)))
+            .border(|b| b.solid().width(px(1.)).color(border).radius(px(2.)))
+            .background(|b| b.color(bg))
+            .color(fg);
 
         let btn_style = if checkbox.is_toggled() {
             Style::default()
                 .add(St::Cursor, cursor)
-                .merge(&css::Size::default().resize(0.2, 0.55))
+                .add(St::Transition, "all .3s cubic-bezier(.645, .045, .355, 1)")
+                .size(|s| s.resize(0.2, 0.55))
                 .merge(
                     &css::Border::default()
                         .bottom(|side| side.solid().width(px(2.)).color(fg))
                         .right(|side| side.solid().width(px(2.)).color(fg)),
                 )
-                .merge(&css::Margin::default().bottom(|_| px(2.).into()))
+                .margin(|m| m.bottom(|_| px(2.).into()))
                 .add(St::Transform, "rotate(45deg)")
         } else {
             Style::default()
         };
 
         let lbl_style = if checkbox.is_disabled() {
-            Style::default().add(St::Color, Color::from(self.disable(false)))
+            Style::default().color(self.disable(false))
         } else {
             Style::default()
         }
+        .add(St::Transition, "all .3s cubic-bezier(.645, .045, .355, 1)")
         .add(St::Cursor, cursor)
         .add(St::Display, css::Flex)
-        .merge(&css::Gap::from(px(4.)));
+        .gap(px(4.));
 
         (input_style, btn_style, lbl_style)
     }
@@ -864,41 +845,101 @@ impl Theme for Ant {
         };
 
         let input_style = Style::default()
+            .add(St::Transition, "all .3s cubic-bezier(.645, .045, .355, 1)")
             .add(St::Cursor, cursor)
             .add(St::Display, css::Flex)
             .add(St::JustifyContent, css::Center)
             .add(St::AlignItems, css::Center)
             .add(St::WebkitAppearance, css::None)
-            .merge(&css::Size::default().resize(px(16.), px(16.)))
-            .merge(
-                &css::Border::default()
-                    .solid()
-                    .width(px(1.))
-                    .color(border)
-                    .radius(0.5),
-            )
-            .merge(&css::Background::default().color(bg))
-            .add(St::Color, Color::from(fg));
+            .color(fg)
+            .size(|s| s.resize(px(16.), px(16.)))
+            .border(|b| b.solid().width(px(1.)).color(border).radius(0.5))
+            .background(|b| b.color(bg));
 
         let btn_style = if radio.is_toggled() {
             Style::default()
                 .add(St::Cursor, cursor)
-                .merge(&css::Size::default().resize(0.6, 0.6))
-                .merge(&css::Border::default().none().radius(0.5))
-                .merge(&css::Background::default().color(fg))
-        } else {
-            Style::default()
-        };
-
-        let lbl_style = if radio.is_disabled() {
-            Style::default().add(St::Color, Color::from(self.disable(false)))
+                .size(|s| s.resize(0.6, 0.6))
+                .border(|b| b.none().radius(0.5))
+                .background(|b| b.color(fg))
         } else {
             Style::default()
         }
+        .add(St::Transition, "all .3s cubic-bezier(.645, .045, .355, 1)");
+
+        let lbl_style = if radio.is_disabled() {
+            Style::default().color(self.disable(false))
+        } else {
+            Style::default()
+        }
+        .add(St::Transition, "all .3s cubic-bezier(.645, .045, .355, 1)")
         .add(St::Cursor, cursor)
         .add(St::Display, css::Flex)
-        .merge(&css::Gap::from(px(4.)));
+        .gap(px(4.));
 
         (input_style, btn_style, lbl_style)
+    }
+
+    fn entry(&self, entry: &Entry) -> <Entry as Themeable>::StyleMap {
+        let (bg, fg, border) = match (
+            entry.is_disabled(),
+            entry.is_focused(),
+            entry.is_mouse_over(),
+        ) {
+            (true, _, _) => (
+                self.gray(Variant::L200),
+                self.disable(false),
+                self.gray(Variant::L400),
+            ),
+            (false, false, false) => (self.white(), self.primary_text(false), self.border(false)),
+            _ => (
+                self.white(),
+                self.primary_text(false),
+                self.brand(Variant::L500),
+            ),
+        };
+
+        let cursor = if entry.is_disabled() {
+            "not-allowed"
+        } else {
+            "initial"
+        };
+
+        let container = Style::default()
+            .add(St::Transition, "all .3s cubic-bezier(.645, .045, .355, 1)")
+            .add(St::Display, css::Flex)
+            .add(St::AlignItems, css::Center)
+            .add(St::JustifyContent, css::Center)
+            .padding(|p| p.y(px(4.)).x(px(11.)))
+            .gap(px(4.))
+            .background(|b| b.color(bg))
+            .border(|b| b.solid().width(px(1.)).color(border).radius(px(4.)))
+            .size(|s| s.width(1.))
+            .add(St::Cursor, cursor);
+
+        let input = Style::default()
+            .add(St::Transition, "all .3s cubic-bezier(.645, .045, .355, 1)")
+            .size(|s| s.width(1.).height(px(32.)))
+            .color(self.primary_text(false))
+            .border(|b| b.none())
+            .background(|b| b.color(css::Color::Transparent))
+            .add(St::WebkitAppearance, css::None)
+            .add(St::Cursor, cursor);
+
+        let icon: Option<Icon<entry::Msg>> = if entry.clear_icon {
+            Some(Icon::html(
+                r#"<path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm165.4 618.2l-66-.3L512 563.4l-99.3 118.4-66.1.3c-4.4 0-8-3.5-8-8 0-1.9.7-3.7 1.9-5.2l130.1-155L340.5 359a8.32 8.32 0 0 1-1.9-5.2c0-4.4 3.6-8 8-8l66.1.3L512 464.6l99.3-118.4 66-.3c4.4 0 8 3.5 8 8 0 1.9-.7 3.7-1.9 5.2L553.5 514l130 155c1.2 1.5 1.9 3.3 1.9 5.2 0 4.4-3.6 8-8 8z"></path>"#,
+            )
+                 .size(|s| s.resize(rem(1.), rem(1.)))
+                 .into())
+        } else {
+            None
+        };
+
+        entry::StyleMap {
+            container,
+            input,
+            icon,
+        }
     }
 }

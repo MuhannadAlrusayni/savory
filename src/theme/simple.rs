@@ -176,7 +176,7 @@ impl Theme for Simple {
             .merge(&border)
             .merge(&padding)
             .merge(&size)
-            .add(St::Color, css::Color::from(text_color))
+            .color(text_color)
             .merge(&style.size)
             .merge(&style.border)
             .merge(&style.background)

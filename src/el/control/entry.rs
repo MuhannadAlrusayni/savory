@@ -1,5 +1,6 @@
 use crate::{
     css::Style,
+    el::prelude::*,
     model::Model,
     propertie::{Shape, Size},
     render::Render,
@@ -9,22 +10,33 @@ use derive_rich::Rich;
 use seed::prelude::*;
 use std::borrow::Cow;
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Clone)]
 pub enum Msg {
     MouseEnter,
     MouseLeave,
     Focus,
     Blur,
-    Click,
+    Clear,
+    UpdateText(String),
 }
 
 #[derive(Debug, Rich)]
 pub struct Entry {
-    pub text: String,
+    #[rich(write(take))]
+    pub text: Option<String>,
+    #[rich(
+        read(copy, rename = is_readonly),
+        value_fns(take) = { readonly = true, readonly_off = false }
+    )]
     pub readonly: bool,
-    pub max_length: usize,
-    pub placeholder: String,
-    pub prefix: Node<Msg>,
+    #[rich(value_fns(take) = { clear_icon = true, clear_icon_off = false })]
+    pub clear_icon: bool,
+    #[rich(write(take))]
+    pub max_length: Option<usize>,
+    #[rich(write(take))]
+    pub placeholder: Option<String>,
+    // pub prefix: Icon<Msg>,
+    // pub suffix: Icon<Msg>,
     #[rich(write(take, style = compose))]
     pub style: Style,
     #[rich(value_fns(take) = {
@@ -42,4 +54,89 @@ pub struct Entry {
     focus: bool,
     #[rich(read(copy, rename = is_mouse_over))]
     mouse_over: bool,
+}
+
+impl Default for Entry {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Entry {
+    pub fn new() -> Self {
+        Self {
+            text: None,
+            readonly: false,
+            clear_icon: false,
+            max_length: None,
+            placeholder: None,
+            // prefix:
+            // suffix:
+            style: Style::default(),
+            size: None,
+            disabled: false,
+            focus: false,
+            mouse_over: false,
+        }
+    }
+
+    fn handle_clear_msg(&mut self) {
+        self.text = None;
+    }
+}
+
+impl<GMsg: 'static> Model<Msg, GMsg> for Entry {
+    fn update(&mut self, msg: Msg, _: &mut impl Orders<Msg, GMsg>) {
+        match msg {
+            Msg::UpdateText(text) => self.text = Some(text),
+            Msg::MouseEnter => self.mouse_over = true,
+            Msg::MouseLeave => self.mouse_over = false,
+            Msg::Focus => self.focus = true,
+            Msg::Blur => self.focus = false,
+            Msg::Clear => self.handle_clear_msg(),
+        }
+    }
+}
+
+impl Render<Msg> for Entry {
+    type View = Node<Msg>;
+
+    fn render(&self, theme: &impl Theme) -> Self::View {
+        let style = theme.entry(self);
+        div![
+            style.container,
+            input![
+                style.input,
+                attrs![
+                    At::Disabled => self.disabled.as_at_value(),
+                    At::Value => self.text.as_ref().map(|v| AtValue::Some(v.clone())).unwrap_or(AtValue::Ignored),
+                    // At::MaxLength => self.max_length,
+                    // At::Placeholder => self.placeholder,
+                ],
+                simple_ev(Ev::Focus, Msg::Focus),
+                simple_ev(Ev::Blur, Msg::Blur),
+                simple_ev(Ev::MouseEnter, Msg::MouseEnter),
+                simple_ev(Ev::MouseLeave, Msg::MouseLeave),
+                input_ev(Ev::Input, Msg::UpdateText)
+            ],
+            style
+                .icon
+                .map(|i| {
+                    let mut node = i.render(theme);
+                    node.add_listener(simple_ev(Ev::Click, Msg::Clear));
+                    node
+                })
+                .unwrap_or(empty![]),
+        ]
+    }
+}
+
+pub struct StyleMap {
+    pub container: Style,
+    pub input: Style,
+    pub icon: Option<Icon<Msg>>,
+}
+
+impl Themeable for Entry {
+    type StyleMap = StyleMap;
 }

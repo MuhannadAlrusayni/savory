@@ -26,6 +26,38 @@ use std::collections::HashMap;
 #[derive(Default, Debug, Clone)]
 pub struct Style(HashMap<St, String>);
 
+macro css_props( $( $fn_ident:ident($prop_ty:ty) $(,)? )* ) {
+    impl Style {
+        $(
+            pub fn $fn_ident<R: Into<$prop_ty>>(mut self, get_prop: impl Fn($prop_ty) -> R) -> Self {
+                let value = get_prop(<$prop_ty>::default()).into();
+                self.merge(&value)
+            }
+        )*
+    }
+}
+
+macro simple_css_props( $( $fn_ident:ident($prop_ty:ty) $(,)? )* ) {
+    impl Style {
+        $(
+            pub fn $fn_ident(mut self, value: impl Into<$prop_ty>) -> Self {
+                self.merge(&value.into())
+            }
+        )*
+    }
+}
+
+simple_css_props! {
+    color(Color), gap(Gap), flex_wrap(flexbox::Wrap), flex_basis(flexbox::Basis),
+    flex_direction(flexbox::Direction), justify_content(box_align::JustifyContent),
+    align_content(box_align::AlignContent), align_items(box_align::AlignItems),
+    justify_self(box_align::JustifySelf), align_self(box_align::AlignSelf),
+}
+
+css_props! {
+    background(Background), border(Border), margin(Margin), padding(Padding), size(Size),
+}
+
 impl Style {
     pub fn new() -> Self {
         Self(HashMap::default())

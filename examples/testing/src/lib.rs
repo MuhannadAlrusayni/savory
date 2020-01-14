@@ -3,14 +3,7 @@ extern crate seed;
 
 use khalas::{
     css::{self, unit::px},
-    el::{
-        button::{self as btn, Button},
-        checkbox::{self, Checkbox},
-        icon::Icon,
-        layout::flexbox::Flexbox,
-        radio::{self, Radio},
-        switch::{self, Switch},
-    },
+    el::prelude::*,
     model::Model,
     render::Render,
     theme::{self, Theme},
@@ -20,9 +13,10 @@ use seed::{prelude::*, App};
 #[derive(Clone, Debug)]
 pub enum Msg {
     Switch(usize, switch::Msg),
-    Btn(usize, btn::Msg),
+    Btn(usize, button::Msg),
     Checkbox(usize, checkbox::Msg),
     Radio(usize, radio::Msg),
+    Entry(usize, entry::Msg),
     Clicked,
 }
 
@@ -34,6 +28,7 @@ pub struct MyApp {
     switchs: Vec<Switch>,
     checkboxs: Vec<Checkbox>,
     radios: Vec<Radio>,
+    entries: Vec<Entry>,
 }
 
 impl Default for MyApp {
@@ -89,6 +84,17 @@ impl MyApp {
                 Radio::default().label("Selecte A"),
                 Radio::default().label("Selte B").toggle().disable(),
             ],
+            entries: vec![
+                Entry::default(),
+                Entry::default().placeholder("e.g. email@example.org"),
+                Entry::default()
+                    .placeholder("e.g. email@example.org")
+                    .clear_icon(),
+                Entry::default().disable(),
+                Entry::default()
+                    .placeholder("e.g. email@example.org")
+                    .disable(),
+            ],
         }
     }
 }
@@ -96,6 +102,11 @@ impl MyApp {
 impl Model<Msg, GlobalMsg> for MyApp {
     fn update(&mut self, msg: Msg, orders: &mut impl Orders<Msg, GlobalMsg>) {
         match msg {
+            Msg::Entry(index, msg) => {
+                if let Some(entry) = self.entries.get_mut(index) {
+                    entry.update(msg, &mut orders.proxy(move |msg| Msg::Entry(index, msg)))
+                }
+            }
             Msg::Radio(index, msg) => {
                 if let Some(radio) = self.radios.get_mut(index) {
                     radio.update(msg, &mut orders.proxy(move |msg| Msg::Radio(index, msg)))
@@ -167,8 +178,18 @@ impl Render<Msg> for MyApp {
                     .map_msg(move |msg| Msg::Radio(index, msg))
             })
             .collect::<Vec<Node<Msg>>>();
+        let entries = self
+            .entries
+            .iter()
+            .enumerate()
+            .map(|(index, entry)| {
+                entry
+                    .render(theme)
+                    .map_msg(move |msg| Msg::Entry(index, msg))
+            })
+            .collect::<Vec<Node<Msg>>>();
 
-        [switchs, btns, checkboxs, radios]
+        [switchs, btns, checkboxs, radios, entries]
             .concat()
             .into_iter()
             .fold(Flexbox::new(), |flexbox, btn| flexbox.add(|item| item.content(vec![btn])))
@@ -180,6 +201,7 @@ impl Render<Msg> for MyApp {
                         .render(theme)
                 ])
             })
+            .margin(|m| m.all(|_| px(12.).into()))
             .gap(px(8.))
             .size(|size| size.full())
             .center()
