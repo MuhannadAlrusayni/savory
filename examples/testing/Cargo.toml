@@ -10,9 +10,8 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
-# seed = { git = "https://github.com/David-OConnor/seed" }
-seed = { path = "../../../seed" }
+seed = { git = "https://github.com/David-OConnor/seed" }
 web-sys = "^0.3"
 khalas = { path = "../../" }
-derive_rich = { path = "../../../derive_rich" }
+derive_rich = { git = "https://gitlab.com/muhannad_alrusayni/derive_rich" }
 wasm-bindgen = "0.2.55"
