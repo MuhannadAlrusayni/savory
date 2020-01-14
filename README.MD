@@ -3,6 +3,11 @@ This project is a try to build UI library based on [Seed](https://seed-rs.org/).
 I'll add docs and other introduections once this project get stable, while then
 you can explore the code your self :D.
 
+## Screenshot
+these screenshots will represnte current state for this proejct
+
+![Screenshot](screenshot.png)
+
 #### License
 
 Licensed under either of <a href="LICENSE-APACHE">Apache License, Version
