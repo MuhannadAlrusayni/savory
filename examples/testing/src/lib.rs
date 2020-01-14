@@ -87,9 +87,7 @@ impl MyApp {
             entries: vec![
                 Entry::default(),
                 Entry::default().placeholder("e.g. email@example.org"),
-                Entry::default()
-                    .placeholder("e.g. email@example.org")
-                    .clear_icon(),
+                Entry::default().placeholder("e.g. email@example.org"),
                 Entry::default().disable(),
                 Entry::default()
                     .placeholder("e.g. email@example.org")

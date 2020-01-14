@@ -29,14 +29,10 @@ pub struct Entry {
         value_fns(take) = { readonly = true, readonly_off = false }
     )]
     pub readonly: bool,
-    #[rich(value_fns(take) = { clear_icon = true, clear_icon_off = false })]
-    pub clear_icon: bool,
     #[rich(write(take))]
     pub max_length: Option<usize>,
     #[rich(write(take))]
     pub placeholder: Option<String>,
-    // pub prefix: Icon<Msg>,
-    // pub suffix: Icon<Msg>,
     #[rich(write(take, style = compose))]
     pub style: Style,
     #[rich(value_fns(take) = {
@@ -67,11 +63,8 @@ impl Entry {
         Self {
             text: None,
             readonly: false,
-            clear_icon: false,
             max_length: None,
             placeholder: None,
-            // prefix:
-            // suffix:
             style: Style::default(),
             size: None,
             disabled: false,
@@ -119,14 +112,6 @@ impl Render<Msg> for Entry {
                 simple_ev(Ev::MouseLeave, Msg::MouseLeave),
                 input_ev(Ev::Input, Msg::UpdateText)
             ],
-            style
-                .icon
-                .map(|i| {
-                    let mut node = i.render(theme);
-                    node.add_listener(simple_ev(Ev::Click, Msg::Clear));
-                    node
-                })
-                .unwrap_or(empty![]),
         ]
     }
 }
@@ -134,7 +119,6 @@ impl Render<Msg> for Entry {
 pub struct StyleMap {
     pub container: Style,
     pub input: Style,
-    pub icon: Option<Icon<Msg>>,
 }
 
 impl Themeable for Entry {
