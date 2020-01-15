@@ -9,11 +9,12 @@ pub mod gap;
 pub mod margin;
 pub mod padding;
 pub mod size;
+pub mod transition;
 pub mod unit;
 
 pub use self::{
     background::Background, border::Border, color::Color, common::*, gap::Gap, margin::Margin,
-    padding::Padding, size::Size,
+    padding::Padding, size::Size, transition::Transition,
 };
 
 pub use seed::{
@@ -55,7 +56,7 @@ simple_css_props! {
 }
 
 css_props! {
-    background(Background), border(Border), margin(Margin), padding(Padding), size(Size),
+    background(Background), border(Border), margin(Margin), padding(Padding), size(Size), transition(Transition),
 }
 
 impl Style {

@@ -2,7 +2,7 @@ use crate::{
     css::{
         self,
         color::Color,
-        unit::{px, rem},
+        unit::{ms, px, rem, sec},
         St, Style,
     },
     el::prelude::*,
@@ -638,7 +638,9 @@ impl Theme for Ant {
         }
         .merge(&padding)
         .merge(&size)
-        .add(St::Transition, "all .3s cubic-bezier(.645, .045, .355, 1)")
+        .transition(|trans| {
+            trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+        })
         .add(St::TextDecoration, css::None)
         .add(St::Outline, css::None)
         .add(St::Cursor, cursor)
@@ -681,7 +683,9 @@ impl Theme for Ant {
             .add(St::Cursor, cursor)
             .add(St::Position, css::Relative)
             .background(|b| b.color(bg_color))
-            .add(St::Transition, "all .3s cubic-bezier(.645, .045, .355, 1)")
+            .transition(|trans| {
+                trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+            })
             .border(|b| {
                 b.color(css::Color::Transparent)
                     .width(px(0.))
@@ -706,7 +710,9 @@ impl Theme for Ant {
             .add(St::Top, px(top))
             .add(St::Left, px(left))
             .try_add(St::Transform, translatex)
-            .add(St::Transition, "all .3s cubic-bezier(.645, .045, .355, 1)")
+            .transition(|trans| {
+                trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+            })
             .background(|b| b.color(self.white()))
             .border(|b| {
                 b.width(px(0.))
@@ -762,7 +768,9 @@ impl Theme for Ant {
         };
 
         let input_style = Style::default()
-            .add(St::Transition, "all .3s cubic-bezier(.645, .045, .355, 1)")
+            .transition(|trans| {
+                trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+            })
             .add(St::Cursor, cursor)
             .add(St::Display, css::Flex)
             .add(St::JustifyContent, css::Center)
@@ -777,7 +785,9 @@ impl Theme for Ant {
         let btn_style = if checkbox.is_toggled() {
             Style::default()
                 .add(St::Cursor, cursor)
-                .add(St::Transition, "all .3s cubic-bezier(.645, .045, .355, 1)")
+                .transition(|trans| {
+                    trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+                })
                 .size(|s| s.resize(0.2, 0.55))
                 .merge(
                     &css::Border::default()
@@ -795,7 +805,9 @@ impl Theme for Ant {
         } else {
             Style::default()
         }
-        .add(St::Transition, "all .3s cubic-bezier(.645, .045, .355, 1)")
+        .transition(|trans| {
+            trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+        })
         .add(St::Cursor, cursor)
         .add(St::Display, css::Flex)
         .gap(px(4.));
@@ -845,7 +857,9 @@ impl Theme for Ant {
         };
 
         let input_style = Style::default()
-            .add(St::Transition, "all .3s cubic-bezier(.645, .045, .355, 1)")
+            .transition(|trans| {
+                trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+            })
             .add(St::Cursor, cursor)
             .add(St::Display, css::Flex)
             .add(St::JustifyContent, css::Center)
@@ -865,14 +879,18 @@ impl Theme for Ant {
         } else {
             Style::default()
         }
-        .add(St::Transition, "all .3s cubic-bezier(.645, .045, .355, 1)");
+        .transition(|trans| {
+            trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+        });
 
         let lbl_style = if radio.is_disabled() {
             Style::default().color(self.disable(false))
         } else {
             Style::default()
         }
-        .add(St::Transition, "all .3s cubic-bezier(.645, .045, .355, 1)")
+        .transition(|trans| {
+            trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+        })
         .add(St::Cursor, cursor)
         .add(St::Display, css::Flex)
         .gap(px(4.));
@@ -906,7 +924,9 @@ impl Theme for Ant {
         };
 
         let container = Style::default()
-            .add(St::Transition, "all .3s cubic-bezier(.645, .045, .355, 1)")
+            .transition(|trans| {
+                trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+            })
             .add(St::Display, css::Flex)
             .add(St::AlignItems, css::Center)
             .add(St::JustifyContent, css::Center)
@@ -918,7 +938,9 @@ impl Theme for Ant {
             .add(St::Cursor, cursor);
 
         let input = Style::default()
-            .add(St::Transition, "all .3s cubic-bezier(.645, .045, .355, 1)")
+            .transition(|trans| {
+                trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+            })
             .size(|s| s.width(1.).height(px(32.)))
             .color(self.primary_text(false))
             .border(|b| b.none())
