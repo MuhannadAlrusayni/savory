@@ -1,4 +1,4 @@
-use crate::css::{St, self, color::Color, unit::*, ToStyle};
+use crate::css::{self, color::Color, unit::*, St, ToStyle};
 use derive_rich::Rich;
 
 // TODO: use css types in this module enums
@@ -72,6 +72,12 @@ impl ToStyle for Background {
             .try_add(St::BackgroundRepeat, self.repeat)
             .try_add(St::BackgroundAttachment, self.attachment)
             .try_add(St::BackgroundPosition, self.position)
+    }
+}
+
+impl Background {
+    pub fn transparent(self) -> Self {
+        self.color(Color::Transparent)
     }
 }
 
@@ -210,7 +216,6 @@ impl From<css::Bottom> for Vertical {
         Self::Bottom(source, None)
     }
 }
-
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum Position {

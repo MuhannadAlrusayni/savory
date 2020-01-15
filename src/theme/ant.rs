@@ -686,12 +686,7 @@ impl Theme for Ant {
             .transition(|trans| {
                 trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
             })
-            .border(|b| {
-                b.color(css::Color::Transparent)
-                    .width(px(0.))
-                    .radius(px(height / 2.))
-                    .none()
-            })
+            .border(|b| b.transparent().width(px(0.)).radius(px(height / 2.)).none())
             .add(St::Display, css::InlineBlock)
             .add(St::TextDecoration, css::None)
             // .add(St::Outline, css::None)
@@ -714,12 +709,7 @@ impl Theme for Ant {
                 trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
             })
             .background(|b| b.color(self.white()))
-            .border(|b| {
-                b.width(px(0.))
-                    .color(css::Color::Transparent)
-                    .none()
-                    .radius(0.5)
-            })
+            .border(|b| b.width(px(0.)).transparent().none().radius(0.5))
             .add(St::BoxShadow, "0 2px 4px 0 rgba(0, 35, 11, 0.2)")
             .size(|s| s.resize(px(btn_size), px(btn_size)));
 
@@ -944,7 +934,7 @@ impl Theme for Ant {
             .size(|s| s.width(1.).height(px(32.)))
             .color(self.primary_text(false))
             .border(|b| b.none())
-            .background(|b| b.color(css::Color::Transparent))
+            .background(|bg| bg.transparent())
             .add(St::WebkitAppearance, css::None)
             .add(St::Cursor, cursor);
 

@@ -1,4 +1,4 @@
-use crate::css::{St, self, color::Color, unit::*, ToStyle};
+use crate::css::{self, color::Color, unit::*, St, ToStyle};
 use derive_rich::Rich;
 
 // TODO: add shadow
@@ -59,10 +59,7 @@ macro sides_style_shortcut_functions( $( $fn:ident() $(,)? )* ) {
 
 impl Border {
     pub fn all_side(self, value: impl Fn(Side) -> Side + Copy) -> Self {
-        self.left(value)
-            .top(value)
-            .right(value)
-            .bottom(value)
+        self.left(value).top(value).right(value).bottom(value)
     }
 
     pub fn style(self, style: impl Into<Style>) -> Self {
@@ -78,6 +75,10 @@ impl Border {
     pub fn color(self, color: impl Into<Color>) -> Self {
         let color = color.into();
         self.all_side(|side| side.color(color))
+    }
+
+    pub fn transparent(self) -> Self {
+        self.color(Color::Transparent)
     }
 
     pub fn radius(self, rad: impl Into<Radius>) -> Self {
