@@ -4,6 +4,7 @@ pub mod color;
 pub mod common;
 // pub mod event;
 pub mod box_align;
+pub mod display;
 pub mod flexbox;
 pub mod gap;
 pub mod margin;
@@ -17,6 +18,7 @@ pub use self::{
     border::Border,
     color::{Color, Opacity},
     common::*,
+    display::Display,
     gap::Gap,
     margin::Margin,
     padding::Padding,
@@ -59,7 +61,7 @@ simple_css_props! {
     color(Color), opacity(Opacity), gap(Gap), flex_wrap(flexbox::Wrap), flex_basis(flexbox::Basis),
     flex_direction(flexbox::Direction), justify_content(box_align::JustifyContent),
     align_content(box_align::AlignContent), align_items(box_align::AlignItems),
-    justify_self(box_align::JustifySelf), align_self(box_align::AlignSelf),
+    justify_self(box_align::JustifySelf), align_self(box_align::AlignSelf), display(Display),
 }
 
 css_props! {

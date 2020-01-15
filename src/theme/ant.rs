@@ -565,7 +565,7 @@ impl Theme for Ant {
     fn flexbox<PMsg: 'static>(&self, flex: &Flexbox<PMsg>) -> Style {
         // flex container style
         Style::default()
-            .add(St::Display, css::Flex)
+            .display(css::Flex)
             .try_merge(flex.direction.as_ref())
             .try_merge(flex.wrap.as_ref())
             .try_merge(flex.justify_content.as_ref())
@@ -687,7 +687,7 @@ impl Theme for Ant {
                 trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
             })
             .border(|b| b.transparent().width(px(0.)).radius(px(height / 2.)).none())
-            .add(St::Display, css::InlineBlock)
+            .display(css::InlineBlock)
             .add(St::TextDecoration, css::None)
             // .add(St::Outline, css::None)
             .add(St::UserSelect, css::None)
@@ -762,7 +762,7 @@ impl Theme for Ant {
                 trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
             })
             .add(St::Cursor, cursor)
-            .add(St::Display, css::Flex)
+            .display(css::Flex)
             .justify_content(css::Center)
             .align_items(css::Center)
             .add(St::WebkitAppearance, css::None)
@@ -799,7 +799,7 @@ impl Theme for Ant {
             trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
         })
         .add(St::Cursor, cursor)
-        .add(St::Display, css::Flex)
+        .display(css::Flex)
         .gap(px(4.));
 
         (input_style, btn_style, lbl_style)
@@ -851,7 +851,7 @@ impl Theme for Ant {
                 trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
             })
             .add(St::Cursor, cursor)
-            .add(St::Display, css::Flex)
+            .display(css::Flex)
             .justify_content(css::Center)
             .align_items(css::Center)
             .add(St::WebkitAppearance, css::None)
@@ -882,7 +882,7 @@ impl Theme for Ant {
             trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
         })
         .add(St::Cursor, cursor)
-        .add(St::Display, css::Flex)
+        .display(css::Flex)
         .gap(px(4.));
 
         (input_style, btn_style, lbl_style)
@@ -917,7 +917,7 @@ impl Theme for Ant {
             .transition(|trans| {
                 trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
             })
-            .add(St::Display, css::Flex)
+            .display(css::Flex)
             .align_items(css::Center)
             .justify_content(css::Center)
             .padding(|p| p.y(px(4.)).x(px(11.)))
