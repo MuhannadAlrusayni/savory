@@ -13,8 +13,15 @@ pub mod transition;
 pub mod unit;
 
 pub use self::{
-    background::Background, border::Border, color::Color, common::*, gap::Gap, margin::Margin,
-    padding::Padding, size::Size, transition::Transition,
+    background::Background,
+    border::Border,
+    color::{Color, Opacity},
+    common::*,
+    gap::Gap,
+    margin::Margin,
+    padding::Padding,
+    size::Size,
+    transition::Transition,
 };
 
 pub use seed::{
@@ -49,7 +56,7 @@ macro simple_css_props( $( $fn_ident:ident($prop_ty:ty) $(,)? )* ) {
 }
 
 simple_css_props! {
-    color(Color), gap(Gap), flex_wrap(flexbox::Wrap), flex_basis(flexbox::Basis),
+    color(Color), opacity(Opacity), gap(Gap), flex_wrap(flexbox::Wrap), flex_basis(flexbox::Basis),
     flex_direction(flexbox::Direction), justify_content(box_align::JustifyContent),
     align_content(box_align::AlignContent), align_items(box_align::AlignItems),
     justify_self(box_align::JustifySelf), align_self(box_align::AlignSelf),

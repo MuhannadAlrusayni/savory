@@ -366,3 +366,12 @@ impl ToStyle for Color {
         Style::new().add(St::Color, self)
     }
 }
+
+#[derive(Clone, Copy, Debug, PartialEq, From)]
+pub struct Opacity(f32);
+
+impl ToStyle for Opacity {
+    fn to_style(&self) -> Style {
+        Style::new().add(St::Opacity, self.0)
+    }
+}
