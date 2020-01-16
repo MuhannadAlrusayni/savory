@@ -4,6 +4,7 @@ pub mod color;
 pub mod common;
 // pub mod event;
 pub mod box_align;
+pub mod cursor;
 pub mod display;
 pub mod flexbox;
 pub mod gap;
@@ -20,6 +21,7 @@ pub use self::{
     border::Border,
     color::{Color, Opacity},
     common::*,
+    cursor::Cursor,
     display::Display,
     gap::Gap,
     margin::Margin,
@@ -66,7 +68,7 @@ simple_css_props! {
     flex_direction(flexbox::Direction), justify_content(box_align::JustifyContent),
     align_content(box_align::AlignContent), align_items(box_align::AlignItems),
     justify_self(box_align::JustifySelf), align_self(box_align::AlignSelf), display(Display),
-    visibility(Visibility),
+    visibility(Visibility), cursor(Cursor),
 }
 
 css_props! {
