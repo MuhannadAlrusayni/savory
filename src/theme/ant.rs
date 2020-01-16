@@ -623,11 +623,10 @@ impl Theme for Ant {
 
         let size = css::Size::default().height(px(32.));
 
-        let cursor = if btn.is_disabled() {
-            "not-allowed"
-        } else {
-            "pointer"
-        };
+        let cursor = btn
+            .is_disabled()
+            .then(|| -> css::Cursor { css::NotAllowed.into() })
+            .unwrap_or_else(|| css::Pointer.into());
 
         match btn.kind {
             Some(button::Kind::Normal) | None => self.button_normal(btn),
@@ -643,7 +642,7 @@ impl Theme for Ant {
         })
         .add(St::TextDecoration, css::None)
         .add(St::Outline, css::None)
-        .add(St::Cursor, cursor)
+        .cursor(cursor)
         .add(St::UserSelect, css::None)
         .add(St::FontSize, px(14.))
         .add(St::BoxSizing, css::BorderBox)
@@ -660,11 +659,10 @@ impl Theme for Ant {
         let top = 3. / 2.;
         let left = 3. / 2.;
 
-        let cursor = if switch.is_disabled() {
-            "not-allowed"
-        } else {
-            "pointer"
-        };
+        let cursor = switch
+            .is_disabled()
+            .then(|| -> css::Cursor { css::NotAllowed.into() })
+            .unwrap_or_else(|| css::Pointer.into());
 
         let bg_color = if switch.is_toggled() {
             self.brand(Variant::L500)
@@ -680,7 +678,7 @@ impl Theme for Ant {
 
         let bg_style = Style::default()
             .try_add(St::Opacity, opacity)
-            .add(St::Cursor, cursor)
+            .cursor(cursor)
             .position(|pos| pos.relative())
             .background(|b| b.color(bg_color))
             .transition(|trans| {
@@ -749,17 +747,16 @@ impl Theme for Ant {
             }
         };
 
-        let cursor = if checkbox.is_disabled() {
-            "not-allowed"
-        } else {
-            "pointer"
-        };
+        let cursor = checkbox
+            .is_disabled()
+            .then(|| -> css::Cursor { css::NotAllowed.into() })
+            .unwrap_or_else(|| css::Pointer.into());
 
         let input_style = Style::default()
             .transition(|trans| {
                 trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
             })
-            .add(St::Cursor, cursor)
+            .cursor(cursor)
             .display(css::Flex)
             .justify_content(css::Center)
             .align_items(css::Center)
@@ -772,7 +769,7 @@ impl Theme for Ant {
 
         let btn_style = if checkbox.is_toggled() {
             Style::default()
-                .add(St::Cursor, cursor)
+                .cursor(cursor)
                 .transition(|trans| {
                     trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
                 })
@@ -796,7 +793,7 @@ impl Theme for Ant {
         .transition(|trans| {
             trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
         })
-        .add(St::Cursor, cursor)
+        .cursor(cursor)
         .display(css::Flex)
         .gap(px(4.));
 
@@ -838,17 +835,16 @@ impl Theme for Ant {
             }
         };
 
-        let cursor = if radio.is_disabled() {
-            "not-allowed"
-        } else {
-            "pointer"
-        };
+        let cursor = radio
+            .is_disabled()
+            .then(|| -> css::Cursor { css::NotAllowed.into() })
+            .unwrap_or_else(|| css::Pointer.into());
 
         let input_style = Style::default()
             .transition(|trans| {
                 trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
             })
-            .add(St::Cursor, cursor)
+            .cursor(cursor)
             .display(css::Flex)
             .justify_content(css::Center)
             .align_items(css::Center)
@@ -860,7 +856,7 @@ impl Theme for Ant {
 
         let btn_style = if radio.is_toggled() {
             Style::default()
-                .add(St::Cursor, cursor)
+                .cursor(cursor)
                 .size(|s| s.resize(0.6, 0.6))
                 .border(|b| b.none().radius(0.5))
                 .background(|b| b.color(fg))
@@ -879,7 +875,7 @@ impl Theme for Ant {
         .transition(|trans| {
             trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
         })
-        .add(St::Cursor, cursor)
+        .cursor(cursor)
         .display(css::Flex)
         .gap(px(4.));
 
@@ -905,11 +901,10 @@ impl Theme for Ant {
             ),
         };
 
-        let cursor = if entry.is_disabled() {
-            "not-allowed"
-        } else {
-            "initial"
-        };
+        let cursor = entry
+            .is_disabled()
+            .then(|| -> css::Cursor { css::NotAllowed.into() })
+            .unwrap_or_else(|| css::Initial.into());
 
         let container = Style::default()
             .transition(|trans| {
@@ -923,7 +918,7 @@ impl Theme for Ant {
             .background(|b| b.color(bg))
             .border(|b| b.solid().width(px(1.)).color(border).radius(px(4.)))
             .size(|s| s.width(1.))
-            .add(St::Cursor, cursor);
+            .cursor(cursor);
 
         let input = Style::default()
             .transition(|trans| {
@@ -934,7 +929,7 @@ impl Theme for Ant {
             .border(|b| b.none())
             .background(|bg| bg.transparent())
             .add(St::WebkitAppearance, css::None)
-            .add(St::Cursor, cursor);
+            .cursor(cursor);
 
         entry::StyleMap { container, input }
     }
