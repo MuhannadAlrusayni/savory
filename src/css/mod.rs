@@ -9,6 +9,7 @@ pub mod flexbox;
 pub mod gap;
 pub mod margin;
 pub mod padding;
+pub mod position;
 pub mod size;
 pub mod transition;
 pub mod unit;
@@ -22,6 +23,7 @@ pub use self::{
     gap::Gap,
     margin::Margin,
     padding::Padding,
+    position::Position,
     size::Size,
     transition::Transition,
 };
@@ -65,7 +67,7 @@ simple_css_props! {
 }
 
 css_props! {
-    background(Background), border(Border), margin(Margin), padding(Padding), size(Size), transition(Transition),
+    background(Background), border(Border), margin(Margin), padding(Padding), size(Size), transition(Transition), position(Position)
 }
 
 impl Style {

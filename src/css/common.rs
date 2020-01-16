@@ -25,9 +25,8 @@ css_values! {
     (SelfStart,"self-start"), (SafeSelfStart,"safe self-start"), (UnsafeSelfStart,"unsafe self-start"),
     (SelfEnd,"self-end"), (SafeSelfEnd,"safe self-end"), (UnsafeSelfEnd,"unsafe self-end"),
     (RepeatX, "repeat-x"), (RepeatY, "repeat-y"), (Repeat, "repeat"), (Space, "space"), (Round, "round"),
-    (NoRepeat, "no-repeat"), (Scroll, "scroll"), (Fixed, "fixed"), (Local, "local"), (BorderBox, "border-box"),
+    (NoRepeat, "no-repeat"), (Scroll, "scroll"), (Local, "local"), (BorderBox, "border-box"),
     (PaddingBox, "padding-box"), (ContentBox, "content-box"), (Cover, "cover"), (Contain, "contain"),
-    (Top, "top"), (Bottom, "bottom"), (Relative, "relative"), (Absolute, "absolute"),
     (Ease, "ease"), (Linear, "linear"), (EaseIn, "ease-in"), (EaseOut, "ease-out"), (EaseInOut, "ease-in-out"),
     (StepStart, "step-start"), (StepEnd, "step-end"), (Inline, "inline"), (Block, "block"),
     (Contents, "contents"), (Flex, "flex"), (Grid, "grid"), (InlineBlock, "inline-block") (InlineFlex, "inline-flex"),
@@ -35,5 +34,6 @@ css_values! {
     (Table, "table"), (TableCaption, "table-caption"), (TableColumnGroup, "table-column-group"),
     (TableHeaderGroup, "table-header-group"), (TableFooterGroup, "table-footer-group"),
     (TableRowGroup, "table-row-group"), (TableCell, "table-cell"), (TableColumn, "table-column"),
-    (TableRow, "table-row"),
+    (TableRow, "table-row"), (Top, "top"), (Bottom, "bottom"), (Static, "static"), (Absolute, "absolute"),
+    (Fixed, "fixed"), (Relative, "relative"), (Sticky, "sticky"),
 }

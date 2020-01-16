@@ -681,7 +681,7 @@ impl Theme for Ant {
         let bg_style = Style::default()
             .try_add(St::Opacity, opacity)
             .add(St::Cursor, cursor)
-            .add(St::Position, css::Relative)
+            .position(|pos| pos.relative())
             .background(|b| b.color(bg_color))
             .transition(|trans| {
                 trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
@@ -701,9 +701,7 @@ impl Theme for Ant {
         };
 
         let btn_style = Style::default()
-            .add(St::Position, css::Absolute)
-            .add(St::Top, px(top))
-            .add(St::Left, px(left))
+            .position(|pos| pos.absolute().top(px(top)).left(px(left)))
             .try_add(St::Transform, translatex)
             .transition(|trans| {
                 trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
