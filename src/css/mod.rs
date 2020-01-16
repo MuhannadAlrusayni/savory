@@ -13,6 +13,7 @@ pub mod position;
 pub mod size;
 pub mod transition;
 pub mod unit;
+pub mod visibility;
 
 pub use self::{
     background::Background,
@@ -26,6 +27,7 @@ pub use self::{
     position::Position,
     size::Size,
     transition::Transition,
+    visibility::Visibility,
 };
 
 pub use seed::{
@@ -64,6 +66,7 @@ simple_css_props! {
     flex_direction(flexbox::Direction), justify_content(box_align::JustifyContent),
     align_content(box_align::AlignContent), align_items(box_align::AlignItems),
     justify_self(box_align::JustifySelf), align_self(box_align::AlignSelf), display(Display),
+    visibility(Visibility),
 }
 
 css_props! {

@@ -35,5 +35,5 @@ css_values! {
     (TableHeaderGroup, "table-header-group"), (TableFooterGroup, "table-footer-group"),
     (TableRowGroup, "table-row-group"), (TableCell, "table-cell"), (TableColumn, "table-column"),
     (TableRow, "table-row"), (Top, "top"), (Bottom, "bottom"), (Static, "static"), (Absolute, "absolute"),
-    (Fixed, "fixed"), (Relative, "relative"), (Sticky, "sticky"),
+    (Fixed, "fixed"), (Relative, "relative"), (Sticky, "sticky"), (Visible, "visible"), (Collapse, "collapse")
 }
