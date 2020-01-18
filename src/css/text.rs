@@ -253,7 +253,7 @@ impl TextDecoration {
             Self::Decoration { ref mut color, .. } => *color = Some(value.into()),
             _ => {
                 self = Self::Decoration {
-                    line: None,
+                    line: Some(val::None.into()),
                     color: Some(value.into()),
                     style: None,
                 }
@@ -267,7 +267,7 @@ impl TextDecoration {
             Self::Decoration { ref mut style, .. } => *style = Some(value.into()),
             _ => {
                 self = Self::Decoration {
-                    line: None,
+                    line: Some(val::None.into()),
                     color: None,
                     style: Some(value.into()),
                 }
