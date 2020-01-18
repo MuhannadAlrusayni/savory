@@ -1,5 +1,5 @@
 use crate::{
-    css::{
+    css::{ values as val,
         self, background::Background, border::Border, box_align::*, flexbox::*, gap::Gap,
         margin::Margin, padding::Padding, size::Size, unit::*,
     },
@@ -16,16 +16,16 @@ pub struct Flexbox<Msg: 'static> {
     pub items: Vec<Item<Msg>>,
     // properties
     #[rich(value_fns(take) = {
-        row = css::Row,
-        reversed_row = css::RowReverse,
-        column = css::Column,
-        reversed_column = css::ColumnReverse,
+        row = val::Row,
+        reversed_row = val::RowReverse,
+        column = val::Column,
+        reversed_column = val::ColumnReverse,
     })]
     pub direction: Option<Direction>,
     #[rich(value_fns(take) = {
-        wrap = css::Wrap,
-        no_wrap = css::NoWrap,
-        reversed_wrap = css::WrapReverse,
+        wrap = val::Wrap,
+        no_wrap = val::Nowrap,
+        reversed_wrap = val::WrapReverse,
     })]
     pub wrap: Option<Wrap>,
     #[rich(write(take))]
@@ -86,48 +86,48 @@ impl<Msg: 'static> Flexbox<Msg> {
     }
 
     pub fn normal(self) -> Self {
-        self.justify_content(css::Normal)
-            .align_content(css::Normal)
-            .align_items(css::Normal)
+        self.justify_content(val::Normal)
+            .align_content(val::Normal)
+            .align_items(val::Normal)
     }
 
     pub fn stretch(self) -> Self {
-        self.justify_content(css::Stretch)
-            .align_content(css::Stretch)
-            .align_items(css::Stretch)
+        self.justify_content(val::Stretch)
+            .align_content(val::Stretch)
+            .align_items(val::Stretch)
     }
 
     pub fn center(self) -> Self {
-        self.justify_content(css::Center)
-            .align_content(css::Center)
-            .align_items(css::Center)
+        self.justify_content(val::Center)
+            .align_content(val::Center)
+            .align_items(val::Center)
     }
 
     pub fn start(self) -> Self {
-        self.justify_content(css::Start)
-            .align_content(css::Start)
-            .align_items(css::Start)
+        self.justify_content(val::Start)
+            .align_content(val::Start)
+            .align_items(val::Start)
     }
 
     pub fn end(self) -> Self {
-        self.justify_content(css::End)
-            .align_content(css::End)
-            .align_items(css::End)
+        self.justify_content(val::End)
+            .align_content(val::End)
+            .align_items(val::End)
     }
 
     pub fn space_between(self) -> Self {
-        self.justify_content(css::SpaceBetween)
-            .align_content(css::SpaceBetween)
+        self.justify_content(val::SpaceBetween)
+            .align_content(val::SpaceBetween)
     }
 
     pub fn space_around(self) -> Self {
-        self.justify_content(css::SpaceAround)
-            .align_content(css::SpaceAround)
+        self.justify_content(val::SpaceAround)
+            .align_content(val::SpaceAround)
     }
 
     pub fn space_evenly(self) -> Self {
-        self.justify_content(css::SpaceEvenly)
-            .align_content(css::SpaceEvenly)
+        self.justify_content(val::SpaceEvenly)
+            .align_content(val::SpaceEvenly)
     }
 
     pub fn full_size(self) -> Self {
@@ -167,12 +167,12 @@ pub struct Item<Msg: 'static> {
     #[rich(write(take))]
     pub basis: Option<Basis>,
     #[rich(value_fns(take) = {
-        auto = css::Auto,
-        normal = css::Normal,
-        stretch = css::Stretch,
-        center = css::Center,
-        start = css::Start,
-        end = css::End,
+        auto = val::Auto,
+        normal = val::Normal,
+        stretch = val::Stretch,
+        center = val::Center,
+        start = val::Start,
+        end = val::End,
     })]
     pub align_self: Option<AlignSelf>,
     #[rich(write(take, style = compose))]

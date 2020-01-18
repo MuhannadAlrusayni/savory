@@ -1,85 +1,85 @@
-use crate::css::{self, St, Style, ToStyle};
+use crate::css::{self, values as val, St, Style, ToStyle};
 
 #[derive(Clone, Copy, PartialEq, Eq, Display, From)]
 pub enum Cursor {
     #[from]
-    Alias(css::Alias),
+    Alias(val::Alias),
     #[from]
-    AllScroll(css::AllScroll),
+    AllScroll(val::AllScroll),
     #[from]
-    Auto(css::Auto),
+    Auto(val::Auto),
     #[from]
-    Cell(css::Cell),
+    Cell(val::Cell),
     #[from]
-    ContextMenu(css::ContextMenu),
+    ContextMenu(val::ContextMenu),
     #[from]
-    ColResize(css::ColResize),
+    ColResize(val::ColResize),
     #[from]
-    Copy(css::Copy),
+    Copy(val::Copy),
     #[from]
-    Crosshair(css::Crosshair),
+    Crosshair(val::Crosshair),
     #[from]
-    Default(css::Default),
+    Default(val::Default),
     #[from]
-    EResize(css::EResize),
+    EResize(val::EResize),
     #[from]
-    EwResize(css::EwResize),
+    EwResize(val::EwResize),
     #[from]
-    Grab(css::Grab),
+    Grab(val::Grab),
     #[from]
-    Grabbing(css::Grabbing),
+    Grabbing(val::Grabbing),
     #[from]
-    Help(css::Help),
+    Help(val::Help),
     #[from]
-    Move(css::Move),
+    Move(val::Move),
     #[from]
-    NResize(css::NResize),
+    NResize(val::NResize),
     #[from]
-    NeResize(css::NeResize),
+    NeResize(val::NeResize),
     #[from]
-    NeswResize(css::NeswResize),
+    NeswResize(val::NeswResize),
     #[from]
-    NsResize(css::NsResize),
+    NsResize(val::NsResize),
     #[from]
-    NwResize(css::NwResize),
+    NwResize(val::NwResize),
     #[from]
-    NwseResize(css::NwseResize),
+    NwseResize(val::NwseResize),
     #[from]
-    NoDrop(css::NoDrop),
+    NoDrop(val::NoDrop),
     #[from]
-    None(css::None),
+    None(val::None),
     #[from]
-    NotAllowed(css::NotAllowed),
+    NotAllowed(val::NotAllowed),
     #[from]
-    Pointer(css::Pointer),
+    Pointer(val::Pointer),
     #[from]
-    Progress(css::Progress),
+    Progress(val::Progress),
     #[from]
-    RowResize(css::RowResize),
+    RowResize(val::RowResize),
     #[from]
-    SResize(css::SResize),
+    SResize(val::SResize),
     #[from]
-    SeResize(css::SeResize),
+    SeResize(val::SeResize),
     #[from]
-    SwResize(css::SwResize),
+    SwResize(val::SwResize),
     #[from]
-    Text(css::Text),
+    Text(val::Text),
     // TODO: Handle Url value
     // Url(Vec<String>),
     #[from]
-    VerticalText(css::VerticalText),
+    VerticalText(val::VerticalText),
     #[from]
-    WResize(css::WResize),
+    WResize(val::WResize),
     #[from]
-    Wait(css::Wait),
+    Wait(val::Wait),
     #[from]
-    ZoomIn(css::ZoomIn),
+    ZoomIn(val::ZoomIn),
     #[from]
-    ZoomOut(css::ZoomOut),
+    ZoomOut(val::ZoomOut),
     #[from]
-    Initial(css::Initial),
+    Initial(val::Initial),
     #[from]
-    Inherit(css::Inherit),
+    Inherit(val::Inherit),
 }
 
 impl ToStyle for Cursor {

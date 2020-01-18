@@ -1,17 +1,17 @@
-use crate::css::{self, unit::*, St, Style, ToStyle};
+use crate::css::{self, values as val, unit::*, St, Style, ToStyle};
 
 #[derive(Clone, Copy, PartialEq, Eq, Display, From)]
 pub enum Visibility {
     #[from]
-    Visible(css::Visible),
+    Visible(val::Visible),
     #[from]
-    Hidden(css::Hidden),
+    Hidden(val::Hidden),
     #[from]
-    Collapse(css::Collapse),
+    Collapse(val::Collapse),
     #[from]
-    Initial(css::Initial),
+    Initial(val::Initial),
     #[from]
-    Inherit(css::Inherit),
+    Inherit(val::Inherit),
 }
 
 impl ToStyle for Visibility {

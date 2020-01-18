@@ -1,14 +1,14 @@
 pub use super::box_align::{JustifyContent, AlignItems, AlignContent, AlignSelf};
-use crate::css::{St, ToStyle, Style, unit::*, self};
+use crate::css::{St, values as val, ToStyle, Style, unit::*, self};
 
 #[derive(Clone, Debug, Copy, PartialEq, Display, From)]
 pub enum Basis {
     #[from]
-    Content(css::Content),
+    Content(val::Content),
     #[from]
-    Auto(css::Auto),
+    Auto(val::Auto),
     #[from]
-    Inherit(css::Inherit),
+    Inherit(val::Inherit),
     #[from]
     Em(Em),
     #[from]
@@ -62,13 +62,13 @@ impl ToStyle for Basis {
 #[derive(Clone, Copy, PartialEq, Eq, Display, From)]
 pub enum Direction {
     #[from]
-    Row(css::Row),
+    Row(val::Row),
     #[from]
-    RowReverse(css::RowReverse),
+    RowReverse(val::RowReverse),
     #[from]
-    Column(css::Column),
+    Column(val::Column),
     #[from]
-    ColumnReverse(css::ColumnReverse),
+    ColumnReverse(val::ColumnReverse),
 }
 
 impl ToStyle for Direction {
@@ -80,11 +80,11 @@ impl ToStyle for Direction {
 #[derive(Clone, Copy, PartialEq, Eq, Display, From)]
 pub enum Wrap {
     #[from]
-    Wrap(css::Wrap),
+    Wrap(val::Wrap),
     #[from]
-    NoWrap(css::NoWrap),
+    Nowrap(val::Nowrap),
     #[from]
-    WrapReverse(css::WrapReverse),
+    WrapReverse(val::WrapReverse),
 }
 
 impl ToStyle for Wrap {

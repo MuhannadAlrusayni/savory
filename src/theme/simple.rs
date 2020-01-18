@@ -91,7 +91,7 @@ impl Theme for Simple {
     fn flexbox<PMsg: 'static>(&self, flex: &Flexbox<PMsg>) -> Style {
         // flex container style
         Style::default()
-            .add(St::Display, css::Flex)
+            .add(St::Display, val::Flex)
             .try_merge(flex.direction.as_ref())
             .try_merge(flex.wrap.as_ref())
             .try_merge(flex.justify_content.as_ref())
@@ -154,20 +154,20 @@ impl Theme for Simple {
             (false, false, false) => (bg_color, text_color),
         };
 
-        let background = css::Background::default()
+        let background = val::Background::default()
             .color(bg_color);
 
-        let border = css::Border::default()
+        let border = val::Border::default()
             .color(bg_color)
             .width(px(1.))
             .solid()
             .radius(px(4.));
 
-        let padding = css::Padding::default()
+        let padding = val::Padding::default()
             .x(px(12.))
             .y(px(4.));
 
-        let size = css::Size::default()
+        let size = val::Size::default()
             .height(px(34.));
 
         let style = &btn.style;

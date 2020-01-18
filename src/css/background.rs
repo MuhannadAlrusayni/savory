@@ -1,4 +1,4 @@
-use crate::css::{self, color::Color, unit::*, St, ToStyle};
+use crate::css::{self, values as val, color::Color, unit::*, St, ToStyle};
 use derive_rich::Rich;
 
 // TODO: use css types in this module enums
@@ -8,58 +8,58 @@ pub struct Background {
     #[rich(read, write(take))]
     color: Option<Color>,
     // TODO: support multiple images
-    #[rich(read, write(take), value_fns(take) = { empty = css::None })]
+    #[rich(read, write(take), value_fns(take) = { empty = val::None })]
     image: Option<Image>,
     #[rich(value_fns(take) = {
-        repeat_x = css::RepeatX,
-        repeat_y = css::RepeatY,
-        repeat = css::Repeat,
-        repeat_with_space = css::Space,
-        repeat_round = css::Round,
-        no_repeat = css::NoRepeat,
-        initial_repeat = css::Initial,
-        inherit_repeat = css::Inherit,
+        repeat_x = val::RepeatX,
+        repeat_y = val::RepeatY,
+        repeat = val::Repeat,
+        repeat_with_space = val::Space,
+        repeat_round = val::Round,
+        no_repeat = val::NoRepeat,
+        initial_repeat = val::Initial,
+        inherit_repeat = val::Inherit,
     })]
     repeat: Option<Repeat>,
     #[rich(value_fns(take) = {
-        scroll = css::Scroll,
-        fixed = css::Fixed,
-        local = css::Local,
-        initial_attachment = css::Initial,
-        inherit_attachment = css::Inherit,
+        scroll = val::Scroll,
+        fixed = val::Fixed,
+        local = val::Local,
+        initial_attachment = val::Initial,
+        inherit_attachment = val::Inherit,
     })]
     attachment: Option<Attachment>,
     #[rich(read, write(take), value_fns(take) = {
-        left_top = (Horizontal::from(css::Left), css::Top.into()),
-        center_top = (Horizontal::from(css::Center), css::Top.into()),
-        right_top = (Horizontal::from(css::Right), css::Top.into()),
-        left_center = (Horizontal::from(css::Left), css::Center.into()),
-        center = (Horizontal::from(css::Center), css::Center.into()),
-        right_center = (Horizontal::from(css::Right), css::Center.into()),
-        left_bottom = (Horizontal::from(css::Left), css::Bottom.into()),
-        center_bottom = (Horizontal::from(css::Center), css::Bottom.into()),
-        right_bottom = (Horizontal::from(css::Right), css::Bottom.into()),
+        left_top = (Horizontal::from(val::Left), val::Top.into()),
+        center_top = (Horizontal::from(val::Center), val::Top.into()),
+        right_top = (Horizontal::from(val::Right), val::Top.into()),
+        left_center = (Horizontal::from(val::Left), val::Center.into()),
+        center = (Horizontal::from(val::Center), val::Center.into()),
+        right_center = (Horizontal::from(val::Right), val::Center.into()),
+        left_bottom = (Horizontal::from(val::Left), val::Bottom.into()),
+        center_bottom = (Horizontal::from(val::Center), val::Bottom.into()),
+        right_bottom = (Horizontal::from(val::Right), val::Bottom.into()),
     })]
     position: Option<Position>,
     #[rich(value_fns(take) = {
-        fill_under_border = css::BorderBox,
-        fill_inside_border = css::PaddingBox,
-        fill_under_content = css::ContentBox,
+        fill_under_border = val::BorderBox,
+        fill_inside_border = val::PaddingBox,
+        fill_under_content = val::ContentBox,
     })]
     clip: Option<Clip>,
     #[rich(value_fns(take) = {
-        image_fill_under_border = css::BorderBox,
-        image_inside_border = css::PaddingBox,
-        image_under_content = css::ContentBox,
+        image_fill_under_border = val::BorderBox,
+        image_inside_border = val::PaddingBox,
+        image_under_content = val::ContentBox,
     })]
     origin: Option<Origin>,
     #[rich(read, write(take), value_fns(take) = {
         full = (1.0, 1.0),
         half = (0.5, 0.5),
         quarter = (0.25, 0.25),
-        auto_size = css::Auto,
-        cover = css::Cover,
-        contain = css::Contain,
+        auto_size = val::Auto,
+        cover = val::Cover,
+        contain = val::Contain,
     })]
     size: Option<Size>,
 }
@@ -84,7 +84,7 @@ impl Background {
 #[derive(Clone, Debug, PartialEq, Display, From)]
 pub enum Image {
     #[from]
-    None(css::None),
+    None(val::None),
     #[display(fmt = "url({})", _0)]
     #[from(forward)]
     Url(String),
@@ -93,35 +93,35 @@ pub enum Image {
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum Repeat {
     #[from]
-    RepeatX(css::RepeatX),
+    RepeatX(val::RepeatX),
     #[from]
-    RepeatY(css::RepeatY),
+    RepeatY(val::RepeatY),
     #[from]
-    Repeat(css::Repeat),
+    Repeat(val::Repeat),
     #[from]
-    Space(css::Space),
+    Space(val::Space),
     #[from]
-    Round(css::Round),
+    Round(val::Round),
     #[from]
-    NoRepeat(css::NoRepeat),
+    NoRepeat(val::NoRepeat),
     #[from]
-    Initial(css::Initial),
+    Initial(val::Initial),
     #[from]
-    Inherit(css::Inherit),
+    Inherit(val::Inherit),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum Attachment {
     #[from]
-    Scroll(css::Scroll),
+    Scroll(val::Scroll),
     #[from]
-    Fixed(css::Fixed),
+    Fixed(val::Fixed),
     #[from]
-    Local(css::Local),
+    Local(val::Local),
     #[from]
-    Initial(css::Initial),
+    Initial(val::Initial),
     #[from]
-    Inherit(css::Inherit),
+    Inherit(val::Inherit),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
@@ -176,21 +176,21 @@ fn display_helper(v: &Option<impl ToString>) -> String {
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum Horizontal {
     #[from]
-    Center(css::Center),
+    Center(val::Center),
     #[display(fmt = "{}{}", _0, "display_helper(_1)")]
-    Left(css::Left, Option<Length>),
+    Left(val::Left, Option<Length>),
     #[display(fmt = "{}{}", _0, "display_helper(_1)")]
-    Right(css::Right, Option<Length>),
+    Right(val::Right, Option<Length>),
 }
 
-impl From<css::Left> for Horizontal {
-    fn from(source: css::Left) -> Self {
+impl From<val::Left> for Horizontal {
+    fn from(source: val::Left) -> Self {
         Self::Left(source, None)
     }
 }
 
-impl From<css::Right> for Horizontal {
-    fn from(source: css::Right) -> Self {
+impl From<val::Right> for Horizontal {
+    fn from(source: val::Right) -> Self {
         Self::Right(source, None)
     }
 }
@@ -198,21 +198,21 @@ impl From<css::Right> for Horizontal {
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum Vertical {
     #[from]
-    Center(css::Center),
+    Center(val::Center),
     #[display(fmt = "{}{}", _0, "display_helper(_1)")]
-    Top(css::Top, Option<Length>),
+    Top(val::Top, Option<Length>),
     #[display(fmt = "{}{}", _0, "display_helper(_1)")]
-    Bottom(css::Bottom, Option<Length>),
+    Bottom(val::Bottom, Option<Length>),
 }
 
-impl From<css::Top> for Vertical {
-    fn from(source: css::Top) -> Self {
+impl From<val::Top> for Vertical {
+    fn from(source: val::Top) -> Self {
         Self::Top(source, None)
     }
 }
 
-impl From<css::Bottom> for Vertical {
-    fn from(source: css::Bottom) -> Self {
+impl From<val::Bottom> for Vertical {
+    fn from(source: val::Bottom) -> Self {
         Self::Bottom(source, None)
     }
 }
@@ -236,15 +236,15 @@ impl From<(f32, f32)> for Position {
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum Box {
     #[from]
-    BorderBox(css::BorderBox),
+    BorderBox(val::BorderBox),
     #[from]
-    PaddingBox(css::PaddingBox),
+    PaddingBox(val::PaddingBox),
     #[from]
-    ContentBox(css::ContentBox),
+    ContentBox(val::ContentBox),
     #[from]
-    Initial(css::Initial),
+    Initial(val::Initial),
     #[from]
-    Inherit(css::Inherit),
+    Inherit(val::Inherit),
 }
 
 pub type Clip = Box;
@@ -302,13 +302,13 @@ pub enum Size {
     #[display(fmt = "{} {}", _0, _1)]
     WidthHeight(LengthPercent, LengthPercent),
     #[from]
-    Auto(css::Auto),
+    Auto(val::Auto),
     #[from]
-    Cover(css::Cover),
+    Cover(val::Cover),
     #[from]
-    Contain(css::Contain),
+    Contain(val::Contain),
     #[from]
-    Initial(css::Initial),
+    Initial(val::Initial),
 }
 
 impl From<(f32, f32)> for Size {

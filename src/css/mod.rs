@@ -1,7 +1,7 @@
 pub mod background;
 pub mod border;
 pub mod color;
-pub mod common;
+pub mod values;
 // pub mod event;
 pub mod box_align;
 pub mod cursor;
@@ -12,6 +12,7 @@ pub mod margin;
 pub mod padding;
 pub mod position;
 pub mod size;
+pub mod text;
 pub mod transition;
 pub mod unit;
 pub mod visibility;
@@ -20,7 +21,6 @@ pub use self::{
     background::Background,
     border::Border,
     color::{Color, Opacity},
-    common::*,
     cursor::Cursor,
     display::Display,
     gap::Gap,
@@ -28,6 +28,7 @@ pub use self::{
     padding::Padding,
     position::Position,
     size::Size,
+    text::Text,
     transition::Transition,
     visibility::Visibility,
 };
@@ -38,7 +39,7 @@ pub use seed::{
 };
 use std::collections::HashMap;
 
-// TODO: add compose function for every css::* style (e.g. border(|border| ..))
+// TODO: add compose function for every val::* style (e.g. border(|border| ..))
 #[derive(Default, Debug, Clone)]
 pub struct Style(HashMap<St, String>);
 
@@ -72,7 +73,8 @@ simple_css_props! {
 }
 
 css_props! {
-    background(Background), border(Border), margin(Margin), padding(Padding), size(Size), transition(Transition), position(Position)
+    background(Background), border(Border), margin(Margin), padding(Padding), size(Size),
+    transition(Transition), position(Position), text(Text),
 }
 
 impl Style {

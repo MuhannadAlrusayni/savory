@@ -3,7 +3,7 @@ use crate::{
         self,
         color::Color,
         unit::{ms, px, rem, sec},
-        St, Style,
+        values as val, St, Style,
     },
     el::prelude::*,
     propertie::*,
@@ -565,7 +565,7 @@ impl Theme for Ant {
     fn flexbox<PMsg: 'static>(&self, flex: &Flexbox<PMsg>) -> Style {
         // flex container style
         Style::default()
-            .display(css::Flex)
+            .display(val::Flex)
             .try_merge(flex.direction.as_ref())
             .try_merge(flex.wrap.as_ref())
             .try_merge(flex.justify_content.as_ref())
@@ -625,8 +625,8 @@ impl Theme for Ant {
 
         let cursor = btn
             .is_disabled()
-            .then(|| -> css::Cursor { css::NotAllowed.into() })
-            .unwrap_or_else(|| css::Pointer.into());
+            .then(|| -> css::Cursor { val::NotAllowed.into() })
+            .unwrap_or_else(|| val::Pointer.into());
 
         match btn.kind {
             Some(button::Kind::Normal) | None => self.button_normal(btn),
@@ -640,15 +640,17 @@ impl Theme for Ant {
         .transition(|trans| {
             trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
         })
-        .add(St::TextDecoration, css::None)
-        .add(St::Outline, css::None)
+        .text(|t| {
+            t.decoration(|d| d.line(val::None))
+                .line_height(1.499)
+                .white_space(val::Nowrap)
+        })
+        .add(St::Outline, val::None)
         .cursor(cursor)
-        .add(St::UserSelect, css::None)
+        .add(St::UserSelect, val::None)
+        .add(St::BoxSizing, val::BorderBox)
         .add(St::FontSize, px(14.))
-        .add(St::BoxSizing, css::BorderBox)
-        .add(St::LineHeight, "1.499")
         .add(St::FontWeight, "400")
-        .add(St::WhiteSpace, css::NoWrap)
         .merge(&btn.style)
     }
 
@@ -661,8 +663,8 @@ impl Theme for Ant {
 
         let cursor = switch
             .is_disabled()
-            .then(|| -> css::Cursor { css::NotAllowed.into() })
-            .unwrap_or_else(|| css::Pointer.into());
+            .then(|| -> css::Cursor { val::NotAllowed.into() })
+            .unwrap_or_else(|| val::Pointer.into());
 
         let bg_color = if switch.is_toggled() {
             self.brand(Variant::L500)
@@ -685,11 +687,11 @@ impl Theme for Ant {
                 trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
             })
             .border(|b| b.transparent().width(px(0.)).radius(px(height / 2.)).none())
-            .display(css::InlineBlock)
-            .add(St::TextDecoration, css::None)
-            // .add(St::Outline, css::None)
-            .add(St::UserSelect, css::None)
-            .add(St::BoxSizing, css::BorderBox)
+            .display(val::InlineBlock)
+            .text(|t| t.decoration(|d| d.line(val::None)))
+            // .add(St::Outline, val::None)
+            .add(St::UserSelect, val::None)
+            .add(St::BoxSizing, val::BorderBox)
             .size(|s| s.height(px(height)).min_width(px(width)));
 
         let translatex = if switch.is_toggled() {
@@ -749,19 +751,19 @@ impl Theme for Ant {
 
         let cursor = checkbox
             .is_disabled()
-            .then(|| -> css::Cursor { css::NotAllowed.into() })
-            .unwrap_or_else(|| css::Pointer.into());
+            .then(|| -> css::Cursor { val::NotAllowed.into() })
+            .unwrap_or_else(|| val::Pointer.into());
 
         let input_style = Style::default()
             .transition(|trans| {
                 trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
             })
             .cursor(cursor)
-            .display(css::Flex)
-            .justify_content(css::Center)
-            .align_items(css::Center)
-            .add(St::WebkitAppearance, css::None)
-            // .add(St::Appearance, css::None)
+            .display(val::Flex)
+            .justify_content(val::Center)
+            .align_items(val::Center)
+            .add(St::WebkitAppearance, val::None)
+            // .add(St::Appearance, val::None)
             .size(|s| s.resize(px(16.), px(16.)))
             .border(|b| b.solid().width(px(1.)).color(border).radius(px(2.)))
             .background(|b| b.color(bg))
@@ -794,7 +796,7 @@ impl Theme for Ant {
             trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
         })
         .cursor(cursor)
-        .display(css::Flex)
+        .display(val::Flex)
         .gap(px(4.));
 
         (input_style, btn_style, lbl_style)
@@ -837,18 +839,18 @@ impl Theme for Ant {
 
         let cursor = radio
             .is_disabled()
-            .then(|| -> css::Cursor { css::NotAllowed.into() })
-            .unwrap_or_else(|| css::Pointer.into());
+            .then(|| -> css::Cursor { val::NotAllowed.into() })
+            .unwrap_or_else(|| val::Pointer.into());
 
         let input_style = Style::default()
             .transition(|trans| {
                 trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
             })
             .cursor(cursor)
-            .display(css::Flex)
-            .justify_content(css::Center)
-            .align_items(css::Center)
-            .add(St::WebkitAppearance, css::None)
+            .display(val::Flex)
+            .justify_content(val::Center)
+            .align_items(val::Center)
+            .add(St::WebkitAppearance, val::None)
             .color(fg)
             .size(|s| s.resize(px(16.), px(16.)))
             .border(|b| b.solid().width(px(1.)).color(border).radius(0.5))
@@ -876,7 +878,7 @@ impl Theme for Ant {
             trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
         })
         .cursor(cursor)
-        .display(css::Flex)
+        .display(val::Flex)
         .gap(px(4.));
 
         (input_style, btn_style, lbl_style)
@@ -903,16 +905,16 @@ impl Theme for Ant {
 
         let cursor = entry
             .is_disabled()
-            .then(|| -> css::Cursor { css::NotAllowed.into() })
-            .unwrap_or_else(|| css::Initial.into());
+            .then(|| -> css::Cursor { val::NotAllowed.into() })
+            .unwrap_or_else(|| val::Initial.into());
 
         let container = Style::default()
             .transition(|trans| {
                 trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
             })
-            .display(css::Flex)
-            .align_items(css::Center)
-            .justify_content(css::Center)
+            .display(val::Flex)
+            .align_items(val::Center)
+            .justify_content(val::Center)
             .padding(|p| p.y(px(4.)).x(px(11.)))
             .gap(px(4.))
             .background(|b| b.color(bg))
@@ -928,7 +930,7 @@ impl Theme for Ant {
             .color(self.primary_text(false))
             .border(|b| b.none())
             .background(|bg| bg.transparent())
-            .add(St::WebkitAppearance, css::None)
+            .add(St::WebkitAppearance, val::None)
             .cursor(cursor);
 
         entry::StyleMap { container, input }

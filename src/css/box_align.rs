@@ -1,59 +1,59 @@
-use crate::css::{St, self, ToStyle, Style};
+use crate::css::{St, values as val, self, ToStyle, Style};
 
 #[derive(Clone, Debug, Copy, PartialEq, Eq, Display, From)]
 pub enum JustifyContent {
     #[from]
-    Normal(css::Normal),
+    Normal(val::Normal),
     #[from]
-    SpaceBetween(css::SpaceBetween),
+    SpaceBetween(val::SpaceBetween),
     #[from]
-    SpaceAround(css::SpaceAround),
+    SpaceAround(val::SpaceAround),
     #[from]
-    SpaceEvenly(css::SpaceEvenly),
+    SpaceEvenly(val::SpaceEvenly),
     #[from]
-    Stretch(css::Stretch),
+    Stretch(val::Stretch),
     #[from]
-    Center(css::Center),
+    Center(val::Center),
     #[from]
-    SafeCenter(css::SafeCenter),
+    SafeCenter(val::SafeCenter),
     #[from]
-    UnsafeCenter(css::UnsafeCenter),
+    UnsafeCenter(val::UnsafeCenter),
     #[from]
-    Start(css::Start),
+    Start(val::Start),
     #[from]
-    SafeStart(css::SafeStart),
+    SafeStart(val::SafeStart),
     #[from]
-    UnsafeStart(css::UnsafeStart),
+    UnsafeStart(val::UnsafeStart),
     #[from]
-    End(css::End),
+    End(val::End),
     #[from]
-    SafeEnd(css::SafeEnd),
+    SafeEnd(val::SafeEnd),
     #[from]
-    UnsafeEnd(css::UnsafeEnd),
+    UnsafeEnd(val::UnsafeEnd),
     #[from]
-    FlexStart(css::FlexStart),
+    FlexStart(val::FlexStart),
     #[from]
-    SafeFlexStart(css::SafeFlexStart),
+    SafeFlexStart(val::SafeFlexStart),
     #[from]
-    UnsafeFlexStart(css::UnsafeFlexStart),
+    UnsafeFlexStart(val::UnsafeFlexStart),
     #[from]
-    FlexEnd(css::FlexEnd),
+    FlexEnd(val::FlexEnd),
     #[from]
-    SafeFlexEnd(css::SafeFlexEnd),
+    SafeFlexEnd(val::SafeFlexEnd),
     #[from]
-    UnsafeFlexEnd(css::UnsafeFlexEnd),
+    UnsafeFlexEnd(val::UnsafeFlexEnd),
     #[from]
-    Left(css::Left),
+    Left(val::Left),
     #[from]
-    SafeLeft(css::SafeLeft),
+    SafeLeft(val::SafeLeft),
     #[from]
-    UnsafeLeft(css::UnsafeLeft),
+    UnsafeLeft(val::UnsafeLeft),
     #[from]
-    Right(css::Right),
+    Right(val::Right),
     #[from]
-    SafeRight(css::SafeRight),
+    SafeRight(val::SafeRight),
     #[from]
-    UnsafeRight(css::UnsafeRight),
+    UnsafeRight(val::UnsafeRight),
 }
 
 impl ToStyle for JustifyContent {
@@ -65,51 +65,51 @@ impl ToStyle for JustifyContent {
 #[derive(Clone, Debug, Copy, PartialEq, Eq, Display, From)]
 pub enum AlignContent {
     #[from]
-    Normal(css::Normal),
+    Normal(val::Normal),
     #[from]
-    Baseline(css::Baseline),
+    Baseline(val::Baseline),
     #[from]
-    FirstBaseline(css::FirstBaseline),
+    FirstBaseline(val::FirstBaseline),
     #[from]
-    LastBaseline(css::LastBaseline),
+    LastBaseline(val::LastBaseline),
     #[from]
-    SpaceBetween(css::SpaceBetween),
+    SpaceBetween(val::SpaceBetween),
     #[from]
-    SpaceAround(css::SpaceAround),
+    SpaceAround(val::SpaceAround),
     #[from]
-    SpaceEvenly(css::SpaceEvenly),
+    SpaceEvenly(val::SpaceEvenly),
     #[from]
-    Stretch(css::Stretch),
+    Stretch(val::Stretch),
     #[from]
-    Center(css::Center),
+    Center(val::Center),
     #[from]
-    SafeCenter(css::SafeCenter),
+    SafeCenter(val::SafeCenter),
     #[from]
-    UnsafeCenter(css::UnsafeCenter),
+    UnsafeCenter(val::UnsafeCenter),
     #[from]
-    Start(css::Start),
+    Start(val::Start),
     #[from]
-    SafeStart(css::SafeStart),
+    SafeStart(val::SafeStart),
     #[from]
-    UnsafeStart(css::UnsafeStart),
+    UnsafeStart(val::UnsafeStart),
     #[from]
-    End(css::End),
+    End(val::End),
     #[from]
-    SafeEnd(css::SafeEnd),
+    SafeEnd(val::SafeEnd),
     #[from]
-    UnsafeEnd(css::UnsafeEnd),
+    UnsafeEnd(val::UnsafeEnd),
     #[from]
-    FlexStart(css::FlexStart),
+    FlexStart(val::FlexStart),
     #[from]
-    SafeFlexStart(css::SafeFlexStart),
+    SafeFlexStart(val::SafeFlexStart),
     #[from]
-    UnsafeFlexStart(css::UnsafeFlexStart),
+    UnsafeFlexStart(val::UnsafeFlexStart),
     #[from]
-    FlexEnd(css::FlexEnd),
+    FlexEnd(val::FlexEnd),
     #[from]
-    SafeFlexEnd(css::SafeFlexEnd),
+    SafeFlexEnd(val::SafeFlexEnd),
     #[from]
-    UnsafeFlexEnd(css::UnsafeFlexEnd),
+    UnsafeFlexEnd(val::UnsafeFlexEnd),
 }
 
 impl ToStyle for AlignContent {
@@ -121,57 +121,57 @@ impl ToStyle for AlignContent {
 #[derive(Clone, Debug, Copy, PartialEq, Eq, Display, From)]
 pub enum AlignItems {
     #[from]
-    Normal(css::Normal),
+    Normal(val::Normal),
     #[from]
-    Stretch(css::Stretch),
+    Stretch(val::Stretch),
     #[from]
-    Baseline(css::Baseline),
+    Baseline(val::Baseline),
     #[from]
-    FirstBaseline(css::FirstBaseline),
+    FirstBaseline(val::FirstBaseline),
     #[from]
-    LastBaseline(css::LastBaseline),
+    LastBaseline(val::LastBaseline),
     #[from]
-    Center(css::Center),
+    Center(val::Center),
     #[from]
-    SafeCenter(css::SafeCenter),
+    SafeCenter(val::SafeCenter),
     #[from]
-    UnsafeCenter(css::UnsafeCenter),
+    UnsafeCenter(val::UnsafeCenter),
     #[from]
-    Start(css::Start),
+    Start(val::Start),
     #[from]
-    SafeStart(css::SafeStart),
+    SafeStart(val::SafeStart),
     #[from]
-    UnsafeStart(css::UnsafeStart),
+    UnsafeStart(val::UnsafeStart),
     #[from]
-    End(css::End),
+    End(val::End),
     #[from]
-    SafeEnd(css::SafeEnd),
+    SafeEnd(val::SafeEnd),
     #[from]
-    UnsafeEnd(css::UnsafeEnd),
+    UnsafeEnd(val::UnsafeEnd),
     #[from]
-    SelfStart(css::SelfStart),
+    SelfStart(val::SelfStart),
     #[from]
-    SafeSelfStart(css::SafeSelfStart),
+    SafeSelfStart(val::SafeSelfStart),
     #[from]
-    UnsafeSelfStart(css::UnsafeSelfStart),
+    UnsafeSelfStart(val::UnsafeSelfStart),
     #[from]
-    SelfEnd(css::SelfEnd),
+    SelfEnd(val::SelfEnd),
     #[from]
-    SafeSelfEnd(css::SafeSelfEnd),
+    SafeSelfEnd(val::SafeSelfEnd),
     #[from]
-    UnsafeSelfEnd(css::UnsafeSelfEnd),
+    UnsafeSelfEnd(val::UnsafeSelfEnd),
     #[from]
-    FlexStart(css::FlexStart),
+    FlexStart(val::FlexStart),
     #[from]
-    SafeFlexStart(css::SafeFlexStart),
+    SafeFlexStart(val::SafeFlexStart),
     #[from]
-    UnsafeFlexStart(css::UnsafeFlexStart),
+    UnsafeFlexStart(val::UnsafeFlexStart),
     #[from]
-    FlexEnd(css::FlexEnd),
+    FlexEnd(val::FlexEnd),
     #[from]
-    SafeFlexEnd(css::SafeFlexEnd),
+    SafeFlexEnd(val::SafeFlexEnd),
     #[from]
-    UnsafeFlexEnd(css::UnsafeFlexEnd),
+    UnsafeFlexEnd(val::UnsafeFlexEnd),
 }
 
 impl ToStyle for AlignItems {
@@ -183,71 +183,71 @@ impl ToStyle for AlignItems {
 #[derive(Clone, Debug, Copy, PartialEq, Eq, Display, From)]
 pub enum JustifySelf {
     #[from]
-    Auto(css::Auto),
+    Auto(val::Auto),
     #[from]
-    Normal(css::Normal),
+    Normal(val::Normal),
     #[from]
-    Stretch(css::Stretch),
+    Stretch(val::Stretch),
     #[from]
-    Baseline(css::Baseline),
+    Baseline(val::Baseline),
     #[from]
-    FirstBaseline(css::FirstBaseline),
+    FirstBaseline(val::FirstBaseline),
     #[from]
-    LastBaseline(css::LastBaseline),
+    LastBaseline(val::LastBaseline),
     #[from]
-    Center(css::Center),
+    Center(val::Center),
     #[from]
-    SafeCenter(css::SafeCenter),
+    SafeCenter(val::SafeCenter),
     #[from]
-    UnsafeCenter(css::UnsafeCenter),
+    UnsafeCenter(val::UnsafeCenter),
     #[from]
-    Start(css::Start),
+    Start(val::Start),
     #[from]
-    SafeStart(css::SafeStart),
+    SafeStart(val::SafeStart),
     #[from]
-    UnsafeStart(css::UnsafeStart),
+    UnsafeStart(val::UnsafeStart),
     #[from]
-    End(css::End),
+    End(val::End),
     #[from]
-    SafeEnd(css::SafeEnd),
+    SafeEnd(val::SafeEnd),
     #[from]
-    UnsafeEnd(css::UnsafeEnd),
+    UnsafeEnd(val::UnsafeEnd),
     #[from]
-    SelfStart(css::SelfStart),
+    SelfStart(val::SelfStart),
     #[from]
-    SafeSelfStart(css::SafeSelfStart),
+    SafeSelfStart(val::SafeSelfStart),
     #[from]
-    UnsafeSelfStart(css::UnsafeSelfStart),
+    UnsafeSelfStart(val::UnsafeSelfStart),
     #[from]
-    SelfEnd(css::SelfEnd),
+    SelfEnd(val::SelfEnd),
     #[from]
-    SafeSelfEnd(css::SafeSelfEnd),
+    SafeSelfEnd(val::SafeSelfEnd),
     #[from]
-    UnsafeSelfEnd(css::UnsafeSelfEnd),
+    UnsafeSelfEnd(val::UnsafeSelfEnd),
     #[from]
-    FlexStart(css::FlexStart),
+    FlexStart(val::FlexStart),
     #[from]
-    SafeFlexStart(css::SafeFlexStart),
+    SafeFlexStart(val::SafeFlexStart),
     #[from]
-    UnsafeFlexStart(css::UnsafeFlexStart),
+    UnsafeFlexStart(val::UnsafeFlexStart),
     #[from]
-    FlexEnd(css::FlexEnd),
+    FlexEnd(val::FlexEnd),
     #[from]
-    SafeFlexEnd(css::SafeFlexEnd),
+    SafeFlexEnd(val::SafeFlexEnd),
     #[from]
-    UnsafeFlexEnd(css::UnsafeFlexEnd),
+    UnsafeFlexEnd(val::UnsafeFlexEnd),
     #[from]
-    Left(css::Left),
+    Left(val::Left),
     #[from]
-    SafeLeft(css::SafeLeft),
+    SafeLeft(val::SafeLeft),
     #[from]
-    UnsafeLeft(css::UnsafeLeft),
+    UnsafeLeft(val::UnsafeLeft),
     #[from]
-    Right(css::Right),
+    Right(val::Right),
     #[from]
-    SafeRight(css::SafeRight),
+    SafeRight(val::SafeRight),
     #[from]
-    UnsafeRight(css::UnsafeRight),
+    UnsafeRight(val::UnsafeRight),
 }
 
 impl ToStyle for JustifySelf {
@@ -259,59 +259,59 @@ impl ToStyle for JustifySelf {
 #[derive(Clone, Debug, Copy, PartialEq, Eq, Display, From)]
 pub enum AlignSelf {
     #[from]
-    Auto(css::Auto),
+    Auto(val::Auto),
     #[from]
-    Normal(css::Normal),
+    Normal(val::Normal),
     #[from]
-    Stretch(css::Stretch),
+    Stretch(val::Stretch),
     #[from]
-    Baseline(css::Baseline),
+    Baseline(val::Baseline),
     #[from]
-    FirstBaseline(css::FirstBaseline),
+    FirstBaseline(val::FirstBaseline),
     #[from]
-    LastBaseline(css::LastBaseline),
+    LastBaseline(val::LastBaseline),
     #[from]
-    Center(css::Center),
+    Center(val::Center),
     #[from]
-    SafeCenter(css::SafeCenter),
+    SafeCenter(val::SafeCenter),
     #[from]
-    UnsafeCenter(css::UnsafeCenter),
+    UnsafeCenter(val::UnsafeCenter),
     #[from]
-    Start(css::Start),
+    Start(val::Start),
     #[from]
-    SafeStart(css::SafeStart),
+    SafeStart(val::SafeStart),
     #[from]
-    UnsafeStart(css::UnsafeStart),
+    UnsafeStart(val::UnsafeStart),
     #[from]
-    End(css::End),
+    End(val::End),
     #[from]
-    SafeEnd(css::SafeEnd),
+    SafeEnd(val::SafeEnd),
     #[from]
-    UnsafeEnd(css::UnsafeEnd),
+    UnsafeEnd(val::UnsafeEnd),
     #[from]
-    SelfStart(css::SelfStart),
+    SelfStart(val::SelfStart),
     #[from]
-    SafeSelfStart(css::SafeSelfStart),
+    SafeSelfStart(val::SafeSelfStart),
     #[from]
-    UnsafeSelfStart(css::UnsafeSelfStart),
+    UnsafeSelfStart(val::UnsafeSelfStart),
     #[from]
-    SelfEnd(css::SelfEnd),
+    SelfEnd(val::SelfEnd),
     #[from]
-    SafeSelfEnd(css::SafeSelfEnd),
+    SafeSelfEnd(val::SafeSelfEnd),
     #[from]
-    UnsafeSelfEnd(css::UnsafeSelfEnd),
+    UnsafeSelfEnd(val::UnsafeSelfEnd),
     #[from]
-    FlexStart(css::FlexStart),
+    FlexStart(val::FlexStart),
     #[from]
-    SafeFlexStart(css::SafeFlexStart),
+    SafeFlexStart(val::SafeFlexStart),
     #[from]
-    UnsafeFlexStart(css::UnsafeFlexStart),
+    UnsafeFlexStart(val::UnsafeFlexStart),
     #[from]
-    FlexEnd(css::FlexEnd),
+    FlexEnd(val::FlexEnd),
     #[from]
-    SafeFlexEnd(css::SafeFlexEnd),
+    SafeFlexEnd(val::SafeFlexEnd),
     #[from]
-    UnsafeFlexEnd(css::UnsafeFlexEnd),
+    UnsafeFlexEnd(val::UnsafeFlexEnd),
 }
 
 impl ToStyle for AlignSelf {

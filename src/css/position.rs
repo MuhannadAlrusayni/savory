@@ -1,16 +1,16 @@
-use crate::css::{self, unit::*, St, Style, ToStyle};
+use crate::css::{self, values as val, unit::*, St, Style, ToStyle};
 use derive_rich::Rich;
 
 #[derive(Rich, Clone, Debug, PartialEq, Default)]
 pub struct Position {
     #[rich(value_fns(take) = {
-        static_pos = css::Static,
-        absolute = css::Absolute,
-        fixed = css::Fixed,
-        relative = css::Relative,
-        sticky = css::Sticky,
-        initial = css::Initial,
-        inherit = css::Inherit,
+        static_pos = val::Static,
+        absolute = val::Absolute,
+        fixed = val::Fixed,
+        relative = val::Relative,
+        sticky = val::Sticky,
+        initial = val::Initial,
+        inherit = val::Inherit,
     })]
     position: Option<PositionType>,
     #[rich(write(take))]
@@ -43,11 +43,11 @@ impl ToStyle for Position {
 #[derive(Clone, Debug, Copy, PartialEq, Display, From)]
 pub enum LengthPercent {
     #[from]
-    Initial(css::Initial),
+    Initial(val::Initial),
     #[from]
-    Inherit(css::Inherit),
+    Inherit(val::Inherit),
     #[from]
-    Auto(css::Auto),
+    Auto(val::Auto),
     #[from]
     Em(Em),
     #[from]
@@ -95,7 +95,7 @@ pub enum LengthPercent {
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum Clip {
     #[from]
-    Auto(css::Auto),
+    Auto(val::Auto),
     #[display(fmt = "rect({}, {}, {}, {})", top, right, bottom, left)]
     ShapeRect {
         top: Length,
@@ -104,20 +104,20 @@ pub enum Clip {
         left: Length,
     },
     #[from]
-    Initial(css::Initial),
+    Initial(val::Initial),
     #[from]
-    Inherit(css::Inherit),
+    Inherit(val::Inherit),
 }
 
 impl Default for Clip {
     fn default() -> Self {
-        css::Initial.into()
+        val::Initial.into()
     }
 }
 
 impl Clip {
     pub fn auto(self) -> Self {
-        css::Auto.into()
+        val::Auto.into()
     }
 
     pub fn rect(
@@ -135,22 +135,22 @@ impl Clip {
     }
 
     pub fn initial(self) -> Self {
-        css::Initial.into()
+        val::Initial.into()
     }
 
     pub fn inherit(self) -> Self {
-        css::Inherit.into()
+        val::Inherit.into()
     }
 }
 
 #[derive(Clone, Debug, Copy, PartialEq, Display, From)]
 pub enum Length {
     #[from]
-    Initial(css::Initial),
+    Initial(val::Initial),
     #[from]
-    Inherit(css::Inherit),
+    Inherit(val::Inherit),
     #[from]
-    Auto(css::Auto),
+    Auto(val::Auto),
     #[from]
     Em(Em),
     #[from]
@@ -198,17 +198,17 @@ pub enum Length {
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum PositionType {
     #[from]
-    Static(css::Static),
+    Static(val::Static),
     #[from]
-    Absolute(css::Absolute),
+    Absolute(val::Absolute),
     #[from]
-    Fixed(css::Fixed),
+    Fixed(val::Fixed),
     #[from]
-    Relative(css::Relative),
+    Relative(val::Relative),
     #[from]
-    Sticky(css::Sticky),
+    Sticky(val::Sticky),
     #[from]
-    Initial(css::Initial),
+    Initial(val::Initial),
     #[from]
-    Inherit(css::Inherit),
+    Inherit(val::Inherit),
 }

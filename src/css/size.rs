@@ -1,4 +1,4 @@
-use crate::css::{St, self, unit::*, ToStyle, Style};
+use crate::css::{St, values as val, self, unit::*, ToStyle, Style};
 use derive_rich::Rich;
 
 #[derive(Rich, Clone, Debug, PartialEq, Default)]
@@ -41,18 +41,18 @@ impl Size {
     }
 
     pub fn min_content(self) -> Self {
-        self.width(css::MinContent)
-            .height(css::MinContent)
+        self.width(val::MinContent)
+            .height(val::MinContent)
     }
 
     pub fn max_content(self) -> Self {
-        self.width(css::MaxContent)
-            .height(css::MaxContent)
+        self.width(val::MaxContent)
+            .height(val::MaxContent)
     }
 
     pub fn auto(self) -> Self {
-        self.width(css::Auto)
-            .height(css::Auto)
+        self.width(val::Auto)
+            .height(val::Auto)
     }
 
     pub fn resize(self, width: impl Into<Length>, height: impl Into<Length>) -> Self {
@@ -65,11 +65,11 @@ impl Size {
 #[derive(Clone, Debug, Copy, PartialEq, Display, From)]
 pub enum Length {
     #[from]
-    Auto(css::Auto),
+    Auto(val::Auto),
     #[from]
-    MinContent(css::MinContent),
+    MinContent(val::MinContent),
     #[from]
-    MaxContent(css::MaxContent),
+    MaxContent(val::MaxContent),
     #[from]
     Em(Em),
     #[from]

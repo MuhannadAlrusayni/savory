@@ -1,53 +1,53 @@
-use crate::css::{self, unit::*, St, Style, ToStyle};
+use crate::css::{self, values as val, unit::*, St, Style, ToStyle};
 
 #[derive(Clone, Copy, PartialEq, Eq, Display, From)]
 pub enum Display {
     #[from]
-    Inline(css::Inline),
+    Inline(val::Inline),
     #[from]
-    Block(css::Block),
+    Block(val::Block),
     #[from]
-    Contents(css::Contents),
+    Contents(val::Contents),
     #[from]
-    Flex(css::Flex),
+    Flex(val::Flex),
     #[from]
-    Grid(css::Grid),
+    Grid(val::Grid),
     #[from]
-    InlineBlock(css::InlineBlock),
+    InlineBlock(val::InlineBlock),
     #[from]
-    InlineFlex(css::InlineFlex),
+    InlineFlex(val::InlineFlex),
     #[from]
-    InlineGrid(css::InlineGrid),
+    InlineGrid(val::InlineGrid),
     #[from]
-    InlineTable(css::InlineTable),
+    InlineTable(val::InlineTable),
     #[from]
-    ListItem(css::ListItem),
+    ListItem(val::ListItem),
     #[from]
-    RunIn(css::RunIn),
+    RunIn(val::RunIn),
     #[from]
-    Table(css::Table),
+    Table(val::Table),
     #[from]
-    TableCaption(css::TableCaption),
+    TableCaption(val::TableCaption),
     #[from]
-    TableColumnGroup(css::TableColumnGroup),
+    TableColumnGroup(val::TableColumnGroup),
     #[from]
-    TableHeaderGroup(css::TableHeaderGroup),
+    TableHeaderGroup(val::TableHeaderGroup),
     #[from]
-    TableFooterGroup(css::TableFooterGroup),
+    TableFooterGroup(val::TableFooterGroup),
     #[from]
-    TableRowGroup(css::TableRowGroup),
+    TableRowGroup(val::TableRowGroup),
     #[from]
-    TableCell(css::TableCell),
+    TableCell(val::TableCell),
     #[from]
-    TableColumn(css::TableColumn),
+    TableColumn(val::TableColumn),
     #[from]
-    TableRow(css::TableRow),
+    TableRow(val::TableRow),
     #[from]
-    None(css::None),
+    None(val::None),
     #[from]
-    Initial(css::Initial),
+    Initial(val::Initial),
     #[from]
-    Inherit(css::Inherit),
+    Inherit(val::Inherit),
 }
 
 impl ToStyle for Display {

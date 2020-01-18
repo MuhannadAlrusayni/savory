@@ -1,7 +1,7 @@
 use crate::css::{
     self,
     unit::{sec, Ms, Sec},
-    St, Style, ToStyle,
+    values as val, St, Style, ToStyle,
 };
 use derive_rich::Rich;
 use std::{borrow::Cow, collections::HashMap};
@@ -61,15 +61,15 @@ pub struct TransitionValue {
     #[rich(write(take))]
     pub duration: Duration,
     #[rich(value_fns(take) = {
-        ease = css::Ease,
-        linear = css::Linear,
-        ease_in = css::EaseIn,
-        ease_out = css::EaseOut,
-        ease_in_out = css::EaseInOut,
-        step_start = css::StepStart,
-        step_end = css::StepEnd,
-        initial = css::Initial,
-        inherit = css::Inherit,
+        ease = val::Ease,
+        linear = val::Linear,
+        ease_in = val::EaseIn,
+        ease_out = val::EaseOut,
+        ease_in_out = val::EaseInOut,
+        step_start = val::StepStart,
+        step_end = val::StepEnd,
+        initial = val::Initial,
+        inherit = val::Inherit,
     })]
     pub timing_function: Option<TimingFunction>,
     #[rich(write(take))]
@@ -99,43 +99,43 @@ impl TransitionValue {
 #[derive(Clone, Debug, Copy, PartialEq, Display, From)]
 pub enum TimingFunction {
     #[from]
-    Ease(css::Ease),
+    Ease(val::Ease),
     #[from]
-    Linear(css::Linear),
+    Linear(val::Linear),
     #[from]
-    EaseIn(css::EaseIn),
+    EaseIn(val::EaseIn),
     #[from]
-    EaseOut(css::EaseOut),
+    EaseOut(val::EaseOut),
     #[from]
-    EaseInOut(css::EaseInOut),
+    EaseInOut(val::EaseInOut),
     #[from]
-    StepStart(css::StepStart),
+    StepStart(val::StepStart),
     #[from]
-    StepEnd(css::StepEnd),
+    StepEnd(val::StepEnd),
     #[display(fmt = "steps({}, {})", _0, _1)]
     Steps(usize, StepsPos),
     #[display(fmt = "cubic-bezier({}, {}, {}, {})", _0, _1, _2, _3)]
     CubicBezier(f32, f32, f32, f32),
     #[from]
-    Initial(css::Initial),
+    Initial(val::Initial),
     #[from]
-    Inherit(css::Inherit),
+    Inherit(val::Inherit),
 }
 
 #[derive(Clone, Debug, Copy, PartialEq, Display, From)]
 pub enum StepsPos {
     #[from]
-    Start(css::Start),
+    Start(val::Start),
     #[from]
-    End(css::End),
+    End(val::End),
 }
 
 #[derive(Clone, Debug, Copy, PartialEq, Display, From)]
 pub enum Duration {
     #[from]
-    Initial(css::Initial),
+    Initial(val::Initial),
     #[from]
-    Inherit(css::Inherit),
+    Inherit(val::Inherit),
     #[from]
     Ms(Ms),
     #[from]

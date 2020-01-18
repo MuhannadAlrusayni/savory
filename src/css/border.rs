@@ -1,4 +1,4 @@
-use crate::css::{self, color::Color, unit::*, St, ToStyle};
+use crate::css::{self, color::Color, unit::*, values as val, St, ToStyle};
 use derive_rich::Rich;
 
 // TODO: add shadow
@@ -98,26 +98,26 @@ impl Border {
 #[derive(Rich, Clone, Debug, PartialEq, From, Default)]
 pub struct Side {
     #[rich(write(take), read, value_fns(take) = {
-        none = css::None,
-        hidden = css::Hidden,
-        dotted = css::Dotted,
-        dashed = css::Dashed,
-        solid = css::Solid,
-        double = css::Double,
-        groove = css::Groove,
-        ridge = css::Ridge,
-        inset = css::Inset,
-        outset = css::Outset,
-        initial_style = css::Initial,
-        inherit_style = css::Inherit,
+        none = val::None,
+        hidden = val::Hidden,
+        dotted = val::Dotted,
+        dashed = val::Dashed,
+        solid = val::Solid,
+        double = val::Double,
+        groove = val::Groove,
+        ridge = val::Ridge,
+        inset = val::Inset,
+        outset = val::Outset,
+        initial_style = val::Initial,
+        inherit_style = val::Inherit,
     })]
     style: Option<Style>,
     #[rich(read, write(take), value_fns(take) = {
-        thick = css::Thick,
-        thin = css::Thin,
-        medium = css::Medium,
-        initial_width = css::Initial,
-        inherit_width = css::Inherit,
+        thick = val::Thick,
+        thin = val::Thin,
+        medium = val::Medium,
+        initial_width = val::Initial,
+        inherit_width = val::Inherit,
     })]
     width: Option<Width>,
     #[rich(read, write(take))]
@@ -127,29 +127,29 @@ pub struct Side {
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum Style {
     #[from]
-    None(css::None),
+    None(val::None),
     #[from]
-    Hidden(css::Hidden),
+    Hidden(val::Hidden),
     #[from]
-    Dotted(css::Dotted),
+    Dotted(val::Dotted),
     #[from]
-    Dashed(css::Dashed),
+    Dashed(val::Dashed),
     #[from]
-    Solid(css::Solid),
+    Solid(val::Solid),
     #[from]
-    Double(css::Double),
+    Double(val::Double),
     #[from]
-    Groove(css::Groove),
+    Groove(val::Groove),
     #[from]
-    Ridge(css::Ridge),
+    Ridge(val::Ridge),
     #[from]
-    Inset(css::Inset),
+    Inset(val::Inset),
     #[from]
-    Outset(css::Outset),
+    Outset(val::Outset),
     #[from]
-    Initial(css::Initial),
+    Initial(val::Initial),
     #[from]
-    Inherit(css::Inherit),
+    Inherit(val::Inherit),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
@@ -195,15 +195,15 @@ pub enum Width {
     #[from]
     Px(Px),
     #[from]
-    Thin(css::Thin),
+    Thin(val::Thin),
     #[from]
-    Medium(css::Medium),
+    Medium(val::Medium),
     #[from]
-    Thick(css::Thick),
+    Thick(val::Thick),
     #[from]
-    Initial(css::Initial),
+    Initial(val::Initial),
     #[from]
-    Inherit(css::Inherit),
+    Inherit(val::Inherit),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
@@ -251,9 +251,9 @@ pub enum Radius {
     #[from(forward)]
     Percent(Percent),
     #[from]
-    Initial(css::Initial),
+    Initial(val::Initial),
     #[from]
-    Inherit(css::Inherit),
+    Inherit(val::Inherit),
 }
 
 // impl Default for Radius {

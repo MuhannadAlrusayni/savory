@@ -1,4 +1,4 @@
-use crate::css::{self, unit::*, St, Style, ToStyle};
+use crate::css::{self, values as val, unit::*, St, Style, ToStyle};
 use derive_rich::Rich;
 
 #[derive(Rich, Clone, Debug, Copy, PartialEq, From, Default)]
@@ -54,7 +54,7 @@ impl Margin {
 #[derive(Clone, Debug, Copy, PartialEq, Display, From)]
 pub enum Length {
     #[from]
-    Auto(css::Auto),
+    Auto(val::Auto),
     #[from]
     Em(Em),
     #[from]
@@ -101,13 +101,13 @@ pub enum Length {
 
 impl Default for Length {
     fn default() -> Self {
-        css::Auto.into()
+        val::Auto.into()
     }
 }
 
 impl Length {
     pub fn auto(self) -> Self {
-        css::Auto.into()
+        val::Auto.into()
     }
 
     pub fn full(self) -> Self {
