@@ -5,20 +5,14 @@ pub mod ant;
 use crate::el::prelude::*;
 
 pub trait Theme {
-    fn flexbox<Msg: 'static + Clone>(
-        &self,
-        _: &Flexbox<Msg>,
-    ) -> <Flexbox<Msg> as Themeable>::StyleMap;
+    fn flexbox<Msg: 'static>(&self, _: &Flexbox<Msg>) -> <Flexbox<Msg> as Themeable>::StyleMap;
 
-    fn flexbox_item<Msg: 'static + Clone>(
+    fn flexbox_item<Msg: 'static>(
         &self,
         _: &flexbox::Item<Msg>,
     ) -> <flexbox::Item<Msg> as Themeable>::StyleMap;
 
-    fn svg_icon<Msg: 'static + Clone>(
-        &self,
-        _: &SvgIcon<Msg>,
-    ) -> <SvgIcon<Msg> as Themeable>::StyleMap;
+    fn svg_icon<Msg: 'static>(&self, _: &SvgIcon<Msg>) -> <SvgIcon<Msg> as Themeable>::StyleMap;
 
     fn html_icon(&self, _: &HtmlIcon) -> <HtmlIcon as Themeable>::StyleMap;
 

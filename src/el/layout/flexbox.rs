@@ -1,7 +1,7 @@
 use crate::{
-    css::{ values as val,
+    css::{
         self, background::Background, border::Border, box_align::*, flexbox::*, gap::Gap,
-        margin::Margin, padding::Padding, size::Size, unit::*,
+        margin::Margin, padding::Padding, size::Size, unit::*, values as val,
     },
     macros::*,
     render::Render,
@@ -135,7 +135,7 @@ impl<Msg: 'static> Flexbox<Msg> {
     }
 }
 
-impl<Msg: Clone + 'static> Render<Msg> for Flexbox<Msg> {
+impl<Msg: 'static> Render<Msg> for Flexbox<Msg> {
     type View = Node<Msg>;
 
     fn render(&self, theme: &impl Theme) -> Self::View {
@@ -225,7 +225,7 @@ impl<Msg: 'static> Item<Msg> {
     }
 }
 
-impl<Msg: Clone + 'static> Render<Msg> for Item<Msg> {
+impl<Msg: 'static> Render<Msg> for Item<Msg> {
     type View = Vec<Node<Msg>>;
 
     fn render(&self, theme: &impl Theme) -> Self::View {

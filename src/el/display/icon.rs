@@ -23,7 +23,7 @@ pub enum Icon<Msg: 'static> {
 //     }
 // }
 
-impl<Msg: Clone + 'static> Render<Msg> for Icon<Msg> {
+impl<Msg: 'static> Render<Msg> for Icon<Msg> {
     type View = Node<Msg>;
 
     fn render(&self, theme: &impl Theme) -> Self::View {
@@ -75,7 +75,7 @@ impl<Msg: 'static> SvgIcon<Msg> {
     }
 }
 
-impl<Msg: Clone + 'static> Render<Msg> for SvgIcon<Msg> {
+impl<Msg: 'static> Render<Msg> for SvgIcon<Msg> {
     type View = Node<Msg>;
 
     fn render(&self, theme: &impl Theme) -> Self::View {
@@ -117,7 +117,7 @@ impl HtmlIcon {
     }
 }
 
-impl<Msg: Clone + 'static> Render<Msg> for HtmlIcon {
+impl<Msg: 'static> Render<Msg> for HtmlIcon {
     type View = Node<Msg>;
 
     fn render(&self, theme: &impl Theme) -> Self::View {
@@ -162,7 +162,7 @@ impl UrlIcon {
     }
 }
 
-impl<Msg: Clone + 'static> Render<Msg> for UrlIcon {
+impl<Msg: 'static> Render<Msg> for UrlIcon {
     type View = Node<Msg>;
 
     fn render(&self, theme: &impl Theme) -> Self::View {

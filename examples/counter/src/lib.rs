@@ -22,7 +22,6 @@ impl Default for MyApp {
     }
 }
 
-#[derive(Clone)]
 pub enum Msg {
     IncBtn(el::button::Msg),
     DecBtn(el::button::Msg),
