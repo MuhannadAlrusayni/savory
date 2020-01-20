@@ -33,12 +33,8 @@ pub enum Msg {
 impl Model<Msg, ()> for MyApp {
     fn update(&mut self, msg: Msg, orders: &mut impl Orders<Msg, ()>) {
         match msg {
-            Msg::IncBtn(msg) => self
-                .inc_btn
-                .update(msg, &mut orders.proxy(move |msg| Msg::IncBtn(msg))),
-            Msg::DecBtn(msg) => self
-                .dec_btn
-                .update(msg, &mut orders.proxy(move |msg| Msg::DecBtn(msg))),
+            Msg::IncBtn(msg) => self.inc_btn.update(msg, &mut orders.proxy(Msg::IncBtn)),
+            Msg::DecBtn(msg) => self.dec_btn.update(msg, &mut orders.proxy(Msg::DecBtn)),
             Msg::Increment => self.count += 1,
             Msg::Decrement => self.count -= 1,
         }
