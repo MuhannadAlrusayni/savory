@@ -91,10 +91,14 @@ impl<GMsg: 'static> Model<Msg, GMsg> for Entry {
     }
 }
 
-impl Render<Msg> for Entry {
-    type View = Node<Msg>;
+impl<ParentMsg: 'static> Render<Msg, ParentMsg> for Entry {
+    type View = Node<ParentMsg>;
 
-    fn render(&self, theme: &impl Theme) -> Self::View {
+    fn render(
+        &self,
+        theme: &impl Theme,
+        map_msg: impl FnOnce(Msg) -> ParentMsg + 'static + Clone,
+    ) -> Self::View {
         let style = theme.entry(self);
         div![
             style.container,
@@ -112,7 +116,7 @@ impl Render<Msg> for Entry {
                 simple_ev(Ev::MouseLeave, Msg::MouseLeave),
                 input_ev(Ev::Input, Msg::UpdateText)
             ],
-        ]
+        ].map_msg(map_msg)
     }
 }
 

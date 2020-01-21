@@ -18,7 +18,10 @@ pub trait Theme {
 
     fn url_icon(&self, _: &UrlIcon) -> <UrlIcon as Themeable>::StyleMap;
 
-    fn button(&self, _: &Button) -> <Button as Themeable>::StyleMap;
+    fn button<ParentMsg>(
+        &self,
+        _: &Button<ParentMsg>,
+    ) -> <Button<ParentMsg> as Themeable>::StyleMap;
 
     fn switch(&self, _: &Switch) -> <Switch as Themeable>::StyleMap;
 

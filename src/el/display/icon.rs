@@ -1,5 +1,5 @@
 use crate::{
-    css::{self, values as val, color::Color, size::Size},
+    css::{self, color::Color, size::Size, values as val},
     render::Render,
     theme::{Theme, Themeable},
 };
@@ -23,14 +23,18 @@ pub enum Icon<Msg: 'static> {
 //     }
 // }
 
-impl<Msg: 'static> Render<Msg> for Icon<Msg> {
-    type View = Node<Msg>;
+impl<Msg: 'static, ParentMsg: 'static> Render<Msg, ParentMsg> for Icon<Msg> {
+    type View = Node<ParentMsg>;
 
-    fn render(&self, theme: &impl Theme) -> Self::View {
+    fn render(
+        &self,
+        theme: &impl Theme,
+        map_msg: impl FnOnce(Msg) -> ParentMsg + 'static + Clone,
+    ) -> Self::View {
         match self {
-            Self::Svg(icon) => icon.render(theme),
-            Self::Html(icon) => icon.render(theme),
-            Self::Url(icon) => icon.render(theme),
+            Self::Svg(icon) => icon.render(theme, map_msg),
+            Self::Html(icon) => icon.render(theme, map_msg),
+            Self::Url(icon) => icon.render(theme, map_msg),
         }
     }
 }
@@ -75,10 +79,14 @@ impl<Msg: 'static> SvgIcon<Msg> {
     }
 }
 
-impl<Msg: 'static> Render<Msg> for SvgIcon<Msg> {
-    type View = Node<Msg>;
+impl<Msg: 'static, ParentMsg: 'static> Render<Msg, ParentMsg> for SvgIcon<Msg> {
+    type View = Node<ParentMsg>;
 
-    fn render(&self, theme: &impl Theme) -> Self::View {
+    fn render(
+        &self,
+        theme: &impl Theme,
+        map_msg: impl FnOnce(Msg) -> ParentMsg + 'static + Clone,
+    ) -> Self::View {
         svg![
             theme.svg_icon(self),
             attrs![
@@ -86,6 +94,7 @@ impl<Msg: 'static> Render<Msg> for SvgIcon<Msg> {
             ],
             self.draw.clone(),
         ]
+        .map_msg(map_msg)
     }
 }
 
@@ -117,10 +126,14 @@ impl HtmlIcon {
     }
 }
 
-impl<Msg: 'static> Render<Msg> for HtmlIcon {
-    type View = Node<Msg>;
+impl<Msg: 'static, ParentMsg: 'static> Render<Msg, ParentMsg> for HtmlIcon {
+    type View = Node<ParentMsg>;
 
-    fn render(&self, theme: &impl Theme) -> Self::View {
+    fn render(
+        &self,
+        theme: &impl Theme,
+        map_msg: impl FnOnce(Msg) -> ParentMsg + 'static + Clone,
+    ) -> Self::View {
         svg![
             theme.html_icon(self),
             attrs![
@@ -128,6 +141,7 @@ impl<Msg: 'static> Render<Msg> for HtmlIcon {
             ],
             raw![self.html.as_ref()],
         ]
+        .map_msg(map_msg)
     }
 }
 
@@ -162,16 +176,21 @@ impl UrlIcon {
     }
 }
 
-impl<Msg: 'static> Render<Msg> for UrlIcon {
-    type View = Node<Msg>;
+impl<Msg: 'static, ParentMsg: 'static> Render<Msg, ParentMsg> for UrlIcon {
+    type View = Node<ParentMsg>;
 
-    fn render(&self, theme: &impl Theme) -> Self::View {
+    fn render(
+        &self,
+        theme: &impl Theme,
+        map_msg: impl FnOnce(Msg) -> ParentMsg + 'static + Clone,
+    ) -> Self::View {
         img![
             theme.url_icon(self),
             attrs![
                 At::Src => self.url,
             ]
         ]
+        .map_msg(map_msg)
     }
 }
 

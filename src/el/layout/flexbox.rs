@@ -135,14 +135,20 @@ impl<Msg: 'static> Flexbox<Msg> {
     }
 }
 
-impl<Msg: 'static> Render<Msg> for Flexbox<Msg> {
-    type View = Node<Msg>;
+impl<Msg: 'static, ParentMsg: 'static> Render<Msg, ParentMsg> for Flexbox<Msg> {
+    type View = Node<ParentMsg>;
 
-    fn render(&self, theme: &impl Theme) -> Self::View {
+    fn render(
+        &self,
+        theme: &impl Theme,
+        map_msg: impl FnOnce(Msg) -> ParentMsg + 'static + Clone,
+    ) -> Self::View {
         div![
             theme.flexbox(self),
             // items
-            self.items.iter().map(|item| item.render(theme)),
+            self.items
+                .iter()
+                .map(|item| item.render(theme, map_msg.clone())),
         ]
     }
 }
@@ -225,10 +231,14 @@ impl<Msg: 'static> Item<Msg> {
     }
 }
 
-impl<Msg: 'static> Render<Msg> for Item<Msg> {
-    type View = Vec<Node<Msg>>;
+impl<Msg: 'static, ParentMsg: 'static> Render<Msg, ParentMsg> for Item<Msg> {
+    type View = Vec<Node<ParentMsg>>;
 
-    fn render(&self, theme: &impl Theme) -> Self::View {
+    fn render(
+        &self,
+        theme: &impl Theme,
+        map_msg: impl FnOnce(Msg) -> ParentMsg + 'static + Clone,
+    ) -> Self::View {
         let style = theme.flexbox_item(self);
         if self.is_flatten() {
             self.content
@@ -242,7 +252,7 @@ impl<Msg: 'static> Render<Msg> for Item<Msg> {
                     }
                     node
                 })
-                .collect::<Self::View>()
+                .collect()
         } else {
             vec![div![
                 style,
@@ -250,6 +260,7 @@ impl<Msg: 'static> Render<Msg> for Item<Msg> {
                 self.content.clone()
             ]]
         }
+        .map_msg(map_msg)
     }
 }
 

@@ -1,5 +1,5 @@
 use crate::{
-    css::{self, values as val, unit::px, St, Style},
+    css::{self, unit::px, values as val, St, Style},
     macros::*,
     model::Model,
     propertie::Size,
@@ -88,10 +88,14 @@ impl<GMsg: 'static> Model<Msg, GMsg> for Radio {
     }
 }
 
-impl Render<Msg> for Radio {
-    type View = Node<Msg>;
+impl<ParentMsg: 'static> Render<Msg, ParentMsg> for Radio {
+    type View = Node<ParentMsg>;
 
-    fn render(&self, theme: &impl Theme) -> Self::View {
+    fn render(
+        &self,
+        theme: &impl Theme,
+        map_msg: impl FnOnce(Msg) -> ParentMsg + 'static + Clone,
+    ) -> Self::View {
         let (input_style, btn_style, lbl_style) = theme.radio(self);
 
         let input = input![
@@ -124,6 +128,7 @@ impl Render<Msg> for Radio {
         } else {
             input
         }
+        .map_msg(map_msg)
     }
 }
 

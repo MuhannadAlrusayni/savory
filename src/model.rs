@@ -1,7 +1,7 @@
 use crate::render::Render;
 use seed::prelude::*;
 
-pub trait Model<Msg, GMsg>: Render<Msg>
+pub trait Model<Msg, GMsg>
 where
     Msg: 'static,
     GMsg: 'static,

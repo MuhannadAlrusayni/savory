@@ -5,8 +5,8 @@ use seed::prelude::*;
 extern crate seed;
 
 pub struct MyApp {
-    inc_btn: el::Button,
-    dec_btn: el::Button,
+    inc_btn: el::Button<Msg>,
+    dec_btn: el::Button<Msg>,
     count: i32,
     theme: Ant,
 }
@@ -40,26 +40,30 @@ impl Model<Msg, ()> for MyApp {
     }
 }
 
-impl Render<Msg> for MyApp {
+impl Render<Msg, Msg> for MyApp {
     type View = Node<Msg>;
 
-    fn render(&self, theme: &impl Theme) -> Self::View {
+    fn render(
+        &self,
+        theme: &impl Theme,
+        map_msg: impl FnOnce(Msg) -> Msg + 'static + Clone,
+    ) -> Self::View {
         el::Flexbox::new()
             .gap(px(8.))
             .center()
             .full_size()
             .add(|item| {
-                let mut btn = self.dec_btn.render(theme).map_msg(Msg::DecBtn);
+                let mut btn = self.dec_btn.render(theme, Msg::DecBtn);
                 btn.add_listener(ev(Ev::Click, |_| Msg::Decrement));
                 item.content(vec![btn])
             })
             .add(|item| {
-                let mut btn = self.inc_btn.render(theme).map_msg(Msg::IncBtn);
+                let mut btn = self.inc_btn.render(theme, Msg::IncBtn);
                 btn.add_listener(ev(Ev::Click, |_| Msg::Increment));
                 item.content(vec![btn])
             })
             .add(|item| item.content(vec![h3![self.count.to_string()]]))
-            .render(theme)
+            .render(theme, |msg| msg)
     }
 }
 
@@ -69,7 +73,7 @@ pub fn render() {
         |msg, model: &mut MyApp, orders| {
             model.update(msg, orders);
         },
-        |model| model.render(&model.theme),
+        |model| model.render(&model.theme, |msg| msg),
     )
     .build_and_start();
 }

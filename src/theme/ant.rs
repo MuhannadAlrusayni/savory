@@ -427,7 +427,7 @@ impl Ant {
         unimplemented!()
     }
 
-    fn button_normal(&self, btn: &Button) -> Style {
+    fn button_normal<ParentMsg>(&self, btn: &Button<ParentMsg>) -> Style {
         // colors
         let (bg, fg, border_color) =
             match (btn.is_disabled(), btn.is_focused(), btn.is_mouse_over()) {
@@ -455,7 +455,7 @@ impl Ant {
             .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
     }
 
-    fn button_suggestion(&self, btn: &Button) -> Style {
+    fn button_suggestion<ParentMsg>(&self, btn: &Button<ParentMsg>) -> Style {
         // colors
         let (bg, fg, border_color) =
             match (btn.is_disabled(), btn.is_focused(), btn.is_mouse_over()) {
@@ -485,7 +485,7 @@ impl Ant {
             .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
     }
 
-    fn button_destructive(&self, btn: &Button) -> Style {
+    fn button_destructive<ParentMsg>(&self, btn: &Button<ParentMsg>) -> Style {
         // colors
         let (bg, fg, border_color) =
             match (btn.is_disabled(), btn.is_focused(), btn.is_mouse_over()) {
@@ -515,7 +515,7 @@ impl Ant {
             .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
     }
 
-    fn button_link(&self, btn: &Button) -> Style {
+    fn button_link<ParentMsg>(&self, btn: &Button<ParentMsg>) -> Style {
         // colors
         let (bg, fg) = match (btn.is_disabled(), btn.is_focused(), btn.is_mouse_over()) {
             (true, _, _) => (self.white(), self.disable(false)),
@@ -530,7 +530,7 @@ impl Ant {
             .background(|b| b.color(bg))
     }
 
-    fn button_dashed(&self, btn: &Button) -> Style {
+    fn button_dashed<ParentMsg>(&self, btn: &Button<ParentMsg>) -> Style {
         // colors
         let (bg, fg, border_color) =
             match (btn.is_disabled(), btn.is_focused(), btn.is_mouse_over()) {
@@ -618,7 +618,7 @@ impl Theme for Ant {
     // TODO: handle btn.shape()
     // TODO: handle btn.is_block()
     // TODO: handle btn.is_ghost()
-    fn button(&self, btn: &Button) -> Style {
+    fn button<ParrentMsg>(&self, btn: &Button<ParrentMsg>) -> Style {
         let padding = css::Padding::default().x(px(15.)).y(px(0.));
 
         let size = css::Size::default().height(px(32.));

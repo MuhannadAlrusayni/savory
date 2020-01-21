@@ -8,7 +8,7 @@ use crate::{
 };
 use derive_rich::Rich;
 use seed::prelude::*;
-use std::borrow::Cow;
+use std::{borrow::Cow, rc::Rc};
 
 #[derive(Debug, Copy, Clone)]
 pub enum Kind {
@@ -34,8 +34,9 @@ pub enum Msg {
     Route,
 }
 
-#[derive(Clone, Debug, Rich)]
-pub struct Button {
+#[derive(Clone, Rich)]
+pub struct Button<ParentMsg> {
+    on_click: Option<Rc<dyn Fn() -> ParentMsg>>,
     // children
     pub inner: Inner,
     // properties
@@ -90,15 +91,16 @@ pub struct Button {
     // active: bool,
 }
 
-impl Default for Button {
+impl<ParentMsg> Default for Button<ParentMsg> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl Button {
+impl<ParentMsg> Button<ParentMsg> {
     pub fn new() -> Self {
         Button {
+            on_click: None,
             inner: Inner::Common(None, None),
             size: None,
             kind: None,
@@ -157,7 +159,7 @@ impl Button {
     }
 }
 
-impl<GMsg: 'static> Model<Msg, GMsg> for Button {
+impl<GMsg: 'static, ParentMsg> Model<Msg, GMsg> for Button<ParentMsg> {
     fn update(&mut self, msg: Msg, _: &mut impl Orders<Msg, GMsg>) {
         match msg {
             Msg::MouseEnter => self.mouse_over = true,
@@ -169,16 +171,20 @@ impl<GMsg: 'static> Model<Msg, GMsg> for Button {
     }
 }
 
-impl Render<Msg> for Button {
-    type View = Node<Msg>;
+impl<ParentMsg: 'static> Render<Msg, ParentMsg> for Button<ParentMsg> {
+    type View = Node<ParentMsg>;
 
-    fn render(&self, theme: &impl Theme) -> Self::View {
+    fn render(
+        &self,
+        theme: &impl Theme,
+        map_msg: impl FnOnce(Msg) -> ParentMsg + 'static + Clone,
+    ) -> Self::View {
         let inner: Vec<Node<Msg>> = match self.inner {
             Inner::Child(ref children) => children.clone(),
             Inner::Common(ref lbl, ref icon) => {
                 let icon = icon
                     .as_ref()
-                    .map(|icon| icon.render(theme))
+                    .map(|icon| icon.render(theme, |msg| msg))
                     .unwrap_or(empty![]);
                 let lbl = lbl
                     .as_ref()
@@ -190,7 +196,7 @@ impl Render<Msg> for Button {
                     .gap(px(4.))
                     .add(|item| item.content(vec![icon]))
                     .add(|item| item.content(vec![lbl]).wrapped())
-                    .render(theme)]
+                    .render(theme, |msg| msg)]
             }
         };
 
@@ -206,10 +212,11 @@ impl Render<Msg> for Button {
             theme.button(self),
             inner,
         ]
+        .map_msg(map_msg)
     }
 }
 
-impl Themeable for Button {
+impl<ParentMsg> Themeable for Button<ParentMsg> {
     type StyleMap = Style;
 }
 

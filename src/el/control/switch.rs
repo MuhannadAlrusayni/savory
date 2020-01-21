@@ -97,10 +97,14 @@ impl<GMsg: 'static> Model<Msg, GMsg> for Switch {
     }
 }
 
-impl Render<Msg> for Switch {
-    type View = Node<Msg>;
+impl<ParentMsg: 'static> Render<Msg, ParentMsg> for Switch {
+    type View = Node<ParentMsg>;
 
-    fn render(&self, theme: &impl Theme) -> Self::View {
+    fn render(
+        &self,
+        theme: &impl Theme,
+        map_msg: impl FnOnce(Msg) -> ParentMsg + 'static + Clone,
+    ) -> Self::View {
         let (bg_style, btn_style) = theme.switch(self);
 
         button![
@@ -115,6 +119,7 @@ impl Render<Msg> for Switch {
             simple_ev(Ev::Click, Msg::Click),
             div![btn_style],
         ]
+        .map_msg(map_msg)
     }
 }
 
