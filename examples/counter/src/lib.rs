@@ -63,7 +63,7 @@ impl Render<Msg, Msg> for MyApp {
                 item.content(vec![btn])
             })
             .add(|item| item.content(vec![h3![self.count.to_string()]]))
-            .render(theme, |msg| msg)
+            .render(theme, map_msg)
     }
 }
 
