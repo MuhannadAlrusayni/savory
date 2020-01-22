@@ -14,8 +14,8 @@ pub struct MyApp {
 impl Default for MyApp {
     fn default() -> Self {
         Self {
-            inc_btn: el::Button::with_label("+"),
-            dec_btn: el::Button::with_label("-"),
+            inc_btn: el::Button::with_label("+").events(|e| e.click(|_| Msg::Increment)),
+            dec_btn: el::Button::with_label("-").events(|e| e.click(|_| Msg::Decrement)),
             count: 0,
             theme: Ant::default(),
         }
@@ -52,16 +52,8 @@ impl Render<Msg, Msg> for MyApp {
             .gap(px(8.))
             .center()
             .full_size()
-            .add(|item| {
-                let mut btn = self.dec_btn.render(theme, Msg::DecBtn);
-                btn.add_listener(ev(Ev::Click, |_| Msg::Decrement));
-                item.content(vec![btn])
-            })
-            .add(|item| {
-                let mut btn = self.inc_btn.render(theme, Msg::IncBtn);
-                btn.add_listener(ev(Ev::Click, |_| Msg::Increment));
-                item.content(vec![btn])
-            })
+            .add(|item| item.content(vec![self.dec_btn.render(theme, Msg::DecBtn)]))
+            .add(|item| item.content(vec![self.inc_btn.render(theme, Msg::IncBtn)]))
             .add(|item| item.content(vec![h3![self.count.to_string()]]))
             .render(theme, map_msg)
     }

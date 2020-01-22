@@ -1,6 +1,7 @@
 use crate::{
     css::{self, unit::px, values as val, Style},
     el::{Flexbox, Icon},
+    events::Events,
     model::Model,
     propertie::{Shape, Size},
     render::Render,
@@ -36,7 +37,9 @@ pub enum Msg {
 
 #[derive(Clone, Rich)]
 pub struct Button<ParentMsg> {
-    on_click: Option<Rc<dyn Fn() -> ParentMsg>>,
+    internal_events: Events<Msg>,
+    #[rich(write(take, style = compose))]
+    events: Events<ParentMsg>,
     // children
     pub inner: Inner,
     // properties
@@ -100,7 +103,13 @@ impl<ParentMsg> Default for Button<ParentMsg> {
 impl<ParentMsg> Button<ParentMsg> {
     pub fn new() -> Self {
         Button {
-            on_click: None,
+            internal_events: Events::default()
+                .focus(|_| Msg::Focus)
+                .blur(|_| Msg::Blur)
+                .mouse_enter(|_| Msg::MouseEnter)
+                .mouse_leave(|_| Msg::MouseLeave)
+                .click(|_| Msg::Route),
+            events: Events::default(),
             inner: Inner::Common(None, None),
             size: None,
             kind: None,
@@ -200,19 +209,18 @@ impl<ParentMsg: 'static> Render<Msg, ParentMsg> for Button<ParentMsg> {
             }
         };
 
-        button![
+        let mut btn = button![
             attrs![
                 At::Disabled => self.disabled.as_at_value()
             ],
-            simple_ev(Ev::Focus, Msg::Focus),
-            simple_ev(Ev::Blur, Msg::Blur),
-            simple_ev(Ev::MouseEnter, Msg::MouseEnter),
-            simple_ev(Ev::MouseLeave, Msg::MouseLeave),
-            simple_ev(Ev::Click, Msg::Route),
             theme.button(self),
             inner,
         ]
-        .map_msg(map_msg)
+        .map_msg(map_msg);
+        for event in self.events.events.clone().into_iter() {
+            btn.add_listener(event);
+        }
+        btn
     }
 }
 

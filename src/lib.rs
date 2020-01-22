@@ -6,6 +6,7 @@ pub mod el;
 pub mod propertie;
 // pub mod layout;
 pub mod css;
+pub mod events;
 pub mod macros;
 pub mod model;
 pub mod render;
