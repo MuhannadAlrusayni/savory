@@ -5,31 +5,28 @@ pub mod ant;
 use crate::el::prelude::*;
 
 pub trait Theme {
-    fn flexbox<Msg: 'static>(&self, _: &Flexbox<Msg>) -> <Flexbox<Msg> as Themeable>::StyleMap;
+    fn flexbox<PMsg: 'static>(&self, _: &Flexbox<PMsg>) -> <Flexbox<PMsg> as Themeable>::StyleMap;
 
-    fn flexbox_item<Msg: 'static>(
+    fn flexbox_item<PMsg: 'static>(
         &self,
-        _: &flexbox::Item<Msg>,
-    ) -> <flexbox::Item<Msg> as Themeable>::StyleMap;
+        _: &flexbox::Item<PMsg>,
+    ) -> <flexbox::Item<PMsg> as Themeable>::StyleMap;
 
-    fn svg_icon<Msg: 'static>(&self, _: &SvgIcon<Msg>) -> <SvgIcon<Msg> as Themeable>::StyleMap;
+    fn svg_icon<PMsg: 'static>(&self, _: &SvgIcon<PMsg>) -> <SvgIcon<PMsg> as Themeable>::StyleMap;
 
-    fn html_icon(&self, _: &HtmlIcon) -> <HtmlIcon as Themeable>::StyleMap;
+    fn html_icon<PMsg>(&self, _: &HtmlIcon<PMsg>) -> <HtmlIcon<PMsg> as Themeable>::StyleMap;
 
-    fn url_icon(&self, _: &UrlIcon) -> <UrlIcon as Themeable>::StyleMap;
+    fn url_icon<PMsg>(&self, _: &UrlIcon<PMsg>) -> <UrlIcon<PMsg> as Themeable>::StyleMap;
 
-    fn button<ParentMsg>(
-        &self,
-        _: &Button<ParentMsg>,
-    ) -> <Button<ParentMsg> as Themeable>::StyleMap;
+    fn button<PMsg>(&self, _: &Button<PMsg>) -> <Button<PMsg> as Themeable>::StyleMap;
 
-    fn switch(&self, _: &Switch) -> <Switch as Themeable>::StyleMap;
+    fn switch<PMsg>(&self, _: &Switch<PMsg>) -> <Switch<PMsg> as Themeable>::StyleMap;
 
-    fn checkbox(&self, _: &Checkbox) -> <Checkbox as Themeable>::StyleMap;
+    fn checkbox<PMsg>(&self, _: &Checkbox<PMsg>) -> <Checkbox<PMsg> as Themeable>::StyleMap;
 
-    fn radio(&self, _: &Radio) -> <Radio as Themeable>::StyleMap;
+    fn radio<PMsg>(&self, _: &Radio<PMsg>) -> <Radio<PMsg> as Themeable>::StyleMap;
 
-    fn entry(&self, _: &Entry) -> <Entry as Themeable>::StyleMap;
+    fn entry<PMsg>(&self, _: &Entry<PMsg>) -> <Entry<PMsg> as Themeable>::StyleMap;
 }
 
 pub trait Themeable {

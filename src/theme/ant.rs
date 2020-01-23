@@ -427,7 +427,7 @@ impl Ant {
         unimplemented!()
     }
 
-    fn button_normal<ParentMsg>(&self, btn: &Button<ParentMsg>) -> Style {
+    fn button_normal<PMsg>(&self, btn: &Button<PMsg>) -> Style {
         // colors
         let (bg, fg, border_color) =
             match (btn.is_disabled(), btn.is_focused(), btn.is_mouse_over()) {
@@ -455,7 +455,7 @@ impl Ant {
             .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
     }
 
-    fn button_suggestion<ParentMsg>(&self, btn: &Button<ParentMsg>) -> Style {
+    fn button_suggestion<PMsg>(&self, btn: &Button<PMsg>) -> Style {
         // colors
         let (bg, fg, border_color) =
             match (btn.is_disabled(), btn.is_focused(), btn.is_mouse_over()) {
@@ -485,7 +485,7 @@ impl Ant {
             .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
     }
 
-    fn button_destructive<ParentMsg>(&self, btn: &Button<ParentMsg>) -> Style {
+    fn button_destructive<PMsg>(&self, btn: &Button<PMsg>) -> Style {
         // colors
         let (bg, fg, border_color) =
             match (btn.is_disabled(), btn.is_focused(), btn.is_mouse_over()) {
@@ -515,7 +515,7 @@ impl Ant {
             .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
     }
 
-    fn button_link<ParentMsg>(&self, btn: &Button<ParentMsg>) -> Style {
+    fn button_link<PMsg>(&self, btn: &Button<PMsg>) -> Style {
         // colors
         let (bg, fg) = match (btn.is_disabled(), btn.is_focused(), btn.is_mouse_over()) {
             (true, _, _) => (self.white(), self.disable(false)),
@@ -530,7 +530,7 @@ impl Ant {
             .background(|b| b.color(bg))
     }
 
-    fn button_dashed<ParentMsg>(&self, btn: &Button<ParentMsg>) -> Style {
+    fn button_dashed<PMsg>(&self, btn: &Button<PMsg>) -> Style {
         // colors
         let (bg, fg, border_color) =
             match (btn.is_disabled(), btn.is_focused(), btn.is_mouse_over()) {
@@ -597,19 +597,19 @@ impl Theme for Ant {
 
     // fn grid(&self) -> Style;
 
-    fn svg_icon<Msg: 'static>(&self, icon: &SvgIcon<Msg>) -> Style {
+    fn svg_icon<PMsg: 'static>(&self, icon: &SvgIcon<PMsg>) -> Style {
         Style::default()
             .try_merge(icon.color.as_ref())
             .merge(&icon.size)
     }
 
-    fn html_icon(&self, icon: &HtmlIcon) -> Style {
+    fn html_icon<PMsg>(&self, icon: &HtmlIcon<PMsg>) -> Style {
         Style::default()
             .try_merge(icon.color.as_ref())
             .merge(&icon.size)
     }
 
-    fn url_icon(&self, icon: &UrlIcon) -> Style {
+    fn url_icon<PMsg>(&self, icon: &UrlIcon<PMsg>) -> Style {
         Style::default().merge(&icon.size)
     }
 
@@ -618,7 +618,7 @@ impl Theme for Ant {
     // TODO: handle btn.shape()
     // TODO: handle btn.is_block()
     // TODO: handle btn.is_ghost()
-    fn button<ParrentMsg>(&self, btn: &Button<ParrentMsg>) -> Style {
+    fn button<PMsg>(&self, btn: &Button<PMsg>) -> Style {
         let padding = css::Padding::default().x(px(15.)).y(px(0.));
 
         let size = css::Size::default().height(px(32.));
@@ -654,7 +654,7 @@ impl Theme for Ant {
         .merge(&btn.style)
     }
 
-    fn switch(&self, switch: &Switch) -> <Switch as Themeable>::StyleMap {
+    fn switch<PMsg>(&self, switch: &Switch<PMsg>) -> <Switch<PMsg> as Themeable>::StyleMap {
         let width = 44.;
         let height = 22.;
         let btn_size = height - 3.;
@@ -714,7 +714,7 @@ impl Theme for Ant {
         (bg_style, btn_style)
     }
 
-    fn checkbox(&self, checkbox: &Checkbox) -> <Checkbox as Themeable>::StyleMap {
+    fn checkbox<PMsg>(&self, checkbox: &Checkbox<PMsg>) -> <Checkbox<PMsg> as Themeable>::StyleMap {
         let (bg, fg, border) = match (
             checkbox.is_disabled(),
             checkbox.is_focused(),
@@ -802,7 +802,7 @@ impl Theme for Ant {
         (input_style, btn_style, lbl_style)
     }
 
-    fn radio(&self, radio: &Radio) -> <Radio as Themeable>::StyleMap {
+    fn radio<PMsg>(&self, radio: &Radio<PMsg>) -> <Radio<PMsg> as Themeable>::StyleMap {
         let (bg, fg, border) = match (
             radio.is_disabled(),
             radio.is_focused(),
@@ -884,7 +884,7 @@ impl Theme for Ant {
         (input_style, btn_style, lbl_style)
     }
 
-    fn entry(&self, entry: &Entry) -> <Entry as Themeable>::StyleMap {
+    fn entry<PMsg>(&self, entry: &Entry<PMsg>) -> <Entry<PMsg> as Themeable>::StyleMap {
         let (bg, fg, border) = match (
             entry.is_disabled(),
             entry.is_focused(),

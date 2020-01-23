@@ -1,6 +1,7 @@
 use crate::{
     css::Style,
     el::prelude::*,
+    events::Events,
     model::Model,
     propertie::{Shape, Size},
     render::Render,
@@ -8,7 +9,7 @@ use crate::{
 };
 use derive_rich::Rich;
 use seed::prelude::*;
-use std::borrow::Cow;
+use std::{borrow::Cow, rc::Rc};
 
 #[derive(Debug, Clone)]
 pub enum Msg {
@@ -20,8 +21,12 @@ pub enum Msg {
     UpdateText(String),
 }
 
-#[derive(Debug, Rich)]
-pub struct Entry {
+#[derive(Rich)]
+pub struct Entry<PMsg> {
+    internal_events: Events<Msg>,
+    map_msg: Rc<dyn Fn(Msg) -> PMsg>,
+    #[rich(write(take, style = compose))]
+    events: Events<PMsg>,
     #[rich(write(take))]
     pub text: Option<String>,
     #[rich(
@@ -52,15 +57,17 @@ pub struct Entry {
     mouse_over: bool,
 }
 
-impl Default for Entry {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Entry {
-    pub fn new() -> Self {
+impl<PMsg> Entry<PMsg> {
+    pub fn new(map_msg: impl FnOnce(Msg) -> PMsg + Clone + 'static) -> Self {
         Self {
+            internal_events: Events::default()
+                .focus(|_| Msg::Focus)
+                .blur(|_| Msg::Blur)
+                .mouse_enter(|_| Msg::MouseEnter)
+                .mouse_leave(|_| Msg::MouseLeave)
+                .input(Msg::UpdateText),
+            events: Events::default(),
+            map_msg: Rc::new(move |msg| (map_msg.clone())(msg)),
             text: None,
             readonly: false,
             max_length: None,
@@ -78,8 +85,8 @@ impl Entry {
     }
 }
 
-impl<GMsg: 'static> Model<Msg, GMsg> for Entry {
-    fn update(&mut self, msg: Msg, _: &mut impl Orders<Msg, GMsg>) {
+impl<GMsg: 'static, PMsg: 'static> Model<Msg, PMsg, GMsg> for Entry<PMsg> {
+    fn update(&mut self, msg: Msg, _: &mut impl Orders<PMsg, GMsg>) {
         match msg {
             Msg::UpdateText(text) => self.text = Some(text),
             Msg::MouseEnter => self.mouse_over = true,
@@ -91,18 +98,16 @@ impl<GMsg: 'static> Model<Msg, GMsg> for Entry {
     }
 }
 
-impl<ParentMsg: 'static> Render<Msg, ParentMsg> for Entry {
-    type View = Node<ParentMsg>;
+impl<PMsg: 'static> Render<PMsg> for Entry<PMsg> {
+    type View = Node<PMsg>;
 
-    fn render(
-        &self,
-        theme: &impl Theme,
-        map_msg: impl FnOnce(Msg) -> ParentMsg + 'static + Clone,
-    ) -> Self::View {
+    fn render(&self, theme: &impl Theme) -> Self::View {
         let style = theme.entry(self);
+        let msg_mapper = Rc::clone(&self.map_msg.clone());
         div![
             style.container,
             input![
+                self.internal_events.events.clone(),
                 style.input,
                 attrs![
                     At::Disabled => self.disabled.as_at_value(),
@@ -110,13 +115,8 @@ impl<ParentMsg: 'static> Render<Msg, ParentMsg> for Entry {
                     // At::MaxLength => self.max_length,
                     // At::Placeholder => self.placeholder,
                 ],
-                simple_ev(Ev::Focus, Msg::Focus),
-                simple_ev(Ev::Blur, Msg::Blur),
-                simple_ev(Ev::MouseEnter, Msg::MouseEnter),
-                simple_ev(Ev::MouseLeave, Msg::MouseLeave),
-                input_ev(Ev::Input, Msg::UpdateText)
             ],
-        ].map_msg(map_msg)
+        ].map_msg(move |msg| (msg_mapper.clone())(msg))
     }
 }
 
@@ -125,6 +125,6 @@ pub struct StyleMap {
     pub input: Style,
 }
 
-impl Themeable for Entry {
+impl<PMsg> Themeable for Entry<PMsg> {
     type StyleMap = StyleMap;
 }

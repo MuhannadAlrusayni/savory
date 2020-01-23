@@ -1,5 +1,4 @@
 #![feature(decl_macro)]
-#![feature(never_type)]
 #![feature(bool_to_option)]
 
 pub mod el;

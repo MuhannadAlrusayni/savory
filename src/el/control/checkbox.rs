@@ -1,5 +1,6 @@
 use crate::{
     css::{self, unit::px, values as val, St, Style},
+    events::Events,
     model::Model,
     propertie::Size,
     render::Render,
@@ -7,7 +8,7 @@ use crate::{
 };
 use derive_rich::Rich;
 use seed::prelude::*;
-use std::borrow::Cow;
+use std::{borrow::Cow, rc::Rc};
 
 #[derive(Debug, Copy, Clone)]
 pub enum Msg {
@@ -18,8 +19,13 @@ pub enum Msg {
     Click,
 }
 
-#[derive(Debug, Clone, Rich)]
-pub struct Checkbox {
+#[derive(Clone, Rich)]
+pub struct Checkbox<PMsg> {
+    internal_events: Events<Msg>,
+    lbl_events: Events<Msg>,
+    #[rich(write(take, style = compose))]
+    events: Events<PMsg>,
+    map_msg: Rc<dyn Fn(Msg) -> PMsg>,
     #[rich(write(take))]
     pub label: Option<Cow<'static, str>>,
     #[rich(write(take, style = compose))]
@@ -46,15 +52,20 @@ pub struct Checkbox {
     toggle: bool,
 }
 
-impl Default for Checkbox {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Checkbox {
-    pub fn new() -> Self {
+impl<PMsg> Checkbox<PMsg> {
+    pub fn new(map_msg: impl FnOnce(Msg) -> PMsg + Clone + 'static) -> Self {
         Self {
+            map_msg: Rc::new(move |msg| (map_msg.clone())(msg)),
+            events: Events::default(),
+            internal_events: Events::default()
+                .focus(|_| Msg::Focus)
+                .blur(|_| Msg::Blur)
+                .mouse_enter(|_| Msg::MouseEnter)
+                .mouse_leave(|_| Msg::MouseLeave)
+                .click(|_| Msg::Click),
+            lbl_events: Events::default()
+                .mouse_enter(|_| Msg::MouseEnter)
+                .mouse_leave(|_| Msg::MouseLeave),
             label: None,
             style: Style::default(),
             size: None,
@@ -75,8 +86,8 @@ impl Checkbox {
     }
 }
 
-impl<GMsg: 'static> Model<Msg, GMsg> for Checkbox {
-    fn update(&mut self, msg: Msg, _: &mut impl Orders<Msg, GMsg>) {
+impl<GMsg: 'static, PMsg: 'static> Model<Msg, PMsg, GMsg> for Checkbox<PMsg> {
+    fn update(&mut self, msg: Msg, _: &mut impl Orders<PMsg, GMsg>) {
         match msg {
             Msg::MouseEnter => self.mouse_over = true,
             Msg::MouseLeave => self.mouse_over = false,
@@ -87,14 +98,10 @@ impl<GMsg: 'static> Model<Msg, GMsg> for Checkbox {
     }
 }
 
-impl<ParentMsg: 'static> Render<Msg, ParentMsg> for Checkbox {
-    type View = Node<ParentMsg>;
+impl<PMsg: 'static> Render<PMsg> for Checkbox<PMsg> {
+    type View = Node<PMsg>;
 
-    fn render(
-        &self,
-        theme: &impl Theme,
-        map_msg: impl FnOnce(Msg) -> ParentMsg + 'static + Clone,
-    ) -> Self::View {
+    fn render(&self, theme: &impl Theme) -> Self::View {
         let (input_style, btn_style, lbl_style) = theme.checkbox(self);
 
         let input = input![
@@ -104,11 +111,7 @@ impl<ParentMsg: 'static> Render<Msg, ParentMsg> for Checkbox {
                 At::Type => "checkbox",
             ],
             input_style,
-            simple_ev(Ev::Focus, Msg::Focus),
-            simple_ev(Ev::Blur, Msg::Blur),
-            simple_ev(Ev::MouseEnter, Msg::MouseEnter),
-            simple_ev(Ev::MouseLeave, Msg::MouseLeave),
-            simple_ev(Ev::Click, Msg::Click),
+            self.internal_events.events.clone(),
             if self.is_toggled() {
                 div![btn_style]
             } else {
@@ -116,21 +119,21 @@ impl<ParentMsg: 'static> Render<Msg, ParentMsg> for Checkbox {
             },
         ];
 
+        let msg_mapper = Rc::clone(&self.map_msg.clone());
         if let Some(ref lbl) = self.label {
             label![
                 lbl_style,
                 input,
                 lbl.to_string(),
-                simple_ev(Ev::MouseEnter, Msg::MouseEnter),
-                simple_ev(Ev::MouseLeave, Msg::MouseLeave),
+                self.lbl_events.events.clone(),
             ]
         } else {
             input
         }
-        .map_msg(map_msg)
+        .map_msg(move |msg| (msg_mapper)(msg))
     }
 }
 
-impl Themeable for Checkbox {
+impl<PMsg> Themeable for Checkbox<PMsg> {
     type StyleMap = (Style, Style, Style);
 }

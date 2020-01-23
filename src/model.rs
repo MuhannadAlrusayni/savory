@@ -1,11 +1,11 @@
 use crate::render::Render;
 use seed::prelude::*;
 
-pub trait Model<Msg, GMsg>
+pub trait Model<Msg, PMsg, GMsg>: Render<PMsg>
 where
-    Msg: 'static,
+    PMsg: 'static,
     GMsg: 'static,
 {
-    fn update(&mut self, _: Msg, _: &mut impl Orders<Msg, GMsg>);
-    fn sink(&mut self, _: GMsg, _: &mut impl Orders<Msg, GMsg>) {}
+    fn update(&mut self, _: Msg, _: &mut impl Orders<PMsg, GMsg>);
+    fn sink(&mut self, _: GMsg, _: &mut impl Orders<PMsg, GMsg>) {}
 }

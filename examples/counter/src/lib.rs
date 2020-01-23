@@ -1,5 +1,6 @@
 use khalas::{css::unit::px, el, prelude::*, theme::ant::Ant};
 use seed::prelude::*;
+use std::rc::Rc;
 
 #[macro_use]
 extern crate seed;
@@ -14,8 +15,10 @@ pub struct MyApp {
 impl Default for MyApp {
     fn default() -> Self {
         Self {
-            inc_btn: el::Button::with_label("+").events(|e| e.click(|_| Msg::Increment)),
-            dec_btn: el::Button::with_label("-").events(|e| e.click(|_| Msg::Decrement)),
+            inc_btn: el::Button::with_label(Msg::IncBtn, "+")
+                .events(|e| e.click(|_| Msg::Increment)),
+            dec_btn: el::Button::with_label(Msg::DecBtn, "-")
+                .events(|e| e.click(|_| Msg::Decrement)),
             count: 0,
             theme: Ant::default(),
         }
@@ -29,33 +32,29 @@ pub enum Msg {
     Decrement,
 }
 
-impl Model<Msg, ()> for MyApp {
+impl Model<Msg, Msg, ()> for MyApp {
     fn update(&mut self, msg: Msg, orders: &mut impl Orders<Msg, ()>) {
         match msg {
-            Msg::IncBtn(msg) => self.inc_btn.update(msg, &mut orders.proxy(Msg::IncBtn)),
-            Msg::DecBtn(msg) => self.dec_btn.update(msg, &mut orders.proxy(Msg::DecBtn)),
+            Msg::IncBtn(msg) => self.inc_btn.update(msg, orders),
+            Msg::DecBtn(msg) => self.dec_btn.update(msg, orders),
             Msg::Increment => self.count += 1,
             Msg::Decrement => self.count -= 1,
         }
     }
 }
 
-impl Render<Msg, Msg> for MyApp {
+impl Render<Msg> for MyApp {
     type View = Node<Msg>;
 
-    fn render(
-        &self,
-        theme: &impl Theme,
-        map_msg: impl FnOnce(Msg) -> Msg + 'static + Clone,
-    ) -> Self::View {
+    fn render(&self, theme: &impl Theme) -> Self::View {
         el::Flexbox::new()
             .gap(px(8.))
             .center()
             .full_size()
-            .add(|item| item.content(vec![self.dec_btn.render(theme, Msg::DecBtn)]))
-            .add(|item| item.content(vec![self.inc_btn.render(theme, Msg::IncBtn)]))
+            .add(|item| item.content(vec![self.dec_btn.render(theme)]))
+            .add(|item| item.content(vec![self.inc_btn.render(theme)]))
             .add(|item| item.content(vec![h3![self.count.to_string()]]))
-            .render(theme, map_msg)
+            .render(theme)
     }
 }
 
@@ -65,7 +64,7 @@ pub fn render() {
         |msg, model: &mut MyApp, orders| {
             model.update(msg, orders);
         },
-        |model| model.render(&model.theme, |msg| msg),
+        |model| model.render(&model.theme),
     )
     .build_and_start();
 }

@@ -20,7 +20,7 @@ pub enum Kind {
     Dashed,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub enum Inner {
     Child(Vec<Node<Msg>>),
     Common(Option<String>, Option<Icon<Msg>>),
@@ -36,10 +36,11 @@ pub enum Msg {
 }
 
 #[derive(Clone, Rich)]
-pub struct Button<ParentMsg> {
+pub struct Button<PMsg> {
+    map_msg: Rc<dyn Fn(Msg) -> PMsg>,
     internal_events: Events<Msg>,
     #[rich(write(take, style = compose))]
-    events: Events<ParentMsg>,
+    events: Events<PMsg>,
     // children
     pub inner: Inner,
     // properties
@@ -94,15 +95,10 @@ pub struct Button<ParentMsg> {
     // active: bool,
 }
 
-impl<ParentMsg> Default for Button<ParentMsg> {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl<ParentMsg> Button<ParentMsg> {
-    pub fn new() -> Self {
+impl<PMsg> Button<PMsg> {
+    pub fn new(map_msg: impl FnOnce(Msg) -> PMsg + Clone + 'static) -> Self {
         Button {
+            map_msg: Rc::new(move |msg| (map_msg.clone())(msg)),
             internal_events: Events::default()
                 .focus(|_| Msg::Focus)
                 .blur(|_| Msg::Blur)
@@ -119,19 +115,24 @@ impl<ParentMsg> Button<ParentMsg> {
             ghost: false,
             style: Style::default(),
             route: None,
-            // events: Self::create_events(),
             disabled: false,
             focus: false,
             mouse_over: false,
         }
     }
 
-    pub fn with_label(label: impl Into<String>) -> Self {
-        Button::default().label(label)
+    pub fn with_label(
+        map_msg: impl FnOnce(Msg) -> PMsg + Clone + 'static,
+        label: impl Into<String>,
+    ) -> Self {
+        Button::new(map_msg).label(label)
     }
 
-    pub fn with_children(children: Vec<Node<Msg>>) -> Self {
-        Button::default().children(children)
+    pub fn with_children(
+        map_msg: impl FnOnce(Msg) -> PMsg + Clone + 'static,
+        children: Vec<Node<Msg>>,
+    ) -> Self {
+        Button::new(map_msg).children(children)
     }
 
     pub fn label(mut self, label: impl Into<String>) -> Self {
@@ -168,8 +169,8 @@ impl<ParentMsg> Button<ParentMsg> {
     }
 }
 
-impl<GMsg: 'static, ParentMsg> Model<Msg, GMsg> for Button<ParentMsg> {
-    fn update(&mut self, msg: Msg, _: &mut impl Orders<Msg, GMsg>) {
+impl<GMsg: 'static, PMsg: 'static> Model<Msg, PMsg, GMsg> for Button<PMsg> {
+    fn update(&mut self, msg: Msg, _: &mut impl Orders<PMsg, GMsg>) {
         match msg {
             Msg::MouseEnter => self.mouse_over = true,
             Msg::MouseLeave => self.mouse_over = false,
@@ -180,20 +181,18 @@ impl<GMsg: 'static, ParentMsg> Model<Msg, GMsg> for Button<ParentMsg> {
     }
 }
 
-impl<ParentMsg: 'static> Render<Msg, ParentMsg> for Button<ParentMsg> {
-    type View = Node<ParentMsg>;
+impl<PMsg: 'static> Render<PMsg> for Button<PMsg> {
+    type View = Node<PMsg>;
 
-    fn render(
-        &self,
-        theme: &impl Theme,
-        map_msg: impl FnOnce(Msg) -> ParentMsg + 'static + Clone,
-    ) -> Self::View {
+    fn render(&self, theme: &impl Theme) -> Self::View {
+        let msg_mapper = Rc::clone(&self.map_msg.clone());
+
         let inner: Vec<Node<Msg>> = match self.inner {
             Inner::Child(ref children) => children.clone(),
             Inner::Common(ref lbl, ref icon) => {
                 let icon = icon
                     .as_ref()
-                    .map(|icon| icon.render(theme, |msg| msg))
+                    .map(|icon| icon.render(theme))
                     .unwrap_or(empty![]);
                 let lbl = lbl
                     .as_ref()
@@ -205,18 +204,19 @@ impl<ParentMsg: 'static> Render<Msg, ParentMsg> for Button<ParentMsg> {
                     .gap(px(4.))
                     .add(|item| item.content(vec![icon]))
                     .add(|item| item.content(vec![lbl]).wrapped())
-                    .render(theme, |msg| msg)]
+                    .render(theme)]
             }
         };
 
         let mut btn = button![
+            self.internal_events.events.clone(),
             attrs![
                 At::Disabled => self.disabled.as_at_value()
             ],
             theme.button(self),
             inner,
         ]
-        .map_msg(map_msg);
+        .map_msg(move |msg| (Rc::clone(&msg_mapper))(msg));
         for event in self.events.events.clone().into_iter() {
             btn.add_listener(event);
         }
@@ -224,7 +224,7 @@ impl<ParentMsg: 'static> Render<Msg, ParentMsg> for Button<ParentMsg> {
     }
 }
 
-impl<ParentMsg> Themeable for Button<ParentMsg> {
+impl<PMsg> Themeable for Button<PMsg> {
     type StyleMap = Style;
 }
 

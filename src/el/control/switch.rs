@@ -1,5 +1,6 @@
 use crate::{
     css::Style,
+    events::Events,
     model::Model,
     propertie::{Shape, Size},
     render::Render,
@@ -7,7 +8,7 @@ use crate::{
 };
 use derive_rich::Rich;
 use seed::prelude::*;
-use std::borrow::Cow;
+use std::{borrow::Cow, rc::Rc};
 
 #[derive(Debug, Copy, Clone)]
 pub enum Msg {
@@ -18,8 +19,12 @@ pub enum Msg {
     Click,
 }
 
-#[derive(Debug, Rich)]
-pub struct Switch {
+#[derive(Rich)]
+pub struct Switch<PMsg> {
+    internal_events: Events<Msg>,
+    #[rich(write(take, style = compose))]
+    events: Events<PMsg>,
+    map_msg: Rc<dyn Fn(Msg) -> PMsg>,
     #[rich(write(take, style = compose))]
     pub style: Style,
     #[rich(value_fns(take) = {
@@ -55,15 +60,17 @@ pub struct Switch {
     toggle: bool,
 }
 
-impl Default for Switch {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Switch {
-    pub fn new() -> Self {
+impl<PMsg> Switch<PMsg> {
+    pub fn new(map_msg: impl FnOnce(Msg) -> PMsg + Clone + 'static) -> Self {
         Self {
+            map_msg: Rc::new(move |msg| (map_msg.clone())(msg)),
+            internal_events: Events::default()
+                .focus(|_| Msg::Focus)
+                .blur(|_| Msg::Blur)
+                .mouse_enter(|_| Msg::MouseEnter)
+                .mouse_leave(|_| Msg::MouseLeave)
+                .click(|_| Msg::Click),
+            events: Events::default(),
             style: Style::default(),
             size: None,
             shape: None,
@@ -85,8 +92,8 @@ impl Switch {
     }
 }
 
-impl<GMsg: 'static> Model<Msg, GMsg> for Switch {
-    fn update(&mut self, msg: Msg, _: &mut impl Orders<Msg, GMsg>) {
+impl<GMsg: 'static, PMsg: 'static> Model<Msg, PMsg, GMsg> for Switch<PMsg> {
+    fn update(&mut self, msg: Msg, _: &mut impl Orders<PMsg, GMsg>) {
         match msg {
             Msg::MouseEnter => self.mouse_over = true,
             Msg::MouseLeave => self.mouse_over = false,
@@ -97,32 +104,25 @@ impl<GMsg: 'static> Model<Msg, GMsg> for Switch {
     }
 }
 
-impl<ParentMsg: 'static> Render<Msg, ParentMsg> for Switch {
-    type View = Node<ParentMsg>;
+impl<PMsg: 'static> Render<PMsg> for Switch<PMsg> {
+    type View = Node<PMsg>;
 
-    fn render(
-        &self,
-        theme: &impl Theme,
-        map_msg: impl FnOnce(Msg) -> ParentMsg + 'static + Clone,
-    ) -> Self::View {
+    fn render(&self, theme: &impl Theme) -> Self::View {
         let (bg_style, btn_style) = theme.switch(self);
+        let msg_mapper = Rc::clone(&self.map_msg.clone());
 
         button![
+            self.internal_events.events.clone(),
             attrs![
                 At::Disabled => self.disabled.as_at_value(),
             ],
             bg_style,
-            simple_ev(Ev::Focus, Msg::Focus),
-            simple_ev(Ev::Blur, Msg::Blur),
-            simple_ev(Ev::MouseEnter, Msg::MouseEnter),
-            simple_ev(Ev::MouseLeave, Msg::MouseLeave),
-            simple_ev(Ev::Click, Msg::Click),
             div![btn_style],
         ]
-        .map_msg(map_msg)
+        .map_msg(move |msg| (msg_mapper.clone())(msg))
     }
 }
 
-impl Themeable for Switch {
+impl<PMsg> Themeable for Switch<PMsg> {
     type StyleMap = (Style, Style);
 }

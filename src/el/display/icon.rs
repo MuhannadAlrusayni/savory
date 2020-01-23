@@ -1,5 +1,6 @@
 use crate::{
     css::{self, color::Color, size::Size, values as val},
+    events::Events,
     render::Render,
     theme::{Theme, Themeable},
 };
@@ -7,86 +8,79 @@ use derive_rich::Rich;
 use seed::prelude::*;
 use std::borrow::Cow;
 
-#[derive(Clone, Debug, From)]
-pub enum Icon<Msg: 'static> {
+#[derive(Clone, From)]
+pub enum Icon<PMsg: 'static> {
     #[from]
-    Svg(SvgIcon<Msg>),
+    Svg(SvgIcon<PMsg>),
     #[from]
-    Html(HtmlIcon),
+    Html(HtmlIcon<PMsg>),
     #[from]
-    Url(UrlIcon),
+    Url(UrlIcon<PMsg>),
 }
 
-// impl<Msg: 'static, T: Into<UrlIcon>> From<T> for Icon<Msg> {
+// impl<PMsg: 'static, T: Into<UrlIcon>> From<T> for Icon<PMsg> {
 //     fn from(url: T) -> Self {
 //         url.into().into()
 //     }
 // }
 
-impl<Msg: 'static, ParentMsg: 'static> Render<Msg, ParentMsg> for Icon<Msg> {
-    type View = Node<ParentMsg>;
+impl<PMsg: 'static> Render<PMsg> for Icon<PMsg> {
+    type View = Node<PMsg>;
 
-    fn render(
-        &self,
-        theme: &impl Theme,
-        map_msg: impl FnOnce(Msg) -> ParentMsg + 'static + Clone,
-    ) -> Self::View {
+    fn render(&self, theme: &impl Theme) -> Self::View {
         match self {
-            Self::Svg(icon) => icon.render(theme, map_msg),
-            Self::Html(icon) => icon.render(theme, map_msg),
-            Self::Url(icon) => icon.render(theme, map_msg),
+            Self::Svg(icon) => icon.render(theme),
+            Self::Html(icon) => icon.render(theme),
+            Self::Url(icon) => icon.render(theme),
         }
     }
 }
 
-impl<Msg: 'static> Icon<Msg> {
-    pub fn svg(draw: impl IntoIterator<Item = Node<Msg>>) -> SvgIcon<Msg> {
+impl<PMsg: 'static> Icon<PMsg> {
+    pub fn svg(draw: impl IntoIterator<Item = Node<PMsg>>) -> SvgIcon<PMsg> {
         SvgIcon::new(draw)
     }
-}
 
-impl Icon<!> {
-    pub fn html(html: impl Into<Cow<'static, str>>) -> HtmlIcon {
+    pub fn html(html: impl Into<Cow<'static, str>>) -> HtmlIcon<PMsg> {
         HtmlIcon::new(html)
     }
 
-    pub fn url(url: impl Into<Cow<'static, str>>) -> UrlIcon {
+    pub fn url(url: impl Into<Cow<'static, str>>) -> UrlIcon<PMsg> {
         UrlIcon::new(url)
     }
 }
 
-#[derive(Clone, Debug, Rich)]
-pub struct SvgIcon<Msg: 'static> {
-    pub draw: Vec<Node<Msg>>,
+#[derive(Clone, Rich)]
+pub struct SvgIcon<PMsg: 'static> {
+    #[rich(write(take, style = compose))]
+    events: Events<PMsg>,
+    pub draw: Vec<Node<PMsg>>,
     #[rich(write(take))]
     pub color: Option<Color>,
     #[rich(write(take, style = compose))]
     pub size: Size,
 }
 
-impl<Msg: 'static> SvgIcon<Msg> {
-    pub fn new(draw: impl IntoIterator<Item = Node<Msg>>) -> Self {
+impl<PMsg: 'static> SvgIcon<PMsg> {
+    pub fn new(draw: impl IntoIterator<Item = Node<PMsg>>) -> Self {
         Self {
+            events: Events::default(),
             draw: draw.into_iter().collect(),
             color: None,
             size: Size::default(),
         }
     }
 
-    pub fn draw(mut self, draw: impl IntoIterator<Item = Node<Msg>>) -> Self {
+    pub fn draw(mut self, draw: impl IntoIterator<Item = Node<PMsg>>) -> Self {
         self.draw = draw.into_iter().collect();
         self
     }
 }
 
-impl<Msg: 'static, ParentMsg: 'static> Render<Msg, ParentMsg> for SvgIcon<Msg> {
-    type View = Node<ParentMsg>;
+impl<PMsg: 'static> Render<PMsg> for SvgIcon<PMsg> {
+    type View = Node<PMsg>;
 
-    fn render(
-        &self,
-        theme: &impl Theme,
-        map_msg: impl FnOnce(Msg) -> ParentMsg + 'static + Clone,
-    ) -> Self::View {
+    fn render(&self, theme: &impl Theme) -> Self::View {
         svg![
             theme.svg_icon(self),
             attrs![
@@ -94,16 +88,17 @@ impl<Msg: 'static, ParentMsg: 'static> Render<Msg, ParentMsg> for SvgIcon<Msg> {
             ],
             self.draw.clone(),
         ]
-        .map_msg(map_msg)
     }
 }
 
-impl<Msg: 'static> Themeable for SvgIcon<Msg> {
+impl<PMsg: 'static> Themeable for SvgIcon<PMsg> {
     type StyleMap = css::Style;
 }
 
-#[derive(Debug, Clone, Rich)]
-pub struct HtmlIcon {
+#[derive(Clone, Rich)]
+pub struct HtmlIcon<PMsg> {
+    #[rich(write(take, style = compose))]
+    events: Events<PMsg>,
     pub html: Cow<'static, str>,
     #[rich(write(take))]
     pub color: Option<Color>,
@@ -111,9 +106,10 @@ pub struct HtmlIcon {
     pub size: Size,
 }
 
-impl HtmlIcon {
+impl<PMsg> HtmlIcon<PMsg> {
     pub fn new(html: impl Into<Cow<'static, str>>) -> Self {
         Self {
+            events: Events::default(),
             html: html.into(),
             color: None,
             size: Size::default(),
@@ -126,14 +122,10 @@ impl HtmlIcon {
     }
 }
 
-impl<Msg: 'static, ParentMsg: 'static> Render<Msg, ParentMsg> for HtmlIcon {
-    type View = Node<ParentMsg>;
+impl<PMsg: 'static> Render<PMsg> for HtmlIcon<PMsg> {
+    type View = Node<PMsg>;
 
-    fn render(
-        &self,
-        theme: &impl Theme,
-        map_msg: impl FnOnce(Msg) -> ParentMsg + 'static + Clone,
-    ) -> Self::View {
+    fn render(&self, theme: &impl Theme) -> Self::View {
         svg![
             theme.html_icon(self),
             attrs![
@@ -141,30 +133,32 @@ impl<Msg: 'static, ParentMsg: 'static> Render<Msg, ParentMsg> for HtmlIcon {
             ],
             raw![self.html.as_ref()],
         ]
-        .map_msg(map_msg)
     }
 }
 
-impl Themeable for HtmlIcon {
+impl<PMsg> Themeable for HtmlIcon<PMsg> {
     type StyleMap = css::Style;
 }
 
-#[derive(Debug, Rich, Clone)]
-pub struct UrlIcon {
+#[derive(Rich, Clone)]
+pub struct UrlIcon<PMsg> {
+    #[rich(write(take, style = compose))]
+    events: Events<PMsg>,
     pub url: Cow<'static, str>,
     #[rich(write(take, style = compose))]
     pub size: Size,
 }
 
-impl<T: ToString> From<T> for UrlIcon {
+impl<PMsg, T: ToString> From<T> for UrlIcon<PMsg> {
     fn from(url: T) -> Self {
         Self::new(url.to_string())
     }
 }
 
-impl UrlIcon {
+impl<PMsg> UrlIcon<PMsg> {
     pub fn new(url: impl Into<Cow<'static, str>>) -> Self {
         Self {
+            events: Events::default(),
             url: url.into(),
             size: Size::default(),
         }
@@ -176,24 +170,19 @@ impl UrlIcon {
     }
 }
 
-impl<Msg: 'static, ParentMsg: 'static> Render<Msg, ParentMsg> for UrlIcon {
-    type View = Node<ParentMsg>;
+impl<PMsg: 'static> Render<PMsg> for UrlIcon<PMsg> {
+    type View = Node<PMsg>;
 
-    fn render(
-        &self,
-        theme: &impl Theme,
-        map_msg: impl FnOnce(Msg) -> ParentMsg + 'static + Clone,
-    ) -> Self::View {
+    fn render(&self, theme: &impl Theme) -> Self::View {
         img![
             theme.url_icon(self),
             attrs![
                 At::Src => self.url,
             ]
         ]
-        .map_msg(map_msg)
     }
 }
 
-impl Themeable for UrlIcon {
+impl<PMsg> Themeable for UrlIcon<PMsg> {
     type StyleMap = css::Style;
 }
