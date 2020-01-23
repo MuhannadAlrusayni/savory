@@ -76,7 +76,7 @@ impl<PMsg> Radio<PMsg> {
     }
 }
 
-impl<GMsg: 'static, PMsg: 'static> Model<Msg, PMsg, GMsg> for Radio<PMsg> {
+impl<GMsg, PMsg: 'static> Model<Msg, PMsg, GMsg> for Radio<PMsg> {
     fn update(&mut self, msg: Msg, _: &mut impl Orders<PMsg, GMsg>) {
         match msg {
             Msg::MouseEnter => self.mouse_over = true,

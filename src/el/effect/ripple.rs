@@ -39,7 +39,7 @@ impl Ripple {
     }
 }
 
-impl<GMsg: 'static> Model<Msg, GMsg> for Ripple {
+impl<GMsg> Model<Msg, GMsg> for Ripple {
     fn update(&mut self, msg: Msg, orders: &mut impl Orders<Msg, GMsg>) {
         match msg {
             Msg::Clicked(x, y) => {
