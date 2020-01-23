@@ -24,7 +24,7 @@ pub struct Switch<PMsg> {
     internal_events: Events<Msg>,
     #[rich(write(take, style = compose))]
     events: Events<PMsg>,
-    map_msg: Rc<dyn Fn(Msg) -> PMsg>,
+    msg_mapper: Rc<dyn Fn(Msg) -> PMsg>,
     #[rich(write(take, style = compose))]
     pub style: Style,
     #[rich(value_fns(take) = {
@@ -61,9 +61,9 @@ pub struct Switch<PMsg> {
 }
 
 impl<PMsg> Switch<PMsg> {
-    pub fn new(map_msg: impl FnOnce(Msg) -> PMsg + Clone + 'static) -> Self {
+    pub fn new(msg_mapper: impl FnOnce(Msg) -> PMsg + Clone + 'static) -> Self {
         Self {
-            map_msg: Rc::new(move |msg| (map_msg.clone())(msg)),
+            msg_mapper: Rc::new(move |msg| (msg_mapper.clone())(msg)),
             internal_events: Events::default()
                 .focus(|_| Msg::Focus)
                 .blur(|_| Msg::Blur)
@@ -109,7 +109,7 @@ impl<PMsg: 'static> Render<PMsg> for Switch<PMsg> {
 
     fn render(&self, theme: &impl Theme) -> Self::View {
         let (bg_style, btn_style) = theme.switch(self);
-        let msg_mapper = Rc::clone(&self.map_msg.clone());
+        let msg_mapper = Rc::clone(&self.msg_mapper.clone());
 
         button![
             self.internal_events.events.clone(),

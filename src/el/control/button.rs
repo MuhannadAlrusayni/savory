@@ -37,7 +37,7 @@ pub enum Msg {
 
 #[derive(Clone, Rich)]
 pub struct Button<PMsg> {
-    map_msg: Rc<dyn Fn(Msg) -> PMsg>,
+    msg_mapper: Rc<dyn Fn(Msg) -> PMsg>,
     internal_events: Events<Msg>,
     #[rich(write(take, style = compose))]
     events: Events<PMsg>,
@@ -96,9 +96,9 @@ pub struct Button<PMsg> {
 }
 
 impl<PMsg> Button<PMsg> {
-    pub fn new(map_msg: impl FnOnce(Msg) -> PMsg + Clone + 'static) -> Self {
+    pub fn new(msg_mapper: impl FnOnce(Msg) -> PMsg + Clone + 'static) -> Self {
         Button {
-            map_msg: Rc::new(move |msg| (map_msg.clone())(msg)),
+            msg_mapper: Rc::new(move |msg| (msg_mapper.clone())(msg)),
             internal_events: Events::default()
                 .focus(|_| Msg::Focus)
                 .blur(|_| Msg::Blur)
@@ -122,17 +122,17 @@ impl<PMsg> Button<PMsg> {
     }
 
     pub fn with_label(
-        map_msg: impl FnOnce(Msg) -> PMsg + Clone + 'static,
+        msg_mapper: impl FnOnce(Msg) -> PMsg + Clone + 'static,
         label: impl Into<String>,
     ) -> Self {
-        Button::new(map_msg).label(label)
+        Button::new(msg_mapper).label(label)
     }
 
     pub fn with_children(
-        map_msg: impl FnOnce(Msg) -> PMsg + Clone + 'static,
+        msg_mapper: impl FnOnce(Msg) -> PMsg + Clone + 'static,
         children: Vec<Node<Msg>>,
     ) -> Self {
-        Button::new(map_msg).children(children)
+        Button::new(msg_mapper).children(children)
     }
 
     pub fn label(mut self, label: impl Into<String>) -> Self {
@@ -185,7 +185,7 @@ impl<PMsg: 'static> Render<PMsg> for Button<PMsg> {
     type View = Node<PMsg>;
 
     fn render(&self, theme: &impl Theme) -> Self::View {
-        let msg_mapper = Rc::clone(&self.map_msg.clone());
+        let msg_mapper = Rc::clone(&self.msg_mapper.clone());
 
         let inner: Vec<Node<Msg>> = match self.inner {
             Inner::Child(ref children) => children.clone(),

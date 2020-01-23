@@ -24,7 +24,7 @@ pub enum Msg {
 pub struct Radio<PMsg> {
     #[rich(write(take, style = compose))]
     events: Events<PMsg>,
-    map_msg: Rc<dyn Fn(Msg) -> PMsg>,
+    msg_mapper: Rc<dyn Fn(Msg) -> PMsg>,
     #[rich(write(take))]
     pub label: Option<Cow<'static, str>>,
     #[rich(write(take, style = compose))]
@@ -52,9 +52,9 @@ pub struct Radio<PMsg> {
 }
 
 impl<PMsg> Radio<PMsg> {
-    pub fn new(map_msg: impl FnOnce(Msg) -> PMsg + Clone + 'static) -> Self {
+    pub fn new(msg_mapper: impl FnOnce(Msg) -> PMsg + Clone + 'static) -> Self {
         Self {
-            map_msg: Rc::new(move |msg| (map_msg.clone())(msg)),
+            msg_mapper: Rc::new(move |msg| (msg_mapper.clone())(msg)),
             events: Events::default(),
             label: None,
             style: Style::default(),
@@ -115,7 +115,7 @@ impl<PMsg: 'static> Render<PMsg> for Radio<PMsg> {
             },
         ];
 
-        let msg_mapper = Rc::clone(&self.map_msg.clone());
+        let msg_mapper = Rc::clone(&self.msg_mapper.clone());
         if let Some(ref lbl) = self.label {
             let events = Events::default()
                 .mouse_enter(|_| Msg::MouseEnter)
