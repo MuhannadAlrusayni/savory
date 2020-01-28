@@ -104,19 +104,22 @@ impl<PMsg: 'static> Render<PMsg> for Entry<PMsg> {
     fn render(&self, theme: &impl Theme) -> Self::View {
         let style = theme.entry(self);
         let msg_mapper = Rc::clone(&self.msg_mapper.clone());
-        div![
-            style.container,
-            input![
-                self.internal_events.events.clone(),
-                style.input,
-                attrs![
-                    At::Disabled => self.disabled.as_at_value(),
-                    At::Value => self.text.as_ref().map(|v| AtValue::Some(v.clone())).unwrap_or(AtValue::Ignored),
-                    // At::MaxLength => self.max_length,
-                    // At::Placeholder => self.placeholder,
-                ],
+        let mut input = input![
+            self.internal_events.events.clone(),
+            style.input,
+            attrs![
+                At::Disabled => self.disabled.as_at_value(),
+                At::Value => self.text.as_ref().map(|v| AtValue::Some(v.clone())).unwrap_or(AtValue::Ignored),
+                // At::MaxLength => self.max_length,
+                // At::Placeholder => self.placeholder,
             ],
-        ].map_msg(move |msg| (msg_mapper.clone())(msg))
+        ].map_msg(move |msg| (msg_mapper.clone())(msg));
+
+        for event in self.events.events.clone().into_iter() {
+            input.add_listener(event);
+        }
+
+        div![style.container, input]
     }
 }
 

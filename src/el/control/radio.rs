@@ -116,7 +116,7 @@ impl<PMsg: 'static> Render<PMsg> for Radio<PMsg> {
         ];
 
         let msg_mapper = Rc::clone(&self.msg_mapper.clone());
-        if let Some(ref lbl) = self.label {
+        let mut radio = if let Some(ref lbl) = self.label {
             let events = Events::default()
                 .mouse_enter(|_| Msg::MouseEnter)
                 .mouse_leave(|_| Msg::MouseLeave);
@@ -124,7 +124,12 @@ impl<PMsg: 'static> Render<PMsg> for Radio<PMsg> {
         } else {
             input
         }
-        .map_msg(move |msg| (msg_mapper.clone())(msg))
+        .map_msg(move |msg| (msg_mapper.clone())(msg));
+
+        for event in self.events.events.clone().into_iter() {
+            radio.add_listener(event);
+        }
+        radio
     }
 }
 

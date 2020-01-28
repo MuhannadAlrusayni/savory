@@ -14,6 +14,7 @@ pub mod theme;
 
 pub mod prelude {
     pub use crate::css::Style;
+    pub use crate::el::prelude::*;
     pub use crate::model::Model;
     pub use crate::render::Render;
     pub use crate::routable::Routable;

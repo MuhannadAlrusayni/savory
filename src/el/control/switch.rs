@@ -111,7 +111,7 @@ impl<PMsg: 'static> Render<PMsg> for Switch<PMsg> {
         let (bg_style, btn_style) = theme.switch(self);
         let msg_mapper = Rc::clone(&self.msg_mapper.clone());
 
-        button![
+        let mut switch = button![
             self.internal_events.events.clone(),
             attrs![
                 At::Disabled => self.disabled.as_at_value(),
@@ -119,7 +119,12 @@ impl<PMsg: 'static> Render<PMsg> for Switch<PMsg> {
             bg_style,
             div![btn_style],
         ]
-        .map_msg(move |msg| (msg_mapper.clone())(msg))
+        .map_msg(move |msg| (msg_mapper.clone())(msg));
+
+        for event in self.events.events.clone().into_iter() {
+            switch.add_listener(event);
+        }
+        switch
     }
 }
 

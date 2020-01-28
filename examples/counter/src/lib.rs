@@ -1,4 +1,4 @@
-use khalas::{css::unit::px, el, prelude::*, theme::ant::Ant};
+use khalas::{css::unit::px, prelude::*, theme::ant::Ant};
 use seed::prelude::*;
 use std::rc::Rc;
 
@@ -6,8 +6,8 @@ use std::rc::Rc;
 extern crate seed;
 
 pub struct MyApp {
-    inc_btn: el::Button<Msg>,
-    dec_btn: el::Button<Msg>,
+    inc_btn: Button<Msg>,
+    dec_btn: Button<Msg>,
     count: i32,
     theme: Ant,
 }
@@ -15,10 +15,8 @@ pub struct MyApp {
 impl Default for MyApp {
     fn default() -> Self {
         Self {
-            inc_btn: el::Button::with_label(Msg::IncBtn, "+")
-                .events(|e| e.click(|_| Msg::Increment)),
-            dec_btn: el::Button::with_label(Msg::DecBtn, "-")
-                .events(|e| e.click(|_| Msg::Decrement)),
+            inc_btn: Button::with_label(Msg::IncBtn, "+").events(|e| e.click(|_| Msg::Increment)),
+            dec_btn: Button::with_label(Msg::DecBtn, "-").events(|e| e.click(|_| Msg::Decrement)),
             count: 0,
             theme: Ant::default(),
         }
@@ -26,10 +24,12 @@ impl Default for MyApp {
 }
 
 pub enum Msg {
-    IncBtn(el::button::Msg),
-    DecBtn(el::button::Msg),
+    IncBtn(button::Msg),
+    DecBtn(button::Msg),
     Increment,
     Decrement,
+    // Popup(i32, i32),
+    // Popdown,
 }
 
 impl Model<Msg, Msg, ()> for MyApp {
@@ -47,7 +47,7 @@ impl Render<Msg> for MyApp {
     type View = Node<Msg>;
 
     fn render(&self, theme: &impl Theme) -> Self::View {
-        el::Flexbox::new()
+        Flexbox::new()
             .gap(px(8.))
             .center()
             .full_size()

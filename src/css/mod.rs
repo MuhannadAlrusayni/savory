@@ -108,6 +108,10 @@ impl Style {
         }
     }
 
+    pub fn config_block(self, block: impl FnOnce(Self) -> Self) -> Self {
+        block(self)
+    }
+
     pub fn to_css(&self) -> Option<String> {
         self.0.iter().fold(Option::None, |mut css, (key, value)| {
             *css.get_or_insert(String::default()) += &format!("{}: {};", key.as_str(), value);

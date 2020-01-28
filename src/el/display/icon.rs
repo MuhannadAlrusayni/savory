@@ -83,6 +83,7 @@ impl<PMsg: 'static> Render<PMsg> for SvgIcon<PMsg> {
     fn render(&self, theme: &impl Theme) -> Self::View {
         svg![
             theme.svg_icon(self),
+            self.events.events.clone(),
             attrs![
                 At::ViewBox => "0 0 100 100",
             ],
@@ -128,6 +129,7 @@ impl<PMsg: 'static> Render<PMsg> for HtmlIcon<PMsg> {
     fn render(&self, theme: &impl Theme) -> Self::View {
         svg![
             theme.html_icon(self),
+            self.events.events.clone(),
             attrs![
                 At::ViewBox => "0 0 100 100",
             ],
@@ -176,6 +178,7 @@ impl<PMsg: 'static> Render<PMsg> for UrlIcon<PMsg> {
     fn render(&self, theme: &impl Theme) -> Self::View {
         img![
             theme.url_icon(self),
+            self.events.events.clone(),
             attrs![
                 At::Src => self.url,
             ]

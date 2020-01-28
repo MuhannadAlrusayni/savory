@@ -120,7 +120,7 @@ impl<PMsg: 'static> Render<PMsg> for Checkbox<PMsg> {
         ];
 
         let msg_mapper = Rc::clone(&self.msg_mapper.clone());
-        if let Some(ref lbl) = self.label {
+        let mut checkbox = if let Some(ref lbl) = self.label {
             label![
                 lbl_style,
                 input,
@@ -130,7 +130,11 @@ impl<PMsg: 'static> Render<PMsg> for Checkbox<PMsg> {
         } else {
             input
         }
-        .map_msg(move |msg| (msg_mapper)(msg))
+        .map_msg(move |msg| (msg_mapper)(msg));
+        for event in self.events.events.clone().into_iter() {
+            checkbox.add_listener(event);
+        }
+        checkbox
     }
 }
 

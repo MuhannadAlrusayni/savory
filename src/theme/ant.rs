@@ -597,6 +597,31 @@ impl Theme for Ant {
 
     // fn grid(&self) -> Style;
 
+    fn popover<PMsg: 'static>(
+        &self,
+        popover: &Popover<PMsg>,
+    ) -> <Popover<PMsg> as Themeable>::StyleMap {
+        Style::default()
+            .transition(|trans| {
+                trans
+                    .add("opacity", |conf| conf.duration(ms(150.)).ease())
+                    .add("transform", |conf| conf.duration(ms(150.)).ease())
+                    .add("visibility", |conf| {
+                        conf.duration(ms(1.)).ease().delay(ms(150.))
+                    })
+            })
+            .config_block(|style| {
+                if let Some((x, y)) = popover.position() {
+                    style
+                        .position(|pos| pos.left(px(x)).top(px(y)))
+                        .opacity(1.)
+                        .visibility(val::Visible)
+                } else {
+                    style.visibility(val::Hidden).opacity(0.)
+                }
+            })
+    }
+
     fn svg_icon<PMsg: 'static>(&self, icon: &SvgIcon<PMsg>) -> Style {
         Style::default()
             .try_merge(icon.color.as_ref())

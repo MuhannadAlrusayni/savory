@@ -14,7 +14,10 @@ pub mod prelude {
             radio::{self, Radio},
             switch::{self, Switch},
         },
-        display::icon::{self, HtmlIcon, Icon, SvgIcon, UrlIcon},
+        display::{
+            icon::{self, HtmlIcon, Icon, SvgIcon, UrlIcon},
+            popover::Popover,
+        },
         layout::flexbox::{self, Flexbox},
     };
 }

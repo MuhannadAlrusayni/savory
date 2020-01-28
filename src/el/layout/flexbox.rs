@@ -144,6 +144,7 @@ impl<PMsg: 'static> Render<PMsg> for Flexbox<PMsg> {
 
     fn render(&self, theme: &impl Theme) -> Self::View {
         div![
+            self.events.events.clone(),
             theme.flexbox(self),
             // items
             self.items.iter().map(|item| item.render(theme)),
@@ -242,6 +243,11 @@ impl<PMsg: 'static> Render<PMsg> for Item<PMsg> {
                 .clone()
                 .into_iter()
                 .map(|mut node| {
+                    // add self.events to every node
+                    for event in self.events.events.clone().into_iter() {
+                        node.add_listener(event);
+                    }
+                    // add style to every node
                     if let Some(style) = style.to_seed_style() {
                         for (key, value) in style.vals.into_iter() {
                             node.add_style(key, value);
@@ -252,6 +258,7 @@ impl<PMsg: 'static> Render<PMsg> for Item<PMsg> {
                 .collect()
         } else {
             vec![div![
+                self.events.events.clone(),
                 style,
                 // child
                 self.content.clone()
