@@ -597,10 +597,7 @@ impl Theme for Ant {
 
     // fn grid(&self) -> Style;
 
-    fn popover<PMsg: 'static>(
-        &self,
-        popover: &Popover<PMsg>,
-    ) -> <Popover<PMsg> as Themeable>::StyleMap {
+    fn popover<'a, PMsg, C, T>(&self, popover: &Popover<'a, PMsg, C, T>) -> popover::Style {
         let container = Style::default().position(|conf| conf.relative());
 
         let panel = Style::default()

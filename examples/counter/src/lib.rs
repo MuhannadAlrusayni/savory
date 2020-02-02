@@ -61,17 +61,16 @@ impl Render<Msg> for MyApp {
             .gap(px(8.))
             .center()
             .full_size()
-            .add(|item| item.content(vec![self.dec_btn.render(theme)]))
-            .add(|item| item.content(vec![self.inc_btn.render(theme)]))
-            .add(|item| item.content(vec![h3![self.count.to_string()]]))
-            .render(theme);
+            .add(|item| item.content(nodes![self.dec_btn.render(theme)]))
+            .add(|item| item.content(nodes![self.inc_btn.render(theme)]))
+            .add(|item| item.content(nodes![h3![self.count.to_string()]]));
 
-        let popover = Popover::new(self.pop_btn.render(theme), child).visible(self.popup);
+        let popover = Popover::new(&self.pop_btn, &child).visible(self.popup);
 
         Flexbox::new()
             .center()
             .full_size()
-            .add(|item| item.content(vec![popover.render(theme)]))
+            .add(|item| item.content(nodes![popover.render(theme)]))
             .render(theme)
     }
 }

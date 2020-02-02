@@ -12,7 +12,7 @@ pub trait Theme {
         _: &flexbox::Item<PMsg>,
     ) -> <flexbox::Item<PMsg> as Themeable>::StyleMap;
 
-    fn popover<PMsg: 'static>(&self, _: &Popover<PMsg>) -> <Popover<PMsg> as Themeable>::StyleMap;
+    fn popover<'a, PMsg, C, T>(&self, _: &Popover<'a, PMsg, C, T>) -> popover::Style;
 
     fn svg_icon<PMsg: 'static>(&self, _: &SvgIcon<PMsg>) -> <SvgIcon<PMsg> as Themeable>::StyleMap;
 

@@ -10,21 +10,21 @@ use seed::prelude::*;
 use std::{borrow::Cow, rc::Rc};
 
 #[derive(Clone, Rich)]
-pub struct Popover<PMsg: 'static> {
+pub struct Popover<'a, PMsg, C, T> {
     #[rich(write(take, style = compose))]
     events: Events<PMsg>,
     #[rich(write(take))]
-    child: Node<PMsg>,
+    child: &'a C,
     #[rich(write(take))]
-    target: Node<PMsg>,
+    target: &'a T,
     #[rich(write(take, style = compose))]
     pub style: css::Style,
     #[rich(write(take), read(copy, rename = is_visible), value_fns(take) = { popup = true, popdown = false })]
     pub visible: bool,
 }
 
-impl<PMsg> Popover<PMsg> {
-    pub fn new(target: Node<PMsg>, child: Node<PMsg>) -> Self {
+impl<'a, PMsg, C, T> Popover<'a, PMsg, C, T> {
+    pub fn new(target: &'a T, child: &'a C) -> Self {
         Self {
             child,
             target,
@@ -35,7 +35,12 @@ impl<PMsg> Popover<PMsg> {
     }
 }
 
-impl<PMsg: 'static> Render<PMsg> for Popover<PMsg> {
+impl<'a, PMsg: 'static, C, T> Render<PMsg> for Popover<'a, PMsg, C, T>
+where
+    PMsg: 'static,
+    C: Render<PMsg, View = Node<PMsg>>,
+    T: Render<PMsg, View = Node<PMsg>>,
+{
     type View = Node<PMsg>;
 
     fn render(&self, theme: &impl Theme) -> Self::View {
@@ -43,8 +48,8 @@ impl<PMsg: 'static> Render<PMsg> for Popover<PMsg> {
         div![
             style.container,
             self.events.events.clone(),
-            self.target.clone(),
-            div![style.panel, self.child.clone(),]
+            self.target.render(theme),
+            div![style.panel, self.child.render(theme)]
         ]
     }
 }
@@ -54,6 +59,6 @@ pub struct Style {
     pub panel: css::Style,
 }
 
-impl<PMsg: 'static> Themeable for Popover<PMsg> {
+impl<'a, PMsg, C, T> Themeable for Popover<'a, PMsg, C, T> {
     type StyleMap = Style;
 }
