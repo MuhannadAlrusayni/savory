@@ -75,12 +75,8 @@ impl<PMsg: 'static> Flexbox<PMsg> {
         }
     }
 
-    pub fn item(content: impl IntoIterator<Item = impl Into<Node<PMsg>>>) -> Item<PMsg> {
-        Item::with_content(content)
-    }
-
-    pub fn add(mut self, get_child: impl FnOnce(Item<PMsg>) -> Item<PMsg>) -> Self {
-        self.items.push(get_child(Item::new()));
+    pub fn add<T: Into<Item<PMsg>>>(mut self, get_child: impl FnOnce(Item<PMsg>) -> T) -> Self {
+        self.items.push(get_child(Item::new()).into());
         self
     }
 
@@ -194,6 +190,18 @@ pub struct Item<PMsg: 'static> {
     pub padding: Padding,
     #[rich(read(copy, rename = is_flatten), value_fns(take) = { flatten = true, wrapped = false })]
     flatten: bool,
+}
+
+impl<PMsg: 'static> From<Vec<Node<PMsg>>> for Item<PMsg> {
+    fn from(source: Vec<Node<PMsg>>) -> Self {
+        Item::with_content(source)
+    }
+}
+
+impl<PMsg: 'static> From<Node<PMsg>> for Item<PMsg> {
+    fn from(source: Node<PMsg>) -> Self {
+        Item::with_content(nodes![source])
+    }
 }
 
 impl<PMsg: 'static> Item<PMsg> {
