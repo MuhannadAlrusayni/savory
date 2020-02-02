@@ -601,25 +601,28 @@ impl Theme for Ant {
         &self,
         popover: &Popover<PMsg>,
     ) -> <Popover<PMsg> as Themeable>::StyleMap {
-        Style::default()
+        let container = Style::default().position(|conf| conf.relative());
+
+        let panel = Style::default()
             .transition(|trans| {
                 trans
                     .add("opacity", |conf| conf.duration(ms(150.)).ease())
                     .add("transform", |conf| conf.duration(ms(150.)).ease())
-                    .add("visibility", |conf| {
-                        conf.duration(ms(1.)).ease().delay(ms(150.))
-                    })
+                    .add("visibility", |conf| conf.duration(ms(150.)).ease())
             })
+            .position(|conf| conf.absolute())
+            .background(|conf| conf.color(self.white()))
+            .border(|conf| conf.color(self.border(false)).solid().width(px(1.)))
+            .padding(|conf| conf.x(px(4.)).y(px(2)))
             .config_block(|style| {
-                if let Some((x, y)) = popover.position() {
-                    style
-                        .position(|pos| pos.left(px(x)).top(px(y)))
-                        .opacity(1.)
-                        .visibility(val::Visible)
+                if popover.is_visible() {
+                    style.opacity(1.).visibility(val::Visible)
                 } else {
                     style.visibility(val::Hidden).opacity(0.)
                 }
-            })
+            });
+
+        popover::Style { container, panel }
     }
 
     fn svg_icon<PMsg: 'static>(&self, icon: &SvgIcon<PMsg>) -> Style {

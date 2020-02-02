@@ -16,7 +16,7 @@ pub mod prelude {
         },
         display::{
             icon::{self, HtmlIcon, Icon, SvgIcon, UrlIcon},
-            popover::Popover,
+            popover::{self, Popover},
         },
         layout::flexbox::{self, Flexbox},
     };

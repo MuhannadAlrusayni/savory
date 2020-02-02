@@ -8,11 +8,14 @@ edition = "2018"
 
 [dependencies]
 seed = { git = "https://github.com/David-OConnor/seed" }
-web-sys = { version = "^0.3.35", features = ["WheelEvent", "CompositionEvent", "FocusEvent", "DragEvent"] }
 palette = "0.4.1"
 derive_more = { git = "https://github.com/JelteF/derive_more" }
 derive_rich = { git = "https://gitlab.com/muhannad_alrusayni/derive_rich" }
 wasm-bindgen = "0.2.58"
+
+[dependencies.web-sys]
+version = "^0.3.35"
+features = ["WheelEvent", "CompositionEvent", "FocusEvent", "DragEvent", "DomRect", "Element"]
 
 [workspace]
 members = [
