@@ -38,7 +38,9 @@ pub enum Msg {
     TogglePopover(web_sys::MouseEvent),
 }
 
-impl Model<Msg, Msg, ()> for MyApp {
+impl Model<Msg, ()> for MyApp {
+    type Message = Msg;
+
     fn update(&mut self, msg: Msg, orders: &mut impl Orders<Msg, ()>) {
         match msg {
             Msg::IncBtn(msg) => self.inc_btn.update(msg, orders),

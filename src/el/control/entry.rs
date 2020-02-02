@@ -85,7 +85,9 @@ impl<PMsg> Entry<PMsg> {
     }
 }
 
-impl<GMsg, PMsg: 'static> Model<Msg, PMsg, GMsg> for Entry<PMsg> {
+impl<GMsg, PMsg: 'static> Model<PMsg, GMsg> for Entry<PMsg> {
+    type Message = Msg;
+
     fn update(&mut self, msg: Msg, _: &mut impl Orders<PMsg, GMsg>) {
         match msg {
             Msg::UpdateText(text) => self.text = Some(text),
