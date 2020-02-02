@@ -61,9 +61,9 @@ impl Render<Msg> for MyApp {
             .gap(px(8.))
             .center()
             .full_size()
-            .add(|_| nodes![self.dec_btn.render(theme)])
-            .add(|_| nodes![self.inc_btn.render(theme)])
-            .add(|_| nodes![h3![self.count.to_string()]]);
+            .add(|_| self.dec_btn.render(theme))
+            .add(|_| self.inc_btn.render(theme))
+            .add(|_| h3![self.count.to_string()]);
 
         let popover = Popover::new(&self.pop_btn, &child).visible(self.popup);
 
