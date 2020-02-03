@@ -87,6 +87,18 @@ impl From<i32> for Px {
     }
 }
 
+impl From<i16> for Px {
+    fn from(source: i16) -> Self {
+        Px(source as f32)
+    }
+}
+
+impl From<i8> for Px {
+    fn from(source: i8) -> Self {
+        Px(source as f32)
+    }
+}
+
 // Parent-relative
 #[derive(Clone, Debug, Copy, PartialEq, Display, From)]
 #[display(fmt = "{}%", "_0 * 100.0")]

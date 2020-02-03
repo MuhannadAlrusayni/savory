@@ -9,6 +9,7 @@ use derive_rich::Rich;
 use seed::prelude::*;
 use std::{borrow::Cow, rc::Rc};
 
+// TODO: add placement property
 #[derive(Clone, Rich)]
 pub struct Popover<'a, PMsg, C, T> {
     #[rich(write(take, style = compose))]
@@ -21,6 +22,8 @@ pub struct Popover<'a, PMsg, C, T> {
     pub style: css::Style,
     #[rich(write(take), read(copy, rename = is_visible), value_fns(take) = { popup = true, popdown = false })]
     pub visible: bool,
+    #[rich(write(take))]
+    pub offset: i8,
 }
 
 impl<'a, PMsg, C, T> Popover<'a, PMsg, C, T> {
@@ -31,6 +34,7 @@ impl<'a, PMsg, C, T> Popover<'a, PMsg, C, T> {
             style: css::Style::default(),
             events: Events::default(),
             visible: false,
+            offset: 0,
         }
     }
 }

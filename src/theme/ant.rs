@@ -611,6 +611,7 @@ impl Theme for Ant {
             .background(|conf| conf.color(self.white()))
             .border(|conf| conf.color(self.border(false)).solid().width(px(1.)))
             .padding(|conf| conf.x(px(4.)).y(px(2)))
+            .margin(|conf| conf.top(|_| px(popover.offset).into()))
             .config_block(|style| {
                 if popover.is_visible() {
                     style.opacity(1.).visibility(val::Visible)

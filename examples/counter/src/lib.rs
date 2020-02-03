@@ -65,7 +65,9 @@ impl Render<Msg> for MyApp {
             .add(|_| self.inc_btn.render(theme))
             .add(|_| h3![self.count.to_string()]);
 
-        let popover = Popover::new(&self.pop_btn, &child).visible(self.popup);
+        let popover = Popover::new(&self.pop_btn, &child)
+            .visible(self.popup)
+            .offset(4);
 
         Flexbox::new()
             .center()
