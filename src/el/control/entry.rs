@@ -29,11 +29,6 @@ pub struct Entry<PMsg> {
     events: Events<PMsg>,
     #[rich(write(take))]
     pub text: Option<String>,
-    #[rich(
-        read(copy, rename = is_readonly),
-        value_fns(take) = { readonly = true, readonly_off = false }
-    )]
-    pub readonly: bool,
     #[rich(write(take))]
     pub max_length: Option<usize>,
     #[rich(write(take))]
@@ -69,7 +64,6 @@ impl<PMsg> Entry<PMsg> {
             events: Events::default(),
             msg_mapper: Rc::new(move |msg| (msg_mapper.clone())(msg)),
             text: None,
-            readonly: false,
             max_length: None,
             placeholder: None,
             style: Style::default(),
