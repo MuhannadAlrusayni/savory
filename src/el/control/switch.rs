@@ -1,10 +1,10 @@
 use crate::{
-    css::Style,
+    css,
     events::Events,
     model::Model,
     propertie::{Shape, Size},
     render::Render,
-    theme::{Theme, Themeable},
+    theme::Theme,
 };
 use derive_rich::Rich;
 use seed::prelude::*;
@@ -106,11 +106,20 @@ impl<GMsg, PMsg: 'static> Model<PMsg, GMsg> for Switch<PMsg> {
     }
 }
 
+#[derive(Clone, Debug, Default, Rich)]
+pub struct Style {
+    #[rich(write(take, style = compose))]
+    pub background: css::Style,
+    #[rich(write(take, style = compose))]
+    pub button: css::Style,
+}
+
 impl<PMsg: 'static> Render<PMsg> for Switch<PMsg> {
     type View = Node<PMsg>;
+    type Style = Style;
 
     fn render(&self, theme: &impl Theme) -> Self::View {
-        let (bg_style, btn_style) = theme.switch(self);
+        let style = theme.switch(self);
         let msg_mapper = Rc::clone(&self.msg_mapper.clone());
 
         let mut switch = button![
@@ -118,8 +127,8 @@ impl<PMsg: 'static> Render<PMsg> for Switch<PMsg> {
             attrs![
                 At::Disabled => self.disabled.as_at_value(),
             ],
-            bg_style,
-            div![btn_style],
+            style.background,
+            div![style.button],
         ]
         .map_msg(move |msg| (msg_mapper.clone())(msg));
 
@@ -128,8 +137,4 @@ impl<PMsg: 'static> Render<PMsg> for Switch<PMsg> {
         }
         switch
     }
-}
-
-impl<PMsg> Themeable for Switch<PMsg> {
-    type StyleMap = (Style, Style);
 }

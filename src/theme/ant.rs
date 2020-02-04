@@ -7,7 +7,7 @@ use crate::{
     },
     el::prelude::*,
     propertie::*,
-    theme::{Theme, Themeable},
+    theme::Theme,
 };
 
 use palette::{Hsl, Hsla};
@@ -562,7 +562,7 @@ impl Ant {
 }
 
 impl Theme for Ant {
-    fn flexbox<PMsg: 'static>(&self, flex: &Flexbox<PMsg>) -> Style {
+    fn flexbox<PMsg: 'static>(&self, flex: &Flexbox<PMsg>) -> flexbox::Style {
         // flex container style
         Style::default()
             .display(val::Flex)
@@ -581,7 +581,7 @@ impl Theme for Ant {
             .merge(&flex.style)
     }
 
-    fn flexbox_item<PMsg: 'static>(&self, item: &flexbox::Item<PMsg>) -> Style {
+    fn flexbox_item<PMsg: 'static>(&self, item: &flexbox::Item<PMsg>) -> flexbox::ItemStyle {
         Style::default()
             .try_add(St::Order, item.order)
             .try_add(St::FlexGrow, item.grow)
@@ -609,7 +609,13 @@ impl Theme for Ant {
             })
             .position(|conf| conf.absolute())
             .background(|conf| conf.color(self.white()))
-            .border(|conf| conf.color(self.border(false)).solid().width(px(1.)))
+            .border(|conf| {
+                conf.color(self.border(false))
+                    .none()
+                    .width(px(0.))
+                    .radius(px(4.))
+            })
+            .add(St::BoxShadow, "0 2px 8px rgba(0, 35, 11, 0.15)")
             .padding(|conf| conf.x(px(4.)).y(px(2)))
             .margin(|conf| conf.top(|_| px(popover.offset).into()))
             .config_block(|style| {
@@ -623,19 +629,19 @@ impl Theme for Ant {
         popover::Style { container, panel }
     }
 
-    fn svg_icon<PMsg: 'static>(&self, icon: &SvgIcon<PMsg>) -> Style {
+    fn svg_icon<PMsg: 'static>(&self, icon: &SvgIcon<PMsg>) -> icon::SvgStyle {
         Style::default()
             .try_merge(icon.color.as_ref())
             .merge(&icon.size)
     }
 
-    fn html_icon<PMsg>(&self, icon: &HtmlIcon<PMsg>) -> Style {
+    fn html_icon<PMsg>(&self, icon: &HtmlIcon<PMsg>) -> icon::HtmlStyle {
         Style::default()
             .try_merge(icon.color.as_ref())
             .merge(&icon.size)
     }
 
-    fn url_icon<PMsg>(&self, icon: &UrlIcon<PMsg>) -> Style {
+    fn url_icon<PMsg>(&self, icon: &UrlIcon<PMsg>) -> icon::UrlStyle {
         Style::default().merge(&icon.size)
     }
 
@@ -644,7 +650,7 @@ impl Theme for Ant {
     // TODO: handle btn.shape()
     // TODO: handle btn.is_block()
     // TODO: handle btn.is_ghost()
-    fn button<PMsg>(&self, btn: &Button<PMsg>) -> Style {
+    fn button<PMsg>(&self, btn: &Button<PMsg>) -> button::Style {
         let padding = css::Padding::default().x(px(15.)).y(px(0.));
 
         let size = css::Size::default().height(px(32.));
@@ -680,7 +686,7 @@ impl Theme for Ant {
         .merge(&btn.style)
     }
 
-    fn switch<PMsg>(&self, switch: &Switch<PMsg>) -> <Switch<PMsg> as Themeable>::StyleMap {
+    fn switch<PMsg>(&self, switch: &Switch<PMsg>) -> switch::Style {
         let width = 44.;
         let height = 22.;
         let btn_size = height - 3.;
@@ -704,7 +710,7 @@ impl Theme for Ant {
             None
         };
 
-        let bg_style = Style::default()
+        let background = Style::default()
             .try_add(St::Opacity, opacity)
             .cursor(cursor)
             .position(|pos| pos.relative())
@@ -720,15 +726,11 @@ impl Theme for Ant {
             .add(St::BoxSizing, val::BorderBox)
             .size(|s| s.height(px(height)).min_width(px(width)));
 
-        let translatex = if switch.is_toggled() {
-            Some(format!("translateX({})", px(width / 2.)))
-        } else {
-            None
-        };
-
-        let btn_style = Style::default()
+        let button = switch
+            .is_toggled()
+            .then(|| Style::default().add(St::Transform, format!("translateX({})", px(width / 2.))))
+            .unwrap_or_else(Style::default)
             .position(|pos| pos.absolute().top(px(top)).left(px(left)))
-            .try_add(St::Transform, translatex)
             .transition(|trans| {
                 trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
             })
@@ -737,10 +739,10 @@ impl Theme for Ant {
             .add(St::BoxShadow, "0 2px 4px 0 rgba(0, 35, 11, 0.2)")
             .size(|s| s.resize(px(btn_size), px(btn_size)));
 
-        (bg_style, btn_style)
+        switch::Style { background, button }
     }
 
-    fn checkbox<PMsg>(&self, checkbox: &Checkbox<PMsg>) -> <Checkbox<PMsg> as Themeable>::StyleMap {
+    fn checkbox<PMsg>(&self, checkbox: &Checkbox<PMsg>) -> checkbox::Style {
         let (bg, fg, border) = match (
             checkbox.is_disabled(),
             checkbox.is_focused(),
@@ -780,7 +782,7 @@ impl Theme for Ant {
             .then(|| -> css::Cursor { val::NotAllowed.into() })
             .unwrap_or_else(|| val::Pointer.into());
 
-        let input_style = Style::default()
+        let input = Style::default()
             .transition(|trans| {
                 trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
             })
@@ -795,7 +797,7 @@ impl Theme for Ant {
             .background(|b| b.color(bg))
             .color(fg);
 
-        let btn_style = if checkbox.is_toggled() {
+        let button = if checkbox.is_toggled() {
             Style::default()
                 .cursor(cursor)
                 .transition(|trans| {
@@ -813,7 +815,7 @@ impl Theme for Ant {
             Style::default()
         };
 
-        let lbl_style = if checkbox.is_disabled() {
+        let label = if checkbox.is_disabled() {
             Style::default().color(self.disable(false))
         } else {
             Style::default()
@@ -825,10 +827,14 @@ impl Theme for Ant {
         .display(val::Flex)
         .gap(px(4.));
 
-        (input_style, btn_style, lbl_style)
+        checkbox::Style {
+            input,
+            button,
+            label,
+        }
     }
 
-    fn radio<PMsg>(&self, radio: &Radio<PMsg>) -> <Radio<PMsg> as Themeable>::StyleMap {
+    fn radio<PMsg>(&self, radio: &Radio<PMsg>) -> radio::Style {
         let (bg, fg, border) = match (
             radio.is_disabled(),
             radio.is_focused(),
@@ -868,7 +874,7 @@ impl Theme for Ant {
             .then(|| -> css::Cursor { val::NotAllowed.into() })
             .unwrap_or_else(|| val::Pointer.into());
 
-        let input_style = Style::default()
+        let input = Style::default()
             .transition(|trans| {
                 trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
             })
@@ -882,35 +888,39 @@ impl Theme for Ant {
             .border(|b| b.solid().width(px(1.)).color(border).radius(0.5))
             .background(|b| b.color(bg));
 
-        let btn_style = if radio.is_toggled() {
-            Style::default()
-                .cursor(cursor)
-                .size(|s| s.resize(0.6, 0.6))
-                .border(|b| b.none().radius(0.5))
-                .background(|b| b.color(fg))
-        } else {
-            Style::default()
-        }
-        .transition(|trans| {
-            trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
-        });
+        let button = radio
+            .is_toggled()
+            .then(|| {
+                Style::default()
+                    .cursor(cursor)
+                    .size(|s| s.resize(0.6, 0.6))
+                    .border(|b| b.none().radius(0.5))
+                    .background(|b| b.color(fg))
+            })
+            .unwrap_or_else(Style::default)
+            .transition(|trans| {
+                trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+            });
 
-        let lbl_style = if radio.is_disabled() {
-            Style::default().color(self.disable(false))
-        } else {
-            Style::default()
-        }
-        .transition(|trans| {
-            trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
-        })
-        .cursor(cursor)
-        .display(val::Flex)
-        .gap(px(4.));
+        let label = radio
+            .is_disabled()
+            .then(|| Style::default().color(self.disable(false)))
+            .unwrap_or_else(Style::default)
+            .transition(|trans| {
+                trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+            })
+            .cursor(cursor)
+            .display(val::Flex)
+            .gap(px(4.));
 
-        (input_style, btn_style, lbl_style)
+        radio::Style {
+            input,
+            button,
+            label,
+        }
     }
 
-    fn entry<PMsg>(&self, entry: &Entry<PMsg>) -> <Entry<PMsg> as Themeable>::StyleMap {
+    fn entry<PMsg>(&self, entry: &Entry<PMsg>) -> entry::Style {
         let (bg, fg, border) = match (
             entry.is_disabled(),
             entry.is_focused(),
@@ -959,6 +969,10 @@ impl Theme for Ant {
             .add(St::WebkitAppearance, val::None)
             .cursor(cursor);
 
-        entry::StyleMap { container, input }
+        entry::Style { container, input }
+    }
+
+    fn spin_entry<PMsg>(&self, _: &SpinEntry<PMsg>) -> spin_entry::Style {
+        todo!()
     }
 }

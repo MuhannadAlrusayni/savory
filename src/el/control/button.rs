@@ -1,11 +1,11 @@
 use crate::{
-    css::{self, unit::px, values as val, Style},
+    css::{self, unit::px, values as val},
     el::{Flexbox, Icon},
     events::Events,
     model::Model,
     propertie::{Shape, Size},
     render::Render,
-    theme::{Theme, Themeable},
+    theme::Theme,
 };
 use derive_rich::Rich;
 use seed::prelude::*;
@@ -183,8 +183,11 @@ impl<GMsg, PMsg: 'static> Model<PMsg, GMsg> for Button<PMsg> {
     }
 }
 
+pub type Style = css::Style;
+
 impl<PMsg: 'static> Render<PMsg> for Button<PMsg> {
     type View = Node<PMsg>;
+    type Style = Style;
 
     fn render(&self, theme: &impl Theme) -> Self::View {
         let msg_mapper = Rc::clone(&self.msg_mapper.clone());
@@ -224,10 +227,6 @@ impl<PMsg: 'static> Render<PMsg> for Button<PMsg> {
         }
         btn
     }
-}
-
-impl<PMsg> Themeable for Button<PMsg> {
-    type StyleMap = Style;
 }
 
 #[cfg(test)]

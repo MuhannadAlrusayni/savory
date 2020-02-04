@@ -3,7 +3,7 @@ use crate::{
     events::Events,
     macros::*,
     render::Render,
-    theme::{Theme, Themeable},
+    theme::Theme,
 };
 use derive_rich::Rich;
 use seed::prelude::*;
@@ -19,7 +19,7 @@ pub struct Popover<'a, PMsg, C, T> {
     #[rich(write(take))]
     target: &'a T,
     #[rich(write(take, style = compose))]
-    pub style: css::Style,
+    pub style: Style,
     #[rich(write(take), read(copy, rename = is_visible), value_fns(take) = { popup = true, popdown = false })]
     pub visible: bool,
     #[rich(write(take))]
@@ -31,12 +31,20 @@ impl<'a, PMsg, C, T> Popover<'a, PMsg, C, T> {
         Self {
             child,
             target,
-            style: css::Style::default(),
+            style: Style::default(),
             events: Events::default(),
             visible: false,
             offset: 0,
         }
     }
+}
+
+#[derive(Clone, Debug, Default, Rich)]
+pub struct Style {
+    #[rich(write(take, style = compose))]
+    pub container: css::Style,
+    #[rich(write(take, style = compose))]
+    pub panel: css::Style,
 }
 
 impl<'a, PMsg: 'static, C, T> Render<PMsg> for Popover<'a, PMsg, C, T>
@@ -46,6 +54,7 @@ where
     T: Render<PMsg, View = Node<PMsg>>,
 {
     type View = Node<PMsg>;
+    type Style = Style;
 
     fn render(&self, theme: &impl Theme) -> Self::View {
         let style = theme.popover(self);
@@ -56,13 +65,4 @@ where
             div![style.panel, self.child.render(theme)]
         ]
     }
-}
-
-pub struct Style {
-    pub container: css::Style,
-    pub panel: css::Style,
-}
-
-impl<'a, PMsg, C, T> Themeable for Popover<'a, PMsg, C, T> {
-    type StyleMap = Style;
 }

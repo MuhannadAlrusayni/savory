@@ -6,7 +6,7 @@ use crate::{
     events::Events,
     macros::*,
     render::Render,
-    theme::{Theme, Themeable},
+    theme::Theme,
 };
 use derive_rich::Rich;
 use seed::prelude::*;
@@ -135,8 +135,11 @@ impl<PMsg: 'static> Flexbox<PMsg> {
     }
 }
 
+pub type Style = css::Style;
+
 impl<PMsg: 'static> Render<PMsg> for Flexbox<PMsg> {
     type View = Node<PMsg>;
+    type Style = Style;
 
     fn render(&self, theme: &impl Theme) -> Self::View {
         div![
@@ -146,10 +149,6 @@ impl<PMsg: 'static> Render<PMsg> for Flexbox<PMsg> {
             self.items.iter().map(|item| item.render(theme)),
         ]
     }
-}
-
-impl<PMsg: 'static> Themeable for Flexbox<PMsg> {
-    type StyleMap = css::Style;
 }
 
 // ---- Flexbox Item ----
@@ -241,8 +240,11 @@ impl<PMsg: 'static> Item<PMsg> {
     }
 }
 
+pub type ItemStyle = css::Style;
+
 impl<PMsg: 'static> Render<PMsg> for Item<PMsg> {
     type View = Vec<Node<PMsg>>;
+    type Style = Style;
 
     fn render(&self, theme: &impl Theme) -> Self::View {
         let style = theme.flexbox_item(self);
@@ -273,10 +275,6 @@ impl<PMsg: 'static> Render<PMsg> for Item<PMsg> {
             ]]
         }
     }
-}
-
-impl<PMsg: 'static> Themeable for Item<PMsg> {
-    type StyleMap = css::Style;
 }
 
 #[cfg(test)]

@@ -1,10 +1,10 @@
 use crate::{
-    css::{self, unit::px, values as val, St, Style},
+    css::{self, unit::px, values as val, St},
     events::Events,
     model::Model,
     propertie::Size,
     render::Render,
-    theme::{Theme, Themeable},
+    theme::Theme,
 };
 use derive_rich::Rich;
 use seed::prelude::*;
@@ -100,11 +100,22 @@ impl<GMsg, PMsg: 'static> Model<PMsg, GMsg> for Checkbox<PMsg> {
     }
 }
 
+#[derive(Clone, Debug, Default, Rich)]
+pub struct Style {
+    #[rich(write(take, style = compose))]
+    pub input: css::Style,
+    #[rich(write(take, style = compose))]
+    pub button: css::Style,
+    #[rich(write(take, style = compose))]
+    pub label: css::Style,
+}
+
 impl<PMsg: 'static> Render<PMsg> for Checkbox<PMsg> {
     type View = Node<PMsg>;
+    type Style = Style;
 
     fn render(&self, theme: &impl Theme) -> Self::View {
-        let (input_style, btn_style, lbl_style) = theme.checkbox(self);
+        let style = theme.checkbox(self);
 
         let input = input![
             attrs![
@@ -112,10 +123,10 @@ impl<PMsg: 'static> Render<PMsg> for Checkbox<PMsg> {
                 At::Checked => self.toggle.as_at_value(),
                 At::Type => "checkbox",
             ],
-            input_style,
+            style.input,
             self.internal_events.events.clone(),
             if self.is_toggled() {
-                div![btn_style]
+                div![style.button]
             } else {
                 empty![]
             },
@@ -124,7 +135,7 @@ impl<PMsg: 'static> Render<PMsg> for Checkbox<PMsg> {
         let msg_mapper = Rc::clone(&self.msg_mapper.clone());
         let mut checkbox = if let Some(ref lbl) = self.label {
             label![
-                lbl_style,
+                style.label,
                 input,
                 lbl.to_string(),
                 self.lbl_events.events.clone(),
@@ -138,8 +149,4 @@ impl<PMsg: 'static> Render<PMsg> for Checkbox<PMsg> {
         }
         checkbox
     }
-}
-
-impl<PMsg> Themeable for Checkbox<PMsg> {
-    type StyleMap = (Style, Style, Style);
 }

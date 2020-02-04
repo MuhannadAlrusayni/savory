@@ -21,7 +21,7 @@ impl Default for MyApp {
             inc_btn: Button::with_label(Msg::IncBtn, "+").events(|e| e.click(|_| Msg::Increment)),
             dec_btn: Button::with_label(Msg::DecBtn, "-").events(|e| e.click(|_| Msg::Decrement)),
             pop_btn: Button::with_label(Msg::PopBtn, "Menu")
-                .events(|conf| conf.click(Msg::TogglePopover)),
+                .events(|conf| conf.click(|_| Msg::TogglePopover)),
             count: 0,
             theme: Ant::default(),
             popup: false,
@@ -35,7 +35,7 @@ pub enum Msg {
     Increment,
     Decrement,
     PopBtn(button::Msg),
-    TogglePopover(web_sys::MouseEvent),
+    TogglePopover,
 }
 
 impl Model<Msg, ()> for MyApp {
@@ -48,13 +48,14 @@ impl Model<Msg, ()> for MyApp {
             Msg::Increment => self.count += 1,
             Msg::Decrement => self.count -= 1,
             Msg::PopBtn(msg) => self.pop_btn.update(msg, orders),
-            Msg::TogglePopover(_) => self.popup = !self.popup,
+            Msg::TogglePopover => self.popup = !self.popup,
         }
     }
 }
 
 impl Render<Msg> for MyApp {
     type View = Node<Msg>;
+    type Style = ();
 
     fn render(&self, theme: &impl Theme) -> Self::View {
         let child = Flexbox::new()

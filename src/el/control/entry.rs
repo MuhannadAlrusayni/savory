@@ -1,11 +1,11 @@
 use crate::{
-    css::Style,
+    css,
     el::prelude::*,
     events::Events,
     model::Model,
     propertie::{Shape, Size},
     render::Render,
-    theme::{Theme, Themeable},
+    theme::Theme,
 };
 use derive_rich::Rich;
 use seed::prelude::*;
@@ -94,8 +94,17 @@ impl<GMsg, PMsg: 'static> Model<PMsg, GMsg> for Entry<PMsg> {
     }
 }
 
+#[derive(Clone, Debug, Default, Rich)]
+pub struct Style {
+    #[rich(write(take, style = compose))]
+    pub container: css::Style,
+    #[rich(write(take, style = compose))]
+    pub input: css::Style,
+}
+
 impl<PMsg: 'static> Render<PMsg> for Entry<PMsg> {
     type View = Node<PMsg>;
+    type Style = Style;
 
     fn render(&self, theme: &impl Theme) -> Self::View {
         let style = theme.entry(self);
@@ -117,13 +126,4 @@ impl<PMsg: 'static> Render<PMsg> for Entry<PMsg> {
 
         div![style.container, input]
     }
-}
-
-pub struct StyleMap {
-    pub container: Style,
-    pub input: Style,
-}
-
-impl<PMsg> Themeable for Entry<PMsg> {
-    type StyleMap = StyleMap;
 }

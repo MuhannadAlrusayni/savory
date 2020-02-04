@@ -1,11 +1,11 @@
 use crate::{
-    css::{self, unit::px, values as val, St, Style},
+    css::{self, unit::px, values as val, St},
     events::Events,
     macros::*,
     model::Model,
     propertie::Size,
     render::Render,
-    theme::{Theme, Themeable},
+    theme::Theme,
 };
 use derive_rich::Rich;
 use seed::prelude::*;
@@ -90,11 +90,22 @@ impl<GMsg, PMsg: 'static> Model<PMsg, GMsg> for Radio<PMsg> {
     }
 }
 
+#[derive(Clone, Debug, Default, Rich)]
+pub struct Style {
+    #[rich(write(take, style = compose))]
+    pub input: css::Style,
+    #[rich(write(take, style = compose))]
+    pub button: css::Style,
+    #[rich(write(take, style = compose))]
+    pub label: css::Style,
+}
+
 impl<PMsg: 'static> Render<PMsg> for Radio<PMsg> {
     type View = Node<PMsg>;
+    type Style = Style;
 
     fn render(&self, theme: &impl Theme) -> Self::View {
-        let (input_style, btn_style, lbl_style) = theme.radio(self);
+        let style = theme.radio(self);
 
         let events = Events::default()
             .focus(|_| Msg::Focus)
@@ -109,9 +120,9 @@ impl<PMsg: 'static> Render<PMsg> for Radio<PMsg> {
                 At::Type => "radio",
             ],
             events.events,
-            input_style,
+            style.input,
             if self.is_toggled() {
-                div![btn_style]
+                div![style.button]
             } else {
                 empty![]
             },
@@ -122,7 +133,7 @@ impl<PMsg: 'static> Render<PMsg> for Radio<PMsg> {
             let events = Events::default()
                 .mouse_enter(|_| Msg::MouseEnter)
                 .mouse_leave(|_| Msg::MouseLeave);
-            label![lbl_style, input, lbl.to_string(), events.events]
+            label![style.label, input, lbl.to_string(), events.events]
         } else {
             input
         }
@@ -133,8 +144,4 @@ impl<PMsg: 'static> Render<PMsg> for Radio<PMsg> {
         }
         radio
     }
-}
-
-impl<PMsg> Themeable for Radio<PMsg> {
-    type StyleMap = (Style, Style, Style);
 }

@@ -2,7 +2,7 @@ use crate::{
     css::{self, color::Color, size::Size, values as val},
     events::Events,
     render::Render,
-    theme::{Theme, Themeable},
+    theme::Theme,
 };
 use derive_rich::Rich;
 use seed::prelude::*;
@@ -26,6 +26,7 @@ pub enum Icon<PMsg: 'static> {
 
 impl<PMsg: 'static> Render<PMsg> for Icon<PMsg> {
     type View = Node<PMsg>;
+    type Style = ();
 
     fn render(&self, theme: &impl Theme) -> Self::View {
         match self {
@@ -59,6 +60,8 @@ pub struct SvgIcon<PMsg: 'static> {
     pub color: Option<Color>,
     #[rich(write(take, style = compose))]
     pub size: Size,
+    #[rich(write(take, style = compose))]
+    pub style: SvgStyle,
 }
 
 impl<PMsg: 'static> SvgIcon<PMsg> {
@@ -68,6 +71,7 @@ impl<PMsg: 'static> SvgIcon<PMsg> {
             draw: draw.into_iter().collect(),
             color: None,
             size: Size::default(),
+            style: SvgStyle::default(),
         }
     }
 
@@ -77,8 +81,11 @@ impl<PMsg: 'static> SvgIcon<PMsg> {
     }
 }
 
+pub type SvgStyle = css::Style;
+
 impl<PMsg: 'static> Render<PMsg> for SvgIcon<PMsg> {
     type View = Node<PMsg>;
+    type Style = SvgStyle;
 
     fn render(&self, theme: &impl Theme) -> Self::View {
         svg![
@@ -92,10 +99,6 @@ impl<PMsg: 'static> Render<PMsg> for SvgIcon<PMsg> {
     }
 }
 
-impl<PMsg: 'static> Themeable for SvgIcon<PMsg> {
-    type StyleMap = css::Style;
-}
-
 #[derive(Clone, Rich)]
 pub struct HtmlIcon<PMsg> {
     #[rich(write(take, style = compose))]
@@ -105,6 +108,8 @@ pub struct HtmlIcon<PMsg> {
     pub color: Option<Color>,
     #[rich(write(take, style = compose))]
     pub size: Size,
+    #[rich(write(take, style = compose))]
+    pub style: HtmlStyle,
 }
 
 impl<PMsg> HtmlIcon<PMsg> {
@@ -114,6 +119,7 @@ impl<PMsg> HtmlIcon<PMsg> {
             html: html.into(),
             color: None,
             size: Size::default(),
+            style: HtmlStyle::default(),
         }
     }
 
@@ -123,8 +129,11 @@ impl<PMsg> HtmlIcon<PMsg> {
     }
 }
 
+pub type HtmlStyle = css::Style;
+
 impl<PMsg: 'static> Render<PMsg> for HtmlIcon<PMsg> {
     type View = Node<PMsg>;
+    type Style = HtmlStyle;
 
     fn render(&self, theme: &impl Theme) -> Self::View {
         svg![
@@ -138,10 +147,6 @@ impl<PMsg: 'static> Render<PMsg> for HtmlIcon<PMsg> {
     }
 }
 
-impl<PMsg> Themeable for HtmlIcon<PMsg> {
-    type StyleMap = css::Style;
-}
-
 #[derive(Rich, Clone)]
 pub struct UrlIcon<PMsg> {
     #[rich(write(take, style = compose))]
@@ -149,6 +154,8 @@ pub struct UrlIcon<PMsg> {
     pub url: Cow<'static, str>,
     #[rich(write(take, style = compose))]
     pub size: Size,
+    #[rich(write(take, style = compose))]
+    pub style: UrlStyle,
 }
 
 impl<PMsg, T: ToString> From<T> for UrlIcon<PMsg> {
@@ -163,6 +170,7 @@ impl<PMsg> UrlIcon<PMsg> {
             events: Events::default(),
             url: url.into(),
             size: Size::default(),
+            style: UrlStyle::default(),
         }
     }
 
@@ -172,8 +180,11 @@ impl<PMsg> UrlIcon<PMsg> {
     }
 }
 
+pub type UrlStyle = css::Style;
+
 impl<PMsg: 'static> Render<PMsg> for UrlIcon<PMsg> {
     type View = Node<PMsg>;
+    type Style = UrlStyle;
 
     fn render(&self, theme: &impl Theme) -> Self::View {
         img![
@@ -184,8 +195,4 @@ impl<PMsg: 'static> Render<PMsg> for UrlIcon<PMsg> {
             ]
         ]
     }
-}
-
-impl<PMsg> Themeable for UrlIcon<PMsg> {
-    type StyleMap = css::Style;
 }
