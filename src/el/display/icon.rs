@@ -28,7 +28,11 @@ impl<PMsg: 'static> Render<PMsg> for Icon<PMsg> {
     type View = Node<PMsg>;
     type Style = ();
 
-    fn render(&self, theme: &impl Theme) -> Self::View {
+    fn style(&self, _: &impl Theme) -> Self::Style {
+        ()
+    }
+
+    fn render_with_style(&self, theme: &impl Theme, _: Self::Style) -> Self::View {
         match self {
             Self::Svg(icon) => icon.render(theme),
             Self::Html(icon) => icon.render(theme),
@@ -87,9 +91,13 @@ impl<PMsg: 'static> Render<PMsg> for SvgIcon<PMsg> {
     type View = Node<PMsg>;
     type Style = SvgStyle;
 
-    fn render(&self, theme: &impl Theme) -> Self::View {
+    fn style(&self, theme: &impl Theme) -> Self::Style {
+        theme.svg_icon(self)
+    }
+
+    fn render_with_style(&self, _: &impl Theme, style: Self::Style) -> Self::View {
         svg![
-            theme.svg_icon(self),
+            style,
             self.events.events.clone(),
             attrs![
                 At::ViewBox => "0 0 100 100",
@@ -135,9 +143,13 @@ impl<PMsg: 'static> Render<PMsg> for HtmlIcon<PMsg> {
     type View = Node<PMsg>;
     type Style = HtmlStyle;
 
-    fn render(&self, theme: &impl Theme) -> Self::View {
+    fn style(&self, theme: &impl Theme) -> Self::Style {
+        theme.html_icon(self)
+    }
+
+    fn render_with_style(&self, _: &impl Theme, style: Self::Style) -> Self::View {
         svg![
-            theme.html_icon(self),
+            style,
             self.events.events.clone(),
             attrs![
                 At::ViewBox => "0 0 100 100",
@@ -186,9 +198,13 @@ impl<PMsg: 'static> Render<PMsg> for UrlIcon<PMsg> {
     type View = Node<PMsg>;
     type Style = UrlStyle;
 
-    fn render(&self, theme: &impl Theme) -> Self::View {
+    fn style(&self, theme: &impl Theme) -> Self::Style {
+        theme.url_icon(self)
+    }
+
+    fn render_with_style(&self, _: &impl Theme, style: Self::Style) -> Self::View {
         img![
-            theme.url_icon(self),
+            style,
             self.events.events.clone(),
             attrs![
                 At::Src => self.url,

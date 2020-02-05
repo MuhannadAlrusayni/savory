@@ -104,9 +104,12 @@ impl<PMsg: 'static> Render<PMsg> for Radio<PMsg> {
     type View = Node<PMsg>;
     type Style = Style;
 
-    fn render(&self, theme: &impl Theme) -> Self::View {
-        let style = theme.radio(self);
+    fn style(&self, theme: &impl Theme) -> Self::Style {
+        theme.radio(self)
+    }
 
+    fn render_with_style(&self, _: &impl Theme, style: Self::Style) -> Self::View {
+        // TODO: create these event in the `new` function
         let events = Events::default()
             .focus(|_| Msg::Focus)
             .blur(|_| Msg::Blur)

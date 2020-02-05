@@ -115,6 +115,8 @@ impl<GMsg: 'static, PMsg: 'static> Model<PMsg, GMsg> for SpinEntry<PMsg> {
 #[derive(Clone, Default, Rich)]
 pub struct UserStyle {
     #[rich(write(take, style = compose))]
+    pub container: css::Style,
+    #[rich(write(take, style = compose))]
     entry: el::entry::Style,
     #[rich(write(take, style = compose))]
     pub increment_button: el::button::Style,
@@ -131,11 +133,15 @@ pub struct UserStyle {
 #[derive(Clone, Rich)]
 pub struct Style {
     #[rich(write(take, style = compose))]
-    pub entry: el::entry::Style,
+    pub container: css::Style,
     #[rich(write(take, style = compose))]
-    pub increment_button: el::button::Style,
+    pub button_container: css::Style,
     #[rich(write(take, style = compose))]
-    pub decrement_button: el::button::Style,
+    pub input: css::Style,
+    #[rich(write(take, style = compose))]
+    pub increment_button: css::Style,
+    #[rich(write(take, style = compose))]
+    pub decrement_button: css::Style,
     #[rich(write(take))]
     pub increment_icon: el::Icon<Msg>,
     #[rich(write(take))]
@@ -146,9 +152,23 @@ impl<PMsg: 'static> Render<PMsg> for SpinEntry<PMsg> {
     type View = Node<PMsg>;
     type Style = Style;
 
-    fn render(&self, theme: &impl Theme) -> Self::View {
-        let style = theme.spin_entry(self);
+    fn style(&self, theme: &impl Theme) -> Self::Style {
+        theme.spin_entry(self)
+    }
 
+    fn render_with_style(&self, theme: &impl Theme, style: Self::Style) -> Self::View {
+        // let msg_mapper = Rc::clone(&self.msg_mapper.clone());
+
+        // div![
+        //     style.container,
+        //     self.entry.render(theme),
+        //     el::Flexbox::new()
+        //         .column()
+        //         .add(|_| self.inc_btn.render(theme))
+        //         .add(|_| self.dec_btn.render(theme))
+        //         .render(theme),
+        // ]
+        // .map_msg(move |msg| (msg_mapper.clone())(msg))
         todo!()
     }
 }

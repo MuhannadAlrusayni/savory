@@ -118,8 +118,11 @@ impl<PMsg: 'static> Render<PMsg> for Switch<PMsg> {
     type View = Node<PMsg>;
     type Style = Style;
 
-    fn render(&self, theme: &impl Theme) -> Self::View {
-        let style = theme.switch(self);
+    fn style(&self, theme: &impl Theme) -> Self::Style {
+        theme.switch(self)
+    }
+
+    fn render_with_style(&self, _: &impl Theme, style: Self::Style) -> Self::View {
         let msg_mapper = Rc::clone(&self.msg_mapper.clone());
 
         let mut switch = button![

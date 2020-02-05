@@ -141,10 +141,14 @@ impl<PMsg: 'static> Render<PMsg> for Flexbox<PMsg> {
     type View = Node<PMsg>;
     type Style = Style;
 
-    fn render(&self, theme: &impl Theme) -> Self::View {
+    fn style(&self, theme: &impl Theme) -> Self::Style {
+        theme.flexbox(self)
+    }
+
+    fn render_with_style(&self, theme: &impl Theme, style: Self::Style) -> Self::View {
         div![
             self.events.events.clone(),
-            theme.flexbox(self),
+            style,
             // items
             self.items.iter().map(|item| item.render(theme)),
         ]
@@ -246,8 +250,11 @@ impl<PMsg: 'static> Render<PMsg> for Item<PMsg> {
     type View = Vec<Node<PMsg>>;
     type Style = Style;
 
-    fn render(&self, theme: &impl Theme) -> Self::View {
-        let style = theme.flexbox_item(self);
+    fn style(&self, theme: &impl Theme) -> Self::Style {
+        theme.flexbox_item(self)
+    }
+
+    fn render_with_style(&self, _: &impl Theme, style: Self::Style) -> Self::View {
         if self.is_flatten() {
             self.content
                 .clone()

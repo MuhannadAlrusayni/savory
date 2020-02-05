@@ -114,9 +114,11 @@ impl<PMsg: 'static> Render<PMsg> for Checkbox<PMsg> {
     type View = Node<PMsg>;
     type Style = Style;
 
-    fn render(&self, theme: &impl Theme) -> Self::View {
-        let style = theme.checkbox(self);
+    fn style(&self, theme: &impl Theme) -> Self::Style {
+        theme.checkbox(self)
+    }
 
+    fn render_with_style(&self, _: &impl Theme, style: Self::Style) -> Self::View {
         let input = input![
             attrs![
                 At::Disabled => self.disabled.as_at_value(),

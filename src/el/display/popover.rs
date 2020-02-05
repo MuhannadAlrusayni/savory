@@ -56,8 +56,11 @@ where
     type View = Node<PMsg>;
     type Style = Style;
 
-    fn render(&self, theme: &impl Theme) -> Self::View {
-        let style = theme.popover(self);
+    fn style(&self, theme: &impl Theme) -> Self::Style {
+        theme.popover(self)
+    }
+
+    fn render_with_style(&self, theme: &impl Theme, style: Self::Style) -> Self::View {
         div![
             style.container,
             self.events.events.clone(),

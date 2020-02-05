@@ -57,7 +57,11 @@ impl Render<Msg> for MyApp {
     type View = Node<Msg>;
     type Style = ();
 
-    fn render(&self, theme: &impl Theme) -> Self::View {
+    fn style(&self, _: &impl Theme) -> Self::Style {
+        ()
+    }
+
+    fn render_with_style(&self, theme: &impl Theme, _: Self::Style) -> Self::View {
         let child = Flexbox::new()
             .gap(px(8.))
             .center()

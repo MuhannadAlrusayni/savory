@@ -189,7 +189,12 @@ impl<PMsg: 'static> Render<PMsg> for Button<PMsg> {
     type View = Node<PMsg>;
     type Style = Style;
 
-    fn render(&self, theme: &impl Theme) -> Self::View {
+    fn style(&self, theme: &impl Theme) -> Self::Style {
+        theme.button(self)
+    }
+
+    // TODO: use el::flexbox::Style insted of hard coding the style
+    fn render_with_style(&self, theme: &impl Theme, style: Self::Style) -> Self::View {
         let msg_mapper = Rc::clone(&self.msg_mapper.clone());
 
         let inner: Vec<Node<Msg>> = match self.inner {
@@ -218,7 +223,7 @@ impl<PMsg: 'static> Render<PMsg> for Button<PMsg> {
             attrs![
                 At::Disabled => self.disabled.as_at_value()
             ],
-            theme.button(self),
+            style,
             inner,
         ]
         .map_msg(move |msg| (Rc::clone(&msg_mapper))(msg));
