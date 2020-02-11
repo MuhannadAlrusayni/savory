@@ -4,11 +4,12 @@ use crate::css::{
     values as val, St, Style, ToStyle,
 };
 use derive_rich::Rich;
-use std::{borrow::Cow, collections::HashMap};
+use indexmap::IndexMap;
+use std::borrow::Cow;
 
 #[derive(Default, Clone, Debug, PartialEq, From)]
 pub struct Transition {
-    pub transitions: HashMap<Cow<'static, str>, TransitionValue>,
+    pub transitions: IndexMap<Cow<'static, str>, TransitionValue>,
 }
 
 impl ToStyle for Transition {
@@ -33,7 +34,7 @@ impl ToStyle for Transition {
 impl Transition {
     pub fn new() -> Self {
         Self {
-            transitions: HashMap::default(),
+            transitions: IndexMap::default(),
         }
     }
 

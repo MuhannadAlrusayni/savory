@@ -21,7 +21,7 @@ pub enum Msg {
 
 #[derive(Rich)]
 pub struct Switch<PMsg> {
-    internal_events: Events<Msg>,
+    local_events: Events<Msg>,
     #[rich(write(take, style = compose))]
     events: Events<PMsg>,
     msg_mapper: Rc<dyn Fn(Msg) -> PMsg>,
@@ -64,7 +64,7 @@ impl<PMsg> Switch<PMsg> {
     pub fn new(msg_mapper: impl FnOnce(Msg) -> PMsg + Clone + 'static) -> Self {
         Self {
             msg_mapper: Rc::new(move |msg| (msg_mapper.clone())(msg)),
-            internal_events: Events::default()
+            local_events: Events::default()
                 .focus(|_| Msg::Focus)
                 .blur(|_| Msg::Blur)
                 .mouse_enter(|_| Msg::MouseEnter)
@@ -126,7 +126,7 @@ impl<PMsg: 'static> Render<PMsg> for Switch<PMsg> {
         let msg_mapper = Rc::clone(&self.msg_mapper.clone());
 
         let mut switch = button![
-            self.internal_events.events.clone(),
+            self.local_events.events.clone(),
             attrs![
                 At::Disabled => self.disabled.as_at_value(),
             ],

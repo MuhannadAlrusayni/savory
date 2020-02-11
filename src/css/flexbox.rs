@@ -1,5 +1,5 @@
-pub use super::box_align::{JustifyContent, AlignItems, AlignContent, AlignSelf};
-use crate::css::{St, values as val, ToStyle, Style, unit::*, self};
+pub use super::box_align::{AlignContent, AlignItems, AlignSelf, JustifyContent};
+use crate::css::{self, unit::*, values as val, St, Style, ToStyle};
 
 #[derive(Clone, Debug, Copy, PartialEq, Display, From)]
 pub enum Basis {
@@ -90,5 +90,32 @@ pub enum Wrap {
 impl ToStyle for Wrap {
     fn to_style(&self) -> Style {
         Style::new().add(St::FlexWrap, self)
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Display, From)]
+pub struct Order(i32);
+
+impl ToStyle for Order {
+    fn to_style(&self) -> Style {
+        Style::new().add(St::Order, self.0)
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Display, From)]
+pub struct Grow(f32);
+
+impl ToStyle for Grow {
+    fn to_style(&self) -> Style {
+        Style::new().add(St::FlexGrow, self.0)
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Display, From)]
+pub struct Shrink(f32);
+
+impl ToStyle for Shrink {
+    fn to_style(&self) -> Style {
+        Style::new().add(St::FlexShrink, self.0)
     }
 }

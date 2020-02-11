@@ -33,15 +33,15 @@ pub use self::{
     visibility::Visibility,
 };
 
+use indexmap::IndexMap;
 pub use seed::{
     prelude::{St, UpdateEl},
     virtual_dom::node::el::El,
 };
-use std::collections::HashMap;
 
 // TODO: add compose function for every val::* style (e.g. border(|border| ..))
 #[derive(Default, Debug, Clone)]
-pub struct Style(HashMap<St, String>);
+pub struct Style(IndexMap<St, String>);
 
 macro css_props( $( $fn_ident:ident($prop_ty:ty) $(,)? )* ) {
     impl Style {
@@ -66,8 +66,8 @@ macro simple_css_props( $( $fn_ident:ident($prop_ty:ty) $(,)? )* ) {
 
 simple_css_props! {
     color(Color), opacity(Opacity), gap(Gap), flex_wrap(flexbox::Wrap), flex_basis(flexbox::Basis),
-    flex_direction(flexbox::Direction), justify_content(box_align::JustifyContent),
-    align_content(box_align::AlignContent), align_items(box_align::AlignItems),
+    flex_direction(flexbox::Direction), order(flexbox::Order), flex_grow(flexbox::Grow), flex_shrink(flexbox::Shrink),
+    justify_content(box_align::JustifyContent), align_content(box_align::AlignContent), align_items(box_align::AlignItems),
     justify_self(box_align::JustifySelf), align_self(box_align::AlignSelf), display(Display),
     visibility(Visibility), cursor(Cursor),
 }
@@ -79,7 +79,7 @@ css_props! {
 
 impl Style {
     pub fn new() -> Self {
-        Self(HashMap::default())
+        Self(IndexMap::default())
     }
 
     pub fn add(mut self, key: impl Into<St>, value: impl ToString) -> Self {
@@ -132,6 +132,7 @@ impl Style {
 impl<Msg> UpdateEl<El<Msg>> for Style {
     fn update(self, el: &mut El<Msg>) {
         if let Some(style) = self.to_seed_style() {
+            // style.update(el);
             el.style.merge(style);
         }
     }

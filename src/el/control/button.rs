@@ -35,12 +35,16 @@ pub enum Msg {
     Route,
 }
 
+pub type LocalEvents = Events<Msg>;
+pub type ParentEvents<PMsg> = Events<PMsg>;
+
 #[derive(Clone, Rich)]
 pub struct Button<PMsg> {
     msg_mapper: Rc<dyn Fn(Msg) -> PMsg>,
-    internal_events: Events<Msg>,
     #[rich(write(take, style = compose))]
-    events: Events<PMsg>,
+    local_events: LocalEvents,
+    #[rich(write(take, style = compose))]
+    events: ParentEvents<PMsg>,
     // children
     pub inner: Inner,
     // properties
@@ -99,7 +103,7 @@ impl<PMsg> Button<PMsg> {
     pub fn new(msg_mapper: impl FnOnce(Msg) -> PMsg + Clone + 'static) -> Self {
         Button {
             msg_mapper: Rc::new(move |msg| (msg_mapper.clone())(msg)),
-            internal_events: Events::default()
+            local_events: Events::default()
                 .focus(|_| Msg::Focus)
                 .blur(|_| Msg::Blur)
                 .mouse_enter(|_| Msg::MouseEnter)
@@ -193,7 +197,6 @@ impl<PMsg: 'static> Render<PMsg> for Button<PMsg> {
         theme.button(self)
     }
 
-    // TODO: use el::flexbox::Style insted of hard coding the style
     fn render_with_style(&self, theme: &impl Theme, style: Self::Style) -> Self::View {
         let msg_mapper = Rc::clone(&self.msg_mapper.clone());
 
@@ -208,6 +211,7 @@ impl<PMsg: 'static> Render<PMsg> for Button<PMsg> {
                     .as_ref()
                     .map(|lbl| plain![lbl.clone()])
                     .unwrap_or(empty![]);
+                // TODO: use el::flexbox::Style insted of hard coding the style
                 vec![Flexbox::new()
                     .center()
                     .full_size()
@@ -219,7 +223,7 @@ impl<PMsg: 'static> Render<PMsg> for Button<PMsg> {
         };
 
         let mut btn = button![
-            self.internal_events.events.clone(),
+            self.local_events.events.clone(),
             attrs![
                 At::Disabled => self.disabled.as_at_value()
             ],

@@ -21,13 +21,45 @@ pub enum Msg {
     UpdateText(String),
 }
 
+#[derive(Default, Rich)]
+pub struct LocalEvents {
+    #[rich(write(take, style = compose))]
+    pub input: Events<Msg>,
+    #[rich(write(take, style = compose))]
+    pub container: Events<Msg>,
+}
+
+impl LocalEvents {
+    pub fn remove_events(mut self) -> Self {
+        Self::default()
+    }
+}
+
+#[derive(Rich)]
+pub struct ParentEvents<PMsg> {
+    #[rich(write(take, style = compose))]
+    pub input: Events<PMsg>,
+    #[rich(write(take, style = compose))]
+    pub container: Events<PMsg>,
+}
+
+impl<PMsg> Default for ParentEvents<PMsg> {
+    fn default() -> Self {
+        Self {
+            input: Events::default(),
+            container: Events::default(),
+        }
+    }
+}
+
 #[derive(Rich)]
 pub struct Entry<PMsg> {
-    internal_events: Events<Msg>,
+    #[rich(write(take, style = compose))]
+    pub local_events: LocalEvents,
     msg_mapper: Rc<dyn Fn(Msg) -> PMsg>,
     #[rich(write(take, style = compose))]
-    events: Events<PMsg>,
-    #[rich(write(take))]
+    pub events: ParentEvents<PMsg>,
+    #[rich(write(take), write(rename = text_mut))]
     pub text: Option<String>,
     #[rich(write(take))]
     pub max_length: Option<usize>,
@@ -55,13 +87,14 @@ pub struct Entry<PMsg> {
 impl<PMsg> Entry<PMsg> {
     pub fn new(msg_mapper: impl FnOnce(Msg) -> PMsg + Clone + 'static) -> Self {
         Self {
-            internal_events: Events::default()
-                .focus(|_| Msg::Focus)
-                .blur(|_| Msg::Blur)
-                .mouse_enter(|_| Msg::MouseEnter)
-                .mouse_leave(|_| Msg::MouseLeave)
-                .input(Msg::UpdateText),
-            events: Events::default(),
+            local_events: LocalEvents::default().input(|conf| {
+                conf.focus(|_| Msg::Focus)
+                    .blur(|_| Msg::Blur)
+                    .mouse_enter(|_| Msg::MouseEnter)
+                    .mouse_leave(|_| Msg::MouseLeave)
+                    .input(Msg::UpdateText)
+            }),
+            events: ParentEvents::default(),
             msg_mapper: Rc::new(move |msg| (msg_mapper.clone())(msg)),
             text: None,
             max_length: None,
@@ -113,7 +146,7 @@ impl<PMsg: 'static> Render<PMsg> for Entry<PMsg> {
     fn render_with_style(&self, _: &impl Theme, style: Self::Style) -> Self::View {
         let msg_mapper = Rc::clone(&self.msg_mapper.clone());
         let mut input = input![
-            self.internal_events.events.clone(),
+            self.local_events.input.clone(),
             style.input,
             attrs![
                 At::Disabled => self.disabled.as_at_value(),
@@ -123,10 +156,19 @@ impl<PMsg: 'static> Render<PMsg> for Entry<PMsg> {
             ],
         ].map_msg(move |msg| (msg_mapper.clone())(msg));
 
-        for event in self.events.events.clone().into_iter() {
+        for event in self.events.input.events.clone().into_iter() {
             input.add_listener(event);
         }
 
-        div![style.container, input]
+        let msg_mapper = Rc::clone(&self.msg_mapper.clone());
+        let mut container = div![style.container, self.local_events.container.clone(),]
+            .map_msg(move |msg| (msg_mapper.clone())(msg));
+
+        for event in self.events.container.events.clone().into_iter() {
+            container.add_listener(event);
+        }
+
+        container.add_child(input);
+        container
     }
 }

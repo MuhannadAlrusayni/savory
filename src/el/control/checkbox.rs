@@ -21,7 +21,7 @@ pub enum Msg {
 
 #[derive(Clone, Rich)]
 pub struct Checkbox<PMsg> {
-    internal_events: Events<Msg>,
+    local_events: Events<Msg>,
     lbl_events: Events<Msg>,
     #[rich(write(take, style = compose))]
     events: Events<PMsg>,
@@ -57,7 +57,7 @@ impl<PMsg> Checkbox<PMsg> {
         Self {
             msg_mapper: Rc::new(move |msg| (msg_mapper.clone())(msg)),
             events: Events::default(),
-            internal_events: Events::default()
+            local_events: Events::default()
                 .focus(|_| Msg::Focus)
                 .blur(|_| Msg::Blur)
                 .mouse_enter(|_| Msg::MouseEnter)
@@ -126,7 +126,7 @@ impl<PMsg: 'static> Render<PMsg> for Checkbox<PMsg> {
                 At::Type => "checkbox",
             ],
             style.input,
-            self.internal_events.events.clone(),
+            self.local_events.events.clone(),
             if self.is_toggled() {
                 div![style.button]
             } else {

@@ -1,3 +1,4 @@
+use crate::model::Model;
 use seed::prelude::*;
 use std::rc::Rc;
 use wasm_bindgen::JsCast;
@@ -17,6 +18,12 @@ impl<Msg> Clone for Events<Msg> {
 impl<Msg> Default for Events<Msg> {
     fn default() -> Self {
         Self { events: vec![] }
+    }
+}
+
+impl<Msg> UpdateEl<El<Msg>> for Events<Msg> {
+    fn update(self, el: &mut El<Msg>) {
+        self.events.update(el)
     }
 }
 

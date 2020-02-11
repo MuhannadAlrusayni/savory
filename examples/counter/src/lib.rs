@@ -7,10 +7,8 @@ use wasm_bindgen::JsCast;
 extern crate seed;
 
 pub struct MyApp {
-    inc_btn: Button<Msg>,
-    dec_btn: Button<Msg>,
+    spin_entry: SpinEntry<Msg>,
     pop_btn: Button<Msg>,
-    count: i32,
     theme: Ant,
     popup: bool,
 }
@@ -18,11 +16,9 @@ pub struct MyApp {
 impl Default for MyApp {
     fn default() -> Self {
         Self {
-            inc_btn: Button::with_label(Msg::IncBtn, "+").events(|e| e.click(|_| Msg::Increment)),
-            dec_btn: Button::with_label(Msg::DecBtn, "-").events(|e| e.click(|_| Msg::Decrement)),
+            spin_entry: SpinEntry::new(Msg::SpinEntry),
             pop_btn: Button::with_label(Msg::PopBtn, "Menu")
                 .events(|conf| conf.click(|_| Msg::TogglePopover)),
-            count: 0,
             theme: Ant::default(),
             popup: false,
         }
@@ -30,10 +26,7 @@ impl Default for MyApp {
 }
 
 pub enum Msg {
-    IncBtn(button::Msg),
-    DecBtn(button::Msg),
-    Increment,
-    Decrement,
+    SpinEntry(spin_entry::Msg),
     PopBtn(button::Msg),
     TogglePopover,
 }
@@ -43,10 +36,7 @@ impl Model<Msg, ()> for MyApp {
 
     fn update(&mut self, msg: Msg, orders: &mut impl Orders<Msg, ()>) {
         match msg {
-            Msg::IncBtn(msg) => self.inc_btn.update(msg, orders),
-            Msg::DecBtn(msg) => self.dec_btn.update(msg, orders),
-            Msg::Increment => self.count += 1,
-            Msg::Decrement => self.count -= 1,
+            Msg::SpinEntry(msg) => self.spin_entry.update(msg, orders),
             Msg::PopBtn(msg) => self.pop_btn.update(msg, orders),
             Msg::TogglePopover => self.popup = !self.popup,
         }
@@ -66,9 +56,7 @@ impl Render<Msg> for MyApp {
             .gap(px(8.))
             .center()
             .full_size()
-            .add(|_| self.dec_btn.render(theme))
-            .add(|_| self.inc_btn.render(theme))
-            .add(|_| h3![self.count.to_string()]);
+            .add(|_| self.spin_entry.render(theme));
 
         let popover = Popover::new(&self.pop_btn, &child)
             .visible(self.popup)

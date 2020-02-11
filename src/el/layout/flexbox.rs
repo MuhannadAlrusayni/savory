@@ -165,11 +165,11 @@ pub struct Item<PMsg: 'static> {
     pub content: Vec<Node<PMsg>>,
     // propertie
     #[rich(write(take))]
-    pub order: Option<i32>,
+    pub order: Option<Order>,
     #[rich(write(take))]
-    pub grow: Option<f32>,
+    pub grow: Option<Grow>,
     #[rich(write(take))]
-    pub shrink: Option<f32>,
+    pub shrink: Option<Shrink>,
     #[rich(write(take))]
     pub basis: Option<Basis>,
     #[rich(value_fns(take) = {
@@ -239,7 +239,7 @@ impl<PMsg: 'static> Item<PMsg> {
         self.margin(|margin| margin.auto())
     }
 
-    pub fn group(self, group_id: impl Into<i32>) -> Self {
+    pub fn group(self, group_id: impl Into<Order>) -> Self {
         self.order(group_id)
     }
 }

@@ -972,7 +972,101 @@ impl Theme for Ant {
         entry::Style { container, input }
     }
 
-    fn spin_entry<PMsg>(&self, _: &SpinEntry<PMsg>) -> spin_entry::Style {
-        todo!()
+    fn spin_entry<PMsg>(&self, spin_entry: &SpinEntry<PMsg>) -> spin_entry::Style {
+        let (bg, fg, border) = match (
+            spin_entry.is_disabled(),
+            spin_entry.is_focused(),
+            spin_entry.is_mouse_over(),
+        ) {
+            (true, _, _) => (
+                self.gray(Variant::L200),
+                self.disable(false),
+                self.gray(Variant::L400),
+            ),
+            (false, false, false) => (self.white(), self.primary_text(false), self.border(false)),
+            _ => (
+                self.white(),
+                self.primary_text(false),
+                self.brand(Variant::L500),
+            ),
+        };
+
+        let cursor = spin_entry
+            .is_disabled()
+            .then(|| -> css::Cursor { val::NotAllowed.into() })
+            .unwrap_or_else(|| val::Initial.into());
+
+        let container = Style::default()
+            .transition(|trans| {
+                trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+            })
+            .display(val::Flex)
+            .align_items(val::Center)
+            .justify_content(val::Center)
+            // .padding(|p| p.y(px(4.)).x(px(11.)))
+            // .gap(px(4.))
+            .background(|b| b.color(bg))
+            .border(|b| b.solid().width(px(1.)).color(border).radius(px(4.)))
+            .size(|s| s.width(1.))
+            .cursor(cursor);
+
+        let input = Style::default()
+            .transition(|trans| {
+                trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+            })
+            .size(|s| s.width(1.).height(px(32.)))
+            .color(fg)
+            .border(|b| b.none())
+            .background(|bg| bg.transparent())
+            .add(St::WebkitAppearance, val::None)
+            .cursor(cursor);
+
+        let get_item = |is_mouse_over| {
+            Style::default()
+                .transition(|trans| {
+                    trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+                })
+                .config_block(|conf| {
+                    if is_mouse_over {
+                        conf.flex_grow(1.5)
+                    } else {
+                        conf.flex_grow(1.)
+                    }
+                })
+        };
+
+        let buttons_container = Style::default()
+            .display(val::Flex)
+            .flex_direction(val::Column);
+
+        let increment_item = get_item(spin_entry.increment_button.is_mouse_over());
+        let decrement_item = get_item(spin_entry.decrement_button.is_mouse_over());
+
+        let increment_button = Style::default().border(|conf| {
+            conf.solid()
+                .width(px(1.))
+                .color(self.border(false))
+                .radius(px(4.))
+        });
+        let decrement_button = increment_button.clone();
+
+        let increment_icon: Icon<spin_entry::Msg> = Icon::html(
+            r#"""<path d="M890.5 755.3L537.9 269.2c-12.8-17.6-39-17.6-51.7 0L133.5 755.3A8 8 0 0 0 140 768h75c5.1 0 9.9-2.5 12.9-6.6L512 369.8l284.1 391.6c3 4.1 7.8 6.6 12.9 6.6h75c6.5 0 10.3-7.4 6.5-12.7z"></path>"""#,
+        ).into();
+        let decrement_icon: Icon<spin_entry::Msg> = Icon::html(
+            r#"""<path d="M884 256h-75c-5.1 0-9.9 2.5-12.9 6.6L512 654.2 227.9 262.6c-3-4.1-7.8-6.6-12.9-6.6h-75c-6.5 0-10.3 7.4-6.5 12.7l352.6 486.1c12.8 17.6 39 17.6 51.7 0l352.6-486.1c3.9-5.3.1-12.7-6.4-12.7z"></path>"""#,
+        ).into();
+
+        spin_entry::Style {
+            container,
+            input,
+            buttons_container,
+            increment_item,
+            decrement_item,
+            increment_button,
+            decrement_button,
+            increment_icon,
+            decrement_icon,
+        }
     }
 }

@@ -1,4 +1,4 @@
-use crate::css::{St, values as val, self, unit::*, ToStyle, Style};
+use crate::css::{self, unit::*, values as val, St, Style, ToStyle};
 use derive_rich::Rich;
 
 #[derive(Rich, Clone, Debug, PartialEq, Default)]
@@ -31,33 +31,27 @@ impl ToStyle for Size {
 
 impl Size {
     pub fn full(self) -> Self {
-        self.width(1.0)
-            .height(1.0)
+        self.width(1.0).height(1.0)
     }
 
     pub fn half(self) -> Self {
-        self.width(0.5)
-            .height(0.5)
+        self.width(0.5).height(0.5)
     }
 
     pub fn min_content(self) -> Self {
-        self.width(val::MinContent)
-            .height(val::MinContent)
+        self.width(val::MinContent).height(val::MinContent)
     }
 
     pub fn max_content(self) -> Self {
-        self.width(val::MaxContent)
-            .height(val::MaxContent)
+        self.width(val::MaxContent).height(val::MaxContent)
     }
 
     pub fn auto(self) -> Self {
-        self.width(val::Auto)
-            .height(val::Auto)
+        self.width(val::Auto).height(val::Auto)
     }
 
     pub fn resize(self, width: impl Into<Length>, height: impl Into<Length>) -> Self {
-        self.width(width)
-            .height(height)
+        self.width(width).height(height)
     }
 }
 
