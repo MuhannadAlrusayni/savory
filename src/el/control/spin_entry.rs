@@ -3,13 +3,13 @@ use crate::{
     el::{self},
     events::Events,
     model::Model,
-    propertie::{Shape, Size},
+    propertie::Size,
     render::Render,
     theme::Theme,
 };
 use derive_rich::Rich;
 use seed::prelude::*;
-use std::{borrow::Cow, rc::Rc};
+use std::rc::Rc;
 
 #[derive(Debug, Clone)]
 pub enum Msg {
@@ -33,7 +33,7 @@ pub struct LocalEvents {
 }
 
 impl LocalEvents {
-    pub fn remove_events(mut self) -> Self {
+    pub fn remove_events(self) -> Self {
         Self::default()
     }
 }

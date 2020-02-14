@@ -8,7 +8,7 @@ use crate::{
 };
 use derive_rich::Rich;
 use seed::prelude::*;
-use std::{borrow::Cow, rc::Rc};
+use std::rc::Rc;
 
 #[derive(Debug, Copy, Clone)]
 pub enum Msg {

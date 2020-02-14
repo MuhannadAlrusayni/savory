@@ -1,4 +1,4 @@
-use crate::css::{self, unit::*, values as val, St, Style, ToStyle};
+use crate::css::{unit::*, values as val, St, Style, ToStyle};
 use derive_rich::Rich;
 
 #[derive(Rich, Clone, Debug, PartialEq, Default)]

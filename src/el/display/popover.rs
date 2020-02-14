@@ -1,13 +1,6 @@
-use crate::{
-    css::{self, unit::px, values as val, St},
-    events::Events,
-    macros::*,
-    render::Render,
-    theme::Theme,
-};
+use crate::{css, events::Events, render::Render, theme::Theme};
 use derive_rich::Rich;
 use seed::prelude::*;
-use std::{borrow::Cow, rc::Rc};
 
 // TODO: add placement property
 #[derive(Clone, Rich)]

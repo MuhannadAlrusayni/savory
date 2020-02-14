@@ -1,5 +1,5 @@
 pub use super::box_align::{AlignContent, AlignItems, AlignSelf, JustifyContent};
-use crate::css::{self, unit::*, values as val, St, Style, ToStyle};
+use crate::css::{unit::*, values as val, St, Style, ToStyle};
 
 #[derive(Clone, Debug, Copy, PartialEq, Display, From)]
 pub enum Basis {

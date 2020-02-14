@@ -1,12 +1,10 @@
 use crate::{
     css::{
         self,
-        color::Color,
-        unit::{em, ms, px, rem, sec},
+        unit::{em, ms, px, sec},
         values as val, St, Style,
     },
     el::prelude::*,
-    propertie::*,
     theme::Theme,
 };
 
@@ -158,7 +156,7 @@ pub fn variant(base_color: impl Into<Hsl>) -> [Hsl; 10] {
 
     let get_hue = |hsv: &Hsv, i, light| {
         let hue = hsv.hue.to_positive_degrees();
-        let mut hue = if hue > 60. && hue <= 240. {
+        let hue = if hue > 60. && hue <= 240. {
             if light {
                 hue - hue_step * i
             } else {
@@ -419,13 +417,13 @@ impl Ant {
         }
     }
 
-    fn color(base_color: impl Into<Hsla>, variant: Variant) -> Hsla {
-        unimplemented!()
-    }
+    // fn color(_base_color: impl Into<Hsla>, _variant: Variant) -> Hsla {
+    //     unimplemented!()
+    // }
 
-    fn on_color(base_color: impl Into<Hsla>, variant: Variant) -> Hsla {
-        unimplemented!()
-    }
+    // fn on_color(_base_color: impl Into<Hsla>, _variant: Variant) -> Hsla {
+    //     unimplemented!()
+    // }
 
     fn button_normal<PMsg>(&self, btn: &Button<PMsg>) -> Style {
         // colors
@@ -963,7 +961,7 @@ impl Theme for Ant {
                 trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
             })
             .size(|s| s.width(1.).height(px(32.)))
-            .color(self.primary_text(false))
+            .color(fg)
             .border(|b| b.none())
             .background(|bg| bg.transparent())
             .add(St::WebkitAppearance, val::None)

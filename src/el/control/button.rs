@@ -1,5 +1,5 @@
 use crate::{
-    css::{self, unit::px, values as val},
+    css::{self, unit::px},
     el::{Flexbox, Icon},
     events::Events,
     model::Model,

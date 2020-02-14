@@ -1,4 +1,4 @@
-use crate::css::{self, values as val, St, Style, ToStyle};
+use crate::css::{values as val, St, Style, ToStyle};
 
 #[derive(Clone, Copy, PartialEq, Eq, Display, From)]
 pub enum Cursor {

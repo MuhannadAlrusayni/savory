@@ -1,4 +1,4 @@
-use crate::css::{self, color::Color, unit::*, values as val, St, Style, ToStyle};
+use crate::css::{color::Color, unit::*, values as val, St, Style, ToStyle};
 use derive_rich::Rich;
 use std::borrow::Cow;
 

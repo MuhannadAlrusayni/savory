@@ -1,5 +1,4 @@
 use crate::css::{
-    self,
     unit::{sec, Ms, Sec},
     values as val, St, Style, ToStyle,
 };

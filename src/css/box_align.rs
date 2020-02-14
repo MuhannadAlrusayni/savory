@@ -1,4 +1,4 @@
-use crate::css::{St, values as val, self, ToStyle, Style};
+use crate::css::{values as val, St, Style, ToStyle};
 
 #[derive(Clone, Debug, Copy, PartialEq, Eq, Display, From)]
 pub enum JustifyContent {

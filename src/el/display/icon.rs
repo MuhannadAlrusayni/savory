@@ -1,5 +1,5 @@
 use crate::{
-    css::{self, color::Color, size::Size, values as val},
+    css::{self, color::Color, size::Size},
     events::Events,
     render::Render,
     theme::Theme,

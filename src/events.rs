@@ -1,6 +1,4 @@
-use crate::model::Model;
 use seed::prelude::*;
-use std::rc::Rc;
 use wasm_bindgen::JsCast;
 
 pub struct Events<Msg> {
