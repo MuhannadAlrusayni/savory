@@ -10,7 +10,7 @@ categories = ["gui", "wasm", "web-programming"]
 license = "MIT OR Apache-2.0"
 repository = "https://gitlab.com/muhannad_alrusayni/khalas"
 homepage = "https://gitlab.com/muhannad_alrusayni/khalas"
-documentation = "https://docs.docs.rs/khalas"
+documentation = "https://docs.rs/khalas"
 
 [badges]
 gitlab = { repository = "https://gitlab.com/muhannad_alrusayni/khalas", branch = "master" }
