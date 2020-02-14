@@ -615,7 +615,7 @@ impl Theme for Ant {
             })
             .add(St::BoxShadow, "0 2px 8px rgba(0, 35, 11, 0.15)")
             .padding(|conf| conf.x(px(4.)).y(px(2)))
-            .margin(|conf| conf.top(|_| px(popover.offset).into()))
+            .margin(|conf| conf.top(px(popover.offset)))
             .config_block(|style| {
                 if popover.is_visible() {
                     style.opacity(1.).visibility(val::Visible)
@@ -807,7 +807,7 @@ impl Theme for Ant {
                         .bottom(|side| side.solid().width(px(2.)).color(fg))
                         .right(|side| side.solid().width(px(2.)).color(fg)),
                 )
-                .margin(|m| m.bottom(|_| px(2.).into()))
+                .margin(|m| m.bottom(px(2.)))
                 .add(St::Transform, "rotate(45deg)")
         } else {
             Style::default()

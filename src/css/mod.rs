@@ -34,18 +34,17 @@ pub use self::{
 };
 
 use indexmap::IndexMap;
-pub use seed::{
-    prelude::{St, UpdateEl},
-    virtual_dom::node::el::El,
-};
+use seed::prelude::*;
+pub use seed::prelude::{St, UpdateEl};
 
 // TODO: add compose function for every val::* style (e.g. border(|border| ..))
 #[derive(Default, Debug, Clone)]
 pub struct Style(IndexMap<St, String>);
 
-macro css_props( $( $fn_ident:ident($prop_ty:ty) $(,)? )* ) {
+macro css_props( $( $(#[$doc:meta])* $fn_ident:ident($prop_ty:ty) $(,)? )* ) {
     impl Style {
         $(
+            $( #[$doc] )*
             pub fn $fn_ident<R: Into<$prop_ty>>(mut self, get_prop: impl Fn($prop_ty) -> R) -> Self {
                 let value = get_prop(<$prop_ty>::default()).into();
                 self.merge(&value)
@@ -54,9 +53,10 @@ macro css_props( $( $fn_ident:ident($prop_ty:ty) $(,)? )* ) {
     }
 }
 
-macro simple_css_props( $( $fn_ident:ident($prop_ty:ty) $(,)? )* ) {
+macro simple_css_props( $( $(#[$doc:meta])* $fn_ident:ident($prop_ty:ty) $(,)? )* ) {
     impl Style {
         $(
+            $( #[$doc] )*
             pub fn $fn_ident(mut self, value: impl Into<$prop_ty>) -> Self {
                 self.merge(&value.into())
             }
@@ -65,16 +65,340 @@ macro simple_css_props( $( $fn_ident:ident($prop_ty:ty) $(,)? )* ) {
 }
 
 simple_css_props! {
-    color(Color), opacity(Opacity), gap(Gap), flex_wrap(flexbox::Wrap), flex_basis(flexbox::Basis),
-    flex_direction(flexbox::Direction), order(flexbox::Order), flex_grow(flexbox::Grow), flex_shrink(flexbox::Shrink),
-    justify_content(box_align::JustifyContent), align_content(box_align::AlignContent), align_items(box_align::AlignItems),
-    justify_self(box_align::JustifySelf), align_self(box_align::AlignSelf), display(Display),
-    visibility(Visibility), cursor(Cursor),
+    /// ```
+    /// use palette::Rgb;
+    /// use khalas::css::Color;
+    ///
+    /// div![
+    ///     Style::default()
+    ///         // we can pass Rgb, Rgba, Hsl, Hsla
+    ///         .color(Rgb::new(0.5, 0.1, 0.1))
+    ///         // or we can use html colors
+    ///         .color(color::BlueViolet)
+    /// ]
+    /// ```
+    color(Color),
+    /// ```
+    /// div![
+    ///     Style::default()
+    ///         .opacity(0.75)
+    /// ]
+    /// ```
+    opacity(Opacity),
+    /// ```
+    /// use khalas::css::unit::px;
+    ///
+    /// div![
+    ///     Style::default()
+    ///         .gap(px(2.))
+    /// ]
+    /// ```
+    gap(Gap),
+    /// This method accept any type implemente `Into<Wrap>`, so we can
+    /// pass `Wrap`, `Nowrap` and `WrapReverse`
+    ///
+    /// ```
+    /// use khalas::css::values as val;
+    ///
+    /// div![
+    ///     Style::default()
+    ///         .flex_wrap(val::Wrap)
+    /// ]
+    /// ```
+    flex_wrap(flexbox::Wrap),
+    /// This method accept any type implemente `Into<Basis>`, so we can
+    /// pass `Auto`, `Content`, `Inherit` or any unit type
+    ///
+    /// ```
+    /// use khalas::css::{values as val, unit::{px, em}};
+    ///
+    /// div![
+    ///     Style::default()
+    ///         // pass auto
+    ///         .flex_basis(val::Auto)
+    ///         // or 4px
+    ///         .flex_basis(px(4.))
+    ///         // or 80%
+    ///         .flex_basis(0.8) // not that f32 get converted to unit::Percent type
+    /// ]
+    /// ```
+    flex_basis(flexbox::Basis),
+    /// This method accept any type implemente `Into<Direction>`, so we can pass
+    /// `Row`, `RowReverse`, `Column` and `ColumnReverse`.
+    ///
+    /// ```
+    /// use khalas::css::values as val;
+    ///
+    /// div![
+    ///     Style::default()
+    ///         .flex_direction(val::Column)
+    /// ]
+    /// ```
+    flex_direction(flexbox::Direction),
+    /// ```
+    /// div![
+    ///     Style::default()
+    ///         .order(3)
+    /// ]
+    /// ```
+    order(flexbox::Order),
+    /// ```
+    /// div![
+    ///     Style::default()
+    ///         .flex_grow(2.0)
+    /// ]
+    /// ```
+    flex_grow(flexbox::Grow),
+    /// ```
+    /// div![
+    ///     Style::default()
+    ///         .flex_shrink(4.0)
+    /// ]
+    /// ```
+    flex_shrink(flexbox::Shrink),
+    /// This method accept any type implemente `Into<JustifyContent>`, so we can
+    /// pass `Normal`, `SpaceBetween`, `SpaceAround`, `Stretch`, `Center`,
+    /// `Start` and many other values
+    ///
+    /// ```
+    /// use khalas::css::values as val;
+    ///
+    /// div![
+    ///     Style::default()
+    ///         .justify_content(val::Center)
+    /// ]
+    /// ```
+    justify_content(box_align::JustifyContent),
+    /// This method accept any type implemente `Into<AlignContent>`, so we can
+    /// pass `Normal`, `Baseline`, `FirstBaseline`, `Stretch`, `Center`,
+    /// `Start` and many other values
+    ///
+    /// ```
+    /// use khalas::css::values as val;
+    ///
+    /// div![
+    ///     Style::default()
+    ///         .align_content(val::Stretch)
+    /// ]
+    /// ```
+    align_content(box_align::AlignContent),
+    /// This method accept any type implemente `Into<AlignItems>`, so we can
+    /// pass `Normal`, `Baseline`, `FirstBaseline`, `Stretch`, `Center`,
+    /// `Start` and many other values
+    ///
+    /// ```
+    /// use khalas::css::values as val;
+    ///
+    /// div![
+    ///     Style::default()
+    ///         .align_items(val::Stretch)
+    /// ]
+    /// ```
+    align_items(box_align::AlignItems),
+    /// This method accept any type implemente `Into<JustifySelf>`, so we can
+    /// pass `Auto`, `Normal`, `Stretch`, `Center`, `Start` and many other
+    /// values
+    ///
+    /// ```
+    /// use khalas::css::values as val;
+    ///
+    /// div![
+    ///     Style::default()
+    ///         .justify_self(val::Stretch)
+    /// ]
+    /// ```
+    justify_self(box_align::JustifySelf),
+    /// This method accept any type implemente `Into<AlignSelf>`, so we can
+    /// pass `Auto`, `Normal`, `Stretch`, `Center`, `Start` and many other
+    /// values
+    ///
+    /// ```
+    /// use khalas::css::values as val;
+    ///
+    /// div![
+    ///     Style::default()
+    ///         .align_self(val::Stretch)
+    /// ]
+    /// ```
+    align_self(box_align::AlignSelf),
+    /// This method accept any type implemente `Into<css::Display>`, so we can
+    /// pass `Flex`, `Grid`, `Block`, `Table`, `None` and many other values
+    ///
+    /// ```
+    /// use khalas::css::values as val;
+    ///
+    /// div![
+    ///     Style::default()
+    ///         .display(val::Flex)
+    /// ]
+    /// ```
+    display(Display),
+    /// This method accept any type implemente `Into<Visibility>`, so we can
+    /// pass `Visible`, `Hidden`, `Collapse`, `Initial`, `Inherit`
+    ///
+    /// ```
+    /// use khalas::css::values as val;
+    ///
+    /// div![
+    ///     Style::default()
+    ///         .visibility(val::Hidden)
+    /// ]
+    /// ```
+    visibility(Visibility),
+    /// This method accept any type implemente `Into<Cursor>`, so we can pass
+    /// `Grab`, `Help`, `NoDrop`, `Progress`, `ZoomIn` and many other values
+    ///
+    /// ```
+    /// use khalas::css::values as val;
+    ///
+    /// div![
+    ///     Style::default()
+    ///         .cursor(val::Progress)
+    /// ]
+    /// ```
+    cursor(Cursor),
 }
 
 css_props! {
-    background(Background), border(Border), margin(Margin), padding(Padding), size(Size),
-    transition(Transition), position(Position), text(Text),
+    /// background properties can be add and manipulated using this method
+    ///
+    /// ```
+    /// use khalas::css::Color;
+    ///
+    /// div![
+    ///     Style::default()
+    ///         .background(|conf| {
+    ///             conf.image("/bg/fullpage.png")
+    ///                 .scroll()
+    ///         })
+    /// ]
+    /// ```
+    background(Background),
+    /// border properties can be add and manipulated using this method
+    ///
+    /// ```
+    /// use khalas::css::{values as val, unit::px, Color};
+    ///
+    /// div![
+    ///     Style::default()
+    ///         .border(|conf| {
+    ///             conf.solid() // or .style(val::Solid)
+    ///                 .width(px(2.))
+    ///                 .color(Color::DimGray)
+    ///                 .radius(px(4.))
+    ///         })
+    /// ]
+    /// ```
+    border(Border),
+    /// margin properties can be add and manipulated using this method
+    ///
+    /// ```
+    /// use khalas::css::{values as val, unit::px};
+    ///
+    /// div![
+    ///     Style::default()
+    ///         .margin(|conf| {
+    ///             conf.x(val::Auto)
+    ///                 .y(px(4.))
+    ///         })
+    /// ]
+    /// ```
+    margin(Margin),
+    /// padding properties can be add and manipulated using this method
+    ///
+    /// ```
+    /// use khalas::css::{values as val, unit::px};
+    ///
+    /// div![
+    ///     Style::default()
+    ///         .padding(|conf| {
+    ///             conf.x(val::Auto)
+    ///                 .y(px(4.))
+    ///         })
+    /// ]
+    /// ```
+    padding(Padding),
+    /// size properties can be add and manipulated using this method
+    ///
+    /// ```
+    /// use khalas::css::{values as val, unit::em};
+    ///
+    /// div![
+    ///     Style::default()
+    ///         .size(|conf| {
+    ///             conf.width(em(2.))
+    ///                 .height(em(1.5))
+    ///                 .min_width(em(1.5))
+    ///                 .min_height(em(1.))
+    ///                 .max_width(em(4.))
+    ///                 .max_height(em(3.))
+    ///         })
+    /// ]
+    /// ```
+    size(Size),
+    /// transition properties can be add and manipulated using this method
+    ///
+    /// ```
+    /// use khalas::css::{values as val, unit::{sec, ms}};
+    ///
+    /// // transition for all properties
+    /// div![
+    ///     Style::default()
+    ///         .transition(|conf| {
+    ///             conf.all(|conf| {
+    ///                 conf.duration(sec(0.3))
+    ///                     .cubic_bezier(0.645, 0.045, 0.355, 1.)
+    ///             })
+    ///         })
+    /// ]
+    ///
+    /// // transition for opacity only
+    /// div![
+    ///     Style::default()
+    ///         .transition(|conf| {
+    ///             conf.add("opacity", |conf| {
+    ///                 conf.duration(ms(150.))
+    ///                     .ease()
+    ///                     .delay(sec(0.5))
+    ///             })
+    ///         })
+    /// ]
+    /// ```
+    transition(Transition),
+    /// position properties can be add and manipulated using this method
+    ///
+    /// ```
+    /// use khalas::css::unit::sec;
+    ///
+    /// // transition for all properties
+    /// div![
+    ///     Style::default()
+    ///         .position(|conf| {
+    ///             conf.position(|conf| {
+    ///                 conf.absolute().top(px(top)).left(px(left))
+    ///             })
+    ///         })
+    /// ]
+    /// ```
+    position(Position),
+    /// text properties can be add and manipulated using this method
+    ///
+    /// ```
+    /// use khalas::css::{values as val, Color, unit::em};
+    ///
+    /// // transition for all properties
+    /// div![
+    ///     Style::default()
+    ///         .text(|conf| {
+    ///             conf.color(Color::DimGray)
+    ///                 .line_height(1.7)
+    ///                 .align(val::Center)
+    ///                 .transform(val::Capitalize)
+    ///                 .indent(em(2.))
+    ///         })
+    /// ]
+    /// ```
+    text(Text),
 }
 
 impl Style {

@@ -3,14 +3,20 @@ use derive_rich::Rich;
 
 #[derive(Rich, Clone, Debug, Copy, PartialEq, From, Default)]
 pub struct Margin {
-    #[rich(read, write(take, style = compose))]
+    #[rich(read, write(take))]
     top: Option<Length>,
-    #[rich(read, write(take, style = compose))]
+    #[rich(read, write(take))]
     right: Option<Length>,
-    #[rich(read, write(take, style = compose))]
+    #[rich(read, write(take))]
     bottom: Option<Length>,
-    #[rich(read, write(take, style = compose))]
+    #[rich(read, write(take))]
     left: Option<Length>,
+}
+
+impl From<Length> for Margin {
+    fn from(source: Length) -> Self {
+        Self::default().all(source)
+    }
 }
 
 impl ToStyle for Margin {
@@ -24,30 +30,43 @@ impl ToStyle for Margin {
 }
 
 impl Margin {
-    pub fn x(self, len: impl Fn(Length) -> Length + Clone) -> Self {
-        self.left(|left| len.clone()(left))
-            .right(|right| len(right))
+    pub fn all(self, value: impl Into<Length>) -> Self {
+        let value = value.into();
+        self.right(value).top(value).left(value).bottom(value)
     }
 
-    pub fn y(self, len: impl Fn(Length) -> Length + Clone) -> Self {
-        self.top(|top| len.clone()(top))
-            .bottom(|bottom| len.clone()(bottom))
+    pub fn zero(self) -> Self {
+        self.all(px(0.))
+    }
+
+    pub fn x(self, value: impl Into<Length>) -> Self {
+        let value = value.into();
+        self.left(value).right(value)
+    }
+
+    pub fn y(self, value: impl Into<Length>) -> Self {
+        let value = value.into();
+        self.top(value).bottom(value)
+    }
+
+    pub fn horizontal(self, value: impl Into<Length>) -> Self {
+        self.y(value)
+    }
+
+    pub fn vertical(self, value: impl Into<Length>) -> Self {
+        self.x(value)
     }
 
     pub fn auto(self) -> Self {
-        self.all(|m| m.auto())
+        self.all(val::Auto)
     }
 
     pub fn full(self) -> Self {
-        self.all(|m| m.full())
+        self.all(1.)
     }
 
     pub fn half(self) -> Self {
-        self.all(|m| m.half())
-    }
-
-    pub fn all(self, value: impl Fn(Length) -> Length + Copy) -> Self {
-        self.right(value).top(value).left(value).bottom(value)
+        self.all(0.5)
     }
 }
 
@@ -102,19 +121,5 @@ pub enum Length {
 impl Default for Length {
     fn default() -> Self {
         val::Auto.into()
-    }
-}
-
-impl Length {
-    pub fn auto(self) -> Self {
-        val::Auto.into()
-    }
-
-    pub fn full(self) -> Self {
-        1.0.into()
-    }
-
-    pub fn half(self) -> Self {
-        0.5.into()
     }
 }
