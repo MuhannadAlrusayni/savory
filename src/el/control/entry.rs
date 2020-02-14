@@ -18,7 +18,7 @@ pub enum Msg {
     Focus,
     Blur,
     Clear,
-    UpdateText(String),
+    UpdateText(web_sys::InputEvent),
 }
 
 #[derive(Default, Rich)]
@@ -107,6 +107,16 @@ impl<PMsg> Entry<PMsg> {
         }
     }
 
+    fn handle_update_text(&mut self, event: web_sys::InputEvent) {
+        if let Some(text) = event
+            .target()
+            .map(|t| seed::util::get_value(&t).ok())
+            .flatten()
+        {
+            self.text = Some(text);
+        }
+    }
+
     fn handle_clear_msg(&mut self) {
         self.text = None;
     }
@@ -117,7 +127,7 @@ impl<GMsg, PMsg: 'static> Model<PMsg, GMsg> for Entry<PMsg> {
 
     fn update(&mut self, msg: Msg, _: &mut impl Orders<PMsg, GMsg>) {
         match msg {
-            Msg::UpdateText(text) => self.text = Some(text),
+            Msg::UpdateText(event) => self.handle_update_text(event),
             Msg::MouseEnter => self.mouse_over = true,
             Msg::MouseLeave => self.mouse_over = false,
             Msg::Focus => self.focus = true,

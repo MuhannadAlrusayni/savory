@@ -19,8 +19,7 @@ pub enum Msg {
     Blur,
     Increment,
     Decrement,
-    Input(String),
-    KeyDown(web_sys::KeyboardEvent),
+    Input,
     IncrementButton(el::button::Msg),
     DecrementButton(el::button::Msg),
 }
@@ -59,6 +58,7 @@ impl<PMsg> Default for ParentEvents<PMsg> {
 // TODO: add way to accept custom format (e.g. `100%`, `45$`)
 #[derive(Rich)]
 pub struct SpinEntry<PMsg> {
+    el_ref: ElRef<web_sys::HtmlInputElement>,
     msg_mapper: Rc<dyn Fn(Msg) -> PMsg>,
     #[rich(write(take, style = compose))]
     pub local_events: LocalEvents,
@@ -101,11 +101,11 @@ pub struct SpinEntry<PMsg> {
 impl<PMsg> SpinEntry<PMsg> {
     pub fn new(msg_mapper: impl FnOnce(Msg) -> PMsg + Clone + 'static) -> Self {
         Self {
+            el_ref: ElRef::default(),
             msg_mapper: Rc::new(move |msg| (msg_mapper.clone())(msg)),
             local_events: LocalEvents::default()
                 .input(|conf| {
-                    conf.key_down(Msg::KeyDown)
-                        .input(Msg::Input)
+                    conf.input(|_| Msg::Input)
                         .focus(|_| Msg::Focus)
                         .blur(|_| Msg::Blur)
                 })
@@ -115,8 +115,8 @@ impl<PMsg> SpinEntry<PMsg> {
                 }),
             events: ParentEvents::default(),
             value: None,
-            max: 0.,
-            min: 10.,
+            max: 10.,
+            min: 0.,
             step: 1.,
             placeholder: None,
             size: None,
@@ -129,6 +129,14 @@ impl<PMsg> SpinEntry<PMsg> {
             decrement_button: el::Button::new(Msg::DecrementButton)
                 .events(|conf| conf.click(|_| Msg::Decrement)),
         }
+    }
+
+    pub fn default_value(&self) -> f32 {
+        self.min
+    }
+
+    pub fn value_or_default(&self) -> f32 {
+        self.value.unwrap_or_else(|| self.default_value())
     }
 
     pub fn max(mut self, max: f32) -> Self {
@@ -178,33 +186,48 @@ impl<PMsg> SpinEntry<PMsg> {
             .decrement_button(|conf| conf.disable())
     }
 
-    fn handle_increment(&mut self) {
-        let value = self.value.unwrap_or(self.min);
+    fn increment(&mut self) {
+        let value = self.value_or_default();
         if value < self.max {
-            self.value = Some(value + self.step);
+            let value = if self.max < value + self.step {
+                self.max
+            } else {
+                value + self.step
+            };
+            self.value = Some(value);
         }
     }
 
-    fn handle_decrement(&mut self) {
-        let value = self.value.unwrap_or(self.min);
-        if value < self.max {
-            self.value = Some(value + self.step);
+    fn decrement(&mut self) {
+        let value = self.value_or_default();
+        if value > self.min {
+            let value = if self.min > value - self.step {
+                self.min
+            } else {
+                value - self.step
+            };
+            self.value = Some(value);
         }
     }
 
-    fn handle_key_down(&mut self, event: web_sys::KeyboardEvent) {
-        log!(event.key());
-        if event.key().chars().any(|c| !c.is_ascii_digit() && c != '.') {
-            let raw_event: &web_sys::Event = event.as_ref();
-            raw_event.prevent_default();
-        }
-    }
-
-    // FIXME: this should call prevent_default() on the input event somehow
-    fn handle_input(&mut self, input: String) {
-        if !input.chars().any(|c| !c.is_ascii_digit() && c != '.') {
-            if let Ok(value) = input.parse::<f32>() {
-                self.value = Some(value)
+    fn handle_input(&mut self) {
+        log!(self.el_ref.get());
+        if let Some(input) = self.el_ref.get() {
+            let value = input.value();
+            // if value is empty then we set None to self.value
+            if value.is_empty() {
+                log!("value is empty");
+                self.value = None;
+            } else {
+                // parse value to f32
+                match value.parse::<f32>().ok() {
+                    // check if value in accpeted range
+                    Some(value) if value >= self.min && value <= self.max => {
+                        self.value = Some(value)
+                    }
+                    // remove the input and set self.value as the value for input
+                    _ => input.set_value(&self.value.map(|v| v.to_string()).unwrap_or("".into())),
+                }
             }
         }
     }
@@ -222,10 +245,9 @@ impl<GMsg: 'static, PMsg: 'static> Model<PMsg, GMsg> for SpinEntry<PMsg> {
             Msg::MouseLeave => self.mouse_over = false,
             Msg::Focus => self.focus = true,
             Msg::Blur => self.focus = false,
-            Msg::Increment => self.handle_increment(),
-            Msg::Decrement => self.handle_decrement(),
-            Msg::Input(input) => self.handle_input(input),
-            Msg::KeyDown(event) => self.handle_key_down(event),
+            Msg::Increment => self.increment(),
+            Msg::Decrement => self.decrement(),
+            Msg::Input => self.handle_input(),
             Msg::IncrementButton(msg) => self.increment_button.update(msg, &mut orders),
             Msg::DecrementButton(msg) => self.decrement_button.update(msg, &mut orders),
         }
@@ -330,9 +352,17 @@ impl<PMsg: 'static> Render<PMsg> for SpinEntry<PMsg> {
         // input
         let msg_mapper = Rc::clone(&self.msg_mapper.clone());
         let mut input = input![
+            el_ref(&self.el_ref),
             self.local_events.input.clone(),
             input,
-            // TODO: At::Max, At::Min ..etc
+            attrs![
+                At::Value => self.value.map(|v| v.to_string()).unwrap_or("".into()),
+                // TODO:
+                //   At::Max => self.max,
+                //   At::Min => self.min,
+                //   At::Step => self.step,
+                //   At::Placeholder => self.placeholder,
+            ]
         ]
         .map_msg(move |msg| (msg_mapper.clone())(msg));
 

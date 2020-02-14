@@ -1,3 +1,6 @@
+// TODO: Impl Add, Div, Sub, Mul, PartialEq and other triats for unit types
+// where posible.
+
 // Font-relative lengths
 #[derive(Clone, Debug, Copy, PartialEq, Display, From)]
 #[display(fmt = "{}em", _0)]
@@ -124,6 +127,7 @@ macro construct_fn( $( $fn:ident() -> $ty:ident $(,)? )* ) {
 construct_fn! {
     px() -> Px,
     rem() -> Rem,
+    em() -> Em,
     cm() -> Cm,
     inch() -> In,
     percent() -> Percent,

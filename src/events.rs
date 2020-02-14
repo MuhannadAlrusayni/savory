@@ -85,9 +85,10 @@ mouse_events! {
     wheel_ev: web_sys::WheelEvent {
         wheel = Ev::Wheel,
     }
-    // TODO: before_input is useless untile web_sys::Input provied access to data property
-    input_ev: String {
-        // TODO: use web_sys::InputEvent once it provied access to data property
+    // NOTE: that `InputEvent` doesn't provied access to data property yet, use
+    // seed::browser::util::{get_value, set_value} access these value for now.
+    input_ev: web_sys::InputEvent {
+        before_input = Ev::from("beforeinput")
         input = Ev::Input,
     }
     keyboard_ev: web_sys::KeyboardEvent {
@@ -134,4 +135,6 @@ event_creator! {
     focus_ev(web_sys::FocusEvent),
     /// create `EventHandler` with `web_sys::DragEvent`
     drag_ev(web_sys::DragEvent),
+    /// create `EventHandler` with `web_sys::InputEvent`
+    input_ev(web_sys::InputEvent)
 }

@@ -2,7 +2,7 @@ use crate::{
     css::{
         self,
         color::Color,
-        unit::{ms, px, rem, sec},
+        unit::{em, ms, px, rem, sec},
         values as val, St, Style,
     },
     el::prelude::*,
@@ -996,59 +996,103 @@ impl Theme for Ant {
             .then(|| -> css::Cursor { val::NotAllowed.into() })
             .unwrap_or_else(|| val::Initial.into());
 
+        // em unit used here
+        let width = 4.;
+        let height = 1.5;
+        let btns_container_width = 1.;
+        let btns_container_height = height;
+        let input_width = width - 0.2;
+        let input_height = 1.;
+        // px used here
+        let radius = 4.;
+        let border_width = 1.;
+        // percent units used here
+        let btn_height = 0.5;
+        let btn_width = 1.;
+        let btn_mouse_over_height = btn_height + 0.10;
+        let btn_mouse_over_height_2 = btn_height - 0.10;
+
         let container = Style::default()
+            .position(|conf| conf.relative())
             .transition(|trans| {
                 trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
             })
             .display(val::Flex)
             .align_items(val::Center)
             .justify_content(val::Center)
-            // .padding(|p| p.y(px(4.)).x(px(11.)))
-            // .gap(px(4.))
             .background(|b| b.color(bg))
-            .border(|b| b.solid().width(px(1.)).color(border).radius(px(4.)))
-            .size(|s| s.width(1.))
+            .border(|b| {
+                b.solid()
+                    .width(px(border_width))
+                    .color(border)
+                    .radius(px(radius))
+            })
+            .size(|s| s.width(em(width)).height(em(height)))
             .cursor(cursor);
 
         let input = Style::default()
             .transition(|trans| {
                 trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
             })
-            .size(|s| s.width(1.).height(px(32.)))
+            .size(|s| s.width(em(input_width)).height(em(input_height)))
             .color(fg)
             .border(|b| b.none())
             .background(|bg| bg.transparent())
             .add(St::WebkitAppearance, val::None)
             .cursor(cursor);
 
-        let get_item = |is_mouse_over| {
-            Style::default()
-                .transition(|trans| {
-                    trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+        let buttons_container = Style::default()
+            .position(|conf| conf.absolute().right(px(0.)))
+            .transition(|trans| {
+                trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+            })
+            .display(val::Flex)
+            .flex_direction(val::Column)
+            .size(|conf| {
+                conf.width(em(btns_container_width))
+                    .height(em(btns_container_height))
+            })
+            .border(|conf| {
+                conf.left(|conf| {
+                    conf.solid()
+                        .width(px(border_width))
+                        .color(self.gray(Variant::L300))
                 })
-                .config_block(|conf| {
-                    if is_mouse_over {
-                        conf.flex_grow(1.5)
-                    } else {
-                        conf.flex_grow(1.)
-                    }
-                })
+            })
+            .config_block(|conf| {
+                if spin_entry.is_mouse_over() {
+                    conf.opacity(1.)
+                } else {
+                    conf.opacity(0.)
+                }
+            });
+
+        let increment_item = Style::default();
+        let decrement_item = Style::default();
+
+        let (inc_btn_height, dec_btn_height) = match (
+            spin_entry.increment_button.is_mouse_over(),
+            spin_entry.decrement_button.is_mouse_over(),
+        ) {
+            (true, _) => (btn_mouse_over_height, btn_mouse_over_height_2),
+            (_, true) => (btn_mouse_over_height_2, btn_mouse_over_height),
+            (false, false) => (btn_height, btn_height),
         };
 
-        let buttons_container = Style::default()
-            .display(val::Flex)
-            .flex_direction(val::Column);
-
-        let increment_item = get_item(spin_entry.increment_button.is_mouse_over());
-        let decrement_item = get_item(spin_entry.decrement_button.is_mouse_over());
-
-        let increment_button = Style::default().border(|conf| {
-            conf.solid()
-                .width(px(1.))
-                .color(self.border(false))
-                .radius(px(4.))
-        });
-        let decrement_button = increment_button.clone();
+        let increment_button = Style::default()
+            .background(|conf| conf.color(self.white()))
+            .border(|conf| conf.none().top_right(px(radius)))
+            .size(|conf| conf.width(btn_width).height(inc_btn_height));
+        let decrement_button = Style::default()
+            .background(|conf| conf.color(self.white()))
+            .border(|conf| {
+                conf.none().bottom_right(px(radius)).top(|conf| {
+                    conf.solid()
+                        .width(px(border_width))
+                        .color(self.gray(Variant::L300))
+                })
+            })
+            .size(|conf| conf.width(btn_width).height(dec_btn_height));
 
         let increment_icon: Icon<spin_entry::Msg> = Icon::html(
             r#"""<path d="M890.5 755.3L537.9 269.2c-12.8-17.6-39-17.6-51.7 0L133.5 755.3A8 8 0 0 0 140 768h75c5.1 0 9.9-2.5 12.9-6.6L512 369.8l284.1 391.6c3 4.1 7.8 6.6 12.9 6.6h75c6.5 0 10.3-7.4 6.5-12.7z"></path>"""#,
