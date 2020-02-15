@@ -3,7 +3,6 @@ use crate::{
     el::{Flexbox, Icon},
     events::Events,
     model::Model,
-    propertie::{Shape, Size},
     render::Render,
     theme::Theme,
 };
@@ -49,12 +48,6 @@ pub struct Button<PMsg> {
     pub inner: Inner,
     // properties
     #[rich(value_fns(take) = {
-        small = Size::Small,
-        medium = Size::Medium,
-        large = Size::Large,
-    })]
-    pub size: Option<Size>,
-    #[rich(value_fns(take) = {
         normal = Kind::Normal,
         suggestion = Kind::Suggestion,
         destructive = Kind::Destructive,
@@ -62,12 +55,6 @@ pub struct Button<PMsg> {
         dashed = Kind::Dashed,
     })]
     pub kind: Option<Kind>,
-    #[rich(value_fns(take) = {
-        circle = Shape::Circle,
-        round = Shape::Round,
-        rectangle = Shape::Rectangle
-    })]
-    pub shape: Option<Shape>,
     #[rich(value_fns(take) = { block = true, inline = false })]
     pub block: bool,
     #[rich(
@@ -111,9 +98,7 @@ impl<PMsg> Button<PMsg> {
                 .click(|_| Msg::Route),
             events: Events::default(),
             inner: Inner::Common(None, None),
-            size: None,
             kind: None,
-            shape: None,
             block: false,
             loading: false,
             ghost: false,

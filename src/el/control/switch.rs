@@ -1,11 +1,4 @@
-use crate::{
-    css,
-    events::Events,
-    model::Model,
-    propertie::{Shape, Size},
-    render::Render,
-    theme::Theme,
-};
+use crate::{css, events::Events, model::Model, render::Render, theme::Theme};
 use derive_rich::Rich;
 use seed::prelude::*;
 use std::rc::Rc;
@@ -27,18 +20,6 @@ pub struct Switch<PMsg> {
     msg_mapper: Rc<dyn Fn(Msg) -> PMsg>,
     #[rich(write(take, style = compose))]
     pub style: Style,
-    #[rich(value_fns(take) = {
-        small = Size::Small,
-        medium = Size::Medium,
-        large = Size::Large,
-    })]
-    pub size: Option<Size>,
-    #[rich(value_fns(take) = {
-        circle = Shape::Circle,
-        round = Shape::Round,
-        rectangle = Shape::Rectangle
-    })]
-    pub shape: Option<Shape>,
     #[rich(
         read(copy, rename = is_disabled),
         value_fns(take) = { disable = true, enable = false }
@@ -72,8 +53,6 @@ impl<PMsg> Switch<PMsg> {
                 .click(|_| Msg::Click),
             events: Events::default(),
             style: Style::default(),
-            size: None,
-            shape: None,
             disabled: false,
             loading: false,
             focus: false,

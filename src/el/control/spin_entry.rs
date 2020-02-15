@@ -3,7 +3,6 @@ use crate::{
     el::{self},
     events::Events,
     model::Model,
-    propertie::Size,
     render::Render,
     theme::Theme,
 };
@@ -72,12 +71,6 @@ pub struct SpinEntry<PMsg> {
     min: f32,
     #[rich(read(copy))]
     step: f32,
-    #[rich(value_fns(take) = {
-        small = Size::Small,
-        medium = Size::Medium,
-        large = Size::Large,
-    })]
-    pub size: Option<Size>,
     #[rich(write(take))]
     pub placeholder: Option<f32>,
     #[rich(write(take, style = compose))]
@@ -119,7 +112,6 @@ impl<PMsg> SpinEntry<PMsg> {
             min: 0.,
             step: 1.,
             placeholder: None,
-            size: None,
             style: UserStyle::default(),
             disabled: false,
             focus: false,

@@ -1,4 +1,4 @@
-use crate::{css, events::Events, model::Model, propertie::Size, render::Render, theme::Theme};
+use crate::{css, events::Events, model::Model, render::Render, theme::Theme};
 use derive_rich::Rich;
 use seed::prelude::*;
 use std::{borrow::Cow, rc::Rc};
@@ -21,12 +21,6 @@ pub struct Radio<PMsg> {
     pub label: Option<Cow<'static, str>>,
     #[rich(write(take, style = compose))]
     pub style: Style,
-    #[rich(value_fns(take) = {
-        small = Size::Small,
-        medium = Size::Medium,
-        large = Size::Large,
-    })]
-    pub size: Option<Size>,
     #[rich(
         read(copy, rename = is_disabled),
         value_fns(take) = { disable = true, enable = false }
@@ -50,7 +44,6 @@ impl<PMsg> Radio<PMsg> {
             events: Events::default(),
             label: None,
             style: Style::default(),
-            size: None,
             disabled: false,
             focus: false,
             mouse_over: false,

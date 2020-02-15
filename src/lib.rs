@@ -1,10 +1,8 @@
 #![feature(decl_macro)]
 #![feature(bool_to_option)]
 
-pub mod el;
-pub mod propertie;
-// pub mod layout;
 pub mod css;
+pub mod el;
 pub mod events;
 pub mod macros;
 pub mod model;
