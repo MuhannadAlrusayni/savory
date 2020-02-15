@@ -449,7 +449,7 @@ impl Ant {
         Style::default()
             .border(|b| b.width(px(1.)).solid().radius(px(4.)).color(border_color))
             .background(|b| b.color(bg))
-            .color(fg)
+            .text(|conf| conf.color(fg))
             .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
     }
 
@@ -479,7 +479,7 @@ impl Ant {
         Style::default()
             .border(|b| b.width(px(1.)).solid().radius(px(4.)).color(border_color))
             .background(|b| b.color(bg))
-            .color(fg)
+            .text(|conf| conf.color(fg))
             .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
     }
 
@@ -509,7 +509,7 @@ impl Ant {
         Style::default()
             .border(|b| b.width(px(1.)).solid().radius(px(4.)).color(border_color))
             .background(|b| b.color(bg))
-            .color(fg)
+            .text(|conf| conf.color(fg))
             .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
     }
 
@@ -523,7 +523,7 @@ impl Ant {
             _ => (self.white(), self.brand(Variant::L400)),
         };
         Style::default()
-            .color(fg)
+            .text(|conf| conf.color(fg))
             .border(|b| b.width(px(0.)).solid().radius(px(4.)).color(bg))
             .background(|b| b.color(bg))
     }
@@ -554,7 +554,7 @@ impl Ant {
         Style::default()
             .border(|b| b.width(px(1.)).dashed().radius(px(4.)).color(border_color))
             .background(|b| b.color(bg))
-            .color(fg)
+            .text(|conf| conf.color(fg))
             .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
     }
 }
@@ -793,7 +793,7 @@ impl Theme for Ant {
             .size(|s| s.resize(px(16.), px(16.)))
             .border(|b| b.solid().width(px(1.)).color(border).radius(px(2.)))
             .background(|b| b.color(bg))
-            .color(fg);
+            .text(|conf| conf.color(fg));
 
         let button = if checkbox.is_toggled() {
             Style::default()
@@ -813,17 +813,20 @@ impl Theme for Ant {
             Style::default()
         };
 
-        let label = if checkbox.is_disabled() {
-            Style::default().color(self.disable(false))
-        } else {
-            Style::default()
-        }
-        .transition(|trans| {
-            trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
-        })
-        .cursor(cursor)
-        .display(val::Flex)
-        .gap(px(4.));
+        let label = Style::default()
+            .config_block(|conf| {
+                if checkbox.is_disabled() {
+                    conf.text(|conf| conf.color(self.disable(false)))
+                } else {
+                    conf
+                }
+            })
+            .transition(|trans| {
+                trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+            })
+            .cursor(cursor)
+            .display(val::Flex)
+            .gap(px(4.));
 
         checkbox::Style {
             input,
@@ -881,7 +884,7 @@ impl Theme for Ant {
             .justify_content(val::Center)
             .align_items(val::Center)
             .add(St::WebkitAppearance, val::None)
-            .color(fg)
+            .text(|conf| conf.color(fg))
             .size(|s| s.resize(px(16.), px(16.)))
             .border(|b| b.solid().width(px(1.)).color(border).radius(0.5))
             .background(|b| b.color(bg));
@@ -902,7 +905,7 @@ impl Theme for Ant {
 
         let label = radio
             .is_disabled()
-            .then(|| Style::default().color(self.disable(false)))
+            .then(|| Style::default().text(|conf| conf.color(self.disable(false))))
             .unwrap_or_else(Style::default)
             .transition(|trans| {
                 trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
@@ -961,7 +964,7 @@ impl Theme for Ant {
                 trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
             })
             .size(|s| s.width(1.).height(px(32.)))
-            .color(fg)
+            .text(|conf| conf.color(fg))
             .border(|b| b.none())
             .background(|bg| bg.transparent())
             .add(St::WebkitAppearance, val::None)
@@ -1033,7 +1036,7 @@ impl Theme for Ant {
                 trans.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
             })
             .size(|s| s.width(em(input_width)).height(em(input_height)))
-            .color(fg)
+            .text(|conf| conf.color(fg))
             .border(|b| b.none())
             .background(|bg| bg.transparent())
             .add(St::WebkitAppearance, val::None)
