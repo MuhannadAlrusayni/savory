@@ -71,8 +71,8 @@ pub struct SpinEntry<PMsg> {
     min: f32,
     #[rich(read(copy))]
     step: f32,
-    #[rich(write(take))]
-    pub placeholder: Option<f32>,
+    #[rich(read(copy))]
+    placeholder: Option<f32>,
     #[rich(write(take, style = compose))]
     pub style: UserStyle,
     #[rich(
@@ -176,6 +176,15 @@ impl<PMsg> SpinEntry<PMsg> {
         self.disabled = true;
         self.increment_button(|conf| conf.disable())
             .decrement_button(|conf| conf.disable())
+    }
+
+    pub fn placeholder(mut self, value: impl Into<f32>) -> Self {
+        let value = value.into();
+        self.placeholder = Some(value);
+        if let Some(input) = self.el_ref.get() {
+            input.set_placeholder(&value.to_string());
+        }
+        self
     }
 
     fn increment(&mut self) {
