@@ -4,7 +4,6 @@
 pub mod css;
 pub mod el;
 pub mod events;
-pub mod macros;
 pub mod model;
 pub mod render;
 pub mod routable;
