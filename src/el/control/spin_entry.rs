@@ -25,9 +25,9 @@ pub enum Msg {
 
 #[derive(Default, Rich)]
 pub struct LocalEvents {
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub container: Events<Msg>,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub input: Events<Msg>,
 }
 
@@ -39,9 +39,9 @@ impl LocalEvents {
 
 #[derive(Rich)]
 pub struct ParentEvents<PMsg> {
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub container: Events<PMsg>,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub input: Events<PMsg>,
 }
 
@@ -59,9 +59,9 @@ impl<PMsg> Default for ParentEvents<PMsg> {
 pub struct SpinEntry<PMsg> {
     el_ref: ElRef<web_sys::HtmlInputElement>,
     msg_mapper: Rc<dyn Fn(Msg) -> PMsg>,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub local_events: LocalEvents,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub events: ParentEvents<PMsg>,
     #[rich(read(copy))]
     value: Option<f32>,
@@ -73,7 +73,7 @@ pub struct SpinEntry<PMsg> {
     step: f32,
     #[rich(read(copy))]
     placeholder: Option<f32>,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub style: UserStyle,
     #[rich(
         read(copy, rename = is_disabled),
@@ -85,27 +85,36 @@ pub struct SpinEntry<PMsg> {
     mouse_over: bool,
 
     // children elements
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub increment_button: el::Button<Msg>,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub decrement_button: el::Button<Msg>,
 }
 
 impl<PMsg> SpinEntry<PMsg> {
     pub fn new(msg_mapper: impl FnOnce(Msg) -> PMsg + Clone + 'static) -> Self {
+        let mut local_events = LocalEvents::default();
+        local_events
+            .input(|conf| {
+                conf.input(|_| Msg::Input)
+                    .focus(|_| Msg::Focus)
+                    .blur(|_| Msg::Blur)
+            })
+            .container(|conf| {
+                conf.mouse_enter(|_| Msg::MouseEnter)
+                    .mouse_leave(|_| Msg::MouseLeave)
+            });
+
+        let mut increment_button = el::Button::new(Msg::IncrementButton);
+        increment_button.events(|conf| conf.click(|_| Msg::Increment));
+
+        let mut decrement_button = el::Button::new(Msg::DecrementButton);
+        decrement_button.events(|conf| conf.click(|_| Msg::Decrement));
+
         Self {
             el_ref: ElRef::default(),
             msg_mapper: Rc::new(move |msg| (msg_mapper.clone())(msg)),
-            local_events: LocalEvents::default()
-                .input(|conf| {
-                    conf.input(|_| Msg::Input)
-                        .focus(|_| Msg::Focus)
-                        .blur(|_| Msg::Blur)
-                })
-                .container(|conf| {
-                    conf.mouse_enter(|_| Msg::MouseEnter)
-                        .mouse_leave(|_| Msg::MouseLeave)
-                }),
+            local_events,
             events: ParentEvents::default(),
             value: None,
             max: 10.,
@@ -116,10 +125,8 @@ impl<PMsg> SpinEntry<PMsg> {
             disabled: false,
             focus: false,
             mouse_over: false,
-            increment_button: el::Button::new(Msg::IncrementButton)
-                .events(|conf| conf.click(|_| Msg::Increment)),
-            decrement_button: el::Button::new(Msg::DecrementButton)
-                .events(|conf| conf.click(|_| Msg::Decrement)),
+            increment_button,
+            decrement_button,
         }
     }
 
@@ -131,7 +138,7 @@ impl<PMsg> SpinEntry<PMsg> {
         self.value.unwrap_or_else(|| self.default_value())
     }
 
-    pub fn max(mut self, max: f32) -> Self {
+    pub fn max(&mut self, max: f32) -> &mut Self {
         if max > self.min {
             self.max = max;
         } else {
@@ -141,7 +148,7 @@ impl<PMsg> SpinEntry<PMsg> {
         self
     }
 
-    pub fn min(mut self, min: f32) -> Self {
+    pub fn min(&mut self, min: f32) -> &mut Self {
         if min < self.max {
             self.min = min;
         } else {
@@ -151,13 +158,13 @@ impl<PMsg> SpinEntry<PMsg> {
         self
     }
 
-    pub fn step(mut self, step: f32) -> Self {
+    pub fn step(&mut self, step: f32) -> &mut Self {
         let range = self.min - self.max;
         self.step = if step > range { range } else { step };
         self
     }
 
-    pub fn value(mut self, value: f32) -> Self {
+    pub fn value(&mut self, value: f32) -> &mut Self {
         self.value = match value {
             x if x > self.max => Some(self.max),
             x if x < self.min => Some(self.min),
@@ -166,19 +173,19 @@ impl<PMsg> SpinEntry<PMsg> {
         self
     }
 
-    pub fn enable(mut self) -> Self {
+    pub fn enable(&mut self) -> &mut Self {
         self.disabled = false;
         self.increment_button(|conf| conf.enable())
             .decrement_button(|conf| conf.enable())
     }
 
-    pub fn disable(mut self) -> Self {
+    pub fn disable(&mut self) -> &mut Self {
         self.disabled = true;
         self.increment_button(|conf| conf.disable())
             .decrement_button(|conf| conf.disable())
     }
 
-    pub fn placeholder(mut self, value: impl Into<f32>) -> Self {
+    pub fn placeholder(&mut self, value: impl Into<f32>) -> &mut Self {
         let value = value.into();
         self.placeholder = Some(value);
         if let Some(input) = self.el_ref.get() {
@@ -258,23 +265,23 @@ impl<GMsg: 'static, PMsg: 'static> Model<PMsg, GMsg> for SpinEntry<PMsg> {
 /// This style used by users when they want to change styles of SpinEntry
 #[derive(Clone, Default, Rich)]
 pub struct UserStyle {
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub container: css::Style,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub input: css::Style,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub buttons_container: el::flexbox::Style,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub increment_item: el::flexbox::ItemStyle,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub decrement_item: el::flexbox::ItemStyle,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub increment_button: el::button::Style,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub decrement_button: el::button::Style,
-    #[rich(write(take))]
+    #[rich(write)]
     pub increment_icon: Option<el::Icon<Msg>>,
-    #[rich(write(take))]
+    #[rich(write)]
     pub decrement_icon: Option<el::Icon<Msg>>,
 }
 
@@ -282,24 +289,24 @@ pub struct UserStyle {
 /// icons must be returned by the theme
 #[derive(Clone, Rich)]
 pub struct Style {
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub container: css::Style,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub input: css::Style,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub buttons_container: el::flexbox::Style,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub increment_item: el::flexbox::ItemStyle,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub decrement_item: el::flexbox::ItemStyle,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub increment_button: el::button::Style,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub decrement_button: el::button::Style,
     // FIXME: should I use SvgIcon insted of Icon ?
-    #[rich(write(take))]
+    #[rich(write)]
     pub increment_icon: el::Icon<Msg>,
-    #[rich(write(take))]
+    #[rich(write)]
     pub decrement_icon: el::Icon<Msg>,
 }
 
@@ -339,14 +346,8 @@ impl<PMsg: 'static> Render<PMsg> for SpinEntry<PMsg> {
 
         let msg_mapper = Rc::clone(&self.msg_mapper.clone());
         let btns_container = el::Flexbox::new()
-            .add(|item| {
-                item.content(nodes![inc_btn])
-                    .render_with_style(theme, increment_item)
-            })
-            .add(|item| {
-                item.content(nodes![dec_btn])
-                    .render_with_style(theme, decrement_item)
-            })
+            .add(el::Flexbox::item_with(nodes![inc_btn]).render_with_style(theme, increment_item))
+            .add(el::Flexbox::item_with(nodes![dec_btn]).render_with_style(theme, decrement_item))
             .render_with_style(theme, buttons_container)
             .map_msg(move |msg| (msg_mapper.clone())(msg));
 

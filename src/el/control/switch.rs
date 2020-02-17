@@ -15,19 +15,19 @@ pub enum Msg {
 #[derive(Rich)]
 pub struct Switch<PMsg> {
     local_events: Events<Msg>,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     events: Events<PMsg>,
     msg_mapper: Rc<dyn Fn(Msg) -> PMsg>,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub style: Style,
     #[rich(
         read(copy, rename = is_disabled),
-        value_fns(take) = { disable = true, enable = false }
+        value_fns = { disable = true, enable = false }
     )]
     pub disabled: bool,
     #[rich(
         read(copy, rename = is_loading),
-        value_fns(take) = { loading = true, loading_off = false }
+        value_fns = { loading = true, loading_off = false }
     )]
     pub loading: bool,
     #[rich(read(copy, rename = is_focused))]
@@ -36,21 +36,24 @@ pub struct Switch<PMsg> {
     mouse_over: bool,
     #[rich(
         read(copy, rename = is_toggled),
-        value_fns(take) = { toggle_on = true, toggle_off = false }
+        value_fns = { toggle_on = true, toggle_off = false }
     )]
     toggle: bool,
 }
 
 impl<PMsg> Switch<PMsg> {
     pub fn new(msg_mapper: impl FnOnce(Msg) -> PMsg + Clone + 'static) -> Self {
+        let mut local_events = Events::default();
+        local_events
+            .focus(|_| Msg::Focus)
+            .blur(|_| Msg::Blur)
+            .mouse_enter(|_| Msg::MouseEnter)
+            .mouse_leave(|_| Msg::MouseLeave)
+            .click(|_| Msg::Click);
+
         Self {
             msg_mapper: Rc::new(move |msg| (msg_mapper.clone())(msg)),
-            local_events: Events::default()
-                .focus(|_| Msg::Focus)
-                .blur(|_| Msg::Blur)
-                .mouse_enter(|_| Msg::MouseEnter)
-                .mouse_leave(|_| Msg::MouseLeave)
-                .click(|_| Msg::Click),
+            local_events,
             events: Events::default(),
             style: Style::default(),
             disabled: false,
@@ -87,9 +90,9 @@ impl<GMsg, PMsg: 'static> Model<PMsg, GMsg> for Switch<PMsg> {
 
 #[derive(Clone, Debug, Default, Rich)]
 pub struct Style {
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub background: css::Style,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub button: css::Style,
 }
 

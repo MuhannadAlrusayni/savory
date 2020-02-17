@@ -1,6 +1,6 @@
-use crate::css::{values as val, St, Style, ToStyle};
+use crate::css::{values as val, St, StyleMap, ToStyleMap};
 
-#[derive(Clone, Copy, PartialEq, Eq, Display, From)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq, Display, From)]
 pub enum Cursor {
     #[from]
     Alias(val::Alias),
@@ -82,8 +82,10 @@ pub enum Cursor {
     Inherit(val::Inherit),
 }
 
-impl ToStyle for Cursor {
-    fn to_style(&self) -> Style {
-        Style::new().add(St::Cursor, self)
+impl ToStyleMap for Cursor {
+    fn style_map(&self) -> StyleMap {
+        let mut map = StyleMap::default();
+        map.add(St::Cursor, self);
+        map
     }
 }

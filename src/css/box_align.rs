@@ -1,4 +1,4 @@
-use crate::css::{values as val, St, Style, ToStyle};
+use crate::css::{values as val, St, StyleMap, ToStyleMap};
 
 #[derive(Clone, Debug, Copy, PartialEq, Eq, Display, From)]
 pub enum JustifyContent {
@@ -56,9 +56,11 @@ pub enum JustifyContent {
     UnsafeRight(val::UnsafeRight),
 }
 
-impl ToStyle for JustifyContent {
-    fn to_style(&self) -> Style {
-        Style::new().add(St::JustifyContent, self)
+impl ToStyleMap for JustifyContent {
+    fn style_map(&self) -> StyleMap {
+        let mut map = StyleMap::default();
+        map.add(St::JustifyContent, self);
+        map
     }
 }
 
@@ -112,9 +114,11 @@ pub enum AlignContent {
     UnsafeFlexEnd(val::UnsafeFlexEnd),
 }
 
-impl ToStyle for AlignContent {
-    fn to_style(&self) -> Style {
-        Style::new().add(St::AlignContent, self)
+impl ToStyleMap for AlignContent {
+    fn style_map(&self) -> StyleMap {
+        let mut map = StyleMap::default();
+        map.add(St::AlignContent, self);
+        map
     }
 }
 
@@ -174,9 +178,11 @@ pub enum AlignItems {
     UnsafeFlexEnd(val::UnsafeFlexEnd),
 }
 
-impl ToStyle for AlignItems {
-    fn to_style(&self) -> Style {
-        Style::new().add(St::AlignItems, self)
+impl ToStyleMap for AlignItems {
+    fn style_map(&self) -> StyleMap {
+        let mut map = StyleMap::default();
+        map.add(St::AlignItems, self);
+        map
     }
 }
 
@@ -250,9 +256,11 @@ pub enum JustifySelf {
     UnsafeRight(val::UnsafeRight),
 }
 
-impl ToStyle for JustifySelf {
-    fn to_style(&self) -> Style {
-        Style::new().add(St::JustifySelf, self)
+impl ToStyleMap for JustifySelf {
+    fn style_map(&self) -> StyleMap {
+        let mut map = StyleMap::default();
+        map.add(St::JustifySelf, self);
+        map
     }
 }
 
@@ -314,8 +322,10 @@ pub enum AlignSelf {
     UnsafeFlexEnd(val::UnsafeFlexEnd),
 }
 
-impl ToStyle for AlignSelf {
-    fn to_style(&self) -> Style {
-        Style::new().add(St::AlignSelf, self)
+impl ToStyleMap for AlignSelf {
+    fn style_map(&self) -> StyleMap {
+        let mut map = StyleMap::default();
+        map.add(St::AlignSelf, self);
+        map
     }
 }

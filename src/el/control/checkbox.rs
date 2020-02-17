@@ -16,16 +16,16 @@ pub enum Msg {
 pub struct Checkbox<PMsg> {
     local_events: Events<Msg>,
     lbl_events: Events<Msg>,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     events: Events<PMsg>,
     msg_mapper: Rc<dyn Fn(Msg) -> PMsg>,
-    #[rich(write(take))]
+    #[rich(write)]
     pub label: Option<Cow<'static, str>>,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub style: Style,
     #[rich(
         read(copy, rename = is_disabled),
-        value_fns(take) = { disable = true, enable = false }
+        value_fns = { disable = true, enable = false }
     )]
     pub disabled: bool,
     #[rich(read(copy, rename = is_focused))]
@@ -34,25 +34,31 @@ pub struct Checkbox<PMsg> {
     mouse_over: bool,
     #[rich(
         read(copy, rename = is_toggled),
-        value_fns(take) = { toggle_on = true, toggle_off = false }
+        value_fns = { toggle_on = true, toggle_off = false }
     )]
     toggle: bool,
 }
 
 impl<PMsg> Checkbox<PMsg> {
     pub fn new(msg_mapper: impl FnOnce(Msg) -> PMsg + Clone + 'static) -> Self {
+        let mut local_events = Events::default();
+        local_events
+            .focus(|_| Msg::Focus)
+            .blur(|_| Msg::Blur)
+            .mouse_enter(|_| Msg::MouseEnter)
+            .mouse_leave(|_| Msg::MouseLeave)
+            .click(|_| Msg::Click);
+
+        let mut lbl_events = Events::default();
+        lbl_events
+            .mouse_enter(|_| Msg::MouseEnter)
+            .mouse_leave(|_| Msg::MouseLeave);
+
         Self {
             msg_mapper: Rc::new(move |msg| (msg_mapper.clone())(msg)),
             events: Events::default(),
-            local_events: Events::default()
-                .focus(|_| Msg::Focus)
-                .blur(|_| Msg::Blur)
-                .mouse_enter(|_| Msg::MouseEnter)
-                .mouse_leave(|_| Msg::MouseLeave)
-                .click(|_| Msg::Click),
-            lbl_events: Events::default()
-                .mouse_enter(|_| Msg::MouseEnter)
-                .mouse_leave(|_| Msg::MouseLeave),
+            local_events,
+            lbl_events,
             label: None,
             style: Style::default(),
             disabled: false,
@@ -62,7 +68,7 @@ impl<PMsg> Checkbox<PMsg> {
         }
     }
 
-    pub fn toggle(mut self) -> Self {
+    pub fn toggle(&mut self) -> &mut Self {
         self.toggle = !self.toggle;
         self
     }
@@ -88,11 +94,11 @@ impl<GMsg, PMsg: 'static> Model<PMsg, GMsg> for Checkbox<PMsg> {
 
 #[derive(Clone, Debug, Default, Rich)]
 pub struct Style {
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub input: css::Style,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub button: css::Style,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub label: css::Style,
 }
 

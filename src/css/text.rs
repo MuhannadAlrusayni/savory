@@ -1,54 +1,54 @@
-use crate::css::{color::Color, unit::*, values as val, St, Style, ToStyle};
+use crate::css::{color::Color, unit::*, values as val, St, StyleMap, ToStyleMap};
 use derive_rich::Rich;
 use std::borrow::Cow;
 
 #[derive(Rich, Clone, Debug, PartialEq, Default)]
 pub struct Text {
-    #[rich(write(take))]
+    #[rich(write)]
     pub color: Option<Color>,
-    #[rich(write(take))]
+    #[rich(write)]
     pub direction: Option<Direction>,
-    #[rich(write(take))]
+    #[rich(write)]
     pub letter_spacing: Option<LetterSpacing>,
-    #[rich(write(take))]
+    #[rich(write)]
     pub word_spacing: Option<WordSpacing>,
-    #[rich(write(take))]
+    #[rich(write)]
     pub line_height: Option<LineHeight>,
-    #[rich(write(take))]
+    #[rich(write)]
     pub align: Option<TextAlign>,
-    #[rich(write(take))]
+    #[rich(write)]
     pub align_last: Option<TextAlignLast>,
-    #[rich(write(take))]
+    #[rich(write)]
     pub justify: Option<TextJustify>,
     // TODO
-    // #[rich(write(take))]
+    // #[rich(write)]
     // pub text_shadow: Option<TextShadow>,
-    #[rich(write(take))]
+    #[rich(write)]
     pub indent: Option<TextIndent>,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub decoration: Option<TextDecoration>,
-    #[rich(write(take))]
+    #[rich(write)]
     pub white_space: Option<WhiteSpace>,
-    #[rich(write(take))]
+    #[rich(write)]
     pub unicode_bidi: Option<UnicodeBidi>,
-    #[rich(write(take))]
+    #[rich(write)]
     pub transform: Option<TextTransform>,
-    #[rich(write(take))]
+    #[rich(write)]
     pub overflow: Option<TextOverflow>,
-    #[rich(write(take))]
+    #[rich(write)]
     pub vertical_align: Option<VerticalAlign>,
-    #[rich(write(take))]
+    #[rich(write)]
     pub writing_mode: Option<WritingMode>,
-    #[rich(write(take))]
+    #[rich(write)]
     pub word_wrap: Option<WordWrap>,
-    #[rich(write(take))]
+    #[rich(write)]
     pub word_break: Option<WordBreak>,
 }
 
-impl ToStyle for Text {
-    fn to_style(&self) -> Style {
-        Style::default()
-            .try_add(St::Color, self.color)
+impl ToStyleMap for Text {
+    fn style_map(&self) -> StyleMap {
+        let mut map = StyleMap::default();
+        map.try_add(St::Color, self.color)
             .try_add(St::Direction, self.direction)
             .try_add(St::LetterSpacing, self.letter_spacing)
             .try_add(St::LineHeight, self.line_height)
@@ -61,7 +61,8 @@ impl ToStyle for Text {
             .try_add(St::UnicodeBidi, self.unicode_bidi)
             .try_add(St::VerticalAlign, self.vertical_align)
             .try_add(St::WhiteSpace, self.white_space)
-            .try_add(St::WordSpacing, self.word_spacing)
+            .try_add(St::WordSpacing, self.word_spacing);
+        map
     }
 }
 
@@ -234,11 +235,11 @@ impl Default for TextDecoration {
 }
 
 impl TextDecoration {
-    pub fn line(mut self, value: impl Into<TextDecorationLine>) -> Self {
+    pub fn line(&mut self, value: impl Into<TextDecorationLine>) -> &mut Self {
         match self {
             Self::Decoration { ref mut line, .. } => *line = Some(value.into()),
             _ => {
-                self = Self::Decoration {
+                *self = Self::Decoration {
                     line: Some(value.into()),
                     color: None,
                     style: None,
@@ -248,11 +249,11 @@ impl TextDecoration {
         self
     }
 
-    pub fn color(mut self, value: impl Into<TextDecorationColor>) -> Self {
+    pub fn color(&mut self, value: impl Into<TextDecorationColor>) -> &mut Self {
         match self {
             Self::Decoration { ref mut color, .. } => *color = Some(value.into()),
             _ => {
-                self = Self::Decoration {
+                *self = Self::Decoration {
                     line: Some(val::None.into()),
                     color: Some(value.into()),
                     style: None,
@@ -262,11 +263,11 @@ impl TextDecoration {
         self
     }
 
-    pub fn style(mut self, value: impl Into<TextDecorationStyle>) -> Self {
+    pub fn style(&mut self, value: impl Into<TextDecorationStyle>) -> &mut Self {
         match self {
             Self::Decoration { ref mut style, .. } => *style = Some(value.into()),
             _ => {
-                self = Self::Decoration {
+                *self = Self::Decoration {
                     line: Some(val::None.into()),
                     color: None,
                     style: Some(value.into()),

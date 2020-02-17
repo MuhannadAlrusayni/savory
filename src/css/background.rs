@@ -1,16 +1,16 @@
-use crate::css::{self, values as val, color::Color, unit::*, St, ToStyle};
+use crate::css::{color::Color, unit::*, values as val, St, StyleMap, ToStyleMap};
 use derive_rich::Rich;
 
 // TODO: use css types in this module enums
 
 #[derive(Rich, Clone, Debug, PartialEq, Default)]
 pub struct Background {
-    #[rich(read, write(take))]
+    #[rich(read, write)]
     color: Option<Color>,
     // TODO: support multiple images
-    #[rich(read, write(take), value_fns(take) = { empty = val::None })]
+    #[rich(read, write, value_fns = { empty = val::None })]
     image: Option<Image>,
-    #[rich(value_fns(take) = {
+    #[rich(value_fns = {
         repeat_x = val::RepeatX,
         repeat_y = val::RepeatY,
         repeat = val::Repeat,
@@ -21,7 +21,7 @@ pub struct Background {
         inherit_repeat = val::Inherit,
     })]
     repeat: Option<Repeat>,
-    #[rich(value_fns(take) = {
+    #[rich(value_fns = {
         scroll = val::Scroll,
         fixed = val::Fixed,
         local = val::Local,
@@ -29,7 +29,7 @@ pub struct Background {
         inherit_attachment = val::Inherit,
     })]
     attachment: Option<Attachment>,
-    #[rich(read, write(take), value_fns(take) = {
+    #[rich(read, write, value_fns = {
         left_top = (Horizontal::from(val::Left), val::Top.into()),
         center_top = (Horizontal::from(val::Center), val::Top.into()),
         right_top = (Horizontal::from(val::Right), val::Top.into()),
@@ -41,19 +41,19 @@ pub struct Background {
         right_bottom = (Horizontal::from(val::Right), val::Bottom.into()),
     })]
     position: Option<Position>,
-    #[rich(value_fns(take) = {
+    #[rich(value_fns = {
         fill_under_border = val::BorderBox,
         fill_inside_border = val::PaddingBox,
         fill_under_content = val::ContentBox,
     })]
     clip: Option<Clip>,
-    #[rich(value_fns(take) = {
+    #[rich(value_fns = {
         image_fill_under_border = val::BorderBox,
         image_inside_border = val::PaddingBox,
         image_under_content = val::ContentBox,
     })]
     origin: Option<Origin>,
-    #[rich(read, write(take), value_fns(take) = {
+    #[rich(read, write, value_fns = {
         full = (1.0, 1.0),
         half = (0.5, 0.5),
         quarter = (0.25, 0.25),
@@ -64,19 +64,20 @@ pub struct Background {
     size: Option<Size>,
 }
 
-impl ToStyle for Background {
-    fn to_style(&self) -> css::Style {
-        css::Style::new()
-            .try_add(St::BackgroundColor, self.color)
+impl ToStyleMap for Background {
+    fn style_map(&self) -> StyleMap {
+        let mut map = StyleMap::default();
+        map.try_add(St::BackgroundColor, self.color)
             .try_add(St::BackgroundImage, self.image.as_ref())
             .try_add(St::BackgroundRepeat, self.repeat)
             .try_add(St::BackgroundAttachment, self.attachment)
-            .try_add(St::BackgroundPosition, self.position)
+            .try_add(St::BackgroundPosition, self.position);
+        map
     }
 }
 
 impl Background {
-    pub fn transparent(self) -> Self {
+    pub fn transparent(&mut self) -> &mut Self {
         self.color(Color::Transparent)
     }
 }

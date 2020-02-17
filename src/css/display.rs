@@ -1,6 +1,6 @@
-use crate::css::{values as val, St, Style, ToStyle};
+use crate::css::{values as val, St, StyleMap, ToStyleMap};
 
-#[derive(Clone, Copy, PartialEq, Eq, Display, From)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq, Display, From)]
 pub enum Display {
     #[from]
     Inline(val::Inline),
@@ -50,8 +50,10 @@ pub enum Display {
     Inherit(val::Inherit),
 }
 
-impl ToStyle for Display {
-    fn to_style(&self) -> Style {
-        Style::new().add(St::Display, self)
+impl ToStyleMap for Display {
+    fn style_map(&self) -> StyleMap {
+        let mut map = StyleMap::default();
+        map.add(St::Display, self);
+        map
     }
 }

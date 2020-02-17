@@ -1,9 +1,9 @@
-use crate::css::{unit::*, values as val, St, Style, ToStyle};
+use crate::css::{unit::*, values as val, St, StyleMap, ToStyleMap};
 use derive_rich::Rich;
 
 #[derive(Rich, Clone, Debug, PartialEq, Default)]
 pub struct Position {
-    #[rich(value_fns(take) = {
+    #[rich(value_fns = {
         static_pos = val::Static,
         absolute = val::Absolute,
         fixed = val::Fixed,
@@ -13,30 +13,31 @@ pub struct Position {
         inherit = val::Inherit,
     })]
     position: Option<PositionType>,
-    #[rich(write(take))]
+    #[rich(write)]
     left: Option<LengthPercent>,
-    #[rich(write(take))]
+    #[rich(write)]
     top: Option<LengthPercent>,
-    #[rich(write(take))]
+    #[rich(write)]
     right: Option<LengthPercent>,
-    #[rich(write(take))]
+    #[rich(write)]
     bottom: Option<LengthPercent>,
-    #[rich(write(take))]
+    #[rich(write)]
     z_index: Option<i32>,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     clip: Option<Clip>,
 }
 
-impl ToStyle for Position {
-    fn to_style(&self) -> Style {
-        Style::default()
-            .try_add(St::Position, self.position.as_ref())
+impl ToStyleMap for Position {
+    fn style_map(&self) -> StyleMap {
+        let mut map = StyleMap::default();
+        map.try_add(St::Position, self.position.as_ref())
             .try_add(St::Left, self.left.as_ref())
             .try_add(St::Top, self.top.as_ref())
             .try_add(St::Right, self.right.as_ref())
             .try_add(St::Bottom, self.bottom.as_ref())
             .try_add(St::ZIndex, self.z_index.as_ref())
-            .try_add(St::Clip, self.clip.as_ref())
+            .try_add(St::Clip, self.clip.as_ref());
+        map
     }
 }
 

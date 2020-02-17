@@ -40,14 +40,15 @@ pub type ParentEvents<PMsg> = Events<PMsg>;
 #[derive(Clone, Rich)]
 pub struct Button<PMsg> {
     msg_mapper: Rc<dyn Fn(Msg) -> PMsg>,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     local_events: LocalEvents,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     events: ParentEvents<PMsg>,
     // children
     pub inner: Inner,
     // properties
-    #[rich(value_fns(take) = {
+    #[rich(value_fns = {
+        /// Change button kind to normal
         normal = Kind::Normal,
         suggestion = Kind::Suggestion,
         destructive = Kind::Destructive,
@@ -55,26 +56,26 @@ pub struct Button<PMsg> {
         dashed = Kind::Dashed,
     })]
     pub kind: Option<Kind>,
-    #[rich(value_fns(take) = { block = true, inline = false })]
+    #[rich(value_fns = { block = true, inline = false })]
     pub block: bool,
     #[rich(
         read(copy, rename = is_loading),
-        value_fns(take) = { loading = true, loading_off = false }
+        value_fns = { loading = true, loading_off = false }
     )]
     pub loading: bool,
-    #[rich(value_fns(take) = { ghost = true, ghost_off = false })]
+    #[rich(value_fns = { ghost = true, ghost_off = false })]
     pub ghost: bool,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub style: Style,
 
-    // #[rich(write(take, style = compose))]
+    // #[rich(write(style = compose))]
     // events: Events<Msg>,
     #[rich(
         read(copy, rename = is_disabled),
-        value_fns(take) = { disable = true, enable = false }
+        value_fns = { disable = true, enable = false }
     )]
     pub disabled: bool,
-    #[rich(write(take))]
+    #[rich(write)]
     pub route: Option<Cow<'static, str>>,
 
     // read only properties, these shouldn't be editable from out side of this
@@ -88,14 +89,17 @@ pub struct Button<PMsg> {
 
 impl<PMsg> Button<PMsg> {
     pub fn new(msg_mapper: impl FnOnce(Msg) -> PMsg + Clone + 'static) -> Self {
+        let mut local_events = Events::default();
+        local_events
+            .focus(|_| Msg::Focus)
+            .blur(|_| Msg::Blur)
+            .mouse_enter(|_| Msg::MouseEnter)
+            .mouse_leave(|_| Msg::MouseLeave)
+            .click(|_| Msg::Route);
+
         Button {
             msg_mapper: Rc::new(move |msg| (msg_mapper.clone())(msg)),
-            local_events: Events::default()
-                .focus(|_| Msg::Focus)
-                .blur(|_| Msg::Blur)
-                .mouse_enter(|_| Msg::MouseEnter)
-                .mouse_leave(|_| Msg::MouseLeave)
-                .click(|_| Msg::Route),
+            local_events,
             events: Events::default(),
             inner: Inner::Common(None, None),
             kind: None,
@@ -114,17 +118,21 @@ impl<PMsg> Button<PMsg> {
         msg_mapper: impl FnOnce(Msg) -> PMsg + Clone + 'static,
         label: impl Into<String>,
     ) -> Self {
-        Button::new(msg_mapper).label(label)
+        let mut btn = Button::new(msg_mapper);
+        btn.label(label);
+        btn
     }
 
     pub fn with_children(
         msg_mapper: impl FnOnce(Msg) -> PMsg + Clone + 'static,
         children: Vec<Node<Msg>>,
     ) -> Self {
-        Button::new(msg_mapper).children(children)
+        let mut btn = Button::new(msg_mapper);
+        btn.children(children);
+        btn
     }
 
-    pub fn label(mut self, label: impl Into<String>) -> Self {
+    pub fn label(&mut self, label: impl Into<String>) -> &mut Self {
         match self.inner {
             Inner::Common(Some(ref mut lbl), _) => *lbl = label.into(),
             Inner::Common(ref mut lbl, _) => *lbl = Some(label.into()),
@@ -133,12 +141,12 @@ impl<PMsg> Button<PMsg> {
         self
     }
 
-    pub fn children(mut self, children: Vec<Node<Msg>>) -> Self {
+    pub fn children(&mut self, children: Vec<Node<Msg>>) -> &mut Self {
         self.inner = Inner::Child(children);
         self
     }
 
-    pub fn icon(mut self, new_icon: impl Into<Icon<Msg>>) -> Self {
+    pub fn icon(&mut self, new_icon: impl Into<Icon<Msg>>) -> &mut Self {
         match self.inner {
             Inner::Common(_, ref mut icon) => *icon = Some(new_icon.into()),
             _ => self.inner = Inner::Common(None, Some(new_icon.into())),
@@ -196,13 +204,15 @@ impl<PMsg: 'static> Render<PMsg> for Button<PMsg> {
                     .as_ref()
                     .map(|lbl| plain![lbl.clone()])
                     .unwrap_or(empty![]);
+                let mut lbl = Flexbox::item_with(nodes![lbl]);
+                lbl.wrapped();
                 // TODO: use el::flexbox::Style insted of hard coding the style
                 vec![Flexbox::new()
                     .center()
                     .full_size()
                     .gap(px(4.))
-                    .add(|item| item.content(vec![icon]))
-                    .add(|item| item.content(vec![lbl]).wrapped())
+                    .add(nodes![icon])
+                    .add(lbl)
                     .render(theme)]
             }
         };

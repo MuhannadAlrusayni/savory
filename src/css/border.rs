@@ -1,30 +1,31 @@
-use crate::css::{self, color::Color, unit::*, values as val, St, ToStyle};
+use crate::css::{color::Color, unit::*, values as val, St, StyleMap, ToStyleMap};
 use derive_rich::Rich;
 
 // TODO: add shadow
-#[derive(Rich, Clone, Debug, PartialEq, Default)]
+#[derive(Rich, Copy, Clone, Debug, PartialEq, Default)]
 pub struct Border {
-    #[rich(read, write(take, style = compose))]
+    #[rich(read, write(style = compose))]
     left: Side,
-    #[rich(read, write(take, style = compose))]
+    #[rich(read, write(style = compose))]
     top: Side,
-    #[rich(read, write(take, style = compose))]
+    #[rich(read, write(style = compose))]
     right: Side,
-    #[rich(read, write(take, style = compose))]
+    #[rich(read, write(style = compose))]
     bottom: Side,
-    #[rich(read, write(take))]
+    #[rich(read, write)]
     top_left: Option<Radius>,
-    #[rich(read, write(take))]
+    #[rich(read, write)]
     top_right: Option<Radius>,
-    #[rich(read, write(take))]
+    #[rich(read, write)]
     bottom_left: Option<Radius>,
-    #[rich(read, write(take))]
+    #[rich(read, write)]
     bottom_right: Option<Radius>,
 }
 
-impl ToStyle for Border {
-    fn to_style(&self) -> css::Style {
-        css::Style::new()
+impl ToStyleMap for Border {
+    fn style_map(&self) -> StyleMap {
+        let mut map = StyleMap::default();
+        map
             // left side
             .try_add(St::BorderLeftColor, self.left.color)
             .try_add(St::BorderLeftWidth, self.left.width)
@@ -45,43 +46,44 @@ impl ToStyle for Border {
             .try_add(St::BorderTopLeftRadius, self.top_left)
             .try_add(St::BorderTopRightRadius, self.top_right)
             .try_add(St::BorderBottomLeftRadius, self.bottom_left)
-            .try_add(St::BorderBottomRightRadius, self.bottom_right)
+            .try_add(St::BorderBottomRightRadius, self.bottom_right);
+        map
     }
 }
 
 macro sides_style_shortcut_functions( $( $fn:ident() $(,)? )* ) {
     $(
-        pub fn $fn(self) -> Self {
+        pub fn $fn(&mut self) -> &mut Self {
             self.all_side(|side| side.$fn())
         }
     )*
 }
 
 impl Border {
-    pub fn all_side(self, value: impl Fn(Side) -> Side + Copy) -> Self {
+    pub fn all_side(&mut self, value: impl Fn(&mut Side) -> &mut Side + Copy) -> &mut Self {
         self.left(value).top(value).right(value).bottom(value)
     }
 
-    pub fn style(self, style: impl Into<Style>) -> Self {
+    pub fn style(&mut self, style: impl Into<Style>) -> &mut Self {
         let style = style.into();
         self.all_side(|side| side.style(style))
     }
 
-    pub fn width(self, width: impl Into<Width>) -> Self {
+    pub fn width(&mut self, width: impl Into<Width>) -> &mut Self {
         let width = width.into();
         self.all_side(|side| side.width(width))
     }
 
-    pub fn color(self, color: impl Into<Color>) -> Self {
+    pub fn color(&mut self, color: impl Into<Color>) -> &mut Self {
         let color = color.into();
         self.all_side(|side| side.color(color))
     }
 
-    pub fn transparent(self) -> Self {
+    pub fn transparent(&mut self) -> &mut Self {
         self.color(Color::Transparent)
     }
 
-    pub fn radius(self, rad: impl Into<Radius>) -> Self {
+    pub fn radius(&mut self, rad: impl Into<Radius>) -> &mut Self {
         let rad = rad.into();
         self.top_left(rad)
             .top_right(rad)
@@ -95,9 +97,9 @@ impl Border {
     }
 }
 
-#[derive(Rich, Clone, Debug, PartialEq, From, Default)]
+#[derive(Rich, Copy, Clone, Debug, PartialEq, From, Default)]
 pub struct Side {
-    #[rich(write(take), read, value_fns(take) = {
+    #[rich(write, read, value_fns = {
         none = val::None,
         hidden = val::Hidden,
         dotted = val::Dotted,
@@ -112,7 +114,7 @@ pub struct Side {
         inherit_style = val::Inherit,
     })]
     style: Option<Style>,
-    #[rich(read, write(take), value_fns(take) = {
+    #[rich(read, write, value_fns = {
         thick = val::Thick,
         thin = val::Thin,
         medium = val::Medium,
@@ -120,7 +122,7 @@ pub struct Side {
         inherit_width = val::Inherit,
     })]
     width: Option<Width>,
-    #[rich(read, write(take))]
+    #[rich(read, write)]
     color: Option<Color>,
 }
 

@@ -1,6 +1,6 @@
 use crate::css::{
     unit::{sec, Ms, Sec},
-    values as val, St, Style, ToStyle,
+    values as val, St, StyleMap, ToStyleMap,
 };
 use derive_rich::Rich;
 use indexmap::IndexMap;
@@ -11,8 +11,8 @@ pub struct Transition {
     pub transitions: IndexMap<Cow<'static, str>, TransitionValue>,
 }
 
-impl ToStyle for Transition {
-    fn to_style(&self) -> Style {
+impl ToStyleMap for Transition {
+    fn style_map(&self) -> StyleMap {
         let mut transitions = vec![];
         for (property, value) in self.transitions.iter() {
             let mut trans = vec![property.to_string()];
@@ -26,7 +26,9 @@ impl ToStyle for Transition {
             transitions.push(trans.join(" "));
         }
 
-        Style::default().add(St::Transition, transitions.join(", "))
+        let mut map = StyleMap::default();
+        map.add(St::Transition, transitions.join(", "));
+        map
     }
 }
 
@@ -37,30 +39,33 @@ impl Transition {
         }
     }
 
-    pub fn all(mut self, get_trans: impl Fn(TransitionValue) -> TransitionValue) -> Self {
-        let trans_value = TransitionValue::new(sec(1.));
-        self.transitions
-            .insert("all".into(), get_trans(trans_value));
+    pub fn all(
+        &mut self,
+        get_trans: impl Fn(&mut TransitionValue) -> &mut TransitionValue,
+    ) -> &mut Self {
+        let mut trans_value = TransitionValue::new(sec(1.));
+        get_trans(&mut trans_value);
+        self.transitions.insert("all".into(), trans_value);
         self
     }
 
     pub fn add(
-        mut self,
+        &mut self,
         property: impl Into<Cow<'static, str>>,
-        get_trans: impl Fn(TransitionValue) -> TransitionValue,
-    ) -> Self {
-        let trans_value = TransitionValue::new(sec(1.));
-        self.transitions
-            .insert(property.into(), get_trans(trans_value));
+        get_trans: impl Fn(&mut TransitionValue) -> &mut TransitionValue,
+    ) -> &mut Self {
+        let mut trans_value = TransitionValue::new(sec(1.));
+        get_trans(&mut trans_value);
+        self.transitions.insert(property.into(), trans_value);
         self
     }
 }
 
 #[derive(Rich, Clone, Debug, PartialEq, From)]
 pub struct TransitionValue {
-    #[rich(write(take))]
+    #[rich(write)]
     pub duration: Duration,
-    #[rich(value_fns(take) = {
+    #[rich(value_fns = {
         ease = val::Ease,
         linear = val::Linear,
         ease_in = val::EaseIn,
@@ -72,7 +77,7 @@ pub struct TransitionValue {
         inherit = val::Inherit,
     })]
     pub timing_function: Option<TimingFunction>,
-    #[rich(write(take))]
+    #[rich(write)]
     pub delay: Option<Delay>,
 }
 
@@ -85,12 +90,12 @@ impl TransitionValue {
         }
     }
 
-    pub fn steps(mut self, intervals: usize, pos: impl Into<StepsPos>) -> Self {
+    pub fn steps(&mut self, intervals: usize, pos: impl Into<StepsPos>) -> &mut Self {
         self.timing_function = Some(TimingFunction::Steps(intervals, pos.into()));
         self
     }
 
-    pub fn cubic_bezier(mut self, n1: f32, n2: f32, n3: f32, n4: f32) -> Self {
+    pub fn cubic_bezier(&mut self, n1: f32, n2: f32, n3: f32, n4: f32) -> &mut Self {
         self.timing_function = Some(TimingFunction::CubicBezier(n1, n2, n3, n4));
         self
     }

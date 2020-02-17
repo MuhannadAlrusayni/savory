@@ -14,16 +14,16 @@ pub enum Msg {
 
 #[derive(Clone, Rich)]
 pub struct Radio<PMsg> {
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     events: Events<PMsg>,
     msg_mapper: Rc<dyn Fn(Msg) -> PMsg>,
-    #[rich(write(take))]
+    #[rich(write)]
     pub label: Option<Cow<'static, str>>,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub style: Style,
     #[rich(
         read(copy, rename = is_disabled),
-        value_fns(take) = { disable = true, enable = false }
+        value_fns = { disable = true, enable = false }
     )]
     pub disabled: bool,
     #[rich(read(copy, rename = is_focused))]
@@ -32,7 +32,7 @@ pub struct Radio<PMsg> {
     mouse_over: bool,
     #[rich(
         read(copy, rename = is_toggled),
-        value_fns(take) = { toggle_on = true, toggle_off = false }
+        value_fns = { toggle_on = true, toggle_off = false }
     )]
     toggle: bool,
 }
@@ -51,7 +51,7 @@ impl<PMsg> Radio<PMsg> {
         }
     }
 
-    pub fn toggle(mut self) -> Self {
+    pub fn toggle(&mut self) -> &mut Self {
         self.toggle = !self.toggle;
         self
     }
@@ -77,11 +77,11 @@ impl<GMsg, PMsg: 'static> Model<PMsg, GMsg> for Radio<PMsg> {
 
 #[derive(Clone, Debug, Default, Rich)]
 pub struct Style {
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub input: css::Style,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub button: css::Style,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub label: css::Style,
 }
 
@@ -95,7 +95,8 @@ impl<PMsg: 'static> Render<PMsg> for Radio<PMsg> {
 
     fn render_with_style(&self, _: &impl Theme, style: Self::Style) -> Self::View {
         // TODO: create these event in the `new` function
-        let events = Events::default()
+        let mut events = Events::default();
+        events
             .focus(|_| Msg::Focus)
             .blur(|_| Msg::Blur)
             .mouse_enter(|_| Msg::MouseEnter)
@@ -118,7 +119,8 @@ impl<PMsg: 'static> Render<PMsg> for Radio<PMsg> {
 
         let msg_mapper = Rc::clone(&self.msg_mapper.clone());
         let mut radio = if let Some(ref lbl) = self.label {
-            let events = Events::default()
+            let mut events = Events::default();
+            events
                 .mouse_enter(|_| Msg::MouseEnter)
                 .mouse_leave(|_| Msg::MouseLeave);
             label![style.label, input, lbl.to_string(), events.events]

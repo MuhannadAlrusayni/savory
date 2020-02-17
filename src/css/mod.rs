@@ -29,7 +29,7 @@ pub use self::{
     padding::Padding,
     position::Position,
     size::Size,
-    style::{St, Style, ToStyle},
+    style::{St, Style, StyleMap, ToStyleMap},
     text::Text,
     transition::Transition,
     visibility::Visibility,

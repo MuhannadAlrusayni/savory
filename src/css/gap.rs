@@ -1,4 +1,4 @@
-use crate::css::{unit::*, St, Style, ToStyle};
+use crate::css::{unit::*, St, StyleMap, ToStyleMap};
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum LengthPercent {
@@ -55,8 +55,10 @@ pub enum Gap {
     RowColumn(LengthPercent, LengthPercent),
 }
 
-impl ToStyle for Gap {
-    fn to_style(&self) -> Style {
-        Style::new().add(St::Gap, self)
+impl ToStyleMap for Gap {
+    fn style_map(&self) -> StyleMap {
+        let mut map = StyleMap::default();
+        map.add(St::Gap, self);
+        map
     }
 }

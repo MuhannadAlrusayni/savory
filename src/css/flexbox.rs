@@ -1,5 +1,5 @@
 pub use super::box_align::{AlignContent, AlignItems, AlignSelf, JustifyContent};
-use crate::css::{unit::*, values as val, St, Style, ToStyle};
+use crate::css::{unit::*, values as val, St, StyleMap, ToStyleMap};
 
 #[derive(Clone, Debug, Copy, PartialEq, Display, From)]
 pub enum Basis {
@@ -53,13 +53,15 @@ pub enum Basis {
     Percent(Percent),
 }
 
-impl ToStyle for Basis {
-    fn to_style(&self) -> Style {
-        Style::new().add(St::FlexBasis, self)
+impl ToStyleMap for Basis {
+    fn style_map(&self) -> StyleMap {
+        let mut map = StyleMap::default();
+        map.add(St::FlexBasis, self);
+        map
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Display, From)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq, Display, From)]
 pub enum Direction {
     #[from]
     Row(val::Row),
@@ -71,13 +73,15 @@ pub enum Direction {
     ColumnReverse(val::ColumnReverse),
 }
 
-impl ToStyle for Direction {
-    fn to_style(&self) -> Style {
-        Style::new().add(St::FlexDirection, self)
+impl ToStyleMap for Direction {
+    fn style_map(&self) -> StyleMap {
+        let mut map = StyleMap::default();
+        map.add(St::FlexDirection, self);
+        map
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Display, From)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq, Display, From)]
 pub enum Wrap {
     #[from]
     Wrap(val::Wrap),
@@ -87,35 +91,43 @@ pub enum Wrap {
     WrapReverse(val::WrapReverse),
 }
 
-impl ToStyle for Wrap {
-    fn to_style(&self) -> Style {
-        Style::new().add(St::FlexWrap, self)
+impl ToStyleMap for Wrap {
+    fn style_map(&self) -> StyleMap {
+        let mut map = StyleMap::default();
+        map.add(St::FlexWrap, self);
+        map
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Display, From)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq, Display, From)]
 pub struct Order(i32);
 
-impl ToStyle for Order {
-    fn to_style(&self) -> Style {
-        Style::new().add(St::Order, self.0)
+impl ToStyleMap for Order {
+    fn style_map(&self) -> StyleMap {
+        let mut map = StyleMap::default();
+        map.add(St::Order, self.0);
+        map
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Display, From)]
+#[derive(Clone, Debug, Copy, PartialEq, Display, From)]
 pub struct Grow(f32);
 
-impl ToStyle for Grow {
-    fn to_style(&self) -> Style {
-        Style::new().add(St::FlexGrow, self.0)
+impl ToStyleMap for Grow {
+    fn style_map(&self) -> StyleMap {
+        let mut map = StyleMap::default();
+        map.add(St::FlexGrow, self.0);
+        map
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Display, From)]
+#[derive(Clone, Debug, Copy, PartialEq, Display, From)]
 pub struct Shrink(f32);
 
-impl ToStyle for Shrink {
-    fn to_style(&self) -> Style {
-        Style::new().add(St::FlexShrink, self.0)
+impl ToStyleMap for Shrink {
+    fn style_map(&self) -> StyleMap {
+        let mut map = StyleMap::default();
+        map.add(St::FlexShrink, self.0);
+        map
     }
 }

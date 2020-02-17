@@ -1,56 +1,57 @@
-use crate::css::{unit::*, values as val, St, Style, ToStyle};
+use crate::css::{unit::*, values as val, St, StyleMap, ToStyleMap};
 use derive_rich::Rich;
 
-#[derive(Rich, Clone, Debug, PartialEq, Default)]
+#[derive(Rich, Copy, Clone, Debug, PartialEq, Default)]
 pub struct Size {
-    #[rich(read, write(take))]
+    #[rich(read, write)]
     width: Option<Length>,
-    #[rich(read, write(take))]
+    #[rich(read, write)]
     min_width: Option<Length>,
-    #[rich(read, write(take))]
+    #[rich(read, write)]
     max_width: Option<Length>,
-    #[rich(read, write(take))]
+    #[rich(read, write)]
     height: Option<Length>,
-    #[rich(read, write(take))]
+    #[rich(read, write)]
     min_height: Option<Length>,
-    #[rich(read, write(take))]
+    #[rich(read, write)]
     max_height: Option<Length>,
 }
 
-impl ToStyle for Size {
-    fn to_style(&self) -> Style {
-        Style::new()
-            .try_add(St::Width, self.width)
+impl ToStyleMap for Size {
+    fn style_map(&self) -> StyleMap {
+        let mut map = StyleMap::default();
+        map.try_add(St::Width, self.width)
             .try_add(St::MinWidth, self.min_width)
             .try_add(St::MaxWidth, self.max_width)
             .try_add(St::Height, self.height)
             .try_add(St::MinHeight, self.min_height)
-            .try_add(St::MaxHeight, self.max_height)
+            .try_add(St::MaxHeight, self.max_height);
+        map
     }
 }
 
 impl Size {
-    pub fn full(self) -> Self {
+    pub fn full(&mut self) -> &mut Self {
         self.width(1.0).height(1.0)
     }
 
-    pub fn half(self) -> Self {
+    pub fn half(&mut self) -> &mut Self {
         self.width(0.5).height(0.5)
     }
 
-    pub fn min_content(self) -> Self {
+    pub fn min_content(&mut self) -> &mut Self {
         self.width(val::MinContent).height(val::MinContent)
     }
 
-    pub fn max_content(self) -> Self {
+    pub fn max_content(&mut self) -> &mut Self {
         self.width(val::MaxContent).height(val::MaxContent)
     }
 
-    pub fn auto(self) -> Self {
+    pub fn auto(&mut self) -> &mut Self {
         self.width(val::Auto).height(val::Auto)
     }
 
-    pub fn resize(self, width: impl Into<Length>, height: impl Into<Length>) -> Self {
+    pub fn resize(&mut self, width: impl Into<Length>, height: impl Into<Length>) -> &mut Self {
         self.width(width).height(height)
     }
 }

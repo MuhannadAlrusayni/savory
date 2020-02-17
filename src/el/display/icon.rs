@@ -57,14 +57,14 @@ impl<PMsg: 'static> Icon<PMsg> {
 
 #[derive(Clone, Rich)]
 pub struct SvgIcon<PMsg: 'static> {
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     events: Events<PMsg>,
     pub draw: Vec<Node<PMsg>>,
-    #[rich(write(take))]
+    #[rich(write)]
     pub color: Option<Color>,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub size: Size,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub style: SvgStyle,
 }
 
@@ -79,7 +79,7 @@ impl<PMsg: 'static> SvgIcon<PMsg> {
         }
     }
 
-    pub fn draw(mut self, draw: impl IntoIterator<Item = Node<PMsg>>) -> Self {
+    pub fn draw(&mut self, draw: impl IntoIterator<Item = Node<PMsg>>) -> &mut Self {
         self.draw = draw.into_iter().collect();
         self
     }
@@ -109,14 +109,14 @@ impl<PMsg: 'static> Render<PMsg> for SvgIcon<PMsg> {
 
 #[derive(Clone, Rich)]
 pub struct HtmlIcon<PMsg> {
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     events: Events<PMsg>,
     pub html: Cow<'static, str>,
-    #[rich(write(take))]
+    #[rich(write)]
     pub color: Option<Color>,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub size: Size,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub style: HtmlStyle,
 }
 
@@ -131,7 +131,7 @@ impl<PMsg> HtmlIcon<PMsg> {
         }
     }
 
-    pub fn html(mut self, html: impl Into<Cow<'static, str>>) -> Self {
+    pub fn html(&mut self, html: impl Into<Cow<'static, str>>) -> &mut Self {
         self.html = html.into();
         self
     }
@@ -161,12 +161,12 @@ impl<PMsg: 'static> Render<PMsg> for HtmlIcon<PMsg> {
 
 #[derive(Rich, Clone)]
 pub struct UrlIcon<PMsg> {
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     events: Events<PMsg>,
     pub url: Cow<'static, str>,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub size: Size,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub style: UrlStyle,
 }
 
@@ -186,7 +186,7 @@ impl<PMsg> UrlIcon<PMsg> {
         }
     }
 
-    pub fn url(mut self, url: impl Into<Cow<'static, str>>) -> Self {
+    pub fn url(&mut self, url: impl Into<Cow<'static, str>>) -> &mut Self {
         self.url = url.into();
         self
     }

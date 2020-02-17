@@ -5,17 +5,17 @@ use seed::prelude::*;
 // TODO: add placement property
 #[derive(Clone, Rich)]
 pub struct Popover<'a, PMsg, C, T> {
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     events: Events<PMsg>,
-    #[rich(write(take))]
+    #[rich(write)]
     child: &'a C,
-    #[rich(write(take))]
+    #[rich(write)]
     target: &'a T,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub style: Style,
-    #[rich(write(take), read(copy, rename = is_visible), value_fns(take) = { popup = true, popdown = false })]
+    #[rich(write, read(copy, rename = is_visible), value_fns = { popup = true, popdown = false })]
     pub visible: bool,
-    #[rich(write(take))]
+    #[rich(write)]
     pub offset: i8,
 }
 
@@ -34,9 +34,9 @@ impl<'a, PMsg, C, T> Popover<'a, PMsg, C, T> {
 
 #[derive(Clone, Debug, Default, Rich)]
 pub struct Style {
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub container: css::Style,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub panel: css::Style,
 }
 

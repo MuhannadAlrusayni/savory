@@ -15,10 +15,15 @@ pub struct MyApp {
 
 impl Default for MyApp {
     fn default() -> Self {
+        let mut spin_entry = SpinEntry::new(Msg::SpinEntry);
+        spin_entry.disable();
+
+        let mut pop_btn = Button::with_label(Msg::PopBtn, "Menu");
+        pop_btn.events(|conf| conf.click(|_| Msg::TogglePopover));
+
         Self {
-            spin_entry: SpinEntry::new(Msg::SpinEntry),
-            pop_btn: Button::with_label(Msg::PopBtn, "Menu")
-                .events(|conf| conf.click(|_| Msg::TogglePopover)),
+            spin_entry,
+            pop_btn,
             theme: Ant::default(),
             popup: false,
         }
@@ -52,20 +57,20 @@ impl Render<Msg> for MyApp {
     }
 
     fn render_with_style(&self, theme: &impl Theme, _: Self::Style) -> Self::View {
-        let child = Flexbox::new()
+        let mut child = Flexbox::new();
+        child
             .gap(px(8.))
             .center()
             .full_size()
-            .add(|_| self.spin_entry.render(theme));
+            .add(self.spin_entry.render(theme));
 
-        let popover = Popover::new(&self.pop_btn, &child)
-            .visible(self.popup)
-            .offset(4);
+        let mut popover = Popover::new(&self.pop_btn, &child);
+        popover.visible(self.popup).offset(4);
 
         Flexbox::new()
             .center()
             .full_size()
-            .add(|item| item.content(nodes![popover.render(theme)]))
+            .add(nodes![popover.render(theme)])
             .render(theme)
     }
 }

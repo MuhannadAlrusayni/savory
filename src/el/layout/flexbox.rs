@@ -13,44 +13,44 @@ use std::default::Default;
 
 #[derive(Clone, Rich, Default)]
 pub struct Flexbox<PMsg: 'static> {
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     events: Events<PMsg>,
     pub items: Vec<Item<PMsg>>,
     // properties
-    #[rich(value_fns(take) = {
+    #[rich(value_fns = {
         row = val::Row,
         reversed_row = val::RowReverse,
         column = val::Column,
         reversed_column = val::ColumnReverse,
     })]
     pub direction: Option<Direction>,
-    #[rich(value_fns(take) = {
+    #[rich(value_fns = {
         wrap = val::Wrap,
         no_wrap = val::Nowrap,
         reversed_wrap = val::WrapReverse,
     })]
     pub wrap: Option<Wrap>,
-    #[rich(write(take))]
+    #[rich(write)]
     pub justify_content: Option<JustifyContent>,
-    #[rich(write(take))]
+    #[rich(write)]
     pub align_items: Option<AlignItems>,
-    #[rich(write(take))]
+    #[rich(write)]
     pub align_content: Option<AlignContent>,
-    #[rich(write(take))]
+    #[rich(write)]
     pub gap: Option<Gap>,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub size: Size,
     // TODO: remove this in favor for style
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub border: Border,
     // TODO: remove this in favor for style
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub background: Background,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub margin: Margin,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub padding: Padding,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub style: css::Style,
 }
 
@@ -74,62 +74,70 @@ impl<PMsg: 'static> Flexbox<PMsg> {
         }
     }
 
-    pub fn add<T: Into<Item<PMsg>>>(mut self, get_child: impl FnOnce(Item<PMsg>) -> T) -> Self {
-        self.items.push(get_child(Item::new()).into());
+    pub fn item() -> Item<PMsg> {
+        Item::new()
+    }
+
+    pub fn item_with(content: impl IntoIterator<Item = impl Into<Node<PMsg>>>) -> Item<PMsg> {
+        Item::with_content(content)
+    }
+
+    pub fn add(&mut self, child: impl Into<Item<PMsg>>) -> &mut Self {
+        self.items.push(child.into());
         self
     }
 
-    pub fn items(mut self, items: impl IntoIterator<Item = Item<PMsg>>) -> Self {
+    pub fn items(&mut self, items: impl IntoIterator<Item = Item<PMsg>>) -> &mut Self {
         self.items.extend(items);
         self
     }
 
-    pub fn normal(self) -> Self {
+    pub fn normal(&mut self) -> &mut Self {
         self.justify_content(val::Normal)
             .align_content(val::Normal)
             .align_items(val::Normal)
     }
 
-    pub fn stretch(self) -> Self {
+    pub fn stretch(&mut self) -> &mut Self {
         self.justify_content(val::Stretch)
             .align_content(val::Stretch)
             .align_items(val::Stretch)
     }
 
-    pub fn center(self) -> Self {
+    pub fn center(&mut self) -> &mut Self {
         self.justify_content(val::Center)
             .align_content(val::Center)
             .align_items(val::Center)
     }
 
-    pub fn start(self) -> Self {
+    pub fn start(&mut self) -> &mut Self {
         self.justify_content(val::Start)
             .align_content(val::Start)
             .align_items(val::Start)
     }
 
-    pub fn end(self) -> Self {
+    pub fn end(&mut self) -> &mut Self {
         self.justify_content(val::End)
             .align_content(val::End)
             .align_items(val::End)
     }
 
-    pub fn space_between(self) -> Self {
+    pub fn space_between(&mut self) -> &mut Self {
         self.justify_content(val::SpaceBetween)
             .align_content(val::SpaceBetween)
     }
 
-    pub fn space_around(self) -> Self {
+    pub fn space_around(&mut self) -> &mut Self {
         self.justify_content(val::SpaceAround)
             .align_content(val::SpaceAround)
     }
 
-    pub fn space_evenly(self) -> Self {
+    pub fn space_evenly(&mut self) -> &mut Self {
         self.justify_content(val::SpaceEvenly)
             .align_content(val::SpaceEvenly)
     }
 
-    pub fn full_size(self) -> Self {
+    pub fn full_size(&mut self) -> &mut Self {
         self.size(|size| size.full())
     }
 }
@@ -159,19 +167,19 @@ impl<PMsg: 'static> Render<PMsg> for Flexbox<PMsg> {
 // TODO: add collapse propertie
 #[derive(Clone, Rich, Default)]
 pub struct Item<PMsg: 'static> {
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     events: Events<PMsg>,
     pub content: Vec<Node<PMsg>>,
     // propertie
-    #[rich(write(take))]
+    #[rich(write)]
     pub order: Option<Order>,
-    #[rich(write(take))]
+    #[rich(write)]
     pub grow: Option<Grow>,
-    #[rich(write(take))]
+    #[rich(write)]
     pub shrink: Option<Shrink>,
-    #[rich(write(take))]
+    #[rich(write)]
     pub basis: Option<Basis>,
-    #[rich(value_fns(take) = {
+    #[rich(value_fns = {
         auto = val::Auto,
         normal = val::Normal,
         stretch = val::Stretch,
@@ -180,17 +188,17 @@ pub struct Item<PMsg: 'static> {
         end = val::End,
     })]
     pub align_self: Option<AlignSelf>,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub size: Size,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub border: Border,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub background: Background,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub margin: Margin,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub padding: Padding,
-    #[rich(read(copy, rename = is_flatten), value_fns(take) = { flatten = true, wrapped = false })]
+    #[rich(read(copy, rename = is_flatten), value_fns = { flatten = true, wrapped = false })]
     flatten: bool,
 }
 
@@ -226,19 +234,24 @@ impl<PMsg: 'static> Item<PMsg> {
     }
 
     pub fn with_content(content: impl IntoIterator<Item = impl Into<Node<PMsg>>>) -> Self {
-        Self::new().content(content)
+        let mut item = Self::new();
+        item.content(content);
+        item
     }
 
-    pub fn content(mut self, content: impl IntoIterator<Item = impl Into<Node<PMsg>>>) -> Self {
+    pub fn content(
+        &mut self,
+        content: impl IntoIterator<Item = impl Into<Node<PMsg>>>,
+    ) -> &mut Self {
         self.content = content.into_iter().map(|c| c.into()).collect();
         self
     }
 
-    pub fn auto_margin(self) -> Self {
+    pub fn auto_margin(&mut self) -> &mut Self {
         self.margin(|margin| margin.auto())
     }
 
-    pub fn group(self, group_id: impl Into<Order>) -> Self {
+    pub fn group(&mut self, group_id: impl Into<Order>) -> &mut Self {
         self.order(group_id)
     }
 }

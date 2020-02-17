@@ -15,9 +15,9 @@ pub enum Msg {
 
 #[derive(Default, Rich)]
 pub struct LocalEvents {
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub input: Events<Msg>,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub container: Events<Msg>,
 }
 
@@ -29,9 +29,9 @@ impl LocalEvents {
 
 #[derive(Rich)]
 pub struct ParentEvents<PMsg> {
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub input: Events<PMsg>,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub container: Events<PMsg>,
 }
 
@@ -46,22 +46,22 @@ impl<PMsg> Default for ParentEvents<PMsg> {
 
 #[derive(Rich)]
 pub struct Entry<PMsg> {
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub local_events: LocalEvents,
     msg_mapper: Rc<dyn Fn(Msg) -> PMsg>,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub events: ParentEvents<PMsg>,
-    #[rich(write(take), write(rename = text_mut))]
+    #[rich(write, write(rename = text_mut))]
     pub text: Option<String>,
-    #[rich(write(take))]
+    #[rich(write)]
     pub max_length: Option<usize>,
-    #[rich(write(take))]
+    #[rich(write)]
     pub placeholder: Option<String>,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub style: Style,
     #[rich(
         read(copy, rename = is_disabled),
-        value_fns(take) = { disable = true, enable = false }
+        value_fns = { disable = true, enable = false }
     )]
     pub disabled: bool,
     #[rich(read(copy, rename = is_focused))]
@@ -72,14 +72,17 @@ pub struct Entry<PMsg> {
 
 impl<PMsg> Entry<PMsg> {
     pub fn new(msg_mapper: impl FnOnce(Msg) -> PMsg + Clone + 'static) -> Self {
+        let mut local_events = LocalEvents::default();
+        local_events.input(|conf| {
+            conf.focus(|_| Msg::Focus)
+                .blur(|_| Msg::Blur)
+                .mouse_enter(|_| Msg::MouseEnter)
+                .mouse_leave(|_| Msg::MouseLeave)
+                .input(Msg::UpdateText)
+        });
+
         Self {
-            local_events: LocalEvents::default().input(|conf| {
-                conf.focus(|_| Msg::Focus)
-                    .blur(|_| Msg::Blur)
-                    .mouse_enter(|_| Msg::MouseEnter)
-                    .mouse_leave(|_| Msg::MouseLeave)
-                    .input(Msg::UpdateText)
-            }),
+            local_events,
             events: ParentEvents::default(),
             msg_mapper: Rc::new(move |msg| (msg_mapper.clone())(msg)),
             text: None,
@@ -124,9 +127,9 @@ impl<GMsg, PMsg: 'static> Model<PMsg, GMsg> for Entry<PMsg> {
 
 #[derive(Clone, Debug, Default, Rich)]
 pub struct Style {
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub container: css::Style,
-    #[rich(write(take, style = compose))]
+    #[rich(write(style = compose))]
     pub input: css::Style,
 }
 

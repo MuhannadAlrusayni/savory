@@ -21,7 +21,7 @@ gitlab = { repository = "https://gitlab.com/muhannad_alrusayni/khalas", branch =
 seed = { git = "https://github.com/David-OConnor/seed", version = "0.6.0" }
 palette = "0.4.1"
 derive_more = "0.99.2"
-derive_rich = { git = "https://gitlab.com/muhannad_alrusayni/derive_rich", version = "0.1.0" }
+derive_rich = { git = "https://gitlab.com/muhannad_alrusayni/derive_rich", version = "0.2.0" }
 wasm-bindgen = "0.2.58"
 indexmap = "1.3.2"
 

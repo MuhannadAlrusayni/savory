@@ -1,59 +1,62 @@
-use super::{unit::*, St, Style, ToStyle};
+use super::{unit::*, St, StyleMap, ToStyleMap};
 use derive_rich::Rich;
 
 #[derive(Rich, Clone, Debug, Copy, PartialEq, From, Default)]
 pub struct Padding {
-    #[rich(read, write(take))]
+    #[rich(read, write)]
     top: Option<Length>,
-    #[rich(read, write(take))]
+    #[rich(read, write)]
     right: Option<Length>,
-    #[rich(read, write(take))]
+    #[rich(read, write)]
     bottom: Option<Length>,
-    #[rich(read, write(take))]
+    #[rich(read, write)]
     left: Option<Length>,
 }
 
 impl From<Length> for Padding {
     fn from(source: Length) -> Self {
-        Padding::default().all(source)
+        let mut padding = Padding::default();
+        padding.all(source);
+        padding
     }
 }
 
-impl ToStyle for Padding {
-    fn to_style(&self) -> Style {
-        Style::new()
-            .try_add(St::PaddingTop, self.top)
+impl ToStyleMap for Padding {
+    fn style_map(&self) -> StyleMap {
+        let mut map = StyleMap::default();
+        map.try_add(St::PaddingTop, self.top)
             .try_add(St::PaddingRight, self.right)
             .try_add(St::PaddingBottom, self.bottom)
-            .try_add(St::PaddingLeft, self.left)
+            .try_add(St::PaddingLeft, self.left);
+        map
     }
 }
 
 impl Padding {
-    pub fn all(self, value: impl Into<Length>) -> Self {
+    pub fn all(&mut self, value: impl Into<Length>) -> &mut Self {
         let value = value.into();
         self.right(value).top(value).left(value).bottom(value)
     }
 
-    pub fn zero(self) -> Self {
+    pub fn zero(&mut self) -> &mut Self {
         self.all(px(0.))
     }
 
-    pub fn x(self, value: impl Into<Length>) -> Self {
+    pub fn x(&mut self, value: impl Into<Length>) -> &mut Self {
         let value = value.into();
         self.left(value).right(value)
     }
 
-    pub fn y(self, value: impl Into<Length>) -> Self {
+    pub fn y(&mut self, value: impl Into<Length>) -> &mut Self {
         let value = value.into();
         self.top(value).bottom(value)
     }
 
-    pub fn horizontal(self, value: impl Into<Length>) -> Self {
+    pub fn horizontal(&mut self, value: impl Into<Length>) -> &mut Self {
         self.y(value)
     }
 
-    pub fn vertical(self, value: impl Into<Length>) -> Self {
+    pub fn vertical(&mut self, value: impl Into<Length>) -> &mut Self {
         self.x(value)
     }
 }

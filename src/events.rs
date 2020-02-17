@@ -31,9 +31,9 @@ macro mouse_events( $( $event:ident: $ty:ty { $( $(#[$doc:meta])? $name:ident = 
             $(
                 $( #[$doc] )?
                 pub fn $name(
-                    mut self,
+                    &mut self,
                     handler: impl FnOnce($ty) -> Msg + 'static + Clone,
-                ) -> Self {
+                ) -> &mut Self {
                     self.events.push($event($ev, handler));
                     self
                 }
