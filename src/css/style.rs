@@ -13,23 +13,23 @@ use seed::prelude::*;
 ///
 /// let mut style = Style::default();
 /// style
-///     .transition(|conf| {
+///     .and_transition(|conf| {
 ///         conf
 ///             .add("opacity", |conf| conf.duration(ms(150.)).ease())
 ///             .add("transform", |conf| conf.duration(ms(150.)).ease())
 ///             .add("visibility", |conf| conf.duration(ms(150.)).ease())
 ///     })
-///     .position(|conf| conf.absolute())
-///     .background(|conf| conf.color(Color::white))
-///     .border(|conf| {
+///     .and_position(|conf| conf.absolute())
+///     .and_background(|conf| conf.color(Color::white))
+///     .and_border(|conf| {
 ///         conf.none()
 ///             .width(px(0.))
 ///             .radius(px(4.))
 ///     })
-///     .add(St::BoxShadow, "0 2px 8px rgba(0, 35, 11, 0.15)")
-///     .padding(|conf| conf.x(px(4.)).y(px(2)))
-///     .margin(|conf| conf.top(px(popover.offset)))
-///     .config_block(|conf| {
+///     .and_add(St::BoxShadow, "0 2px 8px rgba(0, 35, 11, 0.15)")
+///     .and_padding(|conf| conf.x(px(4.)).y(px(2)))
+///     .and_margin(|conf| conf.top(px(popover.offset)))
+///     .and_config_block(|conf| {
 ///         if popover.is_visible() {
 ///             conf.opacity(1.).visibility(val::Visible)
 ///         } else {
@@ -286,17 +286,6 @@ pub struct Style {
             option, rename = try_display
         ))]
     pub display: Option<Display>,
-    /// This method accept any type implemente `Into<Visibility>`, so we can
-    /// pass `Visible`, `Hidden`, `Collapse`, `Initial`, `Inherit`
-    ///
-    /// ```
-    /// use khalas::css::{values as val, Style};
-    ///
-    /// div![
-    ///     Style::default()
-    ///         .visibility(val::Hidden)
-    /// ]
-    /// ```
     #[rich(
         write(
             /// ```
@@ -428,7 +417,7 @@ pub struct Style {
             /// size properties can be add and configured using this method
             ///
             /// ```
-            /// use khalas::css::{values as val, unit::em};
+            /// use khalas::css::{unit::em};
             ///
             /// style
             ///     .and_size(|conf| {
@@ -465,7 +454,7 @@ pub struct Style {
             ///                 conf.duration(sec(0.3))
             ///                     .cubic_bezier(0.645, 0.045, 0.355, 1.)
             ///             })
-            ///             // or transition for specific properties opacity only
+            ///             // or transition for specific properties (e.g. opacity only)
             ///             .add("opacity", |conf| {
             ///                 conf.duration(ms(150.))
             ///                     .ease()
@@ -541,7 +530,7 @@ pub struct Style {
         /// you won't get typed values like the ones that have it's own methods.
         ///
         /// ```
-        /// use khalas::css::{values as val, Color, unit::em};
+        /// use khalas::css::{St, Color, unit::em};
         ///
         /// fn get_color() -> Option<Color> { .. }
         ///
