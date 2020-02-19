@@ -59,35 +59,91 @@ impl<PMsg> Default for ParentEvents<PMsg> {
 pub struct SpinEntry<PMsg> {
     el_ref: ElRef<web_sys::HtmlInputElement>,
     msg_mapper: Rc<dyn Fn(Msg) -> PMsg>,
-    #[rich(write(style = compose))]
-    pub local_events: LocalEvents,
-    #[rich(write(style = compose))]
-    pub events: ParentEvents<PMsg>,
-    #[rich(read(copy))]
-    value: Option<f32>,
-    #[rich(read(copy))]
-    max: f32,
-    #[rich(read(copy))]
-    min: f32,
-    #[rich(read(copy))]
-    step: f32,
-    #[rich(read(copy))]
-    placeholder: Option<f32>,
-    #[rich(write(style = compose))]
-    pub style: UserStyle,
     #[rich(
-        read(copy, rename = is_disabled),
-    )]
-    pub disabled: bool,
-    #[rich(read(copy, rename = is_focused))]
+        read(
+            /// Return reference for the local events.
+        ),
+        write(
+            /// add and remove local events, changes will be applied to the DOM
+            /// after next render
+            style = compose
+        ))]
+    local_events: LocalEvents,
+    #[rich(
+        read(
+            /// Return reference for the storde parent events.
+        ),
+        write(
+            /// add and remove parent events, changes will be applied to the DOM
+            /// after next render
+            style = compose
+        ))]
+    events: ParentEvents<PMsg>,
+    #[rich(read(
+        /// Return the current value if there is any.
+        copy
+    ))]
+    value: Option<f32>,
+    // this is internal API, and shouldn't get exposed
+    vis_value: String,
+    #[rich(read(
+        /// Return the max value if there is any.
+        copy
+    ))]
+    max: Option<f32>,
+    #[rich(read(
+        /// Return the min value if there is any.
+        copy
+    ))]
+    min: Option<f32>,
+    #[rich(read(
+        /// Return the step value.
+        copy
+    ))]
+    step: f32,
+    #[rich(read(
+        /// Return the used placeholder if there is any.
+        copy
+    ))]
+    placeholder: Option<f32>,
+    #[rich(
+        read(
+            /// Return reference to the user style.
+        ),
+        write(
+            /// User style, used to customize the spin entry if you need to,
+            /// changes on this style will overrides the theme style.
+            style = compose
+        ))]
+    style: UserStyle,
+    #[rich(read(
+        /// Return `true` if spin entry is disabled
+        copy, rename = is_disabled
+    ),)]
+    disabled: bool,
+    #[rich(read(
+        /// Return `true` if spin entry is foucsed
+        copy, rename = is_focused
+    ))]
     focus: bool,
-    #[rich(read(copy, rename = is_mouse_over))]
+    #[rich(read(
+        /// Return `true` if mouse is over
+        copy, rename = is_mouse_over
+    ))]
     mouse_over: bool,
 
     // children elements
-    #[rich(write(style = compose))]
+    #[rich(write(
+        /// Customize the increment button. Note by doing so you may override
+        /// the default behavior for this button.
+        style = compose
+    ))]
     pub increment_button: el::Button<Msg>,
-    #[rich(write(style = compose))]
+    #[rich(write(
+        /// Customize the decrement button. Note by doing so you may override
+        /// the default behavior for this button.
+        style = compose
+    ))]
     pub decrement_button: el::Button<Msg>,
 }
 
@@ -117,8 +173,9 @@ impl<PMsg> SpinEntry<PMsg> {
             local_events,
             events: ParentEvents::default(),
             value: None,
-            max: 10.,
-            min: 0.,
+            vis_value: "".into(),
+            max: None,
+            min: None,
             step: 1.,
             placeholder: None,
             style: UserStyle::default(),
@@ -130,46 +187,78 @@ impl<PMsg> SpinEntry<PMsg> {
         }
     }
 
-    pub fn default_value(&self) -> f32 {
-        self.min
-    }
-
-    pub fn value_or_default(&self) -> f32 {
-        self.value.unwrap_or_else(|| self.default_value())
-    }
-
     pub fn max(&mut self, max: f32) -> &mut Self {
-        if max > self.min {
-            self.max = max;
-        } else {
-            self.max = self.min;
-            self.min = max;
+        match (max, self.min) {
+            (max, Some(min)) if max < min => {
+                self.max = self.min;
+                self.min = Some(max);
+            }
+            _ => self.max = Some(max),
+        }
+        // re-calc step and placeholder again
+        self.step(self.step);
+        if let Some(placeholder) = self.placeholder {
+            self.placeholder(placeholder);
         }
         self
     }
 
     pub fn min(&mut self, min: f32) -> &mut Self {
-        if min < self.max {
-            self.min = min;
-        } else {
-            self.min = self.max;
-            self.max = min;
+        match (min, self.max) {
+            (min, Some(max)) if min > max => {
+                self.min = self.max;
+                self.max = Some(min);
+            }
+            _ => self.min = Some(min),
+        }
+        // re-calc step and placeholder again
+        self.step(self.step);
+        if let Some(placeholder) = self.placeholder {
+            self.placeholder(placeholder);
         }
         self
     }
 
     pub fn step(&mut self, step: f32) -> &mut Self {
-        let range = self.min - self.max;
-        self.step = if step > range { range } else { step };
+        self.step = match (step, self.min, self.max) {
+            (step, Some(min), Some(max)) if step.abs() > (min).abs() + (max).abs() => {
+                (min).abs() + (max).abs()
+            }
+            _ => step.abs(),
+        };
+        self
+    }
+
+    pub fn placeholder(&mut self, value: impl Into<f32>) -> &mut Self {
+        let placeholder = match (value.into(), self.min, self.max) {
+            (value, _, Some(max)) if value > max => max,
+            (value, Some(min), _) if value < min => min,
+            (value, _, _) => value,
+        };
+        self.placeholder = Some(placeholder);
+        if let Some(input) = self.el_ref.get() {
+            input.set_placeholder(&placeholder.to_string());
+        }
         self
     }
 
     pub fn value(&mut self, value: f32) -> &mut Self {
-        self.value = match value {
-            x if x > self.max => Some(self.max),
-            x if x < self.min => Some(self.min),
-            x => Some(x),
+        let value = match (value, self.min, self.max) {
+            (value, _, Some(max)) if value > max => max,
+            (value, Some(min), _) if value < min => min,
+            _ => value,
         };
+        self.value = Some(value);
+        self.vis_value = value.to_string();
+        if let Some(input) = self.el_ref.get() {
+            input.set_value(&self.vis_value);
+        }
+        self
+    }
+
+    pub fn unset_value(&mut self) -> &mut Self {
+        self.value = None;
+        self.vis_value = "".into();
         self
     }
 
@@ -185,57 +274,65 @@ impl<PMsg> SpinEntry<PMsg> {
             .decrement_button(|conf| conf.disable())
     }
 
-    pub fn placeholder(&mut self, value: impl Into<f32>) -> &mut Self {
-        let value = value.into();
-        self.placeholder = Some(value);
-        if let Some(input) = self.el_ref.get() {
-            input.set_placeholder(&value.to_string());
-        }
-        self
-    }
-
-    fn increment(&mut self) {
-        let value = self.value_or_default();
-        if value < self.max {
-            let value = if self.max < value + self.step {
-                self.max
-            } else {
-                value + self.step
-            };
-            self.value = Some(value);
+    fn calc_reasonable_value(&self) -> f32 {
+        match (self.value, self.min, self.max) {
+            (Some(value), _, _) => value,
+            (None, Some(min), Some(max)) => (min + max) * 0.5,
+            (None, Some(min), None) if min < 0. => 0.,
+            (None, Some(min), None) => min,
+            (None, None, Some(max)) if max > 0. => 0.,
+            (None, None, Some(max)) => max,
+            _ => 0.,
         }
     }
 
-    fn decrement(&mut self) {
-        let value = self.value_or_default();
-        if value > self.min {
-            let value = if self.min > value - self.step {
-                self.min
-            } else {
-                value - self.step
-            };
-            self.value = Some(value);
-        }
+    pub fn increment(&mut self) {
+        self.value(self.calc_reasonable_value() + self.step);
+    }
+
+    pub fn decrement(&mut self) {
+        self.value(self.calc_reasonable_value() - self.step);
     }
 
     fn handle_input(&mut self) {
-        log!(self.el_ref.get());
         if let Some(input) = self.el_ref.get() {
             let value = input.value();
             // if value is empty then we set None to self.value
             if value.is_empty() {
-                log!("value is empty");
-                self.value = None;
+                self.unset_value();
             } else {
-                // parse value to f32
-                match value.parse::<f32>().ok() {
-                    // check if value in accpeted range
-                    Some(value) if value >= self.min && value <= self.max => {
-                        self.value = Some(value)
+                match value.as_str() {
+                    // these are the only allowed text when there is no number
+                    // in the input, we don't store these in self.value, but we sotre
+                    // them in self.vis_value
+                    "." => {
+                        self.vis_value = "0.".into();
+                        input.set_value(&self.vis_value);
                     }
-                    // remove the input and set self.value as the value for input
-                    _ => input.set_value(&self.value.map(|v| v.to_string()).unwrap_or("".into())),
-                }
+                    "-." => {
+                        self.vis_value = "-0.".into();
+                        input.set_value(&self.vis_value);
+                    }
+                    "-" => {
+                        self.vis_value = value;
+                        input.set_value(&self.vis_value);
+                    }
+                    _ => {
+                        // parse value to f32
+                        if let Some(v_f32) = value.parse::<f32>().ok() {
+                            self.value(v_f32);
+                            // check if value is eq to v_f32
+                            if self.value == Some(v_f32) && value.ends_with(".") {
+                                // use the input value as vis_value if so, this
+                                // helps keep the last dot when user enter e.g.
+                                // `5.`, without this, the input will be
+                                // converted to `5`
+                                self.vis_value = value;
+                                input.set_value(&self.vis_value);
+                            }
+                        }
+                    }
+                };
             }
         }
     }
@@ -351,6 +448,9 @@ impl<PMsg: 'static> Render<PMsg> for SpinEntry<PMsg> {
             .render_with_style(theme, buttons_container)
             .map_msg(move |msg| (msg_mapper.clone())(msg));
 
+        fn att_map(att: Option<impl ToString>) -> AtValue {
+            att.map(|a| a.to_string().into()).unwrap_or(AtValue::None)
+        }
         // input
         let msg_mapper = Rc::clone(&self.msg_mapper.clone());
         let mut input = input![
@@ -358,12 +458,12 @@ impl<PMsg: 'static> Render<PMsg> for SpinEntry<PMsg> {
             self.local_events.input.clone(),
             input,
             attrs![
-                At::Value => self.value.map(|v| v.to_string()).unwrap_or("".into()),
-                // TODO:
-                //   At::Max => self.max,
-                //   At::Min => self.min,
-                //   At::Step => self.step,
-                //   At::Placeholder => self.placeholder,
+                At::Value => self.vis_value,
+                At::Max => att_map(self.max),
+                At::Min => att_map(self.min),
+                At::Step => self.step,
+                At::Placeholder => att_map(self.placeholder),
+                At::Disabled => self.disabled.as_at_value(),
             ]
         ]
         .map_msg(move |msg| (msg_mapper.clone())(msg));

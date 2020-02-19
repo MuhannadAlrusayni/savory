@@ -16,7 +16,12 @@ pub struct MyApp {
 impl Default for MyApp {
     fn default() -> Self {
         let mut spin_entry = SpinEntry::new(Msg::SpinEntry);
-        spin_entry.disable();
+        spin_entry
+            .placeholder(44.)
+            .step(-5.)
+            .max(40.)
+            .min(-40.)
+            .disable();
 
         let mut pop_btn = Button::with_label(Msg::PopBtn, "Menu");
         pop_btn.events(|conf| conf.click(|_| Msg::TogglePopover));
