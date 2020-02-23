@@ -1124,13 +1124,12 @@ impl Theme for Ant {
                         .color(self.gray(Variant::L300))
                 })
             })
-            .config_block(|conf| {
-                if spin_entry.is_mouse_over() {
-                    conf.opacity(1.)
-                } else {
-                    conf.opacity(0.)
-                }
-            });
+            .config_block(
+                |conf| match (spin_entry.is_mouse_over(), spin_entry.is_disabled()) {
+                    (true, false) => conf.opacity(1.).visibility(val::Visible),
+                    _ => conf.opacity(0.).visibility(val::Hidden),
+                },
+            );
 
         let increment_item = Style::default();
         let decrement_item = Style::default();
