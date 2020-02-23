@@ -1,6 +1,7 @@
 #![feature(decl_macro)]
 #![feature(bool_to_option)]
 
+pub mod attribute;
 pub mod css;
 pub mod el;
 pub mod events;
