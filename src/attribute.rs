@@ -3,15 +3,17 @@ use seed::prelude::UpdateEl;
 use seed::prelude::*;
 use std::borrow::Cow;
 
-macro update_el_for_attrs( $( $name:ident => $expr:expr $(,)? )* ) {
-    $(
-        impl<Msg> UpdateEl<El<Msg>> for $name {
-            fn update(self, el: &mut El<Msg>) {
-                let closure = $expr;
-                el.attrs.add(At::$name, closure(self));
+macro_rules! update_el_for_attrs {
+    ( $( $name:ident => $expr:expr $(,)? )* ) => {
+        $(
+            impl<Msg> UpdateEl<El<Msg>> for $name {
+                fn update(self, el: &mut El<Msg>) {
+                    let closure = $expr;
+                    el.attrs.add(At::$name, closure(self));
+                }
             }
-        }
-    )*
+        )*
+    }
 }
 
 // TODO: should we change inner type to something like mime::Mime ?

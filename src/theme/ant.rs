@@ -1,8 +1,7 @@
 use crate::{
     css::{
-        self,
         unit::{em, ms, px, sec},
-        values as val, St, Style,
+        values as val, Cursor, St, Style,
     },
     el::prelude::*,
     theme::Theme,
@@ -690,10 +689,11 @@ impl Theme for Ant {
     // TODO: handle btn.is_block()
     // TODO: handle btn.is_ghost()
     fn button<PMsg>(&self, btn: &Button<PMsg>) -> button::Style {
-        let cursor = btn
-            .is_disabled()
-            .then(|| -> css::Cursor { val::NotAllowed.into() })
-            .unwrap_or_else(|| val::Pointer.into());
+        let cursor: Cursor = if btn.is_disabled() {
+            val::NotAllowed.into()
+        } else {
+            val::Initial.into()
+        };
 
         let mut style = match btn.kind {
             Some(button::Kind::Normal) | None => self.button_normal(btn),
@@ -730,10 +730,11 @@ impl Theme for Ant {
         let top = 3. / 2.;
         let left = 3. / 2.;
 
-        let cursor = switch
-            .is_disabled()
-            .then(|| -> css::Cursor { val::NotAllowed.into() })
-            .unwrap_or_else(|| val::Pointer.into());
+        let cursor: Cursor = if switch.is_disabled() {
+            val::NotAllowed.into()
+        } else {
+            val::Initial.into()
+        };
 
         let bg_color = if switch.is_toggled() {
             self.brand(Variant::L500)
@@ -823,10 +824,11 @@ impl Theme for Ant {
             }
         };
 
-        let cursor = checkbox
-            .is_disabled()
-            .then(|| -> css::Cursor { val::NotAllowed.into() })
-            .unwrap_or_else(|| val::Pointer.into());
+        let cursor: Cursor = if checkbox.is_disabled() {
+            val::NotAllowed.into()
+        } else {
+            val::Initial.into()
+        };
 
         let mut input = Style::default();
         input
@@ -923,10 +925,11 @@ impl Theme for Ant {
             }
         };
 
-        let cursor = radio
-            .is_disabled()
-            .then(|| -> css::Cursor { val::NotAllowed.into() })
-            .unwrap_or_else(|| val::Pointer.into());
+        let cursor: Cursor = if radio.is_disabled() {
+            val::NotAllowed.into()
+        } else {
+            val::Initial.into()
+        };
 
         let mut input = Style::default();
         input
@@ -999,10 +1002,11 @@ impl Theme for Ant {
             ),
         };
 
-        let cursor = entry
-            .is_disabled()
-            .then(|| -> css::Cursor { val::NotAllowed.into() })
-            .unwrap_or_else(|| val::Initial.into());
+        let cursor: Cursor = if entry.is_disabled() {
+            val::NotAllowed.into()
+        } else {
+            val::Initial.into()
+        };
 
         let mut container = Style::default();
         container
@@ -1053,11 +1057,6 @@ impl Theme for Ant {
             ),
         };
 
-        let cursor = spin_entry
-            .is_disabled()
-            .then(|| -> css::Cursor { val::NotAllowed.into() })
-            .unwrap_or_else(|| val::Initial.into());
-
         // em unit used here
         let width = 4.;
         let height = 1.5;
@@ -1073,6 +1072,12 @@ impl Theme for Ant {
         let btn_width = 1.;
         let btn_mouse_over_height = btn_height + 0.10;
         let btn_mouse_over_height_2 = btn_height - 0.10;
+
+        let cursor: Cursor = if spin_entry.is_disabled() {
+            val::NotAllowed.into()
+        } else {
+            val::Initial.into()
+        };
 
         let mut container = Style::default();
         container

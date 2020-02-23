@@ -1,9 +1,11 @@
-macro css_values( $( ($name:ident, $cssvalue:literal) $(,)? )* ) {
-    $(
-        #[derive(Clone, Copy, Debug, PartialEq, Eq, Display)]
-        #[display(fmt = $cssvalue)]
-        pub struct $name;
-    )*
+macro_rules! css_values {
+    ( $( ($name:ident, $cssvalue:literal) $(,)? )* ) => {
+        $(
+            #[derive(Clone, Copy, Debug, PartialEq, Eq, Display)]
+            #[display(fmt = $cssvalue)]
+            pub struct $name;
+        )*
+    }
 }
 
 css_values! {

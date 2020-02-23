@@ -51,12 +51,14 @@ impl ToStyleMap for Border {
     }
 }
 
-macro sides_style_shortcut_functions( $( $fn:ident() $(,)? )* ) {
-    $(
-        pub fn $fn(&mut self) -> &mut Self {
-            self.all_side(|side| side.$fn())
-        }
-    )*
+macro_rules! sides_style_shortcut_functions {
+    ( $( $fn:ident() $(,)? )* ) => {
+        $(
+            pub fn $fn(&mut self) -> &mut Self {
+                self.all_side(|side| side.$fn())
+            }
+        )*
+    }
 }
 
 impl Border {

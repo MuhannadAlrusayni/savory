@@ -25,21 +25,23 @@ impl<Msg> UpdateEl<El<Msg>> for Events<Msg> {
     }
 }
 
-macro mouse_events( $( $event:ident: $ty:ty { $( $(#[$doc:meta])? $name:ident = $ev:expr $(,)? )* } $(,)? )* ) {
-    $(
-        impl<Msg> Events<Msg> {
-            $(
-                $( #[$doc] )?
-                pub fn $name(
-                    &mut self,
-                    handler: impl FnOnce($ty) -> Msg + 'static + Clone,
-                ) -> &mut Self {
-                    self.events.push($event($ev, handler));
-                    self
-                }
-            )*
-        }
-    )*
+macro_rules! mouse_events {
+    ( $( $event:ident: $ty:ty { $( $(#[$doc:meta])? $name:ident = $ev:expr $(,)? )* } $(,)? )* ) => {
+        $(
+            impl<Msg> Events<Msg> {
+                $(
+                    $( #[$doc] )?
+                    pub fn $name(
+                        &mut self,
+                        handler: impl FnOnce($ty) -> Msg + 'static + Clone,
+                    ) -> &mut Self {
+                        self.events.push($event($ev, handler));
+                        self
+                    }
+                )*
+            }
+        )*
+    }
 }
 
 mouse_events! {
@@ -109,19 +111,21 @@ mouse_events! {
     }
 }
 
-macro event_creator( $( $(#[$doc:meta])? $name:ident($ty:ty) $(,)? )* ) {
-    $(
-        $( #[$doc] )?
-        fn $name<Ms>(
-            trigger: impl Into<Ev>,
-            handler: impl FnOnce($ty) -> Ms + 'static + Clone,
-        ) -> EventHandler<Ms> {
-            let closure_handler = move |event: web_sys::Event| {
-                (handler.clone())(event.dyn_ref::<$ty>().unwrap().clone())
-            };
-            EventHandler::new(trigger, closure_handler)
-        }
-    )*
+macro_rules! event_creator{
+    ( $( $(#[$doc:meta])? $name:ident($ty:ty) $(,)? )* ) => {
+        $(
+            $( #[$doc] )?
+            fn $name<Ms>(
+                trigger: impl Into<Ev>,
+                handler: impl FnOnce($ty) -> Ms + 'static + Clone,
+            ) -> EventHandler<Ms> {
+                let closure_handler = move |event: web_sys::Event| {
+                    (handler.clone())(event.dyn_ref::<$ty>().unwrap().clone())
+                };
+                EventHandler::new(trigger, closure_handler)
+            }
+        )*
+    }
 }
 
 event_creator! {

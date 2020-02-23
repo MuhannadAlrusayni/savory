@@ -116,12 +116,14 @@ pub struct Ms(f32);
 #[display(fmt = "{}s", _0)]
 pub struct Sec(f32);
 
-macro construct_fn( $( $fn:ident() -> $ty:ident $(,)? )* ) {
-    $(
-        pub fn $fn(value: impl Into<$ty>) -> $ty {
-            value.into()
-        }
-    )*
+macro_rules! construct_fn{
+    ( $( $fn:ident() -> $ty:ident $(,)? )* ) => {
+        $(
+            pub fn $fn(value: impl Into<$ty>) -> $ty {
+                value.into()
+            }
+        )*
+    }
 }
 
 construct_fn! {
