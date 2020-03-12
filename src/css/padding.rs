@@ -1,6 +1,19 @@
-use super::{unit::*, St, StyleMap, ToStyleMap};
+use super::{
+    unit::{self, *},
+    values as val, St, StyleMap, ToStyleMap,
+};
 use derive_rich::Rich;
 
+/// ```
+/// use khalas::css::{values as val, Style, unit::px};
+///
+/// let mut style = Style::default();
+/// style
+///     .and_padding(|conf| {
+///         conf.x(px(2))
+///             .y(px(4))
+///     });
+/// ```
 #[derive(Rich, Clone, Debug, Copy, PartialEq, From, Default)]
 pub struct Padding {
     #[rich(read, write)]
@@ -64,51 +77,9 @@ impl Padding {
 #[derive(Clone, Debug, Copy, PartialEq, Display, From)]
 pub enum Length {
     #[from]
-    Em(Em),
-    #[from]
-    Ex(Ex),
-    #[from]
-    Cap(Cap),
-    #[from]
-    Ch(Ch),
-    #[from]
-    Ic(Ic),
-    #[from]
-    Rem(Rem),
-    #[from]
-    Rlh(Rlh),
-    #[from]
-    Vm(Vm),
-    #[from]
-    Vh(Vh),
-    #[from]
-    Vi(Vi),
-    #[from]
-    Vb(Vb),
-    #[from]
-    Vmin(Vmin),
-    #[from]
-    Vmax(Vmax),
-    #[from]
-    Cm(Cm),
-    #[from]
-    Mm(Mm),
-    #[from]
-    Q(Q),
-    #[from]
-    In(In),
-    #[from]
-    Pc(Pc),
-    #[from]
-    Pt(Pt),
-    #[from]
-    Px(Px),
+    Length(unit::Length),
     #[from(forward)]
     Percent(Percent),
-}
-
-impl Default for Length {
-    fn default() -> Self {
-        px(0.0).into()
-    }
+    #[from]
+    Inherit(val::Inherit),
 }

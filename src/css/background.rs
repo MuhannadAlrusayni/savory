@@ -1,8 +1,16 @@
 use crate::css::{color::Color, unit::*, values as val, St, StyleMap, ToStyleMap};
 use derive_rich::Rich;
 
-// TODO: use css types in this module enums
-
+/// ```
+/// use khalas::css::{values as val, Style, Color, unit::em};
+///
+/// let mut style = Style::default();
+/// style
+///     .and_background(|conf| {
+///         conf.image("/bg/fullpage.png")
+///             .scroll()
+///     });
+/// ```
 #[derive(Rich, Clone, Debug, PartialEq, Default)]
 pub struct Background {
     #[rich(read, write)]
@@ -125,50 +133,6 @@ pub enum Attachment {
     Inherit(val::Inherit),
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Display, From)]
-pub enum Length {
-    #[from]
-    Em(Em),
-    #[from]
-    Ex(Ex),
-    #[from]
-    Cap(Cap),
-    #[from]
-    Ch(Ch),
-    #[from]
-    Ic(Ic),
-    #[from]
-    Rem(Rem),
-    #[from]
-    Rlh(Rlh),
-    #[from]
-    Vm(Vm),
-    #[from]
-    Vh(Vh),
-    #[from]
-    Vi(Vi),
-    #[from]
-    Vb(Vb),
-    #[from]
-    Vmin(Vmin),
-    #[from]
-    Vmax(Vmax),
-    #[from]
-    Cm(Cm),
-    #[from]
-    Mm(Mm),
-    #[from]
-    Q(Q),
-    #[from]
-    In(In),
-    #[from]
-    Pc(Pc),
-    #[from]
-    Pt(Pt),
-    #[from]
-    Px(Px),
-}
-
 fn display_helper(v: &Option<impl ToString>) -> String {
     v.as_ref()
         .map_or("".into(), |s| format!(" {}", s.to_string()))
@@ -250,52 +214,6 @@ pub enum Box {
 
 pub type Clip = Box;
 pub type Origin = Box;
-
-#[derive(Clone, Copy, Debug, PartialEq, Display, From)]
-pub enum LengthPercent {
-    #[from]
-    Em(Em),
-    #[from]
-    Ex(Ex),
-    #[from]
-    Cap(Cap),
-    #[from]
-    Ch(Ch),
-    #[from]
-    Ic(Ic),
-    #[from]
-    Rem(Rem),
-    #[from]
-    Rlh(Rlh),
-    #[from]
-    Vm(Vm),
-    #[from]
-    Vh(Vh),
-    #[from]
-    Vi(Vi),
-    #[from]
-    Vb(Vb),
-    #[from]
-    Vmin(Vmin),
-    #[from]
-    Vmax(Vmax),
-    #[from]
-    Cm(Cm),
-    #[from]
-    Mm(Mm),
-    #[from]
-    Q(Q),
-    #[from]
-    In(In),
-    #[from]
-    Pc(Pc),
-    #[from]
-    Pt(Pt),
-    #[from]
-    Px(Px),
-    #[from(forward)]
-    Percent(Percent),
-}
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum Size {

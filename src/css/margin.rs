@@ -1,6 +1,19 @@
-use crate::css::{unit::*, values as val, St, StyleMap, ToStyleMap};
+use crate::css::{
+    unit::{self, *},
+    values as val, St, StyleMap, ToStyleMap,
+};
 use derive_rich::Rich;
 
+/// ```
+/// use khalas::css::{values as val, Style, unit::px};
+///
+/// let mut style = Style::default();
+/// style
+///     .and_margin(|conf| {
+///         conf.x(val::Auto)
+///             .y(px(4))
+///     });
+/// ```
 #[derive(Rich, Clone, Debug, Copy, PartialEq, From, Default)]
 pub struct Margin {
     #[rich(read, write)]
@@ -78,51 +91,11 @@ pub enum Length {
     #[from]
     Auto(val::Auto),
     #[from]
-    Em(Em),
+    Inherit(val::Inherit),
     #[from]
-    Ex(Ex),
+    Initial(val::Initial),
     #[from]
-    Cap(Cap),
-    #[from]
-    Ch(Ch),
-    #[from]
-    Ic(Ic),
-    #[from]
-    Rem(Rem),
-    #[from]
-    Rlh(Rlh),
-    #[from]
-    Vm(Vm),
-    #[from]
-    Vh(Vh),
-    #[from]
-    Vi(Vi),
-    #[from]
-    Vb(Vb),
-    #[from]
-    Vmin(Vmin),
-    #[from]
-    Vmax(Vmax),
-    #[from]
-    Cm(Cm),
-    #[from]
-    Mm(Mm),
-    #[from]
-    Q(Q),
-    #[from]
-    In(In),
-    #[from]
-    Pc(Pc),
-    #[from]
-    Pt(Pt),
-    #[from]
-    Px(Px),
+    Length(unit::Length),
     #[from(forward)]
     Percent(Percent),
-}
-
-impl Default for Length {
-    fn default() -> Self {
-        val::Auto.into()
-    }
 }

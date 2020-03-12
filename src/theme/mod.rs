@@ -1,6 +1,6 @@
+//! Traits used to generate elements styles.
+
 pub mod ant;
-// pub mod simple;
-// pub mod matieral;
 
 use crate::el::prelude::*;
 
@@ -28,13 +28,4 @@ pub trait Theme {
     fn entry<PMsg>(&self, _: &Entry<PMsg>) -> entry::Style;
 
     fn spin_entry<PMsg>(&self, _: &SpinEntry<PMsg>) -> spin_entry::Style;
-}
-
-#[cfg(test)]
-mod tests {
-    // use super::*;
-
-    // #[test]
-    // fn primary_test() {
-    // }
 }

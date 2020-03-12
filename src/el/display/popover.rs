@@ -1,6 +1,5 @@
-use crate::{css, events::Events, render::Render, theme::Theme};
+use crate::{css, prelude::*};
 use derive_rich::Rich;
-use seed::prelude::*;
 
 // TODO: add placement property
 #[derive(Clone, Rich)]

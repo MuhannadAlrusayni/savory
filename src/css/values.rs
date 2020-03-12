@@ -52,4 +52,7 @@ css_values! {
     (BreakWord, "break-word"), (HorizontalTb, "horizontal-tb"), (VerticalRl, "vertical-rl"), (VerticalLr, "vertical"),
     (Plaintext, "plaintext"), (Sub, "sub"), (Super, "super"), (TextTop, "text-top"), (Middle, "middle"),
     (TextBottom, "text-bottom"), (Pre, "pre"), (PreLine, "pre-line"), (PreWrap, "pre-wrap"), (Justify, "justify"),
+    (XXSmall, "xx-small"), (XSmall, "x-small"), (Small, "small"), (Large, "large"), (XLarge, "x-large"),
+    (XXLarge, "xx-large"), (Smaller, "smaller"), (Larger, "larger"), (Italic, "italic"), (Oblique, "oblique"),
+    (SmallCaps, "small-caps"), (Bold, "bold"), (Bolder, "bolder"), (Lighter, "lighter"),
 }

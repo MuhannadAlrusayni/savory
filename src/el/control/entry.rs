@@ -1,7 +1,5 @@
-use crate::{css, events::Events, model::Model, render::Render, theme::Theme};
+use crate::{css, prelude::*};
 use derive_rich::Rich;
-use seed::prelude::*;
-use std::rc::Rc;
 
 #[derive(Debug, Clone)]
 pub enum Msg {
@@ -48,7 +46,7 @@ impl<PMsg> Default for ParentEvents<PMsg> {
 pub struct Entry<PMsg> {
     #[rich(write(style = compose))]
     pub local_events: LocalEvents,
-    msg_mapper: Rc<dyn Fn(Msg) -> PMsg>,
+    msg_mapper: MsgMapper<Msg, PMsg>,
     #[rich(write(style = compose))]
     pub events: ParentEvents<PMsg>,
     #[rich(write, write(rename = text_mut))]
@@ -71,7 +69,7 @@ pub struct Entry<PMsg> {
 }
 
 impl<PMsg> Entry<PMsg> {
-    pub fn new(msg_mapper: impl FnOnce(Msg) -> PMsg + Clone + 'static) -> Self {
+    pub fn new(msg_mapper: impl Into<MsgMapper<Msg, PMsg>>) -> Self {
         let mut local_events = LocalEvents::default();
         local_events.input(|conf| {
             conf.focus(|_| Msg::Focus)
@@ -84,7 +82,7 @@ impl<PMsg> Entry<PMsg> {
         Self {
             local_events,
             events: ParentEvents::default(),
-            msg_mapper: Rc::new(move |msg| (msg_mapper.clone())(msg)),
+            msg_mapper: msg_mapper.into(),
             text: None,
             max_length: None,
             placeholder: None,
@@ -142,25 +140,23 @@ impl<PMsg: 'static> Render<PMsg> for Entry<PMsg> {
     }
 
     fn render_with_style(&self, _: &impl Theme, style: Self::Style) -> Self::View {
-        let msg_mapper = Rc::clone(&self.msg_mapper.clone());
+        let msg_mapper = self.msg_mapper.map_msg_once();
         let mut input = input![
             self.local_events.input.clone(),
             style.input,
-            attrs![
-                At::Disabled => self.disabled.as_at_value(),
-                At::Value => self.text.as_ref().map(|v| AtValue::Some(v.clone())).unwrap_or(AtValue::Ignored),
-                // At::MaxLength => self.max_length,
-                // At::Placeholder => self.placeholder,
-            ],
-        ].map_msg(move |msg| (msg_mapper.clone())(msg));
+            att::disabled(self.disabled),
+            self.text.clone().map(att::value),
+            self.max_length.map(att::max_length),
+            self.placeholder.clone().map(att::placeholder),
+        ]
+        .map_msg(msg_mapper.clone());
 
         for event in self.events.input.events.clone().into_iter() {
             input.add_listener(event);
         }
 
-        let msg_mapper = Rc::clone(&self.msg_mapper.clone());
-        let mut container = div![style.container, self.local_events.container.clone(),]
-            .map_msg(move |msg| (msg_mapper.clone())(msg));
+        let mut container =
+            div![style.container, self.local_events.container.clone(),].map_msg(msg_mapper);
 
         for event in self.events.container.events.clone().into_iter() {
             container.add_listener(event);

@@ -2,6 +2,23 @@ use crate::css::{color::Color, unit::*, values as val, St, StyleMap, ToStyleMap}
 use derive_rich::Rich;
 use std::borrow::Cow;
 
+/// ```
+/// use khalas::css::{values as val, Style, Color, unit::em};
+/// use palette::rgb::Rgb;
+///
+/// let mut style = Style::default();
+/// style
+///     .and_text(|conf| {
+///         conf.line_height(1.7)
+///             // we can pass Rgb, Rgba, Hsl, Hsla
+///             .color(Rgb::new(0.5, 0.1, 0.1))
+///             // or we can use HTML colors
+///             .color(Color::BlueViolet)
+///             .align(val::Center)
+///             .transform(val::Capitalize)
+///             .indent(em(2.))
+///     });
+/// ```
 #[derive(Rich, Clone, Debug, PartialEq, Default)]
 pub struct Text {
     #[rich(write)]
@@ -83,45 +100,7 @@ pub enum Spacing {
     #[from]
     Normal(val::Normal),
     #[from]
-    Em(Em),
-    #[from]
-    Ex(Ex),
-    #[from]
-    Cap(Cap),
-    #[from]
-    Ch(Ch),
-    #[from]
-    Ic(Ic),
-    #[from]
-    Rem(Rem),
-    #[from]
-    Rlh(Rlh),
-    #[from]
-    Vm(Vm),
-    #[from]
-    Vh(Vh),
-    #[from]
-    Vi(Vi),
-    #[from]
-    Vb(Vb),
-    #[from]
-    Vmin(Vmin),
-    #[from]
-    Vmax(Vmax),
-    #[from]
-    Cm(Cm),
-    #[from]
-    Mm(Mm),
-    #[from]
-    Q(Q),
-    #[from]
-    In(In),
-    #[from]
-    Pc(Pc),
-    #[from]
-    Pt(Pt),
-    #[from]
-    Px(Px),
+    Length(Length),
     #[from]
     Initial(val::Initial),
     #[from]
@@ -138,45 +117,7 @@ pub enum LineHeight {
     #[from]
     Number(f32),
     #[from]
-    Em(Em),
-    #[from]
-    Ex(Ex),
-    #[from]
-    Cap(Cap),
-    #[from]
-    Ch(Ch),
-    #[from]
-    Ic(Ic),
-    #[from]
-    Rem(Rem),
-    #[from]
-    Rlh(Rlh),
-    #[from]
-    Vm(Vm),
-    #[from]
-    Vh(Vh),
-    #[from]
-    Vi(Vi),
-    #[from]
-    Vb(Vb),
-    #[from]
-    Vmin(Vmin),
-    #[from]
-    Vmax(Vmax),
-    #[from]
-    Cm(Cm),
-    #[from]
-    Mm(Mm),
-    #[from]
-    Q(Q),
-    #[from]
-    In(In),
-    #[from]
-    Pc(Pc),
-    #[from]
-    Pt(Pt),
-    #[from]
-    Px(Px),
+    Length(Length),
     #[from]
     Percent(Percent),
     #[from]
@@ -327,45 +268,7 @@ pub enum TextDecorationStyle {
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum TextIndent {
     #[from]
-    Em(Em),
-    #[from]
-    Ex(Ex),
-    #[from]
-    Cap(Cap),
-    #[from]
-    Ch(Ch),
-    #[from]
-    Ic(Ic),
-    #[from]
-    Rem(Rem),
-    #[from]
-    Rlh(Rlh),
-    #[from]
-    Vm(Vm),
-    #[from]
-    Vh(Vh),
-    #[from]
-    Vi(Vi),
-    #[from]
-    Vb(Vb),
-    #[from]
-    Vmin(Vmin),
-    #[from]
-    Vmax(Vmax),
-    #[from]
-    Cm(Cm),
-    #[from]
-    Mm(Mm),
-    #[from]
-    Q(Q),
-    #[from]
-    In(In),
-    #[from]
-    Pc(Pc),
-    #[from]
-    Pt(Pt),
-    #[from]
-    Px(Px),
+    Length(Length),
     #[from]
     Percent(Percent),
     #[from]
@@ -443,45 +346,7 @@ pub enum VerticalAlign {
     #[from]
     TextBottom(val::TextBottom),
     #[from]
-    Em(Em),
-    #[from]
-    Ex(Ex),
-    #[from]
-    Cap(Cap),
-    #[from]
-    Ch(Ch),
-    #[from]
-    Ic(Ic),
-    #[from]
-    Rem(Rem),
-    #[from]
-    Rlh(Rlh),
-    #[from]
-    Vm(Vm),
-    #[from]
-    Vh(Vh),
-    #[from]
-    Vi(Vi),
-    #[from]
-    Vb(Vb),
-    #[from]
-    Vmin(Vmin),
-    #[from]
-    Vmax(Vmax),
-    #[from]
-    Cm(Cm),
-    #[from]
-    Mm(Mm),
-    #[from]
-    Q(Q),
-    #[from]
-    In(In),
-    #[from]
-    Pc(Pc),
-    #[from]
-    Pt(Pt),
-    #[from]
-    Px(Px),
+    Length(Length),
     #[from]
     Percent(Percent),
     #[from]
@@ -507,56 +372,6 @@ pub enum WhiteSpace {
     #[from]
     Inherit(val::Inherit),
 }
-
-// #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
-// pub enum WordSpacing {
-//     #[from]
-//     Normal(val::Normal),
-//     #[from]
-//     Em(Em),
-//     #[from]
-//     Ex(Ex),
-//     #[from]
-//     Cap(Cap),
-//     #[from]
-//     Ch(Ch),
-//     #[from]
-//     Ic(Ic),
-//     #[from]
-//     Rem(Rem),
-//     #[from]
-//     Rlh(Rlh),
-//     #[from]
-//     Vm(Vm),
-//     #[from]
-//     Vh(Vh),
-//     #[from]
-//     Vi(Vi),
-//     #[from]
-//     Vb(Vb),
-//     #[from]
-//     Vmin(Vmin),
-//     #[from]
-//     Vmax(Vmax),
-//     #[from]
-//     Cm(Cm),
-//     #[from]
-//     Mm(Mm),
-//     #[from]
-//     Q(Q),
-//     #[from]
-//     In(In),
-//     #[from]
-//     Pc(Pc),
-//     #[from]
-//     Pt(Pt),
-//     #[from]
-//     Px(Px),
-//     #[from]
-//     Initial(val::Initial),
-//     #[from]
-//     Inherit(val::Inherit),
-// }
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum TextAlignLast {

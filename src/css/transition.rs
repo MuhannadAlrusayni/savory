@@ -6,6 +6,26 @@ use derive_rich::Rich;
 use indexmap::IndexMap;
 use std::borrow::Cow;
 
+/// ```
+/// use khalas::css::{values as val, Style, unit::{sec, ms}};
+///
+/// let mut style = Style::default();
+/// style
+///     .and_transition(|conf| {
+///         conf
+///             // transition for all properties
+///             .all(|conf| {
+///                 conf.duration(sec(0.3))
+///                     .cubic_bezier(0.645, 0.045, 0.355, 1.)
+///             })
+///             // or transition for specific properties (e.g. opacity only)
+///             .add("opacity", |conf| {
+///                 conf.duration(ms(150.))
+///                     .ease()
+///                     .delay(sec(0.5))
+///             })
+///         });
+/// ```
 #[derive(Default, Clone, Debug, PartialEq, From)]
 pub struct Transition {
     pub transitions: IndexMap<Cow<'static, str>, TransitionValue>,

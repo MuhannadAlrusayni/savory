@@ -1,14 +1,5 @@
-use crate::{
-    css,
-    el::{self},
-    events::Events,
-    model::Model,
-    render::Render,
-    theme::Theme,
-};
+use crate::{css, prelude::*};
 use derive_rich::Rich;
-use seed::prelude::*;
-use std::rc::Rc;
 
 #[derive(Debug, Clone)]
 pub enum Msg {
@@ -19,8 +10,8 @@ pub enum Msg {
     Increment,
     Decrement,
     Input,
-    IncrementButton(el::button::Msg),
-    DecrementButton(el::button::Msg),
+    IncrementButton(button::Msg),
+    DecrementButton(button::Msg),
 }
 
 #[derive(Default, Rich)]
@@ -58,7 +49,8 @@ impl<PMsg> Default for ParentEvents<PMsg> {
 #[derive(Rich)]
 pub struct SpinEntry<PMsg> {
     el_ref: ElRef<web_sys::HtmlInputElement>,
-    msg_mapper: Rc<dyn Fn(Msg) -> PMsg>,
+    // msg_mapper: Rc<dyn Fn(Msg) -> PMsg>,
+    msg_mapper: MsgMapper<Msg, PMsg>,
     #[rich(
         read(
             /// Return reference for the local events.
@@ -138,17 +130,18 @@ pub struct SpinEntry<PMsg> {
         /// the default behavior for this button.
         style = compose
     ))]
-    pub increment_button: el::Button<Msg>,
+    pub increment_button: Button<Msg>,
     #[rich(write(
         /// Customize the decrement button. Note by doing so you may override
         /// the default behavior for this button.
         style = compose
     ))]
-    pub decrement_button: el::Button<Msg>,
+    pub decrement_button: Button<Msg>,
 }
 
 impl<PMsg> SpinEntry<PMsg> {
-    pub fn new(msg_mapper: impl FnOnce(Msg) -> PMsg + Clone + 'static) -> Self {
+    // pub fn new(msg_mapper: impl FnOnce(Msg) -> PMsg + Clone + 'static) -> Self {
+    pub fn new(msg_mapper: impl Into<MsgMapper<Msg, PMsg>>) -> Self {
         let mut local_events = LocalEvents::default();
         local_events
             .input(|conf| {
@@ -161,15 +154,15 @@ impl<PMsg> SpinEntry<PMsg> {
                     .mouse_leave(|_| Msg::MouseLeave)
             });
 
-        let mut increment_button = el::Button::new(Msg::IncrementButton);
+        let mut increment_button = Button::with_label(Msg::IncrementButton, "+");
         increment_button.events(|conf| conf.click(|_| Msg::Increment));
 
-        let mut decrement_button = el::Button::new(Msg::DecrementButton);
+        let mut decrement_button = Button::with_label(Msg::DecrementButton, "-");
         decrement_button.events(|conf| conf.click(|_| Msg::Decrement));
 
         Self {
             el_ref: ElRef::default(),
-            msg_mapper: Rc::new(move |msg| (msg_mapper.clone())(msg)),
+            msg_mapper: msg_mapper.into(),
             local_events,
             events: ParentEvents::default(),
             value: None,
@@ -342,8 +335,7 @@ impl<GMsg: 'static, PMsg: 'static> Model<PMsg, GMsg> for SpinEntry<PMsg> {
     type Message = Msg;
 
     fn update(&mut self, msg: Msg, orders: &mut impl Orders<PMsg, GMsg>) {
-        let msg_mapper = Rc::clone(&self.msg_mapper.clone());
-        let mut orders = orders.proxy(move |msg| (msg_mapper.clone())(msg));
+        let mut orders = orders.proxy(self.msg_mapper.map_msg_once());
 
         match msg {
             Msg::MouseEnter => self.mouse_over = true,
@@ -367,19 +359,11 @@ pub struct UserStyle {
     #[rich(write(style = compose))]
     pub input: css::Style,
     #[rich(write(style = compose))]
-    pub buttons_container: el::flexbox::Style,
+    pub buttons_container: flexbox::Style,
     #[rich(write(style = compose))]
-    pub increment_item: el::flexbox::ItemStyle,
+    pub increment_button: button::Style,
     #[rich(write(style = compose))]
-    pub decrement_item: el::flexbox::ItemStyle,
-    #[rich(write(style = compose))]
-    pub increment_button: el::button::Style,
-    #[rich(write(style = compose))]
-    pub decrement_button: el::button::Style,
-    #[rich(write)]
-    pub increment_icon: Option<el::Icon<Msg>>,
-    #[rich(write)]
-    pub decrement_icon: Option<el::Icon<Msg>>,
+    pub decrement_button: button::Style,
 }
 
 /// This style returned by the Theme and consumed by render function, thus the
@@ -391,20 +375,11 @@ pub struct Style {
     #[rich(write(style = compose))]
     pub input: css::Style,
     #[rich(write(style = compose))]
-    pub buttons_container: el::flexbox::Style,
+    pub buttons_container: flexbox::Style,
     #[rich(write(style = compose))]
-    pub increment_item: el::flexbox::ItemStyle,
+    pub increment_button: button::Style,
     #[rich(write(style = compose))]
-    pub decrement_item: el::flexbox::ItemStyle,
-    #[rich(write(style = compose))]
-    pub increment_button: el::button::Style,
-    #[rich(write(style = compose))]
-    pub decrement_button: el::button::Style,
-    // FIXME: should I use SvgIcon insted of Icon ?
-    #[rich(write)]
-    pub increment_icon: el::Icon<Msg>,
-    #[rich(write)]
-    pub decrement_icon: el::Icon<Msg>,
+    pub decrement_button: button::Style,
 }
 
 impl<PMsg: 'static> Render<PMsg> for SpinEntry<PMsg> {
@@ -420,62 +395,53 @@ impl<PMsg: 'static> Render<PMsg> for SpinEntry<PMsg> {
             container,
             input,
             buttons_container,
-            increment_item,
-            decrement_item,
             increment_button,
             decrement_button,
-            increment_icon,
-            decrement_icon,
         } = style;
 
-        let mut inc_btn = self
+        let inc_btn = self
             .increment_button
             .render_with_style(theme, increment_button);
-        let mut dec_btn = self
+        let dec_btn = self
             .decrement_button
             .render_with_style(theme, decrement_button);
 
-        // FIXME: try to use better way to add icons to the buttons, this way is
-        // pretty hacky and wouldn't work if el::Button::render(theme) return
-        // nasted nodes
-        inc_btn.add_child(increment_icon.render(theme));
-        dec_btn.add_child(decrement_icon.render(theme));
-
-        let msg_mapper = Rc::clone(&self.msg_mapper.clone());
-        let btns_container = el::Flexbox::new()
-            .add(el::Flexbox::item_with(nodes![inc_btn]).render_with_style(theme, increment_item))
-            .add(el::Flexbox::item_with(nodes![dec_btn]).render_with_style(theme, decrement_item))
+        let msg_mapper = self.msg_mapper.map_msg_once();
+        let btns_container = Flexbox::new()
+            .add(inc_btn)
+            .add(dec_btn)
             .render_with_style(theme, buttons_container)
-            .map_msg(move |msg| (msg_mapper.clone())(msg));
+            .map_msg(msg_mapper.clone());
 
-        fn att_map(att: Option<impl ToString>) -> AtValue {
-            att.map(|a| a.to_string().into()).unwrap_or(AtValue::None)
-        }
         // input
-        let msg_mapper = Rc::clone(&self.msg_mapper.clone());
         let mut input = input![
+            att::class("spin-entry-input"),
             el_ref(&self.el_ref),
             self.local_events.input.clone(),
             input,
-            attrs![
-                At::Value => self.vis_value,
-                At::Max => att_map(self.max),
-                At::Min => att_map(self.min),
-                At::Step => self.step,
-                At::Placeholder => att_map(self.placeholder),
-                At::Disabled => self.disabled.as_at_value(),
-            ]
+            // attributes
+            att::value(self.vis_value.clone()),
+            self.max.map(att::max),
+            self.min.map(att::min),
+            att::step(self.step),
+            self.placeholder
+                .map(|v| v.to_string())
+                .map(att::placeholder),
+            att::disabled(self.disabled),
         ]
-        .map_msg(move |msg| (msg_mapper.clone())(msg));
+        .map_msg(msg_mapper.clone());
 
         for event in self.events.input.events.clone().into_iter() {
             input.add_listener(event);
         }
 
         // container
-        let msg_mapper = Rc::clone(&self.msg_mapper.clone());
-        let mut container = div![self.local_events.container.clone(), container,]
-            .map_msg(move |msg| (msg_mapper.clone())(msg));
+        let mut container = div![
+            att::class("spin-entry"),
+            self.local_events.container.clone(),
+            container,
+        ]
+        .map_msg(msg_mapper);
 
         for event in self.events.container.events.clone().into_iter() {
             container.add_listener(event);

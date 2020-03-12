@@ -1,6 +1,18 @@
 use crate::css::{color::Color, unit::*, values as val, St, StyleMap, ToStyleMap};
 use derive_rich::Rich;
 
+/// ```
+/// use khalas::css::{values as val, Style, unit::px, Color};
+///
+/// let mut style = Style::default();
+/// style
+///     .and_border(|conf| {
+///         conf.solid() // or .style(val::Solid)
+///             .width(px(2))
+///             .color(Color::DimGray)
+///             .radius(px(4))
+///     });
+/// ```
 // TODO: add shadow
 #[derive(Rich, Copy, Clone, Debug, PartialEq, Default)]
 pub struct Border {
@@ -159,45 +171,7 @@ pub enum Style {
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum Width {
     #[from]
-    Em(Em),
-    #[from]
-    Ex(Ex),
-    #[from]
-    Cap(Cap),
-    #[from]
-    Ch(Ch),
-    #[from]
-    Ic(Ic),
-    #[from]
-    Rem(Rem),
-    #[from]
-    Rlh(Rlh),
-    #[from]
-    Vm(Vm),
-    #[from]
-    Vh(Vh),
-    #[from]
-    Vi(Vi),
-    #[from]
-    Vb(Vb),
-    #[from]
-    Vmin(Vmin),
-    #[from]
-    Vmax(Vmax),
-    #[from]
-    Cm(Cm),
-    #[from]
-    Mm(Mm),
-    #[from]
-    Q(Q),
-    #[from]
-    In(In),
-    #[from]
-    Pc(Pc),
-    #[from]
-    Pt(Pt),
-    #[from]
-    Px(Px),
+    Length(Length),
     #[from]
     Thin(val::Thin),
     #[from]
@@ -213,45 +187,7 @@ pub enum Width {
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum Radius {
     #[from]
-    Em(Em),
-    #[from]
-    Ex(Ex),
-    #[from]
-    Cap(Cap),
-    #[from]
-    Ch(Ch),
-    #[from]
-    Ic(Ic),
-    #[from]
-    Rem(Rem),
-    #[from]
-    Rlh(Rlh),
-    #[from]
-    Vm(Vm),
-    #[from]
-    Vh(Vh),
-    #[from]
-    Vi(Vi),
-    #[from]
-    Vb(Vb),
-    #[from]
-    Vmin(Vmin),
-    #[from]
-    Vmax(Vmax),
-    #[from]
-    Cm(Cm),
-    #[from]
-    Mm(Mm),
-    #[from]
-    Q(Q),
-    #[from]
-    In(In),
-    #[from]
-    Pc(Pc),
-    #[from]
-    Pt(Pt),
-    #[from]
-    Px(Px),
+    Length(Length),
     #[from(forward)]
     Percent(Percent),
     #[from]
@@ -259,9 +195,3 @@ pub enum Radius {
     #[from]
     Inherit(val::Inherit),
 }
-
-// impl Default for Radius {
-//     fn default() -> Self {
-//         Self::Inherit
-//     }
-// }

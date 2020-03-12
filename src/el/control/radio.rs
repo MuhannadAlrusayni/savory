@@ -1,7 +1,6 @@
-use crate::{css, events::Events, model::Model, render::Render, theme::Theme};
+use crate::{css, prelude::*};
 use derive_rich::Rich;
-use seed::prelude::*;
-use std::{borrow::Cow, rc::Rc};
+use std::borrow::Cow;
 
 #[derive(Debug, Copy, Clone)]
 pub enum Msg {
@@ -16,7 +15,7 @@ pub enum Msg {
 pub struct Radio<PMsg> {
     #[rich(write(style = compose))]
     events: Events<PMsg>,
-    msg_mapper: Rc<dyn Fn(Msg) -> PMsg>,
+    msg_mapper: MsgMapper<Msg, PMsg>,
     #[rich(write)]
     pub label: Option<Cow<'static, str>>,
     #[rich(write(style = compose))]
@@ -38,9 +37,9 @@ pub struct Radio<PMsg> {
 }
 
 impl<PMsg> Radio<PMsg> {
-    pub fn new(msg_mapper: impl FnOnce(Msg) -> PMsg + Clone + 'static) -> Self {
+    pub fn new(msg_mapper: impl Into<MsgMapper<Msg, PMsg>>) -> Self {
         Self {
-            msg_mapper: Rc::new(move |msg| (msg_mapper.clone())(msg)),
+            msg_mapper: msg_mapper.into(),
             events: Events::default(),
             label: None,
             style: Style::default(),
@@ -103,11 +102,9 @@ impl<PMsg: 'static> Render<PMsg> for Radio<PMsg> {
             .mouse_leave(|_| Msg::MouseLeave)
             .click(|_| Msg::Click);
         let input = input![
-            attrs![
-                At::Disabled => self.disabled.as_at_value(),
-                At::Checked => self.toggle.as_at_value(),
-                At::Type => "radio",
-            ],
+            att::disabled(self.disabled),
+            att::checked(self.toggle),
+            att::ty(att::Type::Radio),
             events.events,
             style.input,
             if self.is_toggled() {
@@ -117,7 +114,7 @@ impl<PMsg: 'static> Render<PMsg> for Radio<PMsg> {
             },
         ];
 
-        let msg_mapper = Rc::clone(&self.msg_mapper.clone());
+        let msg_mapper = self.msg_mapper.map_msg_once();
         let mut radio = if let Some(ref lbl) = self.label {
             let mut events = Events::default();
             events
@@ -127,7 +124,7 @@ impl<PMsg: 'static> Render<PMsg> for Radio<PMsg> {
         } else {
             input
         }
-        .map_msg(move |msg| (msg_mapper.clone())(msg));
+        .map_msg(msg_mapper);
 
         for event in self.events.events.clone().into_iter() {
             radio.add_listener(event);

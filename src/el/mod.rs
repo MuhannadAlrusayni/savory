@@ -1,7 +1,7 @@
-pub mod container;
+//! Reusable elements.
+
 pub mod control;
 pub mod display;
-pub mod layout;
 
 pub use self::prelude::*;
 
@@ -16,9 +16,10 @@ pub mod prelude {
             switch::{self, Switch},
         },
         display::{
+            flexbox::{self, Flexbox},
             icon::{self, HtmlIcon, Icon, SvgIcon, UrlIcon},
             popover::{self, Popover},
         },
-        layout::flexbox::{self, Flexbox},
     };
+    pub use seed::prelude::Node;
 }

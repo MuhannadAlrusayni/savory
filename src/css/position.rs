@@ -1,6 +1,15 @@
 use crate::css::{unit::*, values as val, St, StyleMap, ToStyleMap};
 use derive_rich::Rich;
 
+/// ```
+/// use khalas::css::{Style, unit::px};
+///
+/// let mut style = Style::default();
+/// style
+///     .and_position(|conf| {
+///         conf.absolute().top(px(28)).left(px(40))
+///     });
+/// ```
 #[derive(Rich, Clone, Debug, PartialEq, Default)]
 pub struct Position {
     #[rich(value_fns = {
@@ -14,13 +23,13 @@ pub struct Position {
     })]
     position: Option<PositionType>,
     #[rich(write)]
-    left: Option<LengthPercent>,
+    left: Option<PostionLength>,
     #[rich(write)]
-    top: Option<LengthPercent>,
+    top: Option<PostionLength>,
     #[rich(write)]
-    right: Option<LengthPercent>,
+    right: Option<PostionLength>,
     #[rich(write)]
-    bottom: Option<LengthPercent>,
+    bottom: Option<PostionLength>,
     #[rich(write)]
     z_index: Option<i32>,
     #[rich(write(style = compose))]
@@ -42,7 +51,7 @@ impl ToStyleMap for Position {
 }
 
 #[derive(Clone, Debug, Copy, PartialEq, Display, From)]
-pub enum LengthPercent {
+pub enum PostionLength {
     #[from]
     Initial(val::Initial),
     #[from]
@@ -50,45 +59,7 @@ pub enum LengthPercent {
     #[from]
     Auto(val::Auto),
     #[from]
-    Em(Em),
-    #[from]
-    Ex(Ex),
-    #[from]
-    Cap(Cap),
-    #[from]
-    Ch(Ch),
-    #[from]
-    Ic(Ic),
-    #[from]
-    Rem(Rem),
-    #[from]
-    Rlh(Rlh),
-    #[from]
-    Vm(Vm),
-    #[from]
-    Vh(Vh),
-    #[from]
-    Vi(Vi),
-    #[from]
-    Vb(Vb),
-    #[from]
-    Vmin(Vmin),
-    #[from]
-    Vmax(Vmax),
-    #[from]
-    Cm(Cm),
-    #[from]
-    Mm(Mm),
-    #[from]
-    Q(Q),
-    #[from]
-    In(In),
-    #[from]
-    Pc(Pc),
-    #[from]
-    Pt(Pt),
-    #[from]
-    Px(Px),
+    Length(Length),
     #[from(forward)]
     Percent(Percent),
 }
@@ -99,10 +70,10 @@ pub enum Clip {
     Auto(val::Auto),
     #[display(fmt = "rect({}, {}, {}, {})", top, right, bottom, left)]
     ShapeRect {
-        top: Length,
-        right: Length,
-        bottom: Length,
-        left: Length,
+        top: ClipRectLength,
+        right: ClipRectLength,
+        bottom: ClipRectLength,
+        left: ClipRectLength,
     },
     #[from]
     Initial(val::Initial),
@@ -122,10 +93,10 @@ impl Clip {
     }
 
     pub fn rect(
-        top: impl Into<Length>,
-        right: impl Into<Length>,
-        bottom: impl Into<Length>,
-        left: impl Into<Length>,
+        top: impl Into<ClipRectLength>,
+        right: impl Into<ClipRectLength>,
+        bottom: impl Into<ClipRectLength>,
+        left: impl Into<ClipRectLength>,
     ) -> Self {
         Self::ShapeRect {
             top: top.into(),
@@ -145,7 +116,7 @@ impl Clip {
 }
 
 #[derive(Clone, Debug, Copy, PartialEq, Display, From)]
-pub enum Length {
+pub enum ClipRectLength {
     #[from]
     Initial(val::Initial),
     #[from]
@@ -153,45 +124,7 @@ pub enum Length {
     #[from]
     Auto(val::Auto),
     #[from]
-    Em(Em),
-    #[from]
-    Ex(Ex),
-    #[from]
-    Cap(Cap),
-    #[from]
-    Ch(Ch),
-    #[from]
-    Ic(Ic),
-    #[from]
-    Rem(Rem),
-    #[from]
-    Rlh(Rlh),
-    #[from]
-    Vm(Vm),
-    #[from]
-    Vh(Vh),
-    #[from]
-    Vi(Vi),
-    #[from]
-    Vb(Vb),
-    #[from]
-    Vmin(Vmin),
-    #[from]
-    Vmax(Vmax),
-    #[from]
-    Cm(Cm),
-    #[from]
-    Mm(Mm),
-    #[from]
-    Q(Q),
-    #[from]
-    In(In),
-    #[from]
-    Pc(Pc),
-    #[from]
-    Pt(Pt),
-    #[from]
-    Px(Px),
+    Length(Length),
     #[from(forward)]
     Percent(Percent),
 }

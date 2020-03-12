@@ -1,14 +1,9 @@
 use crate::{
     css::{self, unit::px},
-    el::{Flexbox, Icon},
-    events::Events,
-    model::Model,
-    render::Render,
-    theme::Theme,
+    prelude::*,
 };
 use derive_rich::Rich;
-use seed::prelude::*;
-use std::{borrow::Cow, rc::Rc};
+use std::borrow::Cow;
 
 #[derive(Debug, Copy, Clone)]
 pub enum Kind {
@@ -39,7 +34,7 @@ pub type ParentEvents<PMsg> = Events<PMsg>;
 
 #[derive(Clone, Rich)]
 pub struct Button<PMsg> {
-    msg_mapper: Rc<dyn Fn(Msg) -> PMsg>,
+    msg_mapper: MsgMapper<Msg, PMsg>,
     #[rich(write(style = compose))]
     local_events: LocalEvents,
     #[rich(write(style = compose))]
@@ -68,8 +63,6 @@ pub struct Button<PMsg> {
     #[rich(write(style = compose))]
     pub style: Style,
 
-    // #[rich(write(style = compose))]
-    // events: Events<Msg>,
     #[rich(
         read(copy, rename = is_disabled),
         value_fns = { disable = true, enable = false }
@@ -88,7 +81,7 @@ pub struct Button<PMsg> {
 }
 
 impl<PMsg> Button<PMsg> {
-    pub fn new(msg_mapper: impl FnOnce(Msg) -> PMsg + Clone + 'static) -> Self {
+    pub fn new(msg_mapper: impl Into<MsgMapper<Msg, PMsg>>) -> Self {
         let mut local_events = Events::default();
         local_events
             .focus(|_| Msg::Focus)
@@ -98,7 +91,7 @@ impl<PMsg> Button<PMsg> {
             .click(|_| Msg::Route);
 
         Button {
-            msg_mapper: Rc::new(move |msg| (msg_mapper.clone())(msg)),
+            msg_mapper: msg_mapper.into(),
             local_events,
             events: Events::default(),
             inner: Inner::Common(None, None),
@@ -115,7 +108,7 @@ impl<PMsg> Button<PMsg> {
     }
 
     pub fn with_label(
-        msg_mapper: impl FnOnce(Msg) -> PMsg + Clone + 'static,
+        msg_mapper: impl Into<MsgMapper<Msg, PMsg>>,
         label: impl Into<String>,
     ) -> Self {
         let mut btn = Button::new(msg_mapper);
@@ -124,7 +117,7 @@ impl<PMsg> Button<PMsg> {
     }
 
     pub fn with_children(
-        msg_mapper: impl FnOnce(Msg) -> PMsg + Clone + 'static,
+        msg_mapper: impl Into<MsgMapper<Msg, PMsg>>,
         children: Vec<Node<Msg>>,
     ) -> Self {
         let mut btn = Button::new(msg_mapper);
@@ -191,7 +184,7 @@ impl<PMsg: 'static> Render<PMsg> for Button<PMsg> {
     }
 
     fn render_with_style(&self, theme: &impl Theme, style: Self::Style) -> Self::View {
-        let msg_mapper = Rc::clone(&self.msg_mapper.clone());
+        let msg_mapper = self.msg_mapper.map_msg_once();
 
         let inner: Vec<Node<Msg>> = match self.inner {
             Inner::Child(ref children) => children.clone(),
@@ -204,44 +197,28 @@ impl<PMsg: 'static> Render<PMsg> for Button<PMsg> {
                     .as_ref()
                     .map(|lbl| plain![lbl.clone()])
                     .unwrap_or(empty![]);
-                let mut lbl = Flexbox::item_with(nodes![lbl]);
-                lbl.wrapped();
                 // TODO: use el::flexbox::Style insted of hard coding the style
                 vec![Flexbox::new()
                     .center()
                     .full_size()
                     .gap(px(4.))
-                    .add(nodes![icon])
-                    .add(lbl)
+                    .add(icon)
+                    .add_and(|item| item.content(lbl).wrapped())
                     .render(theme)]
             }
         };
 
         let mut btn = button![
+            att::class("button"),
+            att::disabled(self.disabled),
             self.local_events.events.clone(),
-            attrs![
-                At::Disabled => self.disabled.as_at_value()
-            ],
             style,
             inner,
         ]
-        .map_msg(move |msg| (Rc::clone(&msg_mapper))(msg));
+        .map_msg(msg_mapper);
         for event in self.events.events.clone().into_iter() {
             btn.add_listener(event);
         }
         btn
     }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[derive(Debug, Clone)]
-    enum ChildMsg {
-        First,
-    }
-
-    #[test]
-    fn test_name() {}
 }

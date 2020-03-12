@@ -14,6 +14,16 @@ pub enum Visibility {
     Inherit(val::Inherit),
 }
 
+impl From<bool> for Visibility {
+    fn from(source: bool) -> Self {
+        if source {
+            val::Visible.into()
+        } else {
+            val::Hidden.into()
+        }
+    }
+}
+
 impl ToStyleMap for Visibility {
     fn style_map(&self) -> StyleMap {
         let mut map = StyleMap::default();

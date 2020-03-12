@@ -1,6 +1,23 @@
-use crate::css::{unit::*, values as val, St, StyleMap, ToStyleMap};
+use crate::css::{
+    unit::{self, *},
+    values as val, St, StyleMap, ToStyleMap,
+};
 use derive_rich::Rich;
 
+/// ```
+/// use khalas::css::{Style, unit::em};
+///
+/// let mut style = Style::default();
+/// style
+///     .and_size(|conf| {
+///         conf.width(em(2.))
+///             .height(em(1.5))
+///             .min_width(em(1.5))
+///             .min_height(em(1.))
+///             .max_width(em(4.))
+///             .max_height(em(3.))
+///     });
+/// ```
 #[derive(Rich, Copy, Clone, Debug, PartialEq, Default)]
 pub struct Size {
     #[rich(read, write)]
@@ -66,45 +83,7 @@ pub enum Length {
     #[from]
     MaxContent(val::MaxContent),
     #[from]
-    Em(Em),
-    #[from]
-    Ex(Ex),
-    #[from]
-    Cap(Cap),
-    #[from]
-    Ch(Ch),
-    #[from]
-    Ic(Ic),
-    #[from]
-    Rem(Rem),
-    #[from]
-    Rlh(Rlh),
-    #[from]
-    Vm(Vm),
-    #[from]
-    Vh(Vh),
-    #[from]
-    Vi(Vi),
-    #[from]
-    Vb(Vb),
-    #[from]
-    Vmin(Vmin),
-    #[from]
-    Vmax(Vmax),
-    #[from]
-    Cm(Cm),
-    #[from]
-    Mm(Mm),
-    #[from]
-    Q(Q),
-    #[from]
-    In(In),
-    #[from]
-    Pc(Pc),
-    #[from]
-    Pt(Pt),
-    #[from]
-    Px(Px),
+    Length(unit::Length),
     #[from(forward)]
     Percent(Percent),
 }

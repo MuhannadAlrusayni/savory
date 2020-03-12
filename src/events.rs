@@ -1,4 +1,7 @@
-use seed::prelude::*;
+//! Types and functions for working with elements events.
+
+use crate::prelude::{El, UpdateEl};
+use seed::prelude::{ev, keyboard_ev, mouse_ev, pointer_ev, Ev, EventHandler};
 use wasm_bindgen::JsCast;
 
 pub struct Events<Msg> {
@@ -19,9 +22,9 @@ impl<Msg> Default for Events<Msg> {
     }
 }
 
-impl<Msg> UpdateEl<El<Msg>> for Events<Msg> {
-    fn update(self, el: &mut El<Msg>) {
-        self.events.update(el)
+impl<Msg> UpdateEl<Msg> for Events<Msg> {
+    fn update_el(self, el: &mut El<Msg>) {
+        self.events.update_el(el)
     }
 }
 

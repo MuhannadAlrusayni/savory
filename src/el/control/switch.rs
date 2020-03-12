@@ -1,7 +1,5 @@
-use crate::{css, events::Events, model::Model, render::Render, theme::Theme};
+use crate::{css, prelude::*};
 use derive_rich::Rich;
-use seed::prelude::*;
-use std::rc::Rc;
 
 #[derive(Debug, Copy, Clone)]
 pub enum Msg {
@@ -17,7 +15,7 @@ pub struct Switch<PMsg> {
     local_events: Events<Msg>,
     #[rich(write(style = compose))]
     events: Events<PMsg>,
-    msg_mapper: Rc<dyn Fn(Msg) -> PMsg>,
+    msg_mapper: MsgMapper<Msg, PMsg>,
     #[rich(write(style = compose))]
     pub style: Style,
     #[rich(
@@ -42,7 +40,7 @@ pub struct Switch<PMsg> {
 }
 
 impl<PMsg> Switch<PMsg> {
-    pub fn new(msg_mapper: impl FnOnce(Msg) -> PMsg + Clone + 'static) -> Self {
+    pub fn new(msg_mapper: impl Into<MsgMapper<Msg, PMsg>>) -> Self {
         let mut local_events = Events::default();
         local_events
             .focus(|_| Msg::Focus)
@@ -52,7 +50,7 @@ impl<PMsg> Switch<PMsg> {
             .click(|_| Msg::Click);
 
         Self {
-            msg_mapper: Rc::new(move |msg| (msg_mapper.clone())(msg)),
+            msg_mapper: msg_mapper.into(),
             local_events,
             events: Events::default(),
             style: Style::default(),
@@ -105,17 +103,15 @@ impl<PMsg: 'static> Render<PMsg> for Switch<PMsg> {
     }
 
     fn render_with_style(&self, _: &impl Theme, style: Self::Style) -> Self::View {
-        let msg_mapper = Rc::clone(&self.msg_mapper.clone());
+        let msg_mapper = self.msg_mapper.map_msg_once();
 
         let mut switch = button![
             self.local_events.events.clone(),
-            attrs![
-                At::Disabled => self.disabled.as_at_value(),
-            ],
+            att::disabled(self.disabled),
             style.background,
             div![style.button],
         ]
-        .map_msg(move |msg| (msg_mapper.clone())(msg));
+        .map_msg(msg_mapper);
 
         for event in self.events.events.clone().into_iter() {
             switch.add_listener(event);

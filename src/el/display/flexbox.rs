@@ -3,12 +3,9 @@ use crate::{
         self, background::Background, border::Border, box_align::*, flexbox::*, gap::Gap,
         margin::Margin, padding::Padding, size::Size, values as val,
     },
-    events::Events,
-    render::Render,
-    theme::Theme,
+    prelude::*,
 };
 use derive_rich::Rich;
-use seed::prelude::*;
 use std::default::Default;
 
 #[derive(Clone, Rich, Default)]
@@ -78,12 +75,22 @@ impl<PMsg: 'static> Flexbox<PMsg> {
         Item::new()
     }
 
-    pub fn item_with(content: impl IntoIterator<Item = impl Into<Node<PMsg>>>) -> Item<PMsg> {
+    pub fn item_with(content: impl Into<ContentArg<PMsg>>) -> Item<PMsg> {
         Item::with_content(content)
     }
 
-    pub fn add(&mut self, child: impl Into<Item<PMsg>>) -> &mut Self {
-        self.items.push(child.into());
+    pub fn add(&mut self, item: impl Into<Item<PMsg>>) -> &mut Self {
+        self.items.push(item.into());
+        self
+    }
+
+    pub fn add_and(
+        &mut self,
+        config_item: impl FnOnce(&mut Item<PMsg>) -> &mut Item<PMsg> + 'static,
+    ) -> &mut Self {
+        let mut item = Self::item();
+        config_item(&mut item);
+        self.items.push(item);
         self
     }
 
@@ -210,7 +217,7 @@ impl<PMsg: 'static> From<Vec<Node<PMsg>>> for Item<PMsg> {
 
 impl<PMsg: 'static> From<Node<PMsg>> for Item<PMsg> {
     fn from(source: Node<PMsg>) -> Self {
-        Item::with_content(nodes![source])
+        Item::with_content(source)
     }
 }
 
@@ -233,17 +240,14 @@ impl<PMsg: 'static> Item<PMsg> {
         }
     }
 
-    pub fn with_content(content: impl IntoIterator<Item = impl Into<Node<PMsg>>>) -> Self {
+    pub fn with_content(arg: impl Into<ContentArg<PMsg>>) -> Self {
         let mut item = Self::new();
-        item.content(content);
+        item.content(arg);
         item
     }
 
-    pub fn content(
-        &mut self,
-        content: impl IntoIterator<Item = impl Into<Node<PMsg>>>,
-    ) -> &mut Self {
-        self.content = content.into_iter().map(|c| c.into()).collect();
+    pub fn content(&mut self, arg: impl Into<ContentArg<PMsg>>) -> &mut Self {
+        self.content = arg.into().0;
         self
     }
 
@@ -253,6 +257,20 @@ impl<PMsg: 'static> Item<PMsg> {
 
     pub fn group(&mut self, group_id: impl Into<Order>) -> &mut Self {
         self.order(group_id)
+    }
+}
+
+pub struct ContentArg<PMsg: 'static>(Vec<Node<PMsg>>);
+
+impl<PMsg: 'static> From<Node<PMsg>> for ContentArg<PMsg> {
+    fn from(source: Node<PMsg>) -> Self {
+        Self(vec![source])
+    }
+}
+
+impl<PMsg: 'static> From<Vec<Node<PMsg>>> for ContentArg<PMsg> {
+    fn from(source: Vec<Node<PMsg>>) -> Self {
+        Self(source)
     }
 }
 
@@ -293,39 +311,5 @@ impl<PMsg: 'static> Render<PMsg> for Item<PMsg> {
                 self.content.clone()
             ]]
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[derive(Clone, Debug)]
-    pub enum Msg {
-        Home,
-        AboutUs,
-    }
-
-    #[derive(Debug)]
-    pub struct Flexbox {
-        items: Vec<Node<PMsg>>,
-    }
-
-    fn view_flexbox(flexbox: &Flexbox) -> Node<PMsg> {
-        div![flexbox.items.clone()]
-    }
-
-    #[test]
-    fn test_listeners() {
-        let items = vec![
-            button![simple_ev(Ev::Click, Msg::Home), "Home"],
-            button![simple_ev(Ev::Click, Msg::AboutUs), "About us"],
-        ];
-
-        let flexbox = Flexbox { items };
-        //
-        panic!("{:#?}", flexbox);
-        let node = view_flexbox(&flexbox);
-        panic!("{:#?}", node);
     }
 }

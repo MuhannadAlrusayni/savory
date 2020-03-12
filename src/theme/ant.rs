@@ -1,14 +1,11 @@
 use crate::{
     css::{
         unit::{em, ms, px, sec},
-        values as val, Cursor, St, Style,
+        values as val, Cursor, St,
     },
-    el::prelude::*,
-    theme::Theme,
+    prelude::*,
 };
-
 use palette::{Hsl, Hsla};
-// use seed::prelude::*;
 
 pub fn contrast_ratio(background_light: f32, foreground_light: f32) -> f32 {
     if background_light > foreground_light {
@@ -656,13 +653,11 @@ impl Theme for Ant {
             .add(St::BoxShadow, "0 2px 8px rgba(0, 35, 11, 0.15)")
             .and_padding(|conf| conf.x(px(4.)).y(px(2)))
             .and_margin(|conf| conf.top(px(popover.offset)))
-            .config_block(|style| {
-                if popover.is_visible() {
-                    style.opacity(1.).visibility(val::Visible)
-                } else {
-                    style.visibility(val::Hidden).opacity(0.)
-                }
-            });
+            .config_if_else(
+                popover.is_visible(),
+                |conf| conf.opacity(1.).visibility(val::Visible),
+                |conf| conf.visibility(val::Hidden).opacity(0.),
+            );
 
         popover::Style { container, panel }
     }
@@ -713,12 +708,11 @@ impl Theme for Ant {
                     .line_height(1.499)
                     .white_space(val::Nowrap)
             })
-            .add(St::Outline, val::None)
+            .and_font(|conf| conf.size(px(14.)).weight_400())
             .cursor(cursor)
+            .add(St::Outline, val::None)
             .add(St::UserSelect, val::None)
             .add(St::BoxSizing, val::BorderBox)
-            .add(St::FontSize, px(14.))
-            .add(St::FontWeight, "400")
             .merge(&btn.style);
         style
     }
@@ -744,12 +738,7 @@ impl Theme for Ant {
 
         let mut background = Style::default();
         background
-            .config_block(|conf| {
-                if switch.is_disabled() {
-                    conf.opacity(0.4);
-                }
-                conf
-            })
+            .config_if(switch.is_disabled(), |conf| conf.opacity(0.4))
             .cursor(cursor)
             .and_position(|conf| conf.relative())
             .and_background(|conf| conf.color(bg_color))
@@ -771,11 +760,8 @@ impl Theme for Ant {
 
         let mut button = Style::default();
         button
-            .config_block(|conf| {
-                if switch.is_toggled() {
-                    conf.add(St::Transform, format!("translateX({})", px(width / 2.)));
-                }
-                conf
+            .config_if(switch.is_toggled(), |conf| {
+                conf.add(St::Transform, format!("translateX({})", px(width / 2.)))
             })
             .and_position(|conf| conf.absolute().top(px(top)).left(px(left)))
             .and_transition(|conf| {
@@ -850,31 +836,24 @@ impl Theme for Ant {
             .and_text(|conf| conf.color(fg));
 
         let mut button = Style::default();
-        button.config_block(|conf| {
-            if checkbox.is_toggled() {
-                conf.cursor(cursor)
-                    .and_transition(|conf| {
-                        conf.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
-                    })
-                    .and_size(|conf| conf.resize(0.2, 0.55))
-                    .and_border(|conf| {
-                        conf.bottom(|conf| conf.solid().width(px(2.)).color(fg))
-                            .right(|conf| conf.solid().width(px(2.)).color(fg))
-                    })
-                    .and_margin(|conf| conf.bottom(px(2.)))
-                    .add(St::Transform, "rotate(45deg)");
-            }
-            conf
+        button.config_if(checkbox.is_toggled(), |conf| {
+            conf.cursor(cursor)
+                .and_transition(|conf| {
+                    conf.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+                })
+                .and_size(|conf| conf.resize(0.2, 0.55))
+                .and_border(|conf| {
+                    conf.bottom(|conf| conf.solid().width(px(2.)).color(fg))
+                        .right(|conf| conf.solid().width(px(2.)).color(fg))
+                })
+                .and_margin(|conf| conf.bottom(px(2.)))
+                .add(St::Transform, "rotate(45deg)")
         });
 
         let mut label = Style::default();
         label
-            .config_block(|conf| {
-                if checkbox.is_disabled() {
-                    conf.and_text(|conf| conf.color(self.disable(false)))
-                } else {
-                    conf
-                }
+            .config_if(checkbox.is_disabled(), |conf| {
+                conf.and_text(|conf| conf.color(self.disable(false)))
             })
             .and_transition(|conf| {
                 conf.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
@@ -948,14 +927,11 @@ impl Theme for Ant {
 
         let mut button = Style::default();
         button
-            .config_block(|conf| {
-                if radio.is_toggled() {
-                    conf.cursor(cursor)
-                        .and_size(|conf| conf.resize(0.6, 0.6))
-                        .and_border(|conf| conf.none().radius(0.5))
-                        .and_background(|conf| conf.color(fg));
-                }
-                conf
+            .config_if(radio.is_toggled(), |conf| {
+                conf.cursor(cursor)
+                    .and_size(|conf| conf.resize(0.6, 0.6))
+                    .and_border(|conf| conf.none().radius(0.5))
+                    .and_background(|conf| conf.color(fg))
             })
             .and_transition(|conf| {
                 conf.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
@@ -963,11 +939,8 @@ impl Theme for Ant {
 
         let mut label = Style::default();
         label
-            .config_block(|conf| {
-                if radio.is_disabled() {
-                    conf.and_text(|conf| conf.color(self.disable(false)));
-                }
-                conf
+            .config_if(radio.is_disabled(), |conf| {
+                conf.and_text(|conf| conf.color(self.disable(false)))
             })
             .and_transition(|conf| {
                 conf.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
@@ -1128,16 +1101,13 @@ impl Theme for Ant {
                         .width(px(border_width))
                         .color(self.gray(Variant::L300))
                 })
-            })
-            .config_block(
-                |conf| match (spin_entry.is_mouse_over(), spin_entry.is_disabled()) {
-                    (true, false) => conf.opacity(1.).visibility(val::Visible),
-                    _ => conf.opacity(0.).visibility(val::Hidden),
-                },
-            );
-
-        let increment_item = Style::default();
-        let decrement_item = Style::default();
+            });
+        // .config(
+        //     |conf| match (spin_entry.is_mouse_over(), spin_entry.is_disabled()) {
+        //         (true, false) => conf.opacity(1.).visibility(val::Visible),
+        //         _ => conf.opacity(0.).visibility(val::Hidden),
+        //     },
+        // );
 
         let (inc_btn_height, dec_btn_height) = match (
             spin_entry.increment_button.is_mouse_over(),
@@ -1150,11 +1120,15 @@ impl Theme for Ant {
 
         let mut increment_button = Style::default();
         increment_button
+            .and_font(|conf| conf.size(em(0.6)))
+            .and_text(|conf| conf.color(self.secondary_text(false)))
             .and_background(|conf| conf.color(self.white()))
             .and_border(|conf| conf.none().top_right(px(radius)))
             .and_size(|conf| conf.width(btn_width).height(inc_btn_height));
         let mut decrement_button = Style::default();
         decrement_button
+            .and_font(|conf| conf.size(em(0.6)))
+            .and_text(|conf| conf.color(self.secondary_text(false)))
             .and_background(|conf| conf.color(self.white()))
             .and_border(|conf| {
                 conf.none().bottom_right(px(radius)).top(|conf| {
@@ -1165,23 +1139,12 @@ impl Theme for Ant {
             })
             .and_size(|conf| conf.width(btn_width).height(dec_btn_height));
 
-        let increment_icon: Icon<spin_entry::Msg> = Icon::html(
-            r#"""<path d="M890.5 755.3L537.9 269.2c-12.8-17.6-39-17.6-51.7 0L133.5 755.3A8 8 0 0 0 140 768h75c5.1 0 9.9-2.5 12.9-6.6L512 369.8l284.1 391.6c3 4.1 7.8 6.6 12.9 6.6h75c6.5 0 10.3-7.4 6.5-12.7z"></path>"""#,
-        ).into();
-        let decrement_icon: Icon<spin_entry::Msg> = Icon::html(
-            r#"""<path d="M884 256h-75c-5.1 0-9.9 2.5-12.9 6.6L512 654.2 227.9 262.6c-3-4.1-7.8-6.6-12.9-6.6h-75c-6.5 0-10.3 7.4-6.5 12.7l352.6 486.1c12.8 17.6 39 17.6 51.7 0l352.6-486.1c3.9-5.3.1-12.7-6.4-12.7z"></path>"""#,
-        ).into();
-
         spin_entry::Style {
             container,
             input,
             buttons_container,
-            increment_item,
-            decrement_item,
             increment_button,
             decrement_button,
-            increment_icon,
-            decrement_icon,
         }
     }
 }

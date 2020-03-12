@@ -1,11 +1,8 @@
 use crate::{
     css::{self, color::Color, size::Size},
-    events::Events,
-    render::Render,
-    theme::Theme,
+    prelude::*,
 };
 use derive_rich::Rich;
-use seed::prelude::*;
 use std::borrow::Cow;
 
 #[derive(Clone, From)]
@@ -17,12 +14,6 @@ pub enum Icon<PMsg: 'static> {
     #[from]
     Url(UrlIcon<PMsg>),
 }
-
-// impl<PMsg: 'static, T: Into<UrlIcon>> From<T> for Icon<PMsg> {
-//     fn from(url: T) -> Self {
-//         url.into().into()
-//     }
-// }
 
 impl<PMsg: 'static> Render<PMsg> for Icon<PMsg> {
     type View = Node<PMsg>;
@@ -59,6 +50,8 @@ impl<PMsg: 'static> Icon<PMsg> {
 pub struct SvgIcon<PMsg: 'static> {
     #[rich(write(style = compose))]
     events: Events<PMsg>,
+    #[rich(write, read)]
+    view_box: Option<att::ViewBox>,
     pub draw: Vec<Node<PMsg>>,
     #[rich(write)]
     pub color: Option<Color>,
@@ -72,6 +65,7 @@ impl<PMsg: 'static> SvgIcon<PMsg> {
     pub fn new(draw: impl IntoIterator<Item = Node<PMsg>>) -> Self {
         Self {
             events: Events::default(),
+            view_box: None,
             draw: draw.into_iter().collect(),
             color: None,
             size: Size::default(),
@@ -99,9 +93,8 @@ impl<PMsg: 'static> Render<PMsg> for SvgIcon<PMsg> {
         svg![
             style,
             self.events.events.clone(),
-            attrs![
-                At::ViewBox => "0 0 100 100",
-            ],
+            self.view_box,
+            // att::try_att(self.view_box),
             self.draw.clone(),
         ]
     }
@@ -111,6 +104,8 @@ impl<PMsg: 'static> Render<PMsg> for SvgIcon<PMsg> {
 pub struct HtmlIcon<PMsg> {
     #[rich(write(style = compose))]
     events: Events<PMsg>,
+    #[rich(write, read)]
+    view_box: Option<att::ViewBox>,
     pub html: Cow<'static, str>,
     #[rich(write)]
     pub color: Option<Color>,
@@ -124,6 +119,7 @@ impl<PMsg> HtmlIcon<PMsg> {
     pub fn new(html: impl Into<Cow<'static, str>>) -> Self {
         Self {
             events: Events::default(),
+            view_box: None,
             html: html.into(),
             color: None,
             size: Size::default(),
@@ -151,9 +147,8 @@ impl<PMsg: 'static> Render<PMsg> for HtmlIcon<PMsg> {
         svg![
             style,
             self.events.events.clone(),
-            attrs![
-                At::ViewBox => "0 0 100 100",
-            ],
+            self.view_box,
+            // att::try_att(self.view_box),
             raw![self.html.as_ref()],
         ]
     }
@@ -206,9 +201,7 @@ impl<PMsg: 'static> Render<PMsg> for UrlIcon<PMsg> {
         img![
             style,
             self.events.events.clone(),
-            attrs![
-                At::Src => self.url,
-            ]
+            att::src(self.url.clone()),
         ]
     }
 }

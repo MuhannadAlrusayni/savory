@@ -1,3 +1,5 @@
+//! Types and traits for working with CSS.
+
 pub mod background;
 pub mod border;
 pub mod color;
@@ -8,6 +10,7 @@ pub mod box_align;
 pub mod cursor;
 pub mod display;
 pub mod flexbox;
+pub mod font;
 pub mod gap;
 pub mod margin;
 pub mod padding;
@@ -24,6 +27,7 @@ pub use self::{
     color::{Color, Opacity},
     cursor::Cursor,
     display::Display,
+    font::Font,
     gap::Gap,
     margin::Margin,
     padding::Padding,

@@ -1,3 +1,5 @@
+//! Traits for making elements routable
+
 pub trait Routable {
     type Route;
     fn from_url(url: &seed::Url) -> Option<Self::Route>;
