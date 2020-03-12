@@ -1,7 +1,4 @@
 use khalas::{css::unit::px, prelude::*, theme::ant::Ant};
-use seed::prelude::*;
-use std::rc::Rc;
-use wasm_bindgen::JsCast;
 
 #[macro_use]
 extern crate seed;
@@ -16,12 +13,7 @@ pub struct MyApp {
 impl Default for MyApp {
     fn default() -> Self {
         let mut spin_entry = SpinEntry::new(Msg::SpinEntry);
-        spin_entry
-            .placeholder(44.)
-            .step(-5.)
-            .max(40.)
-            .min(-40.)
-            .disable();
+        spin_entry.min(-40.).placeholder(44.).step(5.).max(40.);
 
         let mut pop_btn = Button::with_label(Msg::PopBtn, "Menu");
         pop_btn.events(|conf| conf.click(|_| Msg::TogglePopover));
