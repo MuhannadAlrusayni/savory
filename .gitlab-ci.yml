@@ -18,10 +18,11 @@ testing workspace:
 
 pages:
   stage: documentation
+  image: rust:nightly
   script:
     - "mkdir .public"
     - "mkdir build-docs"
-    - "cargo doc --no-deps --target-dir build-docs"
+    - "cargo doc +nightly --no-deps --target-dir build-docs"
     - "cp -r build-docs/doc/* .public/"
     - "mv .public public"
   artifacts:
