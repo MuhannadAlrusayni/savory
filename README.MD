@@ -9,9 +9,7 @@
 &middot;
 [![crate info](https://img.shields.io/crates/v/khalas.svg)](https://crates.io/crates/khalas)
 
-
-All documentation can be found in
-[![master docs](https://img.shields.io/badge/docs-master-blue.svg)](https://malrusayni.gitlab.io/khalas/khalas/)
+All documentation can be found in [API Docs](https://malrusayni.gitlab.io/khalas/khalas/)
 
 ## Screenshot
 these screenshots will represnte current state for this proejct
