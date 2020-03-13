@@ -7,7 +7,7 @@
 &middot;
 [![pipeline](https://gitlab.com/MAlrusayni/khalas/badges/master/pipeline.svg)](https://gitlab.com/MAlrusayni/khalas/pipelines)
 &middot;
-![rustc version](https://img.shields.io/badge/rustc-stable-lightgray.svg)
+[![rustc version](https://img.shields.io/badge/rustc-stable-green.svg)](https://crates.io/crates/khalas)
 
 All documentation can be found in [API Docs](https://malrusayni.gitlab.io/khalas/khalas/)
 
