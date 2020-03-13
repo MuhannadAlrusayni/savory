@@ -8,12 +8,12 @@ readme = "README.MD"
 keywords = ["web", "seed", "SPA", "wasm", "framework"]
 categories = ["gui", "wasm", "web-programming"]
 license = "MIT OR Apache-2.0"
-repository = "https://gitlab.com/muhannad_alrusayni/khalas"
-homepage = "https://gitlab.com/muhannad_alrusayni/khalas"
+repository = "https://gitlab.com/M.Alrusayni/khalas"
+homepage = "https://gitlab.com/M.Alrusayni/khalas"
 documentation = "https://docs.rs/khalas"
 
 [badges]
-gitlab = { repository = "muhannad_alrusayni/khalas", branch = "master" }
+gitlab = { repository = "M.Alrusayni/khalas", branch = "master" }
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -21,7 +21,7 @@ gitlab = { repository = "muhannad_alrusayni/khalas", branch = "master" }
 seed = { git = "https://github.com/David-OConnor/seed", version = "0.6.0" }
 palette = "0.4.1"
 derive_more = "0.99.2"
-derive_rich = { git = "https://gitlab.com/muhannad_alrusayni/derive_rich", version = "0.2.0" }
+derive_rich = { git = "https://gitlab.com/M.Alrusayni/derive_rich", version = "0.2.0" }
 wasm-bindgen = "0.2.58"
 indexmap = "1.3.2"
 smart-default = "0.6.0"
