@@ -1,7 +1,17 @@
-This project is a try to build UI library based on [Seed](https://seed-rs.org/).
+# Khalas
+**Rust / Wasm frontend UI library for building user interfaces.**
 
-I'll add docs and other introduections once this project get stable, while then
-you can explore the code your self :D.
+[![master docs](https://img.shields.io/badge/docs-master-blue.svg)](https://malrusayni.gitlab.io/khalas/khalas/)
+&middot;
+[![crate info](https://img.shields.io/crates/v/khalas.svg)](https://crates.io/crates/khalas)
+&middot;
+[![pipeline](https://gitlab.com/MAlrusayni/khalas/badges/master/pipeline.svg)](https://gitlab.com/MAlrusayni/khalas/pipelines)
+&middot;
+[![crate info](https://img.shields.io/crates/v/khalas.svg)](https://crates.io/crates/khalas)
+
+
+All documentation can be found in
+[![master docs](https://img.shields.io/badge/docs-master-blue.svg)](https://malrusayni.gitlab.io/khalas/khalas/)
 
 ## Screenshot
 these screenshots will represnte current state for this proejct
