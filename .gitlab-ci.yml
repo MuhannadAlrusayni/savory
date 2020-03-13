@@ -4,6 +4,7 @@ default:
 stages:
   - build
   - test
+  - documentation
 
 building workspace:
   stage: build
@@ -14,3 +15,18 @@ testing workspace:
   stage: test
   script:
     - "cargo test --workspace"
+
+pages:
+  stage: documentation
+  script:
+    - "mkdir .public"
+    - "mkdir build-docs"
+    - "cargo doc --no-deps --target-dir build-docs"
+    - "cp -r build-docs/doc/* .public/"
+    - "mv .public public"
+  artifacts:
+    paths:
+      - public
+  only:
+    - master
+
