@@ -113,7 +113,7 @@ impl<PMsg: 'static> Render<PMsg> for Checkbox<PMsg> {
         let input = input![
             att::disabled(self.disabled),
             att::checked(self.toggle),
-            att::ty(att::Type::Checkbox),
+            att::type_(att::Type::Checkbox),
             style.input,
             self.local_events.events.clone(),
             if self.is_toggled() {

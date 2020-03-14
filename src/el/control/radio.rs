@@ -104,7 +104,7 @@ impl<PMsg: 'static> Render<PMsg> for Radio<PMsg> {
         let input = input![
             att::disabled(self.disabled),
             att::checked(self.toggle),
-            att::ty(att::Type::Radio),
+            att::type_(att::Type::Radio),
             events.events,
             style.input,
             if self.is_toggled() {

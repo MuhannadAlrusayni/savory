@@ -450,7 +450,7 @@ create_attributes! {
 
     Type {
         update_el: |ty: Self| Some(ty),
-        ty,
+        type_,
     }
 
     Max {
