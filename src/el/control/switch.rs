@@ -12,31 +12,29 @@ pub enum Msg {
 
 #[derive(Rich)]
 pub struct Switch<PMsg> {
-    local_events: Events<Msg>,
-    #[rich(write(style = compose))]
-    events: Events<PMsg>,
+    // general element properties
+    el_ref: ElRef<web_sys::HtmlInputElement>,
     msg_mapper: MsgMapper<Msg, PMsg>,
-    #[rich(write(style = compose))]
-    pub style: Style,
+    #[rich(read, write(style = compose))]
+    local_events: Events<Msg>,
+    #[rich(read, write(style = compose))]
+    events: Events<PMsg>,
+    #[rich(read, write(style = compose))]
+    user_style: UserStyle,
+
+    // switch element properties
     #[rich(
         read(copy, rename = is_disabled),
-        value_fns = { disable = true, enable = false }
     )]
-    pub disabled: bool,
-    #[rich(
-        read(copy, rename = is_loading),
-        value_fns = { loading = true, loading_off = false }
-    )]
-    pub loading: bool,
+    disabled: bool,
     #[rich(read(copy, rename = is_focused))]
     focus: bool,
     #[rich(read(copy, rename = is_mouse_over))]
     mouse_over: bool,
     #[rich(
         read(copy, rename = is_toggled),
-        value_fns = { toggle_on = true, toggle_off = false }
     )]
-    toggle: bool,
+    toggled: bool,
 }
 
 impl<PMsg> Switch<PMsg> {
@@ -50,25 +48,60 @@ impl<PMsg> Switch<PMsg> {
             .click(|_| Msg::Click);
 
         Self {
+            el_ref: ElRef::default(),
             msg_mapper: msg_mapper.into(),
             local_events,
             events: Events::default(),
-            style: Style::default(),
+            user_style: UserStyle::default(),
             disabled: false,
-            loading: false,
             focus: false,
             mouse_over: false,
-            toggle: false,
+            toggled: false,
         }
     }
 
-    pub fn toggle(mut self) -> Self {
-        self.toggle = !self.toggle;
+    pub fn disable(&mut self) -> &mut Self {
+        self.el_ref.get_then(|el| el.set_disabled(true));
+        self.disabled = true;
         self
     }
 
-    pub fn handle_toggle_msg(&mut self) {
-        self.toggle = !self.toggle;
+    pub fn enable(&mut self) -> &mut Self {
+        self.el_ref.get_then(|el| el.set_disabled(false));
+        self.disabled = true;
+        self
+    }
+
+    pub fn set_disabled(&mut self, val: bool) -> &mut Self {
+        self.el_ref.get_then(|el| el.set_disabled(val));
+        self.disabled = val;
+        self
+    }
+
+    pub fn toggle_on(&mut self) -> &mut Self {
+        self.toggled = true;
+        self
+    }
+
+    pub fn toggle_off(&mut self) -> &mut Self {
+        self.toggled = false;
+        self
+    }
+
+    pub fn set_toggle(&mut self, val: bool) -> &mut Self {
+        if val {
+            self.toggle_on()
+        } else {
+            self.toggle_off()
+        }
+    }
+
+    pub fn toggle(&mut self) -> &mut Self {
+        self.set_toggle(!self.toggled)
+    }
+
+    fn handle_toggle_msg(&mut self) {
+        self.toggle();
     }
 }
 
@@ -84,6 +117,14 @@ impl<GMsg, PMsg: 'static> Model<PMsg, GMsg> for Switch<PMsg> {
             Msg::Click => self.handle_toggle_msg(),
         }
     }
+}
+
+#[derive(Clone, Debug, Default, Rich)]
+pub struct UserStyle {
+    #[rich(write(style = compose))]
+    pub background: css::Style,
+    #[rich(write(style = compose))]
+    pub button: css::Style,
 }
 
 #[derive(Clone, Debug, Default, Rich)]
@@ -103,19 +144,20 @@ impl<PMsg: 'static> Render<PMsg> for Switch<PMsg> {
     }
 
     fn render_with_style(&self, _: &impl Theme, style: Self::Style) -> Self::View {
-        let msg_mapper = self.msg_mapper.map_msg_once();
+        let mut button = div!();
+        button
+            .and_attributes(|conf| conf.set_class("switch-button"))
+            .set_style(style.button);
 
-        let mut switch = button![
-            self.local_events.events.clone(),
-            att::disabled(self.disabled),
-            style.background,
-            div![style.button],
-        ]
-        .map_msg(msg_mapper);
+        let mut switch = button!();
+        switch
+            .set_events(&self.local_events)
+            .set_style(style.background)
+            .and_attributes(|conf| conf.set_class("switch").set_disabled(self.disabled))
+            .add_child(button);
 
-        for event in self.events.events.clone().into_iter() {
-            switch.add_listener(event);
-        }
+        let mut switch = switch.map_msg_with(&self.msg_mapper);
+        switch.add_events(&self.events);
         switch
     }
 }

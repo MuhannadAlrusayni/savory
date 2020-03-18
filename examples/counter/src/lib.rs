@@ -13,10 +13,14 @@ pub struct MyApp {
 impl Default for MyApp {
     fn default() -> Self {
         let mut spin_entry = SpinEntry::new(Msg::SpinEntry);
-        spin_entry.min(-40.).placeholder(44.).step(5.).max(40.);
+        spin_entry
+            .set_min(-40.)
+            .set_placeholder(44.)
+            .set_step(5.)
+            .set_max(40.);
 
         let mut pop_btn = Button::with_label(Msg::PopBtn, "Menu");
-        pop_btn.events(|conf| conf.click(|_| Msg::TogglePopover));
+        pop_btn.and_events(|conf| conf.click(|_| Msg::TogglePopover));
 
         Self {
             spin_entry,
@@ -56,13 +60,13 @@ impl Render<Msg> for MyApp {
     fn render_with_style(&self, theme: &impl Theme, _: Self::Style) -> Self::View {
         let mut child = Flexbox::new();
         child
-            .gap(px(8.))
+            .set_gap(px(8.))
             .center()
             .full_size()
             .add(self.spin_entry.render(theme));
 
         let mut popover = Popover::new(&self.pop_btn, &child);
-        popover.visible(self.popup).offset(4);
+        popover.set_visible(self.popup).set_offset(4);
 
         Flexbox::new()
             .center()

@@ -7,7 +7,7 @@ use derive_rich::Rich;
 /// let mut style = Style::default();
 /// style
 ///     .and_background(|conf| {
-///         conf.image("/bg/fullpage.png")
+///         conf.set_image("/bg/fullpage.png")
 ///             .scroll()
 ///     });
 /// ```
@@ -86,7 +86,7 @@ impl ToStyleMap for Background {
 
 impl Background {
     pub fn transparent(&mut self) -> &mut Self {
-        self.color(Color::Transparent)
+        self.set_color(Color::Transparent)
     }
 }
 

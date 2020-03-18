@@ -60,6 +60,7 @@ pub mod model;
 pub mod msg_mapper;
 pub mod render;
 pub mod routable;
+pub mod seed_ext;
 pub mod theme;
 
 /// khalas prelude.
@@ -69,12 +70,13 @@ pub mod prelude {
     pub use crate::el::prelude::*;
     pub use crate::events::Events;
     pub use crate::model::Model;
-    pub use crate::msg_mapper::MsgMapper;
+    pub use crate::msg_mapper::{MapWithMsgMapper, MsgMapper};
     pub use crate::render::Render;
     pub use crate::routable::Routable;
+    pub use crate::seed_ext::{ElExt, ElRefExt, NodeExt};
     pub use crate::theme::Theme;
     pub use seed::prelude::{
-        el_ref, AfterMount, App, BeforeMount, El, ElRef, MessageMapper, MountType, Orders,
+        AfterMount, App, BeforeMount, El, ElRef, MessageMapper, MountType, Orders,
         RenderTimestampDelta, UpdateEl, UpdateElForIterator, UrlHandling, View,
     };
     pub use wasm_bindgen::prelude::*;

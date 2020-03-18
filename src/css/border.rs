@@ -8,9 +8,9 @@ use derive_rich::Rich;
 /// style
 ///     .and_border(|conf| {
 ///         conf.solid() // or .style(val::Solid)
-///             .width(px(2))
-///             .color(Color::DimGray)
-///             .radius(px(4))
+///             .set_width(px(2))
+///             .set_color(Color::DimGray)
+///             .set_radius(px(4))
 ///     });
 /// ```
 // TODO: add shadow
@@ -75,34 +75,37 @@ macro_rules! sides_style_shortcut_functions {
 
 impl Border {
     pub fn all_side(&mut self, value: impl Fn(&mut Side) -> &mut Side + Copy) -> &mut Self {
-        self.left(value).top(value).right(value).bottom(value)
+        self.and_left(value)
+            .and_top(value)
+            .and_right(value)
+            .and_bottom(value)
     }
 
-    pub fn style(&mut self, style: impl Into<Style>) -> &mut Self {
+    pub fn set_style(&mut self, style: impl Into<Style>) -> &mut Self {
         let style = style.into();
-        self.all_side(|side| side.style(style))
+        self.all_side(|side| side.set_style(style))
     }
 
-    pub fn width(&mut self, width: impl Into<Width>) -> &mut Self {
+    pub fn set_width(&mut self, width: impl Into<Width>) -> &mut Self {
         let width = width.into();
-        self.all_side(|side| side.width(width))
+        self.all_side(|side| side.set_width(width))
     }
 
-    pub fn color(&mut self, color: impl Into<Color>) -> &mut Self {
+    pub fn set_color(&mut self, color: impl Into<Color>) -> &mut Self {
         let color = color.into();
-        self.all_side(|side| side.color(color))
+        self.all_side(|side| side.set_color(color))
     }
 
     pub fn transparent(&mut self) -> &mut Self {
-        self.color(Color::Transparent)
+        self.set_color(Color::Transparent)
     }
 
-    pub fn radius(&mut self, rad: impl Into<Radius>) -> &mut Self {
+    pub fn set_radius(&mut self, rad: impl Into<Radius>) -> &mut Self {
         let rad = rad.into();
-        self.top_left(rad)
-            .top_right(rad)
-            .bottom_left(rad)
-            .bottom_right(rad)
+        self.set_top_left(rad)
+            .set_top_right(rad)
+            .set_bottom_left(rad)
+            .set_bottom_right(rad)
     }
 
     sides_style_shortcut_functions! {

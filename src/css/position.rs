@@ -7,7 +7,7 @@ use derive_rich::Rich;
 /// let mut style = Style::default();
 /// style
 ///     .and_position(|conf| {
-///         conf.absolute().top(px(28)).left(px(40))
+///         conf.absolute().set_top(px(28)).set_left(px(40))
 ///     });
 /// ```
 #[derive(Rich, Clone, Debug, PartialEq, Default)]

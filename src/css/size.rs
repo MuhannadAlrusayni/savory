@@ -10,12 +10,12 @@ use derive_rich::Rich;
 /// let mut style = Style::default();
 /// style
 ///     .and_size(|conf| {
-///         conf.width(em(2.))
-///             .height(em(1.5))
-///             .min_width(em(1.5))
-///             .min_height(em(1.))
-///             .max_width(em(4.))
-///             .max_height(em(3.))
+///         conf.set_width(em(2.))
+///             .set_height(em(1.5))
+///             .set_min_width(em(1.5))
+///             .set_min_height(em(1.))
+///             .set_max_width(em(4.))
+///             .set_max_height(em(3.))
 ///     });
 /// ```
 #[derive(Rich, Copy, Clone, Debug, PartialEq, Default)]
@@ -49,27 +49,27 @@ impl ToStyleMap for Size {
 
 impl Size {
     pub fn full(&mut self) -> &mut Self {
-        self.width(1.0).height(1.0)
+        self.set_width(1.0).set_height(1.0)
     }
 
     pub fn half(&mut self) -> &mut Self {
-        self.width(0.5).height(0.5)
+        self.set_width(0.5).set_height(0.5)
     }
 
     pub fn min_content(&mut self) -> &mut Self {
-        self.width(val::MinContent).height(val::MinContent)
+        self.set_width(val::MinContent).set_height(val::MinContent)
     }
 
     pub fn max_content(&mut self) -> &mut Self {
-        self.width(val::MaxContent).height(val::MaxContent)
+        self.set_width(val::MaxContent).set_height(val::MaxContent)
     }
 
     pub fn auto(&mut self) -> &mut Self {
-        self.width(val::Auto).height(val::Auto)
+        self.set_width(val::Auto).set_height(val::Auto)
     }
 
     pub fn resize(&mut self, width: impl Into<Length>, height: impl Into<Length>) -> &mut Self {
-        self.width(width).height(height)
+        self.set_width(width).set_height(height)
     }
 }
 

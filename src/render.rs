@@ -23,8 +23,8 @@
 //!     fn style(&self, _: &impl Theme) -> Self::Style {
 //!         let mut style = Style::default();
 //!         style
-//!             .and_background(|conf| conf.color(Color::Black))
-//!             .and_text(|conf| conf.color(Color::White));
+//!             .and_background(|conf| conf.set_color(Color::Black))
+//!             .and_text(|conf| conf.set_color(Color::White));
 //!         style
 //!     }
 //!
@@ -55,8 +55,8 @@
 //!     // creating element style
 //!     let mut style = Style::default();
 //!     style
-//!         .and_background(|conf| conf.color(Color::Black))
-//!         .and_text(|conf| conf.color(Color::White));
+//!         .and_background(|conf| conf.set_color(Color::Black))
+//!         .and_text(|conf| conf.set_color(Color::White));
 //!
 //!     // rendering the element
 //!     Flexbox::new()
@@ -165,5 +165,17 @@ impl<PMsg: 'static> Render<PMsg> for Vec<El<PMsg>> {
 
     fn render_with_style(&self, _: &impl Theme, _: Self::Style) -> Self::View {
         self.clone()
+    }
+}
+
+/// calls `render(theme)` on all passed elements.
+#[macro_export]
+macro_rules! renders {
+    ( $theme:ident, $( $element:expr $(,)? )+ ) => {
+        vec![
+            $(
+                $element.render($theme),
+            )*
+        ]
     }
 }

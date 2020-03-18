@@ -12,7 +12,7 @@ use std::borrow::Cow;
 ///         // set the font size to xx-large
 ///         conf.xx_large()
 ///             // we can set the font size with unit functions too
-///             .size(em(1.5))
+///             .set_size(em(1.5))
 ///             // set font variant to smal-caps
 ///             .small_caps()
 ///             // set font to be bold

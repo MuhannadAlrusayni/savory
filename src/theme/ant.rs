@@ -446,13 +446,13 @@ impl Ant {
         let mut style = Style::default();
         style
             .and_border(|conf| {
-                conf.width(px(1.))
+                conf.set_width(px(1.))
                     .solid()
-                    .radius(px(4.))
-                    .color(border_color)
+                    .set_radius(px(4.))
+                    .set_color(border_color)
             })
-            .and_background(|conf| conf.color(bg))
-            .and_text(|conf| conf.color(fg))
+            .and_background(|conf| conf.set_color(bg))
+            .and_text(|conf| conf.set_color(fg))
             .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)");
         style
     }
@@ -484,13 +484,13 @@ impl Ant {
         let mut style = Style::default();
         style
             .and_border(|conf| {
-                conf.width(px(1.))
+                conf.set_width(px(1.))
                     .solid()
-                    .radius(px(4.))
-                    .color(border_color)
+                    .set_radius(px(4.))
+                    .set_color(border_color)
             })
-            .and_background(|conf| conf.color(bg))
-            .and_text(|conf| conf.color(fg))
+            .and_background(|conf| conf.set_color(bg))
+            .and_text(|conf| conf.set_color(fg))
             .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)");
         style
     }
@@ -522,13 +522,13 @@ impl Ant {
         let mut style = Style::default();
         style
             .and_border(|conf| {
-                conf.width(px(1.))
+                conf.set_width(px(1.))
                     .solid()
-                    .radius(px(4.))
-                    .color(border_color)
+                    .set_radius(px(4.))
+                    .set_color(border_color)
             })
-            .and_background(|conf| conf.color(bg))
-            .and_text(|conf| conf.color(fg))
+            .and_background(|conf| conf.set_color(bg))
+            .and_text(|conf| conf.set_color(fg))
             .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)");
         style
     }
@@ -545,9 +545,14 @@ impl Ant {
 
         let mut style = Style::default();
         style
-            .and_text(|conf| conf.color(fg))
-            .and_border(|conf| conf.width(px(0.)).solid().radius(px(4.)).color(bg))
-            .and_background(|conf| conf.color(bg));
+            .and_text(|conf| conf.set_color(fg))
+            .and_border(|conf| {
+                conf.set_width(px(0.))
+                    .solid()
+                    .set_radius(px(4.))
+                    .set_color(bg)
+            })
+            .and_background(|conf| conf.set_color(bg));
         style
     }
 
@@ -577,13 +582,13 @@ impl Ant {
         let mut style = Style::default();
         style
             .and_border(|conf| {
-                conf.width(px(1.))
+                conf.set_width(px(1.))
                     .dashed()
-                    .radius(px(4.))
-                    .color(border_color)
+                    .set_radius(px(4.))
+                    .set_color(border_color)
             })
-            .and_background(|conf| conf.color(bg))
-            .and_text(|conf| conf.color(fg))
+            .and_background(|conf| conf.set_color(bg))
+            .and_text(|conf| conf.set_color(fg))
             .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)");
         style
     }
@@ -593,39 +598,26 @@ impl Theme for Ant {
     fn flexbox<PMsg: 'static>(&self, flex: &Flexbox<PMsg>) -> flexbox::Style {
         let mut style = Style::default();
         style
-            .display(val::Flex)
-            .try_flex_direction(flex.direction)
-            .try_flex_wrap(flex.wrap)
-            .try_justify_content(flex.justify_content)
-            .try_align_items(flex.align_items)
-            .try_align_content(flex.align_content)
-            .try_gap(flex.gap)
-            .size(flex.size)
-            .border(flex.border)
-            .background(flex.background.clone())
-            .margin(flex.margin)
-            .padding(flex.padding)
-            .merge(&flex.style);
+            .set_display(val::Flex)
+            .try_set_flex_direction(flex.get_direction())
+            .try_set_flex_wrap(flex.get_wrap())
+            .try_set_justify_content(flex.get_justify_content())
+            .try_set_align_items(flex.get_align_items())
+            .try_set_align_content(flex.get_align_content())
+            .try_set_gap(flex.get_gap())
+            .merge(flex.user_style());
         style
     }
 
     fn flexbox_item<PMsg: 'static>(&self, item: &flexbox::Item<PMsg>) -> flexbox::ItemStyle {
         let mut style = Style::default();
         style
-            .try_add(St::Order, item.order)
-            .try_add(St::FlexGrow, item.grow)
-            .try_add(St::FlexShrink, item.shrink)
-            .try_merge(item.basis.as_ref())
-            .try_merge(item.align_self.as_ref())
-            .and_size(|conf| {
-                *conf = item.size.clone();
-                conf
-            })
-            .merge(&item.size)
-            .merge(&item.border)
-            .merge(&item.background)
-            .merge(&item.margin)
-            .merge(&item.padding);
+            .try_add(St::Order, item.get_order())
+            .try_add(St::FlexGrow, item.get_grow())
+            .try_add(St::FlexShrink, item.get_shrink())
+            .try_merge(item.get_basis().as_ref())
+            .try_merge(item.get_align_self().as_ref())
+            .merge(item.user_style());
         style
     }
 
@@ -638,25 +630,25 @@ impl Theme for Ant {
         let mut panel = Style::default();
         panel
             .and_transition(|conf| {
-                conf.add("opacity", |conf| conf.duration(ms(150.)).ease())
-                    .add("transform", |conf| conf.duration(ms(150.)).ease())
-                    .add("visibility", |conf| conf.duration(ms(150.)).ease())
+                conf.add("opacity", |conf| conf.set_duration(ms(150.)).ease())
+                    .add("transform", |conf| conf.set_duration(ms(150.)).ease())
+                    .add("visibility", |conf| conf.set_duration(ms(150.)).ease())
             })
             .and_position(|conf| conf.absolute())
-            .and_background(|conf| conf.color(self.white()))
+            .and_background(|conf| conf.set_color(self.white()))
             .and_border(|conf| {
-                conf.color(self.border(false))
+                conf.set_color(self.border(false))
                     .none()
-                    .width(px(0.))
-                    .radius(px(4.))
+                    .set_width(px(0.))
+                    .set_radius(px(4.))
             })
             .add(St::BoxShadow, "0 2px 8px rgba(0, 35, 11, 0.15)")
-            .and_padding(|conf| conf.x(px(4.)).y(px(2)))
-            .and_margin(|conf| conf.top(px(popover.offset)))
+            .and_padding(|conf| conf.set_x(px(4.)).set_y(px(2)))
+            .and_margin(|conf| conf.set_top(px(popover.offset())))
             .config_if_else(
                 popover.is_visible(),
-                |conf| conf.opacity(1.).visibility(val::Visible),
-                |conf| conf.visibility(val::Hidden).opacity(0.),
+                |conf| conf.set_opacity(1.).set_visibility(val::Visible),
+                |conf| conf.set_visibility(val::Hidden).set_opacity(0.),
             );
 
         popover::Style { container, panel }
@@ -664,19 +656,19 @@ impl Theme for Ant {
 
     fn svg_icon<PMsg: 'static>(&self, icon: &SvgIcon<PMsg>) -> icon::SvgStyle {
         let mut style = Style::default();
-        style.try_merge(icon.color.as_ref()).merge(&icon.size);
+        style.merge(icon.user_style());
         style
     }
 
     fn html_icon<PMsg>(&self, icon: &HtmlIcon<PMsg>) -> icon::HtmlStyle {
         let mut style = Style::default();
-        style.try_merge(icon.color.as_ref()).merge(&icon.size);
+        style.merge(icon.user_style());
         style
     }
 
     fn url_icon<PMsg>(&self, icon: &UrlIcon<PMsg>) -> icon::UrlStyle {
         let mut style = Style::default();
-        style.merge(&icon.size);
+        style.merge(icon.user_style());
         style
     }
 
@@ -690,31 +682,48 @@ impl Theme for Ant {
             val::Initial.into()
         };
 
-        let mut style = match btn.kind {
+        let mut button = match btn.get_kind() {
             Some(button::Kind::Normal) | None => self.button_normal(btn),
             Some(button::Kind::Suggestion) => self.button_suggestion(btn),
             Some(button::Kind::Destructive) => self.button_destructive(btn),
             Some(button::Kind::Link) => self.button_link(btn),
             Some(button::Kind::Dashed) => self.button_dashed(btn),
         };
-        style
-            .and_padding(|conf| conf.x(px(15.)).y(px(0.)))
-            .and_size(|conf| conf.height(px(32.)))
+        button
+            .and_padding(|conf| conf.set_x(px(15.)).set_y(px(0.)))
+            .and_size(|conf| conf.set_height(px(32.)))
             .and_transition(|conf| {
-                conf.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+                conf.all(|val| {
+                    val.set_duration(sec(0.3))
+                        .cubic_bezier(0.645, 0.045, 0.355, 1.)
+                })
             })
             .and_text(|conf| {
-                conf.decoration(|d| d.line(val::None))
-                    .line_height(1.499)
-                    .white_space(val::Nowrap)
+                conf.and_decoration(|d| d.set_line(val::None))
+                    .set_line_height(1.499)
+                    .set_white_space(val::Nowrap)
             })
-            .and_font(|conf| conf.size(px(14.)).weight_400())
-            .cursor(cursor)
+            .and_font(|conf| conf.set_size(px(14.)).weight_400())
+            .set_cursor(cursor)
             .add(St::Outline, val::None)
             .add(St::UserSelect, val::None)
             .add(St::BoxSizing, val::BorderBox)
-            .merge(&btn.style);
-        style
+            .merge(&btn.user_style().button);
+
+        let mut common_container = flexbox::Style::default();
+        common_container
+            .set_display(val::Flex)
+            .set_align_content(val::Center)
+            .set_align_items(val::Center)
+            .set_justify_content(val::Center)
+            .and_size(|conf| conf.full())
+            .set_gap(px(4))
+            .merge(&btn.user_style().common_container);
+
+        button::Style {
+            button,
+            common_container,
+        }
     }
 
     fn switch<PMsg>(&self, switch: &Switch<PMsg>) -> switch::Style {
@@ -738,39 +747,47 @@ impl Theme for Ant {
 
         let mut background = Style::default();
         background
-            .config_if(switch.is_disabled(), |conf| conf.opacity(0.4))
-            .cursor(cursor)
+            .config_if(switch.is_disabled(), |conf| conf.set_opacity(0.4))
+            .set_cursor(cursor)
             .and_position(|conf| conf.relative())
-            .and_background(|conf| conf.color(bg_color))
+            .and_background(|conf| conf.set_color(bg_color))
             .and_transition(|conf| {
-                conf.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+                conf.all(|val| {
+                    val.set_duration(sec(0.3))
+                        .cubic_bezier(0.645, 0.045, 0.355, 1.)
+                })
             })
             .and_border(|conf| {
                 conf.transparent()
-                    .width(px(0.))
-                    .radius(px(height / 2.))
+                    .set_width(px(0.))
+                    .set_radius(px(height / 2.))
                     .none()
             })
-            .display(val::InlineBlock)
-            .and_text(|conf| conf.decoration(|d| d.line(val::None)))
+            .set_display(val::InlineBlock)
+            .and_text(|conf| conf.and_decoration(|d| d.set_line(val::None)))
             // .add(St::Outline, val::None)
             .add(St::UserSelect, val::None)
             .add(St::BoxSizing, val::BorderBox)
-            .and_size(|conf| conf.height(px(height)).min_width(px(width)));
+            .and_size(|conf| conf.set_height(px(height)).set_min_width(px(width)))
+            .merge(&switch.user_style().background);
 
         let mut button = Style::default();
         button
             .config_if(switch.is_toggled(), |conf| {
                 conf.add(St::Transform, format!("translateX({})", px(width / 2.)))
             })
-            .and_position(|conf| conf.absolute().top(px(top)).left(px(left)))
+            .and_position(|conf| conf.absolute().set_top(px(top)).set_left(px(left)))
             .and_transition(|conf| {
-                conf.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+                conf.all(|val| {
+                    val.set_duration(sec(0.3))
+                        .cubic_bezier(0.645, 0.045, 0.355, 1.)
+                })
             })
-            .and_background(|conf| conf.color(self.white()))
-            .and_border(|conf| conf.width(px(0.)).transparent().none().radius(0.5))
+            .and_background(|conf| conf.set_color(self.white()))
+            .and_border(|conf| conf.set_width(px(0.)).transparent().none().set_radius(0.5))
             .add(St::BoxShadow, "0 2px 4px 0 rgba(0, 35, 11, 0.2)")
-            .and_size(|conf| conf.resize(px(btn_size), px(btn_size)));
+            .and_size(|conf| conf.resize(px(btn_size), px(btn_size)))
+            .merge(&switch.user_style().button);
 
         switch::Style { background, button }
     }
@@ -820,47 +837,62 @@ impl Theme for Ant {
         input
             .and_transition(|conf| {
                 conf.all(|conf| {
-                    conf.duration(sec(0.3))
+                    conf.set_duration(sec(0.3))
                         .cubic_bezier(0.645, 0.045, 0.355, 1.)
                 })
             })
-            .cursor(cursor)
-            .display(val::Flex)
-            .justify_content(val::Center)
-            .align_items(val::Center)
+            .set_cursor(cursor)
+            .set_display(val::Flex)
+            .set_justify_content(val::Center)
+            .set_align_items(val::Center)
             .add(St::WebkitAppearance, val::None)
             .add(St::Appearance, val::None)
             .and_size(|conf| conf.resize(px(16.), px(16.)))
-            .and_border(|conf| conf.solid().width(px(1.)).color(border).radius(px(2.)))
-            .and_background(|conf| conf.color(bg))
-            .and_text(|conf| conf.color(fg));
+            .and_border(|conf| {
+                conf.solid()
+                    .set_width(px(1.))
+                    .set_color(border)
+                    .set_radius(px(2.))
+            })
+            .and_background(|conf| conf.set_color(bg))
+            .and_text(|conf| conf.set_color(fg))
+            .merge(&checkbox.user_style().input);
 
         let mut button = Style::default();
-        button.config_if(checkbox.is_toggled(), |conf| {
-            conf.cursor(cursor)
-                .and_transition(|conf| {
-                    conf.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
-                })
-                .and_size(|conf| conf.resize(0.2, 0.55))
-                .and_border(|conf| {
-                    conf.bottom(|conf| conf.solid().width(px(2.)).color(fg))
-                        .right(|conf| conf.solid().width(px(2.)).color(fg))
-                })
-                .and_margin(|conf| conf.bottom(px(2.)))
-                .add(St::Transform, "rotate(45deg)")
-        });
+        button
+            .config_if(checkbox.is_toggled(), |conf| {
+                conf.set_cursor(cursor)
+                    .and_transition(|conf| {
+                        conf.all(|val| {
+                            val.set_duration(sec(0.3))
+                                .cubic_bezier(0.645, 0.045, 0.355, 1.)
+                        })
+                    })
+                    .and_size(|conf| conf.resize(0.2, 0.55))
+                    .and_border(|conf| {
+                        conf.and_bottom(|conf| conf.solid().set_width(px(2.)).set_color(fg))
+                            .and_right(|conf| conf.solid().set_width(px(2.)).set_color(fg))
+                    })
+                    .and_margin(|conf| conf.set_bottom(px(2.)))
+                    .add(St::Transform, "rotate(45deg)")
+            })
+            .merge(&checkbox.user_style().button);
 
         let mut label = Style::default();
         label
             .config_if(checkbox.is_disabled(), |conf| {
-                conf.and_text(|conf| conf.color(self.disable(false)))
+                conf.and_text(|conf| conf.set_color(self.disable(false)))
             })
             .and_transition(|conf| {
-                conf.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+                conf.all(|val| {
+                    val.set_duration(sec(0.3))
+                        .cubic_bezier(0.645, 0.045, 0.355, 1.)
+                })
             })
-            .cursor(cursor)
-            .display(val::Flex)
-            .gap(px(4.));
+            .set_cursor(cursor)
+            .set_display(val::Flex)
+            .set_gap(px(4))
+            .merge(&checkbox.user_style().label);
 
         checkbox::Style {
             input,
@@ -913,41 +945,60 @@ impl Theme for Ant {
         let mut input = Style::default();
         input
             .and_transition(|conf| {
-                conf.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+                conf.all(|val| {
+                    val.set_duration(sec(0.3))
+                        .cubic_bezier(0.645, 0.045, 0.355, 1.)
+                })
             })
-            .cursor(cursor)
-            .display(val::Flex)
-            .justify_content(val::Center)
-            .align_items(val::Center)
+            .set_cursor(cursor)
+            .set_display(val::Flex)
+            .and_margin(|conf| conf.zero())
+            .set_justify_content(val::Center)
+            .set_align_items(val::Center)
             .add(St::WebkitAppearance, val::None)
-            .and_text(|conf| conf.color(fg))
+            .and_text(|conf| conf.set_color(fg))
             .and_size(|conf| conf.resize(px(16.), px(16.)))
-            .and_border(|conf| conf.solid().width(px(1.)).color(border).radius(0.5))
-            .and_background(|conf| conf.color(bg));
+            .and_border(|conf| {
+                conf.solid()
+                    .set_width(px(1.))
+                    .set_color(border)
+                    .set_radius(0.5)
+            })
+            .and_background(|conf| conf.set_color(bg))
+            .merge(&radio.user_style().input);
 
         let mut button = Style::default();
         button
             .config_if(radio.is_toggled(), |conf| {
-                conf.cursor(cursor)
+                conf.set_cursor(cursor)
                     .and_size(|conf| conf.resize(0.6, 0.6))
-                    .and_border(|conf| conf.none().radius(0.5))
-                    .and_background(|conf| conf.color(fg))
+                    .and_border(|conf| conf.none().set_radius(0.5))
+                    .and_background(|conf| conf.set_color(fg))
             })
             .and_transition(|conf| {
-                conf.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
-            });
+                conf.all(|val| {
+                    val.set_duration(sec(0.3))
+                        .cubic_bezier(0.645, 0.045, 0.355, 1.)
+                })
+            })
+            .merge(&radio.user_style().button);
 
         let mut label = Style::default();
         label
             .config_if(radio.is_disabled(), |conf| {
-                conf.and_text(|conf| conf.color(self.disable(false)))
+                conf.and_text(|conf| conf.set_color(self.disable(false)))
             })
             .and_transition(|conf| {
-                conf.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+                conf.all(|val| {
+                    val.set_duration(sec(0.3))
+                        .cubic_bezier(0.645, 0.045, 0.355, 1.)
+                })
             })
-            .cursor(cursor)
-            .display(val::Flex)
-            .gap(px(4.));
+            .set_cursor(cursor)
+            .set_display(val::Flex)
+            .set_align_items(val::Center)
+            .set_gap(px(4.))
+            .merge(&radio.user_style().label);
 
         radio::Style {
             input,
@@ -984,29 +1035,42 @@ impl Theme for Ant {
         let mut container = Style::default();
         container
             .and_transition(|conf| {
-                conf.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+                conf.all(|val| {
+                    val.set_duration(sec(0.3))
+                        .cubic_bezier(0.645, 0.045, 0.355, 1.)
+                })
             })
-            .display(val::Flex)
-            .align_items(val::Center)
-            .justify_content(val::Center)
-            .and_padding(|conf| conf.y(px(4.)).x(px(11.)))
-            .gap(px(4.))
-            .and_background(|conf| conf.color(bg))
-            .and_border(|conf| conf.solid().width(px(1.)).color(border).radius(px(4.)))
-            .and_size(|conf| conf.width(1.))
-            .cursor(cursor);
+            .set_display(val::Flex)
+            .set_align_items(val::Center)
+            .set_justify_content(val::Center)
+            .and_padding(|conf| conf.set_y(px(4.)).set_x(px(11.)))
+            .set_gap(px(4.))
+            .and_background(|conf| conf.set_color(bg))
+            .and_border(|conf| {
+                conf.solid()
+                    .set_width(px(1.))
+                    .set_color(border)
+                    .set_radius(px(4.))
+            })
+            .and_size(|conf| conf.set_width(1.))
+            .set_cursor(cursor)
+            .merge(&entry.user_style().container);
 
         let mut input = Style::default();
         input
             .and_transition(|conf| {
-                conf.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+                conf.all(|val| {
+                    val.set_duration(sec(0.3))
+                        .cubic_bezier(0.645, 0.045, 0.355, 1.)
+                })
             })
-            .and_size(|conf| conf.width(1.).height(px(32.)))
-            .and_text(|conf| conf.color(fg))
+            .and_size(|conf| conf.set_width(1.).set_height(px(32.)))
+            .and_text(|conf| conf.set_color(fg))
             .and_border(|conf| conf.none())
             .and_background(|conf| conf.transparent())
             .add(St::WebkitAppearance, val::None)
-            .cursor(cursor);
+            .set_cursor(cursor)
+            .merge(&entry.user_style().input);
 
         entry::Style { container, input }
     }
@@ -1045,6 +1109,7 @@ impl Theme for Ant {
         let btn_width = 1.;
         let btn_mouse_over_height = btn_height + 0.10;
         let btn_mouse_over_height_2 = btn_height - 0.10;
+        let font_size = 1.;
 
         let cursor: Cursor = if spin_entry.is_disabled() {
             val::NotAllowed.into()
@@ -1056,58 +1121,71 @@ impl Theme for Ant {
         container
             .and_position(|conf| conf.relative())
             .and_transition(|conf| {
-                conf.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+                conf.all(|val| {
+                    val.set_duration(sec(0.3))
+                        .cubic_bezier(0.645, 0.045, 0.355, 1.)
+                })
             })
-            .display(val::Flex)
-            .align_items(val::Center)
-            .justify_content(val::Center)
-            .and_background(|conf| conf.color(bg))
+            .set_display(val::Flex)
+            .set_align_items(val::Center)
+            .set_justify_content(val::Center)
+            .and_background(|conf| conf.set_color(bg))
             .and_border(|conf| {
                 conf.solid()
-                    .width(px(border_width))
-                    .color(border)
-                    .radius(px(radius))
+                    .set_width(px(border_width))
+                    .set_color(border)
+                    .set_radius(px(radius))
             })
-            .and_size(|conf| conf.width(em(width)).height(em(height)))
-            .cursor(cursor);
+            .and_size(|conf| conf.set_width(em(width)).set_height(em(height)))
+            .set_cursor(cursor)
+            .merge(&spin_entry.user_style().container);
 
         let mut input = Style::default();
         input
             .and_transition(|conf| {
-                conf.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+                conf.all(|val| {
+                    val.set_duration(sec(0.3))
+                        .cubic_bezier(0.645, 0.045, 0.355, 1.)
+                })
             })
-            .and_size(|conf| conf.width(em(input_width)).height(em(input_height)))
-            .and_text(|conf| conf.color(fg))
+            .and_size(|conf| conf.set_width(em(input_width)).set_height(em(input_height)))
+            .and_text(|conf| conf.set_color(fg))
+            .and_font(|conf| conf.set_size(em(font_size)))
             .and_border(|conf| conf.none())
             .and_background(|conf| conf.transparent())
             .add(St::WebkitAppearance, val::None)
-            .cursor(cursor);
+            .set_cursor(cursor)
+            .merge(&spin_entry.user_style().input);
 
         let mut buttons_container = Style::default();
         buttons_container
-            .and_position(|conf| conf.absolute().right(px(0.)))
+            .and_position(|conf| conf.absolute().set_right(px(0.)))
             .and_transition(|conf| {
-                conf.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+                conf.all(|val| {
+                    val.set_duration(sec(0.3))
+                        .cubic_bezier(0.645, 0.045, 0.355, 1.)
+                })
             })
-            .display(val::Flex)
-            .flex_direction(val::Column)
+            .set_display(val::Flex)
+            .set_flex_direction(val::Column)
             .and_size(|conf| {
-                conf.width(em(btns_container_width))
-                    .height(em(btns_container_height))
+                conf.set_width(em(btns_container_width))
+                    .set_height(em(btns_container_height))
             })
             .and_border(|conf| {
-                conf.left(|conf| {
+                conf.and_left(|conf| {
                     conf.solid()
-                        .width(px(border_width))
-                        .color(self.gray(Variant::L300))
+                        .set_width(px(border_width))
+                        .set_color(self.gray(Variant::L300))
                 })
-            });
-        // .config(
-        //     |conf| match (spin_entry.is_mouse_over(), spin_entry.is_disabled()) {
-        //         (true, false) => conf.opacity(1.).visibility(val::Visible),
-        //         _ => conf.opacity(0.).visibility(val::Hidden),
-        //     },
-        // );
+            })
+            .config(
+                |conf| match (spin_entry.is_mouse_over(), spin_entry.is_disabled()) {
+                    (true, false) => conf.set_opacity(1.).set_visibility(val::Visible),
+                    _ => conf.set_opacity(0.).set_visibility(val::Hidden),
+                },
+            )
+            .merge(&spin_entry.user_style().buttons_container);
 
         let (inc_btn_height, dec_btn_height) = match (
             spin_entry.increment_button.is_mouse_over(),
@@ -1118,26 +1196,58 @@ impl Theme for Ant {
             (false, false) => (btn_height, btn_height),
         };
 
-        let mut increment_button = Style::default();
+        let mut increment_button = button::Style::default();
         increment_button
-            .and_font(|conf| conf.size(em(0.6)))
-            .and_text(|conf| conf.color(self.secondary_text(false)))
-            .and_background(|conf| conf.color(self.white()))
-            .and_border(|conf| conf.none().top_right(px(radius)))
-            .and_size(|conf| conf.width(btn_width).height(inc_btn_height));
-        let mut decrement_button = Style::default();
-        decrement_button
-            .and_font(|conf| conf.size(em(0.6)))
-            .and_text(|conf| conf.color(self.secondary_text(false)))
-            .and_background(|conf| conf.color(self.white()))
-            .and_border(|conf| {
-                conf.none().bottom_right(px(radius)).top(|conf| {
-                    conf.solid()
-                        .width(px(border_width))
-                        .color(self.gray(Variant::L300))
-                })
+            .and_common_container(|conf| {
+                conf.set_display(val::Flex)
+                    .set_align_items(val::Center)
+                    .set_align_content(val::Center)
+                    .set_justify_content(val::Center)
+                    .merge(&spin_entry.user_style().decrement_button.common_container)
             })
-            .and_size(|conf| conf.width(btn_width).height(dec_btn_height));
+            .and_button(|conf| {
+                conf.and_transition(|conf| {
+                    conf.all(|val| {
+                        val.set_duration(sec(0.3))
+                            .cubic_bezier(0.645, 0.045, 0.355, 1.)
+                    })
+                })
+                .and_font(|conf| conf.set_size(em(0.6)))
+                .and_text(|conf| conf.set_color(self.secondary_text(false)))
+                .and_background(|conf| conf.set_color(self.white()))
+                .and_border(|conf| conf.none().set_top_right(px(radius)))
+                .and_size(|conf| conf.set_width(btn_width).set_height(inc_btn_height))
+                .merge(&spin_entry.user_style().decrement_button.button)
+            });
+        let mut decrement_button = button::Style::default();
+        decrement_button
+            .and_common_container(|conf| {
+                conf.set_display(val::Flex)
+                    .set_align_items(val::Center)
+                    .set_align_content(val::Center)
+                    .set_justify_content(val::Center)
+                    .merge(&spin_entry.user_style().decrement_button.common_container)
+            })
+            .and_button(|conf| {
+                conf.and_transition(|conf| {
+                    conf.all(|val| {
+                        val.set_duration(sec(0.3))
+                            .cubic_bezier(0.645, 0.045, 0.355, 1.)
+                    })
+                })
+                .and_font(|conf| conf.set_size(em(0.6)))
+                .and_text(|conf| conf.set_color(self.secondary_text(false)))
+                .and_background(|conf| conf.set_color(self.white()))
+                .and_border(|conf| {
+                    conf.none().set_bottom_right(px(radius)).and_top(|conf| {
+                        conf.solid()
+                            .set_width(px(border_width))
+                            .set_color(self.gray(Variant::L300))
+                    })
+                })
+                .and_size(|conf| conf.set_width(btn_width).set_height(dec_btn_height))
+                .merge(&spin_entry.user_style().decrement_button.button)
+            });
 
         spin_entry::Style {
             container,

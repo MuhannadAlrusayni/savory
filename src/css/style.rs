@@ -14,72 +14,72 @@ pub use seed::prelude::St;
 /// style
 ///     .and_transition(|conf| {
 ///         conf
-///             .add("opacity", |conf| conf.duration(ms(150.)).ease())
-///             .add("transform", |conf| conf.duration(ms(150.)).ease())
-///             .add("visibility", |conf| conf.duration(ms(150.)).ease())
+///             .add("opacity", |conf| conf.set_duration(ms(150.)).ease())
+///             .add("transform", |conf| conf.set_duration(ms(150.)).ease())
+///             .add("visibility", |conf| conf.set_duration(ms(150.)).ease())
 ///     })
 ///     .and_position(|conf| conf.absolute())
-///     .and_background(|conf| conf.color(Color::White))
+///     .and_background(|conf| conf.set_color(Color::White))
 ///     .and_border(|conf| {
 ///         conf.none()
-///             .width(px(0))
-///             .radius(px(4))
+///             .set_width(px(0))
+///             .set_radius(px(4))
 ///     })
-///     .and_padding(|conf| conf.x(px(4)).y(px(2)))
-///     .and_margin(|conf| conf.top(px(2)))
+///     .and_padding(|conf| conf.set_x(px(4)).set_y(px(2)))
+///     .and_margin(|conf| conf.set_top(px(2)))
 ///     .add(St::BoxShadow, "0 2px 8px rgba(0, 35, 11, 0.15)");
 /// ```
-#[derive(Default, Debug, Clone, Rich)]
+#[derive(Default, PartialEq, Debug, Clone, Rich)]
 pub struct Style {
-    #[rich(write, write(option, rename = try_opacity))]
+    #[rich(write, write(option))]
     pub opacity: Option<Opacity>,
-    #[rich(write, write(option, rename = try_gap))]
+    #[rich(write, write(option))]
     pub gap: Option<Gap>,
-    #[rich(write, write(option, rename = try_flex_wrap))]
+    #[rich(write, write(option))]
     pub flex_wrap: Option<flexbox::Wrap>,
-    #[rich(write, write(option, rename = try_flex_basis))]
+    #[rich(write, write(option))]
     pub flex_basis: Option<flexbox::Basis>,
-    #[rich(write, write(option, rename = try_flex_direction))]
+    #[rich(write, write(option))]
     pub flex_direction: Option<flexbox::Direction>,
-    #[rich(write, write(option, rename = try_order))]
+    #[rich(write, write(option))]
     pub order: Option<flexbox::Order>,
-    #[rich(write, write(option, rename = try_flex_grow))]
+    #[rich(write, write(option))]
     pub flex_grow: Option<flexbox::Grow>,
-    #[rich(write, write(option, rename = try_flex_shrink))]
+    #[rich(write, write(option))]
     pub flex_shrink: Option<flexbox::Shrink>,
-    #[rich(write, write(option, rename = try_justify_content))]
+    #[rich(write, write(option))]
     pub justify_content: Option<box_align::JustifyContent>,
-    #[rich(write, write(option, rename = try_align_content))]
+    #[rich(write, write(option))]
     pub align_content: Option<box_align::AlignContent>,
-    #[rich(write, write(option, rename = try_align_items))]
+    #[rich(write, write(option))]
     pub align_items: Option<box_align::AlignItems>,
-    #[rich(write, write(option, rename = try_justify_self))]
+    #[rich(write, write(option))]
     pub justify_self: Option<box_align::JustifySelf>,
-    #[rich(write, write(option, rename = try_align_self))]
+    #[rich(write, write(option))]
     pub align_self: Option<box_align::AlignSelf>,
-    #[rich(write, write(option, rename = try_display))]
+    #[rich(write, write(option))]
     pub display: Option<Display>,
-    #[rich(write, write(option, rename = try_visibility))]
+    #[rich(write, write(option))]
     pub visibility: Option<Visibility>,
-    #[rich(write, write(option, rename = try_cursor))]
+    #[rich(write, write(option))]
     pub cursor: Option<Cursor>,
-    #[rich(write(style = compose, rename = and_background), write)]
+    #[rich(write(style = compose), write)]
     pub background: Option<Background>,
-    #[rich(write(style = compose, rename = and_border), write)]
+    #[rich(write(style = compose), write)]
     pub border: Option<Border>,
-    #[rich(write(style = compose, rename = and_margin), write)]
+    #[rich(write(style = compose), write)]
     pub margin: Option<Margin>,
-    #[rich(write(style = compose, rename = and_padding), write)]
+    #[rich(write(style = compose), write)]
     pub padding: Option<Padding>,
-    #[rich(write(style = compose, rename = and_size), write)]
+    #[rich(write(style = compose), write)]
     pub size: Option<Size>,
-    #[rich(write(style = compose, rename = and_transition), write)]
+    #[rich(write(style = compose), write)]
     pub transition: Option<Transition>,
-    #[rich(write(style = compose, rename = and_position), write)]
+    #[rich(write(style = compose), write)]
     pub position: Option<Position>,
-    #[rich(write(style = compose, rename = and_text), write)]
+    #[rich(write(style = compose), write)]
     pub text: Option<Text>,
-    #[rich(write(style = compose, rename = and_font), write)]
+    #[rich(write(style = compose), write)]
     pub font: Option<Font>,
     #[rich(write(
         /// Here goes other css properties those doesn't have their own method
@@ -101,7 +101,7 @@ pub struct Style {
         ///             .add(St::from("--container-gap"), em(2.))
         ///     });
         /// ```
-        style = compose, rename = and_others
+        style = compose
     ))]
     pub others: StyleMap,
 }
@@ -120,10 +120,10 @@ impl Style {
     /// let mut style = Style::default();
     /// style.config(|conf| {
     ///     match angle {
-    ///         1 => conf.and_text(|conf| conf.color(Color::Red)),
-    ///         2 => conf.and_text(|conf| conf.color(Color::Blue)),
-    ///         3 => conf.and_text(|conf| conf.color(Color::Green)),
-    ///         _ => conf.and_text(|conf| conf.color(Color::Black)),
+    ///         1 => conf.and_text(|conf| conf.set_color(Color::Red)),
+    ///         2 => conf.and_text(|conf| conf.set_color(Color::Blue)),
+    ///         3 => conf.and_text(|conf| conf.set_color(Color::Green)),
+    ///         _ => conf.and_text(|conf| conf.set_color(Color::Black)),
     ///     }
     /// });
     /// ```
@@ -170,7 +170,7 @@ impl Style {
             })
     }
 
-    /// this method convert this style to seed [`Style`](seed::virtual_dom::Style)
+    /// this method convert this style to seed `Style`
     pub fn to_seed_style(&self) -> Option<seed::virtual_dom::Style> {
         self.style_map()
             .map
@@ -259,7 +259,7 @@ impl ToStyleMap for Style {
     }
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct StyleMap {
     pub map: IndexMap<St, String>,
 }

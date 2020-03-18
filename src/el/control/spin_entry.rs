@@ -22,12 +22,6 @@ pub struct LocalEvents {
     pub input: Events<Msg>,
 }
 
-impl LocalEvents {
-    pub fn remove_events(self) -> Self {
-        Self::default()
-    }
-}
-
 #[derive(Rich)]
 pub struct ParentEvents<PMsg> {
     #[rich(write(style = compose))]
@@ -49,7 +43,6 @@ impl<PMsg> Default for ParentEvents<PMsg> {
 #[derive(Rich)]
 pub struct SpinEntry<PMsg> {
     el_ref: ElRef<web_sys::HtmlInputElement>,
-    // msg_mapper: Rc<dyn Fn(Msg) -> PMsg>,
     msg_mapper: MsgMapper<Msg, PMsg>,
     #[rich(
         read(
@@ -71,33 +64,6 @@ pub struct SpinEntry<PMsg> {
             style = compose
         ))]
     events: ParentEvents<PMsg>,
-    #[rich(read(
-        /// Return the current value if there is any.
-        copy
-    ))]
-    value: Option<f32>,
-    // this is internal API, and shouldn't get exposed
-    vis_value: String,
-    #[rich(read(
-        /// Return the max value if there is any.
-        copy
-    ))]
-    max: Option<f32>,
-    #[rich(read(
-        /// Return the min value if there is any.
-        copy
-    ))]
-    min: Option<f32>,
-    #[rich(read(
-        /// Return the step value.
-        copy
-    ))]
-    step: f32,
-    #[rich(read(
-        /// Return the used placeholder if there is any.
-        copy
-    ))]
-    placeholder: Option<f32>,
     #[rich(
         read(
             /// Return reference to the user style.
@@ -107,14 +73,41 @@ pub struct SpinEntry<PMsg> {
             /// changes on this style will overrides the theme style.
             style = compose
         ))]
-    style: UserStyle,
+    user_style: UserStyle,
+    #[rich(read(
+        /// Return the current value if there is any.
+        copy
+    ))]
+    value: Option<f64>,
+    // this is internal API, and shouldn't get exposed
+    vis_value: String,
+    #[rich(read(
+        /// Return the max value if there is any.
+        copy
+    ))]
+    max: Option<f64>,
+    #[rich(read(
+        /// Return the min value if there is any.
+        copy
+    ))]
+    min: Option<f64>,
+    #[rich(read(
+        /// Return the step value.
+        copy
+    ))]
+    step: f64,
+    #[rich(read(
+        /// Return the used placeholder if there is any.
+        copy
+    ))]
+    placeholder: Option<f64>,
     #[rich(read(
         /// Return `true` if spin entry is disabled
         copy, rename = is_disabled
     ),)]
     disabled: bool,
     #[rich(read(
-        /// Return `true` if spin entry is foucsed
+        /// Return `true` if spin entry is focused
         copy, rename = is_focused
     ))]
     focus: bool,
@@ -139,26 +132,28 @@ pub struct SpinEntry<PMsg> {
     pub decrement_button: Button<Msg>,
 }
 
+// TODO: add fn unset_max()
+// TODO: add fn unset_min()
+// TODO: add fn unset_placeholder()
 impl<PMsg> SpinEntry<PMsg> {
-    // pub fn new(msg_mapper: impl FnOnce(Msg) -> PMsg + Clone + 'static) -> Self {
     pub fn new(msg_mapper: impl Into<MsgMapper<Msg, PMsg>>) -> Self {
         let mut local_events = LocalEvents::default();
         local_events
-            .input(|conf| {
+            .and_input(|conf| {
                 conf.input(|_| Msg::Input)
                     .focus(|_| Msg::Focus)
                     .blur(|_| Msg::Blur)
             })
-            .container(|conf| {
+            .and_container(|conf| {
                 conf.mouse_enter(|_| Msg::MouseEnter)
                     .mouse_leave(|_| Msg::MouseLeave)
             });
 
         let mut increment_button = Button::with_label(Msg::IncrementButton, "+");
-        increment_button.events(|conf| conf.click(|_| Msg::Increment));
+        increment_button.and_events(|conf| conf.click(|_| Msg::Increment));
 
         let mut decrement_button = Button::with_label(Msg::DecrementButton, "-");
-        decrement_button.events(|conf| conf.click(|_| Msg::Decrement));
+        decrement_button.and_events(|conf| conf.click(|_| Msg::Decrement));
 
         Self {
             el_ref: ElRef::default(),
@@ -171,7 +166,7 @@ impl<PMsg> SpinEntry<PMsg> {
             min: None,
             step: 1.,
             placeholder: None,
-            style: UserStyle::default(),
+            user_style: UserStyle::default(),
             disabled: false,
             focus: false,
             mouse_over: false,
@@ -180,7 +175,7 @@ impl<PMsg> SpinEntry<PMsg> {
         }
     }
 
-    pub fn max(&mut self, max: f32) -> &mut Self {
+    pub fn set_max(&mut self, max: f64) -> &mut Self {
         match (max, self.min) {
             (max, Some(min)) if max < min => {
                 self.max = self.min;
@@ -189,14 +184,14 @@ impl<PMsg> SpinEntry<PMsg> {
             _ => self.max = Some(max),
         }
         // re-calc step and placeholder again
-        self.step(self.step);
+        self.set_step(self.step);
         if let Some(placeholder) = self.placeholder {
-            self.placeholder(placeholder);
+            self.set_placeholder(placeholder);
         }
         self
     }
 
-    pub fn min(&mut self, min: f32) -> &mut Self {
+    pub fn set_min(&mut self, min: f64) -> &mut Self {
         match (min, self.max) {
             (min, Some(max)) if min > max => {
                 self.min = self.max;
@@ -205,14 +200,14 @@ impl<PMsg> SpinEntry<PMsg> {
             _ => self.min = Some(min),
         }
         // re-calc step and placeholder again
-        self.step(self.step);
+        self.set_step(self.step);
         if let Some(placeholder) = self.placeholder {
-            self.placeholder(placeholder);
+            self.set_placeholder(placeholder);
         }
         self
     }
 
-    pub fn step(&mut self, step: f32) -> &mut Self {
+    pub fn set_step(&mut self, step: f64) -> &mut Self {
         self.step = match (step, self.min, self.max) {
             (step, Some(min), Some(max)) if step.abs() > (min).abs() + (max).abs() => {
                 (min).abs() + (max).abs()
@@ -222,7 +217,7 @@ impl<PMsg> SpinEntry<PMsg> {
         self
     }
 
-    pub fn placeholder(&mut self, value: impl Into<f32>) -> &mut Self {
+    pub fn set_placeholder(&mut self, value: impl Into<f64>) -> &mut Self {
         let placeholder = match (value.into(), self.min, self.max) {
             (value, _, Some(max)) if value > max => max,
             (value, Some(min), _) if value < min => min,
@@ -235,7 +230,7 @@ impl<PMsg> SpinEntry<PMsg> {
         self
     }
 
-    pub fn value(&mut self, value: f32) -> &mut Self {
+    pub fn set_value(&mut self, value: f64) -> &mut Self {
         let value = match (value, self.min, self.max) {
             (value, _, Some(max)) if value > max => max,
             (value, Some(min), _) if value < min => min,
@@ -252,22 +247,35 @@ impl<PMsg> SpinEntry<PMsg> {
     pub fn unset_value(&mut self) -> &mut Self {
         self.value = None;
         self.vis_value = "".into();
+        if let Some(input) = self.el_ref.get() {
+            input.set_value(&self.vis_value);
+        }
         self
     }
 
     pub fn enable(&mut self) -> &mut Self {
+        self.el_ref.get_then(|el| el.set_disabled(false));
         self.disabled = false;
-        self.increment_button(|conf| conf.enable())
-            .decrement_button(|conf| conf.enable())
+        self.and_increment_button(|conf| conf.enable())
+            .and_decrement_button(|conf| conf.enable())
     }
 
     pub fn disable(&mut self) -> &mut Self {
+        self.el_ref.get_then(|el| el.set_disabled(true));
         self.disabled = true;
-        self.increment_button(|conf| conf.disable())
-            .decrement_button(|conf| conf.disable())
+        self.and_increment_button(|conf| conf.disable())
+            .and_decrement_button(|conf| conf.disable())
     }
 
-    fn calc_reasonable_value(&self) -> f32 {
+    pub fn set_disabled(&mut self, val: bool) -> &mut Self {
+        if val {
+            self.enable()
+        } else {
+            self.disable()
+        }
+    }
+
+    fn calc_reasonable_value(&self) -> f64 {
         match (self.value, self.min, self.max) {
             (Some(value), _, _) => value,
             (None, Some(min), Some(max)) => (min + max) * 0.5,
@@ -280,11 +288,11 @@ impl<PMsg> SpinEntry<PMsg> {
     }
 
     pub fn increment(&mut self) {
-        self.value(self.calc_reasonable_value() + self.step);
+        self.set_value(self.calc_reasonable_value() + self.step);
     }
 
     pub fn decrement(&mut self) {
-        self.value(self.calc_reasonable_value() - self.step);
+        self.set_value(self.calc_reasonable_value() - self.step);
     }
 
     fn handle_input(&mut self) {
@@ -311,11 +319,11 @@ impl<PMsg> SpinEntry<PMsg> {
                         input.set_value(&self.vis_value);
                     }
                     _ => {
-                        // parse value to f32
-                        if let Some(v_f32) = value.parse::<f32>().ok() {
-                            self.value(v_f32);
-                            // check if value is eq to v_f32
-                            if self.value == Some(v_f32) && value.ends_with(".") {
+                        // parse value to f64
+                        if let Some(v_f64) = value.parse::<f64>().ok() {
+                            self.set_value(v_f64);
+                            // check if value is eq to v_f64
+                            if self.value == Some(v_f64) && value.ends_with(".") {
                                 // use the input value as vis_value if so, this
                                 // helps keep the last dot when user enter e.g.
                                 // `5.`, without this, the input will be
@@ -351,7 +359,7 @@ impl<GMsg: 'static, PMsg: 'static> Model<PMsg, GMsg> for SpinEntry<PMsg> {
     }
 }
 
-/// This style used by users when they want to change styles of SpinEntry
+/// This style used by users when they want to override the defualt theme style.
 #[derive(Clone, Default, Rich)]
 pub struct UserStyle {
     #[rich(write(style = compose))]
@@ -366,8 +374,7 @@ pub struct UserStyle {
     pub decrement_button: button::Style,
 }
 
-/// This style returned by the Theme and consumed by render function, thus the
-/// icons must be returned by the theme
+/// This style returned by the Theme and consumed by render function
 #[derive(Clone, Rich)]
 pub struct Style {
     #[rich(write(style = compose))]
@@ -391,63 +398,50 @@ impl<PMsg: 'static> Render<PMsg> for SpinEntry<PMsg> {
     }
 
     fn render_with_style(&self, theme: &impl Theme, style: Self::Style) -> Self::View {
-        let Style {
-            container,
-            input,
-            buttons_container,
-            increment_button,
-            decrement_button,
-        } = style;
-
         let inc_btn = self
             .increment_button
-            .render_with_style(theme, increment_button);
+            .render_with_style(theme, style.increment_button);
         let dec_btn = self
             .decrement_button
-            .render_with_style(theme, decrement_button);
+            .render_with_style(theme, style.decrement_button);
 
-        let msg_mapper = self.msg_mapper.map_msg_once();
         let btns_container = Flexbox::new()
             .add(inc_btn)
             .add(dec_btn)
-            .render_with_style(theme, buttons_container)
-            .map_msg(msg_mapper.clone());
+            .render_with_style(theme, style.buttons_container)
+            .map_msg_with(&self.msg_mapper);
 
         // input
-        let mut input = input![
-            att::class("spin-entry-input"),
-            el_ref(&self.el_ref),
-            self.local_events.input.clone(),
-            input,
-            // attributes
-            att::value(self.vis_value.clone()),
-            self.max.map(att::max),
-            self.min.map(att::min),
-            att::step(self.step),
-            self.placeholder
-                .map(|v| v.to_string())
-                .map(att::placeholder),
-            att::disabled(self.disabled),
-        ]
-        .map_msg(msg_mapper.clone());
+        let mut input = input!();
+        input
+            .set_events(&self.local_events.input)
+            .el_ref(&self.el_ref)
+            .set_style(style.input)
+            .and_attributes(|conf| {
+                conf.set_class("spin-entry-input")
+                    .set_disabled(self.disabled)
+                    .set_value(self.vis_value.clone())
+                    .set_step(self.step)
+                    .try_set_max(self.max)
+                    .try_set_min(self.min)
+                    .try_set_placeholder(self.placeholder.map(|val| val.to_string()))
+            });
 
-        for event in self.events.input.events.clone().into_iter() {
-            input.add_listener(event);
-        }
+        let mut input = input.map_msg_with(&self.msg_mapper);
+        input.add_events(&self.events.input);
 
         // container
-        let mut container = div![
-            att::class("spin-entry"),
-            self.local_events.container.clone(),
-            container,
-        ]
-        .map_msg(msg_mapper);
+        let mut container = div!();
+        container
+            .set_style(style.container)
+            .set_events(&self.local_events.container)
+            .and_attributes(|conf| conf.set_class("spin-entry"));
 
-        for event in self.events.container.events.clone().into_iter() {
-            container.add_listener(event);
-        }
-
-        container.add_child(input).add_child(btns_container);
+        let mut container = container.map_msg_with(&self.msg_mapper);
+        container
+            .add_events(&self.events.container)
+            .add_child(input)
+            .add_child(btns_container);
         container
     }
 }

@@ -15,14 +15,14 @@ use std::borrow::Cow;
 ///         conf
 ///             // transition for all properties
 ///             .all(|conf| {
-///                 conf.duration(sec(0.3))
+///                 conf.set_duration(sec(0.3))
 ///                     .cubic_bezier(0.645, 0.045, 0.355, 1.)
 ///             })
 ///             // or transition for specific properties (e.g. opacity only)
 ///             .add("opacity", |conf| {
-///                 conf.duration(ms(150.))
+///                 conf.set_duration(ms(150.))
 ///                     .ease()
-///                     .delay(sec(0.5))
+///                     .set_delay(sec(0.5))
 ///             })
 ///         });
 /// ```

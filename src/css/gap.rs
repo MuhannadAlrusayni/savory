@@ -4,11 +4,11 @@ use crate::css::{unit::*, St, StyleMap, ToStyleMap};
 /// use khalas::css::{Style, unit::{px, em}};
 ///
 /// let mut style = Style::default();
-/// style.gap(px(2))
+/// style.set_gap(px(2))
 ///      // this can take percent value too (.e.g 40%).
-///      .gap(0.4)
+///      .set_gap(0.4)
 ///      // and can take row and column each with different value
-///      .gap((em(4.), em(8.)));
+///      .set_gap((em(4.), em(8.)));
 /// ```
 #[derive(Clone, Debug, Copy, PartialEq, Display)]
 pub enum Gap {

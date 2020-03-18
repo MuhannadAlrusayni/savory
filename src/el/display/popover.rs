@@ -4,31 +4,39 @@ use derive_rich::Rich;
 // TODO: add placement property
 #[derive(Clone, Rich)]
 pub struct Popover<'a, PMsg, C, T> {
-    #[rich(write(style = compose))]
+    #[rich(read, write(style = compose))]
     events: Events<PMsg>,
-    #[rich(write)]
+    #[rich(read, write(style = compose))]
+    user_style: UserStyle,
+    #[rich(read, write)]
     child: &'a C,
-    #[rich(write)]
+    #[rich(read, write)]
     target: &'a T,
-    #[rich(write(style = compose))]
-    pub style: Style,
     #[rich(write, read(copy, rename = is_visible), value_fns = { popup = true, popdown = false })]
-    pub visible: bool,
-    #[rich(write)]
-    pub offset: i8,
+    visible: bool,
+    #[rich(read(copy), write)]
+    offset: i8,
 }
 
 impl<'a, PMsg, C, T> Popover<'a, PMsg, C, T> {
     pub fn new(target: &'a T, child: &'a C) -> Self {
         Self {
+            events: Events::default(),
+            user_style: UserStyle::default(),
             child,
             target,
-            style: Style::default(),
-            events: Events::default(),
             visible: false,
             offset: 0,
         }
     }
+}
+
+#[derive(Clone, Debug, Default, Rich)]
+pub struct UserStyle {
+    #[rich(write(style = compose))]
+    pub container: css::Style,
+    #[rich(write(style = compose))]
+    pub panel: css::Style,
 }
 
 #[derive(Clone, Debug, Default, Rich)]
@@ -53,11 +61,16 @@ where
     }
 
     fn render_with_style(&self, theme: &impl Theme, style: Self::Style) -> Self::View {
-        div![
-            style.container,
-            self.events.events.clone(),
-            self.target.render(theme),
-            div![style.panel, self.child.render(theme)]
-        ]
+        let mut panel = div!();
+        panel
+            .set_style(style.panel)
+            .add_child(self.child.render(theme));
+
+        let mut popover = div!();
+        popover
+            .set_style(style.container)
+            .set_events(&self.events)
+            .add_children(vec![self.target.render(theme), panel]);
+        popover
     }
 }

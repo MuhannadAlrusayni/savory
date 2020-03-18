@@ -1,7 +1,4 @@
-use crate::{
-    css::{self, unit::px},
-    prelude::*,
-};
+use crate::{css, prelude::*};
 use derive_rich::Rich;
 use std::borrow::Cow;
 
@@ -15,9 +12,9 @@ pub enum Kind {
 }
 
 #[derive(Clone)]
-pub enum Inner {
-    Child(Vec<Node<Msg>>),
-    Common(Option<String>, Option<Icon<Msg>>),
+pub enum Inner<PMsg: 'static> {
+    Children(Vec<Node<PMsg>>),
+    Common(Option<Cow<'static, str>>, Option<Icon<PMsg>>),
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -33,51 +30,44 @@ pub type LocalEvents = Events<Msg>;
 pub type ParentEvents<PMsg> = Events<PMsg>;
 
 #[derive(Clone, Rich)]
-pub struct Button<PMsg> {
+pub struct Button<PMsg: 'static> {
+    // general element properties
+    el_ref: ElRef<web_sys::HtmlInputElement>,
     msg_mapper: MsgMapper<Msg, PMsg>,
-    #[rich(write(style = compose))]
+    #[rich(read, write(style = compose))]
     local_events: LocalEvents,
-    #[rich(write(style = compose))]
+    #[rich(read, write(style = compose))]
     events: ParentEvents<PMsg>,
-    // children
-    pub inner: Inner,
-    // properties
-    #[rich(value_fns = {
+    #[rich(read, write(style = compose))]
+    user_style: UserStyle,
+
+    // button element properties
+    inner: Inner<PMsg>,
+    #[rich(read(copy), value_fns = {
         /// Change button kind to normal
         normal = Kind::Normal,
+        /// Change button kind to suggestion
         suggestion = Kind::Suggestion,
+        /// Change button kind to destructive
         destructive = Kind::Destructive,
+        /// Change button kind to link
         link = Kind::Link,
+        /// Change button kind to dashed
         dashed = Kind::Dashed,
     })]
-    pub kind: Option<Kind>,
-    #[rich(value_fns = { block = true, inline = false })]
-    pub block: bool,
-    #[rich(
-        read(copy, rename = is_loading),
-        value_fns = { loading = true, loading_off = false }
-    )]
-    pub loading: bool,
-    #[rich(value_fns = { ghost = true, ghost_off = false })]
-    pub ghost: bool,
-    #[rich(write(style = compose))]
-    pub style: Style,
-
-    #[rich(
-        read(copy, rename = is_disabled),
-        value_fns = { disable = true, enable = false }
-    )]
-    pub disabled: bool,
-    #[rich(write)]
-    pub route: Option<Cow<'static, str>>,
-
-    // read only properties, these shouldn't be editable from out side of this
-    // module, this may changed later.
+    kind: Option<Kind>,
+    #[rich(read(copy), write)]
+    block: bool,
+    #[rich(read(copy), write)]
+    ghost: bool,
+    #[rich(write, read)]
+    route: Option<Cow<'static, str>>,
+    #[rich(read(copy, rename = is_disabled),)]
+    disabled: bool,
     #[rich(read(copy, rename = is_focused))]
     focus: bool,
     #[rich(read(copy, rename = is_mouse_over))]
     mouse_over: bool,
-    // active: bool,
 }
 
 impl<PMsg> Button<PMsg> {
@@ -91,15 +81,15 @@ impl<PMsg> Button<PMsg> {
             .click(|_| Msg::Route);
 
         Button {
+            el_ref: ElRef::default(),
             msg_mapper: msg_mapper.into(),
             local_events,
             events: Events::default(),
             inner: Inner::Common(None, None),
             kind: None,
             block: false,
-            loading: false,
             ghost: false,
-            style: Style::default(),
+            user_style: UserStyle::default(),
             route: None,
             disabled: false,
             focus: false,
@@ -109,23 +99,30 @@ impl<PMsg> Button<PMsg> {
 
     pub fn with_label(
         msg_mapper: impl Into<MsgMapper<Msg, PMsg>>,
-        label: impl Into<String>,
+        label: impl Into<Cow<'static, str>>,
     ) -> Self {
         let mut btn = Button::new(msg_mapper);
-        btn.label(label);
+        btn.set_label(label);
         btn
     }
 
     pub fn with_children(
         msg_mapper: impl Into<MsgMapper<Msg, PMsg>>,
-        children: Vec<Node<Msg>>,
+        children: Vec<Node<PMsg>>,
     ) -> Self {
         let mut btn = Button::new(msg_mapper);
-        btn.children(children);
+        btn.set_children(children);
         btn
     }
 
-    pub fn label(&mut self, label: impl Into<String>) -> &mut Self {
+    pub fn label(&self) -> Option<&str> {
+        match self.inner {
+            Inner::Common(Some(ref lbl), _) => Some(lbl),
+            _ => None,
+        }
+    }
+
+    pub fn set_label(&mut self, label: impl Into<Cow<'static, str>>) -> &mut Self {
         match self.inner {
             Inner::Common(Some(ref mut lbl), _) => *lbl = label.into(),
             Inner::Common(ref mut lbl, _) => *lbl = Some(label.into()),
@@ -134,16 +131,34 @@ impl<PMsg> Button<PMsg> {
         self
     }
 
-    pub fn children(&mut self, children: Vec<Node<Msg>>) -> &mut Self {
-        self.inner = Inner::Child(children);
+    pub fn set_children(&mut self, children: Vec<Node<PMsg>>) -> &mut Self {
+        self.inner = Inner::Children(children);
         self
     }
 
-    pub fn icon(&mut self, new_icon: impl Into<Icon<Msg>>) -> &mut Self {
+    pub fn set_icon(&mut self, new_icon: impl Into<Icon<PMsg>>) -> &mut Self {
         match self.inner {
             Inner::Common(_, ref mut icon) => *icon = Some(new_icon.into()),
             _ => self.inner = Inner::Common(None, Some(new_icon.into())),
         };
+        self
+    }
+
+    pub fn disable(&mut self) -> &mut Self {
+        self.el_ref.get_then(|el| el.set_disabled(true));
+        self.disabled = true;
+        self
+    }
+
+    pub fn enable(&mut self) -> &mut Self {
+        self.el_ref.get_then(|el| el.set_disabled(false));
+        self.disabled = false;
+        self
+    }
+
+    pub fn set_disabled(&mut self, val: bool) -> &mut Self {
+        self.el_ref.get_then(|el| el.set_disabled(val));
+        self.disabled = val;
         self
     }
 
@@ -173,7 +188,24 @@ impl<GMsg, PMsg: 'static> Model<PMsg, GMsg> for Button<PMsg> {
     }
 }
 
-pub type Style = css::Style;
+/// This style used by users when they want to change styles of SpinEntry
+#[derive(Clone, Default, Rich)]
+pub struct UserStyle {
+    #[rich(write(style = compose))]
+    pub button: css::Style,
+    #[rich(write(style = compose))]
+    pub common_container: flexbox::Style,
+}
+
+/// This style returned by the Theme and consumed by render function, thus the
+/// icons must be returned by the theme
+#[derive(Clone, Debug, Default, Rich)]
+pub struct Style {
+    #[rich(write(style = compose))]
+    pub button: css::Style,
+    #[rich(write(style = compose))]
+    pub common_container: flexbox::Style,
+}
 
 impl<PMsg: 'static> Render<PMsg> for Button<PMsg> {
     type View = Node<PMsg>;
@@ -184,41 +216,26 @@ impl<PMsg: 'static> Render<PMsg> for Button<PMsg> {
     }
 
     fn render_with_style(&self, theme: &impl Theme, style: Self::Style) -> Self::View {
-        let msg_mapper = self.msg_mapper.map_msg_once();
-
-        let inner: Vec<Node<Msg>> = match self.inner {
-            Inner::Child(ref children) => children.clone(),
-            Inner::Common(ref lbl, ref icon) => {
-                let icon = icon
-                    .as_ref()
-                    .map(|icon| icon.render(theme))
-                    .unwrap_or(empty![]);
-                let lbl = lbl
-                    .as_ref()
-                    .map(|lbl| plain![lbl.clone()])
-                    .unwrap_or(empty![]);
-                // TODO: use el::flexbox::Style insted of hard coding the style
-                vec![Flexbox::new()
-                    .center()
-                    .full_size()
-                    .gap(px(4.))
-                    .add(icon)
-                    .add_and(|item| item.content(lbl).wrapped())
-                    .render(theme)]
+        let inner = match self.inner {
+            Inner::Children(ref children) => children.clone(),
+            Inner::Common(ref label, ref icon) => {
+                let icon = icon.as_ref().map(|icon| icon.render(theme));
+                let label = label.as_ref().map(|lbl| plain!(lbl.clone()));
+                nodes![Flexbox::new()
+                    .try_add(icon)
+                    .try_add(label)
+                    .render_with_style(theme, style.common_container)]
             }
         };
 
-        let mut btn = button![
-            att::class("button"),
-            att::disabled(self.disabled),
-            self.local_events.events.clone(),
-            style,
-            inner,
-        ]
-        .map_msg(msg_mapper);
-        for event in self.events.events.clone().into_iter() {
-            btn.add_listener(event);
-        }
-        btn
+        let mut button = button!();
+        button
+            .set_events(&self.local_events)
+            .set_style(style.button)
+            .and_attributes(|conf| conf.set_class("button").set_disabled(self.disabled));
+
+        let mut button = button.map_msg_with(&self.msg_mapper);
+        button.add_events(&self.events).add_children(inner);
+        button
     }
 }

@@ -1,5 +1,6 @@
 use crate::{css, prelude::*};
 use derive_rich::Rich;
+use std::borrow::Cow;
 
 #[derive(Debug, Clone)]
 pub enum Msg {
@@ -7,8 +8,7 @@ pub enum Msg {
     MouseLeave,
     Focus,
     Blur,
-    Clear,
-    UpdateText(web_sys::InputEvent),
+    UpdateText,
 }
 
 #[derive(Default, Rich)]
@@ -17,12 +17,6 @@ pub struct LocalEvents {
     pub input: Events<Msg>,
     #[rich(write(style = compose))]
     pub container: Events<Msg>,
-}
-
-impl LocalEvents {
-    pub fn remove_events(self) -> Self {
-        Self::default()
-    }
 }
 
 #[derive(Rich)]
@@ -44,67 +38,123 @@ impl<PMsg> Default for ParentEvents<PMsg> {
 
 #[derive(Rich)]
 pub struct Entry<PMsg> {
-    #[rich(write(style = compose))]
-    pub local_events: LocalEvents,
+    // general element properties
+    el_ref: ElRef<web_sys::HtmlInputElement>,
     msg_mapper: MsgMapper<Msg, PMsg>,
-    #[rich(write(style = compose))]
-    pub events: ParentEvents<PMsg>,
-    #[rich(write, write(rename = text_mut))]
-    pub text: Option<String>,
-    #[rich(write)]
-    pub max_length: Option<usize>,
-    #[rich(write)]
-    pub placeholder: Option<String>,
-    #[rich(write(style = compose))]
-    pub style: Style,
-    #[rich(
-        read(copy, rename = is_disabled),
-        value_fns = { disable = true, enable = false }
-    )]
-    pub disabled: bool,
-    #[rich(read(copy, rename = is_focused))]
+    #[rich(read, write(style = compose))]
+    local_events: LocalEvents,
+    #[rich(read, write(style = compose))]
+    events: ParentEvents<PMsg>,
+    #[rich(read, write(style = compose))]
+    user_style: UserStyle,
+
+    // entry element properties
+    #[rich(read)]
+    text: Option<Cow<'static, str>>,
+    #[rich(read(copy))]
+    max_length: Option<att::MaxLength>,
+    #[rich(read)]
+    placeholder: Option<Cow<'static, str>>,
+    #[rich(read(
+        /// Return `true` if entry element is disabled
+        copy, rename = is_disabled
+    ))]
+    disabled: bool,
+    #[rich(read(
+        /// Return `true` if entry element is focused
+        copy, rename = is_focused
+    ))]
     focus: bool,
-    #[rich(read(copy, rename = is_mouse_over))]
+    #[rich(read(
+        /// Return `true` when mouse over entry element
+        copy, rename = is_mouse_over
+    ))]
     mouse_over: bool,
 }
 
 impl<PMsg> Entry<PMsg> {
     pub fn new(msg_mapper: impl Into<MsgMapper<Msg, PMsg>>) -> Self {
         let mut local_events = LocalEvents::default();
-        local_events.input(|conf| {
+        local_events.and_input(|conf| {
             conf.focus(|_| Msg::Focus)
                 .blur(|_| Msg::Blur)
                 .mouse_enter(|_| Msg::MouseEnter)
                 .mouse_leave(|_| Msg::MouseLeave)
-                .input(Msg::UpdateText)
+                .input(|_| Msg::UpdateText)
         });
 
         Self {
+            el_ref: ElRef::default(),
+            msg_mapper: msg_mapper.into(),
             local_events,
             events: ParentEvents::default(),
-            msg_mapper: msg_mapper.into(),
+            user_style: UserStyle::default(),
             text: None,
             max_length: None,
             placeholder: None,
-            style: Style::default(),
             disabled: false,
             focus: false,
             mouse_over: false,
         }
     }
 
-    fn handle_update_text(&mut self, event: web_sys::InputEvent) {
-        if let Some(text) = event
-            .target()
-            .map(|t| seed::util::get_value(&t).ok())
-            .flatten()
-        {
-            self.text = Some(text);
+    pub fn with_placeholder(
+        msg_mapper: impl Into<MsgMapper<Msg, PMsg>>,
+        val: impl Into<Cow<'static, str>>,
+    ) -> Self {
+        let mut entry = Self::new(msg_mapper);
+        entry.set_placeholder(val);
+        entry
+    }
+
+    pub fn set_text(&mut self, text: impl Into<Cow<'static, str>>) -> &mut Self {
+        let text = text.into();
+        if let Some(input) = self.el_ref.get() {
+            input.set_value(text.as_ref());
+        }
+        self.text = Some(text);
+        self
+    }
+
+    pub fn set_max_length(&mut self, val: impl Into<att::MaxLength>) -> &mut Self {
+        let val = val.into();
+        self.el_ref
+            .get_then(|el| el.set_max_length(val.into_inner()));
+        self.max_length = Some(val);
+        self
+    }
+
+    pub fn set_placeholder(&mut self, val: impl Into<Cow<'static, str>>) -> &mut Self {
+        let val = val.into();
+        self.el_ref.get_then(|el| el.set_placeholder(&val));
+        self.placeholder = Some(val);
+        self
+    }
+
+    pub fn disable(&mut self) -> &mut Self {
+        self.el_ref.get_then(|el| el.set_disabled(true));
+        self.disabled = true;
+        self
+    }
+
+    pub fn enable(&mut self) -> &mut Self {
+        self.el_ref.get_then(|el| el.set_disabled(false));
+        self.disabled = false;
+        self
+    }
+
+    pub fn set_disabled(&mut self, val: bool) -> &mut Self {
+        if val {
+            self.enable()
+        } else {
+            self.disable()
         }
     }
 
-    fn handle_clear_msg(&mut self) {
-        self.text = None;
+    fn handle_update_text(&mut self) {
+        if let Some(input) = self.el_ref.get() {
+            self.text = Some(input.value().into());
+        }
     }
 }
 
@@ -113,14 +163,21 @@ impl<GMsg, PMsg: 'static> Model<PMsg, GMsg> for Entry<PMsg> {
 
     fn update(&mut self, msg: Msg, _: &mut impl Orders<PMsg, GMsg>) {
         match msg {
-            Msg::UpdateText(event) => self.handle_update_text(event),
+            Msg::UpdateText => self.handle_update_text(),
             Msg::MouseEnter => self.mouse_over = true,
             Msg::MouseLeave => self.mouse_over = false,
             Msg::Focus => self.focus = true,
             Msg::Blur => self.focus = false,
-            Msg::Clear => self.handle_clear_msg(),
         }
     }
+}
+
+#[derive(Clone, Debug, Default, Rich)]
+pub struct UserStyle {
+    #[rich(write(style = compose))]
+    pub container: css::Style,
+    #[rich(write(style = compose))]
+    pub input: css::Style,
 }
 
 #[derive(Clone, Debug, Default, Rich)]
@@ -140,29 +197,29 @@ impl<PMsg: 'static> Render<PMsg> for Entry<PMsg> {
     }
 
     fn render_with_style(&self, _: &impl Theme, style: Self::Style) -> Self::View {
-        let msg_mapper = self.msg_mapper.map_msg_once();
-        let mut input = input![
-            self.local_events.input.clone(),
-            style.input,
-            att::disabled(self.disabled),
-            self.text.clone().map(att::value),
-            self.max_length.map(att::max_length),
-            self.placeholder.clone().map(att::placeholder),
-        ]
-        .map_msg(msg_mapper.clone());
+        let mut input = input!();
+        input
+            .set_events(&self.local_events.input)
+            .set_style(style.input)
+            .and_attributes(|conf| {
+                conf.set_disabled(self.disabled)
+                    .try_set_value(self.text.clone())
+                    .try_set_max_length(self.max_length)
+                    .try_set_placeholder(self.placeholder.clone())
+            });
 
-        for event in self.events.input.events.clone().into_iter() {
-            input.add_listener(event);
-        }
+        let mut input = input.map_msg_with(&self.msg_mapper);
+        input.add_events(&self.events.input);
 
-        let mut container =
-            div![style.container, self.local_events.container.clone(),].map_msg(msg_mapper);
+        let mut container = div!();
+        container
+            .set_style(style.container)
+            .set_events(&self.local_events.container);
 
-        for event in self.events.container.events.clone().into_iter() {
-            container.add_listener(event);
-        }
-
-        container.add_child(input);
+        let mut container = container.map_msg_with(&self.msg_mapper);
+        container
+            .add_events(&self.events.container)
+            .add_child(input);
         container
     }
 }

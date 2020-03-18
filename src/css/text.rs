@@ -9,14 +9,14 @@ use std::borrow::Cow;
 /// let mut style = Style::default();
 /// style
 ///     .and_text(|conf| {
-///         conf.line_height(1.7)
+///         conf.set_line_height(1.7)
 ///             // we can pass Rgb, Rgba, Hsl, Hsla
-///             .color(Rgb::new(0.5, 0.1, 0.1))
+///             .set_color(Rgb::new(0.5, 0.1, 0.1))
 ///             // or we can use HTML colors
-///             .color(Color::BlueViolet)
-///             .align(val::Center)
-///             .transform(val::Capitalize)
-///             .indent(em(2.))
+///             .set_color(Color::BlueViolet)
+///             .set_align(val::Center)
+///             .set_transform(val::Capitalize)
+///             .set_indent(em(2.))
 ///     });
 /// ```
 #[derive(Rich, Clone, Debug, PartialEq, Default)]
@@ -176,7 +176,7 @@ impl Default for TextDecoration {
 }
 
 impl TextDecoration {
-    pub fn line(&mut self, value: impl Into<TextDecorationLine>) -> &mut Self {
+    pub fn set_line(&mut self, value: impl Into<TextDecorationLine>) -> &mut Self {
         match self {
             Self::Decoration { ref mut line, .. } => *line = Some(value.into()),
             _ => {
@@ -190,7 +190,7 @@ impl TextDecoration {
         self
     }
 
-    pub fn color(&mut self, value: impl Into<TextDecorationColor>) -> &mut Self {
+    pub fn set_color(&mut self, value: impl Into<TextDecorationColor>) -> &mut Self {
         match self {
             Self::Decoration { ref mut color, .. } => *color = Some(value.into()),
             _ => {
@@ -204,7 +204,7 @@ impl TextDecoration {
         self
     }
 
-    pub fn style(&mut self, value: impl Into<TextDecorationStyle>) -> &mut Self {
+    pub fn set_style(&mut self, value: impl Into<TextDecorationStyle>) -> &mut Self {
         match self {
             Self::Decoration { ref mut style, .. } => *style = Some(value.into()),
             _ => {
