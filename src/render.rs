@@ -21,11 +21,9 @@
 //!     type Style = Style;
 //!
 //!     fn style(&self, _: &impl Theme) -> Self::Style {
-//!         let mut style = Style::default();
-//!         style
+//!         Style::default()
 //!             .and_background(|conf| conf.set_color(Color::Black))
-//!             .and_text(|conf| conf.set_color(Color::White));
-//!         style
+//!             .and_text(|conf| conf.set_color(Color::White))
 //!     }
 //!
 //!     fn render_with_style(&self, theme: &impl Theme, style: Self::Style) -> Self::View {
@@ -53,8 +51,7 @@
 //!     theme: &impl Theme
 //! ) -> Node<PMsg> {
 //!     // creating element style
-//!     let mut style = Style::default();
-//!     style
+//!     let style = Style::default()
 //!         .and_background(|conf| conf.set_color(Color::Black))
 //!         .and_text(|conf| conf.set_color(Color::White));
 //!

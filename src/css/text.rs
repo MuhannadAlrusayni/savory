@@ -64,8 +64,8 @@ pub struct Text {
 
 impl ToStyleMap for Text {
     fn style_map(&self) -> StyleMap {
-        let mut map = StyleMap::default();
-        map.try_add(St::Color, self.color)
+        StyleMap::default()
+            .try_add(St::Color, self.color)
             .try_add(St::Direction, self.direction)
             .try_add(St::LetterSpacing, self.letter_spacing)
             .try_add(St::LineHeight, self.line_height)
@@ -78,8 +78,7 @@ impl ToStyleMap for Text {
             .try_add(St::UnicodeBidi, self.unicode_bidi)
             .try_add(St::VerticalAlign, self.vertical_align)
             .try_add(St::WhiteSpace, self.white_space)
-            .try_add(St::WordSpacing, self.word_spacing);
-        map
+            .try_add(St::WordSpacing, self.word_spacing)
     }
 }
 
@@ -176,11 +175,11 @@ impl Default for TextDecoration {
 }
 
 impl TextDecoration {
-    pub fn set_line(&mut self, value: impl Into<TextDecorationLine>) -> &mut Self {
+    pub fn set_line(mut self, value: impl Into<TextDecorationLine>) -> Self {
         match self {
             Self::Decoration { ref mut line, .. } => *line = Some(value.into()),
             _ => {
-                *self = Self::Decoration {
+                self = Self::Decoration {
                     line: Some(value.into()),
                     color: None,
                     style: None,
@@ -190,11 +189,11 @@ impl TextDecoration {
         self
     }
 
-    pub fn set_color(&mut self, value: impl Into<TextDecorationColor>) -> &mut Self {
+    pub fn set_color(mut self, value: impl Into<TextDecorationColor>) -> Self {
         match self {
             Self::Decoration { ref mut color, .. } => *color = Some(value.into()),
             _ => {
-                *self = Self::Decoration {
+                self = Self::Decoration {
                     line: Some(val::None.into()),
                     color: Some(value.into()),
                     style: None,
@@ -204,11 +203,11 @@ impl TextDecoration {
         self
     }
 
-    pub fn set_style(&mut self, value: impl Into<TextDecorationStyle>) -> &mut Self {
+    pub fn set_style(mut self, value: impl Into<TextDecorationStyle>) -> Self {
         match self {
             Self::Decoration { ref mut style, .. } => *style = Some(value.into()),
             _ => {
-                *self = Self::Decoration {
+                self = Self::Decoration {
                     line: Some(val::None.into()),
                     color: None,
                     style: Some(value.into()),

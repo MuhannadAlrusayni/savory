@@ -127,16 +127,12 @@ impl Style {
     ///     }
     /// });
     /// ```
-    pub fn config(&mut self, block: impl FnOnce(&mut Self) -> &mut Self) -> &mut Self {
+    pub fn config(self, block: impl FnOnce(Self) -> Self) -> Self {
         block(self)
     }
 
     /// Same as `config` but will be called if `condition` is `true`
-    pub fn config_if(
-        &mut self,
-        condition: bool,
-        block: impl FnOnce(&mut Self) -> &mut Self,
-    ) -> &mut Self {
+    pub fn config_if(self, condition: bool, block: impl FnOnce(Self) -> Self) -> Self {
         if condition {
             self.config(block)
         } else {
@@ -147,11 +143,11 @@ impl Style {
     /// if `condition` is `true` then `block` will be called, otherwise
     /// `else_blcok` will be called
     pub fn config_if_else(
-        &mut self,
+        self,
         condition: bool,
-        block: impl FnOnce(&mut Self) -> &mut Self,
-        else_block: impl FnOnce(&mut Self) -> &mut Self,
-    ) -> &mut Self {
+        block: impl FnOnce(Self) -> Self,
+        else_block: impl FnOnce(Self) -> Self,
+    ) -> Self {
         if condition {
             self.config(block)
         } else {
@@ -184,26 +180,26 @@ impl Style {
     }
 
     /// Shortcut for `self.others.add()`
-    pub fn add(&mut self, key: impl Into<St>, value: impl ToString) -> &mut Self {
-        self.others.add(key, value);
+    pub fn add(mut self, key: impl Into<St>, value: impl ToString) -> Self {
+        self.others = self.others.add(key, value);
         self
     }
 
     /// Shortcut for `self.others.try_add()`
-    pub fn try_add(&mut self, key: impl Into<St>, value: Option<impl ToString>) -> &mut Self {
-        self.others.try_add(key, value);
+    pub fn try_add(mut self, key: impl Into<St>, value: Option<impl ToString>) -> Self {
+        self.others = self.others.try_add(key, value);
         self
     }
 
     /// Shortcut for `self.others.merge()`
-    pub fn merge(&mut self, others: &impl ToStyleMap) -> &mut Self {
-        self.others.merge(others);
+    pub fn merge(mut self, others: &impl ToStyleMap) -> Self {
+        self.others = self.others.merge(others);
         self
     }
 
     /// Shortcut for `self.others.try_merge()`
-    pub fn try_merge(&mut self, others: Option<&impl ToStyleMap>) -> &mut Self {
-        self.others.try_merge(others);
+    pub fn try_merge(mut self, others: Option<&impl ToStyleMap>) -> Self {
+        self.others = self.others.try_merge(others);
         self
     }
 }
@@ -250,11 +246,12 @@ impl ToStyleMap for Style {
             Some(self.others.clone()),
         ]
         .into_iter()
-        .fold(StyleMap::default(), |mut map, prop| {
+        .fold(StyleMap::default(), |map, prop| {
             if let Some(prop_map) = prop {
-                map.extend(prop_map);
+                map.extend(prop_map)
+            } else {
+                map
             }
-            map
         })
     }
 }
@@ -275,14 +272,14 @@ impl StyleMap {
     /// map.add(St::UserSelect, val::None)
     ///     .add(St::BoxSizing, val::BorderBox);
     /// ```
-    pub fn add(&mut self, key: impl Into<St>, value: impl ToString) -> &mut Self {
+    pub fn add(mut self, key: impl Into<St>, value: impl ToString) -> Self {
         self.map.insert(key.into(), value.to_string());
         self
     }
 
     /// This method is similar `add` but it accept an optional value, if the
     /// passed value is `None` then nothing added to the style.
-    pub fn try_add(&mut self, key: impl Into<St>, value: Option<impl ToString>) -> &mut Self {
+    pub fn try_add(self, key: impl Into<St>, value: Option<impl ToString>) -> Self {
         if let Some(value) = value {
             self.add(key, value)
         } else {
@@ -291,13 +288,13 @@ impl StyleMap {
     }
 
     /// Merge this style map with other
-    pub fn merge(&mut self, other: &impl ToStyleMap) -> &mut Self {
+    pub fn merge(mut self, other: &impl ToStyleMap) -> Self {
         self.map.extend(other.style_map().map);
         self
     }
 
     /// This method is similar to `merge` but it accept an optional value.
-    pub fn try_merge(&mut self, other: Option<&impl ToStyleMap>) -> &mut Self {
+    pub fn try_merge(self, other: Option<&impl ToStyleMap>) -> Self {
         if let Some(other) = other {
             self.merge(other)
         } else {
@@ -305,7 +302,7 @@ impl StyleMap {
         }
     }
 
-    fn extend(&mut self, other: Self) -> &mut Self {
+    fn extend(mut self, other: Self) -> Self {
         self.map.extend(other.map);
         self
     }

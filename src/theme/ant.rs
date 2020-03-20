@@ -443,8 +443,7 @@ impl Ant {
                 ),
             };
 
-        let mut style = Style::default();
-        style
+        Style::default()
             .and_border(|conf| {
                 conf.set_width(px(1.))
                     .solid()
@@ -453,8 +452,7 @@ impl Ant {
             })
             .and_background(|conf| conf.set_color(bg))
             .and_text(|conf| conf.set_color(fg))
-            .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)");
-        style
+            .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
     }
 
     fn button_suggestion<PMsg>(&self, btn: &Button<PMsg>) -> Style {
@@ -481,8 +479,7 @@ impl Ant {
                 ),
             };
 
-        let mut style = Style::default();
-        style
+        Style::default()
             .and_border(|conf| {
                 conf.set_width(px(1.))
                     .solid()
@@ -491,8 +488,7 @@ impl Ant {
             })
             .and_background(|conf| conf.set_color(bg))
             .and_text(|conf| conf.set_color(fg))
-            .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)");
-        style
+            .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
     }
 
     fn button_destructive<PMsg>(&self, btn: &Button<PMsg>) -> Style {
@@ -519,8 +515,7 @@ impl Ant {
                 ),
             };
 
-        let mut style = Style::default();
-        style
+        Style::default()
             .and_border(|conf| {
                 conf.set_width(px(1.))
                     .solid()
@@ -529,8 +524,7 @@ impl Ant {
             })
             .and_background(|conf| conf.set_color(bg))
             .and_text(|conf| conf.set_color(fg))
-            .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)");
-        style
+            .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
     }
 
     fn button_link<PMsg>(&self, btn: &Button<PMsg>) -> Style {
@@ -543,8 +537,7 @@ impl Ant {
             _ => (self.white(), self.brand(Variant::L400)),
         };
 
-        let mut style = Style::default();
-        style
+        Style::default()
             .and_text(|conf| conf.set_color(fg))
             .and_border(|conf| {
                 conf.set_width(px(0.))
@@ -552,8 +545,7 @@ impl Ant {
                     .set_radius(px(4.))
                     .set_color(bg)
             })
-            .and_background(|conf| conf.set_color(bg));
-        style
+            .and_background(|conf| conf.set_color(bg))
     }
 
     fn button_dashed<PMsg>(&self, btn: &Button<PMsg>) -> Style {
@@ -579,8 +571,7 @@ impl Ant {
                 ),
             };
 
-        let mut style = Style::default();
-        style
+        Style::default()
             .and_border(|conf| {
                 conf.set_width(px(1.))
                     .dashed()
@@ -589,15 +580,13 @@ impl Ant {
             })
             .and_background(|conf| conf.set_color(bg))
             .and_text(|conf| conf.set_color(fg))
-            .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)");
-        style
+            .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
     }
 }
 
 impl Theme for Ant {
     fn flexbox<PMsg: 'static>(&self, flex: &Flexbox<PMsg>) -> flexbox::Style {
-        let mut style = Style::default();
-        style
+        Style::default()
             .set_display(val::Flex)
             .try_set_flex_direction(flex.get_direction())
             .try_set_flex_wrap(flex.get_wrap())
@@ -605,30 +594,25 @@ impl Theme for Ant {
             .try_set_align_items(flex.get_align_items())
             .try_set_align_content(flex.get_align_content())
             .try_set_gap(flex.get_gap())
-            .merge(flex.user_style());
-        style
+            .merge(flex.user_style())
     }
 
     fn flexbox_item<PMsg: 'static>(&self, item: &flexbox::Item<PMsg>) -> flexbox::ItemStyle {
-        let mut style = Style::default();
-        style
+        Style::default()
             .try_add(St::Order, item.get_order())
             .try_add(St::FlexGrow, item.get_grow())
             .try_add(St::FlexShrink, item.get_shrink())
             .try_merge(item.get_basis().as_ref())
             .try_merge(item.get_align_self().as_ref())
-            .merge(item.user_style());
-        style
+            .merge(item.user_style())
     }
 
     // fn grid(&self) -> Style;
 
     fn popover<'a, PMsg, C, T>(&self, popover: &Popover<'a, PMsg, C, T>) -> popover::Style {
-        let mut container = Style::default();
-        container.and_position(|conf| conf.relative());
+        let container = Style::default().and_position(|conf| conf.relative());
 
-        let mut panel = Style::default();
-        panel
+        let panel = Style::default()
             .and_transition(|conf| {
                 conf.add("opacity", |conf| conf.set_duration(ms(150.)).ease())
                     .add("transform", |conf| conf.set_duration(ms(150.)).ease())
@@ -655,21 +639,15 @@ impl Theme for Ant {
     }
 
     fn svg_icon<PMsg: 'static>(&self, icon: &SvgIcon<PMsg>) -> icon::SvgStyle {
-        let mut style = Style::default();
-        style.merge(icon.user_style());
-        style
+        Style::default().merge(icon.user_style())
     }
 
     fn html_icon<PMsg>(&self, icon: &HtmlIcon<PMsg>) -> icon::HtmlStyle {
-        let mut style = Style::default();
-        style.merge(icon.user_style());
-        style
+        Style::default().merge(icon.user_style())
     }
 
     fn url_icon<PMsg>(&self, icon: &UrlIcon<PMsg>) -> icon::UrlStyle {
-        let mut style = Style::default();
-        style.merge(icon.user_style());
-        style
+        Style::default().merge(icon.user_style())
     }
 
     // TODO: handle is_loading()
@@ -682,36 +660,34 @@ impl Theme for Ant {
             val::Initial.into()
         };
 
-        let mut button = match btn.get_kind() {
+        let button = match btn.get_kind() {
             Some(button::Kind::Normal) | None => self.button_normal(btn),
             Some(button::Kind::Suggestion) => self.button_suggestion(btn),
             Some(button::Kind::Destructive) => self.button_destructive(btn),
             Some(button::Kind::Link) => self.button_link(btn),
             Some(button::Kind::Dashed) => self.button_dashed(btn),
-        };
-        button
-            .and_padding(|conf| conf.set_x(px(15.)).set_y(px(0.)))
-            .and_size(|conf| conf.set_height(px(32.)))
-            .and_transition(|conf| {
-                conf.all(|val| {
-                    val.set_duration(sec(0.3))
-                        .cubic_bezier(0.645, 0.045, 0.355, 1.)
-                })
+        }
+        .and_padding(|conf| conf.set_x(px(15.)).set_y(px(0.)))
+        .and_size(|conf| conf.set_all_heights(px(32.)))
+        .and_transition(|conf| {
+            conf.all(|val| {
+                val.set_duration(sec(0.3))
+                    .cubic_bezier(0.645, 0.045, 0.355, 1.)
             })
-            .and_text(|conf| {
-                conf.and_decoration(|d| d.set_line(val::None))
-                    .set_line_height(1.499)
-                    .set_white_space(val::Nowrap)
-            })
-            .and_font(|conf| conf.set_size(px(14.)).weight_400())
-            .set_cursor(cursor)
-            .add(St::Outline, val::None)
-            .add(St::UserSelect, val::None)
-            .add(St::BoxSizing, val::BorderBox)
-            .merge(&btn.user_style().button);
+        })
+        .and_text(|conf| {
+            conf.and_decoration(|d| d.set_line(val::None))
+                .set_line_height(1.499)
+                .set_white_space(val::Nowrap)
+        })
+        .and_font(|conf| conf.set_size(px(14.)).weight_400())
+        .set_cursor(cursor)
+        .add(St::Outline, val::None)
+        .add(St::UserSelect, val::None)
+        .add(St::BoxSizing, val::BorderBox)
+        .merge(&btn.user_style().button);
 
-        let mut common_container = flexbox::Style::default();
-        common_container
+        let common_container = flexbox::Style::default()
             .set_display(val::Flex)
             .set_align_content(val::Center)
             .set_align_items(val::Center)
@@ -745,8 +721,7 @@ impl Theme for Ant {
             self.gray(Variant::L500)
         };
 
-        let mut background = Style::default();
-        background
+        let background = Style::default()
             .config_if(switch.is_disabled(), |conf| conf.set_opacity(0.4))
             .set_cursor(cursor)
             .and_position(|conf| conf.relative())
@@ -768,11 +743,10 @@ impl Theme for Ant {
             // .add(St::Outline, val::None)
             .add(St::UserSelect, val::None)
             .add(St::BoxSizing, val::BorderBox)
-            .and_size(|conf| conf.set_height(px(height)).set_min_width(px(width)))
+            .and_size(|conf| conf.set_all_heights(px(height)).set_all_widths(px(width)))
             .merge(&switch.user_style().background);
 
-        let mut button = Style::default();
-        button
+        let button = Style::default()
             .config_if(switch.is_toggled(), |conf| {
                 conf.add(St::Transform, format!("translateX({})", px(width / 2.)))
             })
@@ -833,8 +807,7 @@ impl Theme for Ant {
             val::Initial.into()
         };
 
-        let mut input = Style::default();
-        input
+        let input = Style::default()
             .and_transition(|conf| {
                 conf.all(|conf| {
                     conf.set_duration(sec(0.3))
@@ -847,7 +820,7 @@ impl Theme for Ant {
             .set_align_items(val::Center)
             .add(St::WebkitAppearance, val::None)
             .add(St::Appearance, val::None)
-            .and_size(|conf| conf.resize(px(16.), px(16.)))
+            .and_size(|conf| conf.set_all(px(16.)))
             .and_border(|conf| {
                 conf.solid()
                     .set_width(px(1.))
@@ -858,8 +831,7 @@ impl Theme for Ant {
             .and_text(|conf| conf.set_color(fg))
             .merge(&checkbox.user_style().input);
 
-        let mut button = Style::default();
-        button
+        let button = Style::default()
             .config_if(checkbox.is_toggled(), |conf| {
                 conf.set_cursor(cursor)
                     .and_transition(|conf| {
@@ -878,8 +850,7 @@ impl Theme for Ant {
             })
             .merge(&checkbox.user_style().button);
 
-        let mut label = Style::default();
-        label
+        let label = Style::default()
             .config_if(checkbox.is_disabled(), |conf| {
                 conf.and_text(|conf| conf.set_color(self.disable(false)))
             })
@@ -942,8 +913,7 @@ impl Theme for Ant {
             val::Initial.into()
         };
 
-        let mut input = Style::default();
-        input
+        let input = Style::default()
             .and_transition(|conf| {
                 conf.all(|val| {
                     val.set_duration(sec(0.3))
@@ -957,7 +927,7 @@ impl Theme for Ant {
             .set_align_items(val::Center)
             .add(St::WebkitAppearance, val::None)
             .and_text(|conf| conf.set_color(fg))
-            .and_size(|conf| conf.resize(px(16.), px(16.)))
+            .and_size(|conf| conf.set_all(px(16)))
             .and_border(|conf| {
                 conf.solid()
                     .set_width(px(1.))
@@ -967,8 +937,7 @@ impl Theme for Ant {
             .and_background(|conf| conf.set_color(bg))
             .merge(&radio.user_style().input);
 
-        let mut button = Style::default();
-        button
+        let button = Style::default()
             .config_if(radio.is_toggled(), |conf| {
                 conf.set_cursor(cursor)
                     .and_size(|conf| conf.resize(0.6, 0.6))
@@ -983,8 +952,7 @@ impl Theme for Ant {
             })
             .merge(&radio.user_style().button);
 
-        let mut label = Style::default();
-        label
+        let label = Style::default()
             .config_if(radio.is_disabled(), |conf| {
                 conf.and_text(|conf| conf.set_color(self.disable(false)))
             })
@@ -1032,8 +1000,7 @@ impl Theme for Ant {
             val::Initial.into()
         };
 
-        let mut container = Style::default();
-        container
+        let container = Style::default()
             .and_transition(|conf| {
                 conf.all(|val| {
                     val.set_duration(sec(0.3))
@@ -1052,12 +1019,11 @@ impl Theme for Ant {
                     .set_color(border)
                     .set_radius(px(4.))
             })
-            .and_size(|conf| conf.set_width(1.))
+            .and_size(|conf| conf.set_all_widths(em(14.)).set_all_heights(em(1.5)))
             .set_cursor(cursor)
             .merge(&entry.user_style().container);
 
-        let mut input = Style::default();
-        input
+        let input = Style::default()
             .and_transition(|conf| {
                 conf.all(|val| {
                     val.set_duration(sec(0.3))
@@ -1099,7 +1065,7 @@ impl Theme for Ant {
         let height = 1.5;
         let btns_container_width = 1.;
         let btns_container_height = height;
-        let input_width = width - 0.2;
+        let input_width = width - 0.6;
         let input_height = 1.;
         // px used here
         let radius = 4.;
@@ -1117,8 +1083,7 @@ impl Theme for Ant {
             val::Initial.into()
         };
 
-        let mut container = Style::default();
-        container
+        let container = Style::default()
             .and_position(|conf| conf.relative())
             .and_transition(|conf| {
                 conf.all(|val| {
@@ -1136,12 +1101,11 @@ impl Theme for Ant {
                     .set_color(border)
                     .set_radius(px(radius))
             })
-            .and_size(|conf| conf.set_width(em(width)).set_height(em(height)))
+            .and_size(|conf| conf.set_all_widths(em(width)).set_all_heights(em(height)))
             .set_cursor(cursor)
             .merge(&spin_entry.user_style().container);
 
-        let mut input = Style::default();
-        input
+        let input = Style::default()
             .and_transition(|conf| {
                 conf.all(|val| {
                     val.set_duration(sec(0.3))
@@ -1157,8 +1121,7 @@ impl Theme for Ant {
             .set_cursor(cursor)
             .merge(&spin_entry.user_style().input);
 
-        let mut buttons_container = Style::default();
-        buttons_container
+        let buttons_container = Style::default()
             .and_position(|conf| conf.absolute().set_right(px(0.)))
             .and_transition(|conf| {
                 conf.all(|val| {
@@ -1196,8 +1159,7 @@ impl Theme for Ant {
             (false, false) => (btn_height, btn_height),
         };
 
-        let mut increment_button = button::Style::default();
-        increment_button
+        let increment_button = button::Style::default()
             .and_common_container(|conf| {
                 conf.set_display(val::Flex)
                     .set_align_items(val::Center)
@@ -1219,8 +1181,7 @@ impl Theme for Ant {
                 .and_size(|conf| conf.set_width(btn_width).set_height(inc_btn_height))
                 .merge(&spin_entry.user_style().decrement_button.button)
             });
-        let mut decrement_button = button::Style::default();
-        decrement_button
+        let decrement_button = button::Style::default()
             .and_common_container(|conf| {
                 conf.set_display(val::Flex)
                     .set_align_items(val::Center)
@@ -1256,5 +1217,56 @@ impl Theme for Ant {
             increment_button,
             decrement_button,
         }
+    }
+
+    fn dialog<PMsg, C>(&self, dialog: &Dialog<PMsg, C>) -> dialog::Style {
+        dialog::Style::default()
+            .and_background(|conf| {
+                conf.and_position(|conf| conf.absolute().set_z_index(500))
+                    .and_background(|conf| conf.set_color(Hsla::new(0.0, 0., 0., 0.5)))
+                    .and_size(|conf| conf.full())
+                    .and_transition(|conf| {
+                        conf.all(|val| {
+                            val.set_duration(sec(0.3))
+                                .cubic_bezier(0.645, 0.045, 0.355, 1.)
+                        })
+                    })
+                    .config(|conf| {
+                        use dialog::State::*;
+                        match dialog.state() {
+                            Closed => conf.set_display(val::None),
+                            Opening => conf
+                                .set_display(val::Flex)
+                                .set_align_content(val::Center)
+                                .set_align_items(val::Center)
+                                .set_justify_content(val::Center)
+                                .set_opacity(0.0),
+                            Opened => conf
+                                .set_display(val::Flex)
+                                .set_align_content(val::Center)
+                                .set_align_items(val::Center)
+                                .set_justify_content(val::Center)
+                                .set_opacity(1.0),
+                            Closing => conf
+                                .set_display(val::Flex)
+                                .set_align_content(val::Center)
+                                .set_align_items(val::Center)
+                                .set_justify_content(val::Center)
+                                .set_opacity(0.0),
+                        }
+                    })
+                    .merge(&dialog.user_style().background)
+            })
+            .and_widget(|conf| {
+                conf.and_background(|conf| conf.set_color(self.white()))
+                    .and_text(|conf| conf.set_color(self.primary_text(true)))
+                    .and_border(|conf| conf.set_radius(px(2)))
+                    .set_display(val::Flex)
+                    .set_align_content(val::Center)
+                    .set_align_items(val::Center)
+                    .set_justify_content(val::Center)
+                    .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
+                    .merge(&dialog.user_style().widget)
+            })
     }
 }

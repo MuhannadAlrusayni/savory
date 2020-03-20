@@ -50,11 +50,15 @@ pub struct Radio<PMsg> {
     user_style: UserStyle,
 
     // radio element properties
-    #[rich(read)]
+    #[rich(read, write)]
     label: Option<Cow<'static, str>>,
-    #[rich(read(
-        /// Return `true` if radio element is disabled
-        copy, rename = is_disabled),
+    #[rich(
+        read(
+            /// Return `true` if radio element is disabled
+            copy, rename = is_disabled
+        ),
+        write,
+        value_fns = { enable = false, disable = true }
     )]
     disabled: bool,
     #[rich(read(
@@ -67,17 +71,20 @@ pub struct Radio<PMsg> {
         copy, rename = is_mouse_over
     ))]
     mouse_over: bool,
-    #[rich(read(
-        /// Return `true` if radio element is toggled
-        copy, rename = is_toggled
-    ))]
+    #[rich(
+        read(
+            /// Return `true` if radio element is toggled
+            copy, rename = is_toggled
+        ),
+        write,
+        value_fns = { toggled = true, toggle_off = false }
+    )]
     toggled: bool,
 }
 
 impl<PMsg> Radio<PMsg> {
     pub fn new(msg_mapper: impl Into<MsgMapper<Msg, PMsg>>) -> Self {
-        let mut local_events = LocalEvents::default();
-        local_events
+        let local_events = LocalEvents::default()
             .and_input(|conf| {
                 conf.focus(|_| Msg::Focus)
                     .blur(|_| Msg::Blur)
@@ -89,6 +96,7 @@ impl<PMsg> Radio<PMsg> {
                 conf.mouse_enter(|_| Msg::MouseEnter)
                     .mouse_leave(|_| Msg::MouseLeave)
             });
+
         Self {
             input_el_ref: ElRef::default(),
             label_el_ref: ElRef::default(),
@@ -108,63 +116,61 @@ impl<PMsg> Radio<PMsg> {
         msg_mapper: impl Into<MsgMapper<Msg, PMsg>>,
         lbl: impl Into<Cow<'static, str>>,
     ) -> Self {
-        let mut radio = Self::new(msg_mapper);
-        radio.set_label(lbl);
-        radio
+        Self::new(msg_mapper).set_label(lbl)
     }
 
-    pub fn set_label(&mut self, val: impl Into<Cow<'static, str>>) -> &mut Self {
-        let val = val.into();
-        self.label_el_ref
-            .get_then(|el| el.set_inner_text(val.as_ref()));
-        self.label = Some(val.into());
-        self
-    }
+    // pub fn set_label(self, val: impl Into<Cow<'static, str>>) -> Self {
+    //     let val = val.into();
+    //     self.label_el_ref
+    //         .get_then(|el| el.set_inner_text(val.as_ref()));
+    //     self.label = Some(val.into());
+    //     self
+    // }
 
-    pub fn disable(&mut self) -> &mut Self {
-        self.input_el_ref.get_then(|el| el.set_disabled(true));
-        self.disabled = true;
-        self
-    }
+    // pub fn disable(self) -> Self {
+    //     self.input_el_ref.get_then(|el| el.set_disabled(true));
+    //     self.disabled = true;
+    //     self
+    // }
 
-    pub fn enable(&mut self) -> &mut Self {
-        self.input_el_ref.get_then(|el| el.set_disabled(false));
-        self.disabled = false;
-        self
-    }
+    // pub fn enable(self) -> Self {
+    //     self.input_el_ref.get_then(|el| el.set_disabled(false));
+    //     self.disabled = false;
+    //     self
+    // }
 
-    pub fn set_disabled(&mut self, val: bool) -> &mut Self {
-        if let Some(input) = self.input_el_ref.get() {
-            input.set_disabled(val);
-        }
-        self.disabled = val;
-        self
-    }
+    // pub fn set_disabled(self, val: bool) -> Self {
+    //     if let Some(input) = self.input_el_ref.get() {
+    //         input.set_disabled(val);
+    //     }
+    //     self.disabled = val;
+    //     self
+    // }
 
-    pub fn toggle_on(&mut self) -> &mut Self {
-        self.toggled = true;
-        self
-    }
+    // pub fn toggle_on(self) -> Self {
+    //     self.toggled = true;
+    //     self
+    // }
 
-    pub fn toggle_off(&mut self) -> &mut Self {
-        self.toggled = false;
-        self
-    }
+    // pub fn toggle_off(self) -> Self {
+    //     self.toggled = false;
+    //     self
+    // }
 
-    pub fn set_toggle(&mut self, val: bool) -> &mut Self {
-        if val {
-            self.toggle_on()
-        } else {
-            self.toggle_off()
-        }
-    }
+    // pub fn set_toggle(self, val: bool) -> Self {
+    //     if val {
+    //         self.toggle_on()
+    //     } else {
+    //         self.toggle_off()
+    //     }
+    // }
 
-    pub fn toggle(&mut self) -> &mut Self {
-        self.set_toggle(!self.toggled)
-    }
+    // pub fn toggle(self) -> Self {
+    //     self.set_toggle(!self.toggled)
+    // }
 
     pub fn handle_toggle_msg(&mut self) {
-        self.toggle();
+        self.toggled = !self.toggled;
     }
 }
 
@@ -211,8 +217,7 @@ impl<PMsg: 'static> Render<PMsg> for Radio<PMsg> {
     }
 
     fn render_with_style(&self, _: &impl Theme, style: Self::Style) -> Self::View {
-        let mut input = input!();
-        input
+        let mut input = input!()
             .el_ref(&self.input_el_ref)
             .and_attributes(|conf| {
                 conf.set_class("radio-input")
@@ -225,33 +230,26 @@ impl<PMsg: 'static> Render<PMsg> for Radio<PMsg> {
 
         // add button div if the radio is toggled
         if self.is_toggled() {
-            let mut button = div!();
-            button
+            let button = div!()
                 .and_attributes(|conf| conf.set_class("radio-button"))
                 .set_style(style.button);
             input.add_child(button);
         }
 
-        let mut input = input.map_msg_with(&self.msg_mapper);
-        input.add_events(&self.events.input);
+        let input = input
+            .map_msg_with(&self.msg_mapper)
+            .add_events(&self.events.input);
 
         match self.label.as_ref() {
             None => input,
-            Some(lbl) => {
-                let mut label = label!();
-                label
-                    .and_attributes(|conf| conf.set_class("radio-label"))
-                    .el_ref(&self.label_el_ref)
-                    .set_style(style.label)
-                    .set_events(&self.local_events.label);
-
-                let mut label = label.map_msg_with(&self.msg_mapper);
-                label
-                    .add_children(vec![input, plain![lbl.to_string()]])
-                    .add_events(&self.events.label);
-
-                label
-            }
+            Some(lbl) => label!()
+                .and_attributes(|conf| conf.set_class("radio-label"))
+                .el_ref(&self.label_el_ref)
+                .set_style(style.label)
+                .set_events(&self.local_events.label)
+                .map_msg_with(&self.msg_mapper)
+                .add_children(vec![input, plain![lbl.to_string()]])
+                .add_events(&self.events.label),
         }
     }
 }

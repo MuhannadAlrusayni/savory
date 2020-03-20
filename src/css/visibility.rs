@@ -26,8 +26,6 @@ impl From<bool> for Visibility {
 
 impl ToStyleMap for Visibility {
     fn style_map(&self) -> StyleMap {
-        let mut map = StyleMap::default();
-        map.add(St::Visibility, self);
-        map
+        StyleMap::default().add(St::Visibility, self)
     }
 }

@@ -10,6 +10,7 @@ pub mod prelude {
         control::{
             button::{self, Button},
             checkbox::{self, Checkbox},
+            dialog::{self, Dialog},
             entry::{self, Entry},
             radio::{self, Radio},
             spin_entry::{self, SpinEntry},

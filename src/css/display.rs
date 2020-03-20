@@ -52,8 +52,6 @@ pub enum Display {
 
 impl ToStyleMap for Display {
     fn style_map(&self) -> StyleMap {
-        let mut map = StyleMap::default();
-        map.add(St::Display, self);
-        map
+        StyleMap::default().add(St::Display, self)
     }
 }

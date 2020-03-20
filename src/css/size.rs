@@ -36,40 +36,56 @@ pub struct Size {
 
 impl ToStyleMap for Size {
     fn style_map(&self) -> StyleMap {
-        let mut map = StyleMap::default();
-        map.try_add(St::Width, self.width)
+        StyleMap::default()
+            .try_add(St::Width, self.width)
             .try_add(St::MinWidth, self.min_width)
             .try_add(St::MaxWidth, self.max_width)
             .try_add(St::Height, self.height)
             .try_add(St::MinHeight, self.min_height)
-            .try_add(St::MaxHeight, self.max_height);
-        map
+            .try_add(St::MaxHeight, self.max_height)
     }
 }
 
 impl Size {
-    pub fn full(&mut self) -> &mut Self {
+    pub fn full(self) -> Self {
         self.set_width(1.0).set_height(1.0)
     }
 
-    pub fn half(&mut self) -> &mut Self {
+    pub fn half(self) -> Self {
         self.set_width(0.5).set_height(0.5)
     }
 
-    pub fn min_content(&mut self) -> &mut Self {
+    pub fn min_content(self) -> Self {
         self.set_width(val::MinContent).set_height(val::MinContent)
     }
 
-    pub fn max_content(&mut self) -> &mut Self {
+    pub fn max_content(self) -> Self {
         self.set_width(val::MaxContent).set_height(val::MaxContent)
     }
 
-    pub fn auto(&mut self) -> &mut Self {
+    pub fn auto(self) -> Self {
         self.set_width(val::Auto).set_height(val::Auto)
     }
 
-    pub fn resize(&mut self, width: impl Into<Length>, height: impl Into<Length>) -> &mut Self {
+    pub fn resize(self, width: impl Into<Length>, height: impl Into<Length>) -> Self {
         self.set_width(width).set_height(height)
+    }
+
+    pub fn set_all(self, val: impl Into<Length>) -> Self {
+        let val = val.into();
+        self.set_all_widths(val).set_all_heights(val)
+    }
+
+    pub fn set_all_widths(self, width: impl Into<Length>) -> Self {
+        let width = width.into();
+        self.set_width(width)
+            .set_min_width(width)
+            .set_max_width(width)
+    }
+
+    pub fn set_all_heights(self, val: impl Into<Length>) -> Self {
+        let val = val.into();
+        self.set_height(val).set_min_height(val).set_max_height(val)
     }
 }
 

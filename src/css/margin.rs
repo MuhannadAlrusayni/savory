@@ -28,25 +28,22 @@ pub struct Margin {
 
 impl From<Length> for Margin {
     fn from(source: Length) -> Self {
-        let mut margin = Self::default();
-        margin.set_all(source);
-        margin
+        Self::default().set_all(source)
     }
 }
 
 impl ToStyleMap for Margin {
     fn style_map(&self) -> StyleMap {
-        let mut map = StyleMap::default();
-        map.try_add(St::MarginTop, self.top)
+        StyleMap::default()
+            .try_add(St::MarginTop, self.top)
             .try_add(St::MarginRight, self.right)
             .try_add(St::MarginBottom, self.bottom)
-            .try_add(St::MarginLeft, self.left);
-        map
+            .try_add(St::MarginLeft, self.left)
     }
 }
 
 impl Margin {
-    pub fn set_all(&mut self, value: impl Into<Length>) -> &mut Self {
+    pub fn set_all(self, value: impl Into<Length>) -> Self {
         let value = value.into();
         self.set_right(value)
             .set_top(value)
@@ -54,37 +51,37 @@ impl Margin {
             .set_bottom(value)
     }
 
-    pub fn zero(&mut self) -> &mut Self {
+    pub fn zero(self) -> Self {
         self.set_all(px(0.))
     }
 
-    pub fn set_x(&mut self, value: impl Into<Length>) -> &mut Self {
+    pub fn set_x(self, value: impl Into<Length>) -> Self {
         let value = value.into();
         self.set_left(value).set_right(value)
     }
 
-    pub fn set_y(&mut self, value: impl Into<Length>) -> &mut Self {
+    pub fn set_y(self, value: impl Into<Length>) -> Self {
         let value = value.into();
         self.set_top(value).set_bottom(value)
     }
 
-    pub fn set_horizontal(&mut self, value: impl Into<Length>) -> &mut Self {
+    pub fn set_horizontal(self, value: impl Into<Length>) -> Self {
         self.set_y(value)
     }
 
-    pub fn set_vertical(&mut self, value: impl Into<Length>) -> &mut Self {
+    pub fn set_vertical(self, value: impl Into<Length>) -> Self {
         self.set_x(value)
     }
 
-    pub fn auto(&mut self) -> &mut Self {
+    pub fn auto(self) -> Self {
         self.set_all(val::Auto)
     }
 
-    pub fn full(&mut self) -> &mut Self {
+    pub fn full(self) -> Self {
         self.set_all(1.)
     }
 
-    pub fn half(&mut self) -> &mut Self {
+    pub fn half(self) -> Self {
         self.set_all(0.5)
     }
 }

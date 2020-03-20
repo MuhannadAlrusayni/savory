@@ -17,9 +17,7 @@ pub enum Basis {
 
 impl ToStyleMap for Basis {
     fn style_map(&self) -> StyleMap {
-        let mut map = StyleMap::default();
-        map.add(St::FlexBasis, self);
-        map
+        StyleMap::default().add(St::FlexBasis, self)
     }
 }
 
@@ -37,9 +35,7 @@ pub enum Direction {
 
 impl ToStyleMap for Direction {
     fn style_map(&self) -> StyleMap {
-        let mut map = StyleMap::default();
-        map.add(St::FlexDirection, self);
-        map
+        StyleMap::default().add(St::FlexDirection, self)
     }
 }
 
@@ -55,9 +51,7 @@ pub enum Wrap {
 
 impl ToStyleMap for Wrap {
     fn style_map(&self) -> StyleMap {
-        let mut map = StyleMap::default();
-        map.add(St::FlexWrap, self);
-        map
+        StyleMap::default().add(St::FlexWrap, self)
     }
 }
 
@@ -66,9 +60,7 @@ pub struct Order(i32);
 
 impl ToStyleMap for Order {
     fn style_map(&self) -> StyleMap {
-        let mut map = StyleMap::default();
-        map.add(St::Order, self.0);
-        map
+        StyleMap::default().add(St::Order, self.0)
     }
 }
 
@@ -77,9 +69,7 @@ pub struct Grow(f32);
 
 impl ToStyleMap for Grow {
     fn style_map(&self) -> StyleMap {
-        let mut map = StyleMap::default();
-        map.add(St::FlexGrow, self.0);
-        map
+        StyleMap::default().add(St::FlexGrow, self.0)
     }
 }
 
@@ -88,8 +78,6 @@ pub struct Shrink(f32);
 
 impl ToStyleMap for Shrink {
     fn style_map(&self) -> StyleMap {
-        let mut map = StyleMap::default();
-        map.add(St::FlexShrink, self.0);
-        map
+        StyleMap::default().add(St::FlexShrink, self.0)
     }
 }

@@ -40,8 +40,6 @@ where
 
 impl ToStyleMap for Gap {
     fn style_map(&self) -> StyleMap {
-        let mut map = StyleMap::default();
-        map.add(St::Gap, self);
-        map
+        StyleMap::default().add(St::Gap, self)
     }
 }

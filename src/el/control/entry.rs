@@ -49,13 +49,13 @@ pub struct Entry<PMsg> {
     user_style: UserStyle,
 
     // entry element properties
-    #[rich(read)]
+    #[rich(read, write)]
     text: Option<Cow<'static, str>>,
-    #[rich(read(copy))]
+    #[rich(read(copy), write)]
     max_length: Option<att::MaxLength>,
-    #[rich(read)]
+    #[rich(read, write)]
     placeholder: Option<Cow<'static, str>>,
-    #[rich(read(
+    #[rich(write, read(
         /// Return `true` if entry element is disabled
         copy, rename = is_disabled
     ))]
@@ -74,8 +74,7 @@ pub struct Entry<PMsg> {
 
 impl<PMsg> Entry<PMsg> {
     pub fn new(msg_mapper: impl Into<MsgMapper<Msg, PMsg>>) -> Self {
-        let mut local_events = LocalEvents::default();
-        local_events.and_input(|conf| {
+        let local_events = LocalEvents::default().and_input(|conf| {
             conf.focus(|_| Msg::Focus)
                 .blur(|_| Msg::Blur)
                 .mouse_enter(|_| Msg::MouseEnter)
@@ -102,54 +101,52 @@ impl<PMsg> Entry<PMsg> {
         msg_mapper: impl Into<MsgMapper<Msg, PMsg>>,
         val: impl Into<Cow<'static, str>>,
     ) -> Self {
-        let mut entry = Self::new(msg_mapper);
-        entry.set_placeholder(val);
-        entry
+        Self::new(msg_mapper).set_placeholder(val)
     }
 
-    pub fn set_text(&mut self, text: impl Into<Cow<'static, str>>) -> &mut Self {
-        let text = text.into();
-        if let Some(input) = self.el_ref.get() {
-            input.set_value(text.as_ref());
-        }
-        self.text = Some(text);
-        self
-    }
+    // pub fn set_text(self, text: impl Into<Cow<'static, str>>) -> Self {
+    //     let text = text.into();
+    //     if let Some(input) = self.el_ref.get() {
+    //         input.set_value(text.as_ref());
+    //     }
+    //     self.text = Some(text);
+    //     self
+    // }
 
-    pub fn set_max_length(&mut self, val: impl Into<att::MaxLength>) -> &mut Self {
-        let val = val.into();
-        self.el_ref
-            .get_then(|el| el.set_max_length(val.into_inner()));
-        self.max_length = Some(val);
-        self
-    }
+    // pub fn set_max_length(self, val: impl Into<att::MaxLength>) -> Self {
+    //     let val = val.into();
+    //     self.el_ref
+    //         .get_then(|el| el.set_max_length(val.into_inner()));
+    //     self.max_length = Some(val);
+    //     self
+    // }
 
-    pub fn set_placeholder(&mut self, val: impl Into<Cow<'static, str>>) -> &mut Self {
-        let val = val.into();
-        self.el_ref.get_then(|el| el.set_placeholder(&val));
-        self.placeholder = Some(val);
-        self
-    }
+    // pub fn set_placeholder(self, val: impl Into<Cow<'static, str>>) -> Self {
+    //     let val = val.into();
+    //     self.el_ref.get_then(|el| el.set_placeholder(&val));
+    //     self.placeholder = Some(val);
+    //     self
+    // }
 
-    pub fn disable(&mut self) -> &mut Self {
-        self.el_ref.get_then(|el| el.set_disabled(true));
-        self.disabled = true;
-        self
-    }
+    // pub fn disable(self) -> Self {
+    //     self.el_ref.get_then(|el| el.set_disabled(true));
+    //     self.disabled = true;
+    //     self
+    // }
 
-    pub fn enable(&mut self) -> &mut Self {
-        self.el_ref.get_then(|el| el.set_disabled(false));
-        self.disabled = false;
-        self
-    }
+    // pub fn enable(self) -> Self {
+    //     self.el_ref.get_then(|el| el.set_disabled(false));
+    //     self.disabled = false;
+    //     self
+    // }
 
-    pub fn set_disabled(&mut self, val: bool) -> &mut Self {
-        if val {
-            self.enable()
-        } else {
-            self.disable()
-        }
-    }
+    // pub fn set_disabled(self, val: bool) -> Self {
+    //     if val {
+    //         self.enable()
+    //     } else {
+    //         self.disable()
+    //     }
+    // }
 
     fn handle_update_text(&mut self) {
         if let Some(input) = self.el_ref.get() {
@@ -197,8 +194,7 @@ impl<PMsg: 'static> Render<PMsg> for Entry<PMsg> {
     }
 
     fn render_with_style(&self, _: &impl Theme, style: Self::Style) -> Self::View {
-        let mut input = input!();
-        input
+        let input = input!()
             .set_events(&self.local_events.input)
             .set_style(style.input)
             .and_attributes(|conf| {
@@ -206,20 +202,15 @@ impl<PMsg: 'static> Render<PMsg> for Entry<PMsg> {
                     .try_set_value(self.text.clone())
                     .try_set_max_length(self.max_length)
                     .try_set_placeholder(self.placeholder.clone())
-            });
+            })
+            .map_msg_with(&self.msg_mapper)
+            .add_events(&self.events.input);
 
-        let mut input = input.map_msg_with(&self.msg_mapper);
-        input.add_events(&self.events.input);
-
-        let mut container = div!();
-        container
+        div!()
             .set_style(style.container)
-            .set_events(&self.local_events.container);
-
-        let mut container = container.map_msg_with(&self.msg_mapper);
-        container
+            .set_events(&self.local_events.container)
+            .map_msg_with(&self.msg_mapper)
             .add_events(&self.events.container)
-            .add_child(input);
-        container
+            .add_children(vec![input])
     }
 }

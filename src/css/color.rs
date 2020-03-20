@@ -363,9 +363,7 @@ pub enum Color {
 
 impl ToStyleMap for Color {
     fn style_map(&self) -> StyleMap {
-        let mut map = StyleMap::default();
-        map.add(St::Color, self);
-        map
+        StyleMap::default().add(St::Color, self)
     }
 }
 
@@ -374,8 +372,6 @@ pub struct Opacity(f32);
 
 impl ToStyleMap for Opacity {
     fn style_map(&self) -> StyleMap {
-        let mut map = StyleMap::default();
-        map.add(St::Opacity, self.0);
-        map
+        StyleMap::default().add(St::Opacity, self.0)
     }
 }

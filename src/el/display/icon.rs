@@ -78,12 +78,11 @@ impl<PMsg: 'static> Render<PMsg> for SvgIcon<PMsg> {
     }
 
     fn render_with_style(&self, _: &impl Theme, style: Self::Style) -> Self::View {
-        let mut svg = svg![];
-        svg.set_style(style)
+        svg!()
+            .set_style(style)
             .set_events(&self.events)
             .and_attributes(|conf| conf.try_set_view_box(self.view_box))
-            .add_children(self.draw.clone());
-        svg
+            .add_children(self.draw.clone())
     }
 }
 
@@ -122,12 +121,11 @@ impl<PMsg: 'static> Render<PMsg> for HtmlIcon<PMsg> {
     }
 
     fn render_with_style(&self, _: &impl Theme, style: Self::Style) -> Self::View {
-        let mut svg = svg!();
-        svg.set_style(style)
+        svg!()
+            .set_style(style)
             .and_attributes(|conf| conf.try_set_view_box(self.view_box))
             .set_events(&self.events)
-            .add_children(raw![self.html.as_ref()]);
-        svg
+            .add_children(raw![self.html.as_ref()])
     }
 }
 
@@ -169,10 +167,9 @@ impl<PMsg: 'static> Render<PMsg> for UrlIcon<PMsg> {
     }
 
     fn render_with_style(&self, _: &impl Theme, style: Self::Style) -> Self::View {
-        let mut img = img!();
-        img.set_style(style)
+        img!()
+            .set_style(style)
             .set_events(&self.events)
-            .and_attributes(|conf| conf.set_src(self.url.clone()));
-        img
+            .and_attributes(|conf| conf.set_src(self.url.clone()))
     }
 }

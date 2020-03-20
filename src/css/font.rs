@@ -68,13 +68,12 @@ pub struct Font {
 
 impl ToStyleMap for Font {
     fn style_map(&self) -> StyleMap {
-        let mut map = StyleMap::default();
-        map.try_add(St::FontFamily, self.family.clone())
+        StyleMap::default()
+            .try_add(St::FontFamily, self.family.clone())
             .try_add(St::FontSize, self.size)
             .try_add(St::FontStyle, self.style)
             .try_add(St::FontVariant, self.variant)
-            .try_add(St::FontWeight, self.weight);
-        map
+            .try_add(St::FontWeight, self.weight)
     }
 }
 

@@ -36,8 +36,7 @@ pub struct Border {
 
 impl ToStyleMap for Border {
     fn style_map(&self) -> StyleMap {
-        let mut map = StyleMap::default();
-        map
+        StyleMap::default()
             // left side
             .try_add(St::BorderLeftColor, self.left.color)
             .try_add(St::BorderLeftWidth, self.left.width)
@@ -58,15 +57,14 @@ impl ToStyleMap for Border {
             .try_add(St::BorderTopLeftRadius, self.top_left)
             .try_add(St::BorderTopRightRadius, self.top_right)
             .try_add(St::BorderBottomLeftRadius, self.bottom_left)
-            .try_add(St::BorderBottomRightRadius, self.bottom_right);
-        map
+            .try_add(St::BorderBottomRightRadius, self.bottom_right)
     }
 }
 
 macro_rules! sides_style_shortcut_functions {
     ( $( $fn:ident() $(,)? )* ) => {
         $(
-            pub fn $fn(&mut self) -> &mut Self {
+            pub fn $fn(self) -> Self {
                 self.all_side(|side| side.$fn())
             }
         )*
@@ -74,33 +72,33 @@ macro_rules! sides_style_shortcut_functions {
 }
 
 impl Border {
-    pub fn all_side(&mut self, value: impl Fn(&mut Side) -> &mut Side + Copy) -> &mut Self {
+    pub fn all_side(self, value: impl Fn(Side) -> Side + Copy) -> Self {
         self.and_left(value)
             .and_top(value)
             .and_right(value)
             .and_bottom(value)
     }
 
-    pub fn set_style(&mut self, style: impl Into<Style>) -> &mut Self {
+    pub fn set_style(self, style: impl Into<Style>) -> Self {
         let style = style.into();
         self.all_side(|side| side.set_style(style))
     }
 
-    pub fn set_width(&mut self, width: impl Into<Width>) -> &mut Self {
+    pub fn set_width(self, width: impl Into<Width>) -> Self {
         let width = width.into();
         self.all_side(|side| side.set_width(width))
     }
 
-    pub fn set_color(&mut self, color: impl Into<Color>) -> &mut Self {
+    pub fn set_color(self, color: impl Into<Color>) -> Self {
         let color = color.into();
         self.all_side(|side| side.set_color(color))
     }
 
-    pub fn transparent(&mut self) -> &mut Self {
+    pub fn transparent(self) -> Self {
         self.set_color(Color::Transparent)
     }
 
-    pub fn set_radius(&mut self, rad: impl Into<Radius>) -> &mut Self {
+    pub fn set_radius(self, rad: impl Into<Radius>) -> Self {
         let rad = rad.into();
         self.set_top_left(rad)
             .set_top_right(rad)

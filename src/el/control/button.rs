@@ -60,20 +60,19 @@ pub struct Button<PMsg: 'static> {
     block: bool,
     #[rich(read(copy), write)]
     ghost: bool,
-    #[rich(write, read)]
+    #[rich(read, write)]
     route: Option<Cow<'static, str>>,
-    #[rich(read(copy, rename = is_disabled),)]
+    #[rich(read(copy, rename = is_disabled), write, value_fns = { disable = true, enable = false })]
     disabled: bool,
-    #[rich(read(copy, rename = is_focused))]
+    #[rich(read(copy, rename = is_focused), write)]
     focus: bool,
-    #[rich(read(copy, rename = is_mouse_over))]
+    #[rich(read(copy, rename = is_mouse_over), write)]
     mouse_over: bool,
 }
 
 impl<PMsg> Button<PMsg> {
     pub fn new(msg_mapper: impl Into<MsgMapper<Msg, PMsg>>) -> Self {
-        let mut local_events = Events::default();
-        local_events
+        let local_events = Events::default()
             .focus(|_| Msg::Focus)
             .blur(|_| Msg::Blur)
             .mouse_enter(|_| Msg::MouseEnter)
@@ -101,18 +100,14 @@ impl<PMsg> Button<PMsg> {
         msg_mapper: impl Into<MsgMapper<Msg, PMsg>>,
         label: impl Into<Cow<'static, str>>,
     ) -> Self {
-        let mut btn = Button::new(msg_mapper);
-        btn.set_label(label);
-        btn
+        Button::new(msg_mapper).set_label(label)
     }
 
     pub fn with_children(
         msg_mapper: impl Into<MsgMapper<Msg, PMsg>>,
         children: Vec<Node<PMsg>>,
     ) -> Self {
-        let mut btn = Button::new(msg_mapper);
-        btn.set_children(children);
-        btn
+        Button::new(msg_mapper).set_children(children)
     }
 
     pub fn label(&self) -> Option<&str> {
@@ -122,7 +117,7 @@ impl<PMsg> Button<PMsg> {
         }
     }
 
-    pub fn set_label(&mut self, label: impl Into<Cow<'static, str>>) -> &mut Self {
+    pub fn set_label(mut self, label: impl Into<Cow<'static, str>>) -> Self {
         match self.inner {
             Inner::Common(Some(ref mut lbl), _) => *lbl = label.into(),
             Inner::Common(ref mut lbl, _) => *lbl = Some(label.into()),
@@ -131,34 +126,16 @@ impl<PMsg> Button<PMsg> {
         self
     }
 
-    pub fn set_children(&mut self, children: Vec<Node<PMsg>>) -> &mut Self {
+    pub fn set_children(mut self, children: Vec<Node<PMsg>>) -> Self {
         self.inner = Inner::Children(children);
         self
     }
 
-    pub fn set_icon(&mut self, new_icon: impl Into<Icon<PMsg>>) -> &mut Self {
+    pub fn set_icon(mut self, new_icon: impl Into<Icon<PMsg>>) -> Self {
         match self.inner {
             Inner::Common(_, ref mut icon) => *icon = Some(new_icon.into()),
             _ => self.inner = Inner::Common(None, Some(new_icon.into())),
         };
-        self
-    }
-
-    pub fn disable(&mut self) -> &mut Self {
-        self.el_ref.get_then(|el| el.set_disabled(true));
-        self.disabled = true;
-        self
-    }
-
-    pub fn enable(&mut self) -> &mut Self {
-        self.el_ref.get_then(|el| el.set_disabled(false));
-        self.disabled = false;
-        self
-    }
-
-    pub fn set_disabled(&mut self, val: bool) -> &mut Self {
-        self.el_ref.get_then(|el| el.set_disabled(val));
-        self.disabled = val;
         self
     }
 
@@ -228,14 +205,12 @@ impl<PMsg: 'static> Render<PMsg> for Button<PMsg> {
             }
         };
 
-        let mut button = button!();
-        button
+        button!()
             .set_events(&self.local_events)
             .set_style(style.button)
-            .and_attributes(|conf| conf.set_class("button").set_disabled(self.disabled));
-
-        let mut button = button.map_msg_with(&self.msg_mapper);
-        button.add_events(&self.events).add_children(inner);
-        button
+            .and_attributes(|conf| conf.set_class("button").set_disabled(self.disabled))
+            .map_msg_with(&self.msg_mapper)
+            .add_events(&self.events)
+            .add_children(inner)
     }
 }

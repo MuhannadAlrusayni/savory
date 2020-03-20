@@ -13,7 +13,6 @@ pub enum Msg {
 #[derive(Rich)]
 pub struct Switch<PMsg> {
     // general element properties
-    el_ref: ElRef<web_sys::HtmlInputElement>,
     msg_mapper: MsgMapper<Msg, PMsg>,
     #[rich(read, write(style = compose))]
     local_events: Events<Msg>,
@@ -39,8 +38,7 @@ pub struct Switch<PMsg> {
 
 impl<PMsg> Switch<PMsg> {
     pub fn new(msg_mapper: impl Into<MsgMapper<Msg, PMsg>>) -> Self {
-        let mut local_events = Events::default();
-        local_events
+        let local_events = Events::default()
             .focus(|_| Msg::Focus)
             .blur(|_| Msg::Blur)
             .mouse_enter(|_| Msg::MouseEnter)
@@ -48,7 +46,6 @@ impl<PMsg> Switch<PMsg> {
             .click(|_| Msg::Click);
 
         Self {
-            el_ref: ElRef::default(),
             msg_mapper: msg_mapper.into(),
             local_events,
             events: Events::default(),
@@ -60,48 +57,8 @@ impl<PMsg> Switch<PMsg> {
         }
     }
 
-    pub fn disable(&mut self) -> &mut Self {
-        self.el_ref.get_then(|el| el.set_disabled(true));
-        self.disabled = true;
-        self
-    }
-
-    pub fn enable(&mut self) -> &mut Self {
-        self.el_ref.get_then(|el| el.set_disabled(false));
-        self.disabled = true;
-        self
-    }
-
-    pub fn set_disabled(&mut self, val: bool) -> &mut Self {
-        self.el_ref.get_then(|el| el.set_disabled(val));
-        self.disabled = val;
-        self
-    }
-
-    pub fn toggle_on(&mut self) -> &mut Self {
-        self.toggled = true;
-        self
-    }
-
-    pub fn toggle_off(&mut self) -> &mut Self {
-        self.toggled = false;
-        self
-    }
-
-    pub fn set_toggle(&mut self, val: bool) -> &mut Self {
-        if val {
-            self.toggle_on()
-        } else {
-            self.toggle_off()
-        }
-    }
-
-    pub fn toggle(&mut self) -> &mut Self {
-        self.set_toggle(!self.toggled)
-    }
-
     fn handle_toggle_msg(&mut self) {
-        self.toggle();
+        self.toggled = !self.toggled;
     }
 }
 
@@ -144,20 +101,16 @@ impl<PMsg: 'static> Render<PMsg> for Switch<PMsg> {
     }
 
     fn render_with_style(&self, _: &impl Theme, style: Self::Style) -> Self::View {
-        let mut button = div!();
-        button
+        let button = div!()
             .and_attributes(|conf| conf.set_class("switch-button"))
             .set_style(style.button);
 
-        let mut switch = button!();
-        switch
+        button!()
             .set_events(&self.local_events)
             .set_style(style.background)
             .and_attributes(|conf| conf.set_class("switch").set_disabled(self.disabled))
-            .add_child(button);
-
-        let mut switch = switch.map_msg_with(&self.msg_mapper);
-        switch.add_events(&self.events);
-        switch
+            .add_children(vec![button])
+            .map_msg_with(&self.msg_mapper)
+            .add_events(&self.events)
     }
 }

@@ -61,16 +61,13 @@ where
     }
 
     fn render_with_style(&self, theme: &impl Theme, style: Self::Style) -> Self::View {
-        let mut panel = div!();
-        panel
+        let panel = div!()
             .set_style(style.panel)
-            .add_child(self.child.render(theme));
+            .add_children(vec![self.child.render(theme)]);
 
-        let mut popover = div!();
-        popover
+        div!()
             .set_style(style.container)
             .set_events(&self.events)
-            .add_children(vec![self.target.render(theme), panel]);
-        popover
+            .add_children(vec![self.target.render(theme), panel])
     }
 }

@@ -58,9 +58,7 @@ pub enum JustifyContent {
 
 impl ToStyleMap for JustifyContent {
     fn style_map(&self) -> StyleMap {
-        let mut map = StyleMap::default();
-        map.add(St::JustifyContent, self);
-        map
+        StyleMap::default().add(St::JustifyContent, self)
     }
 }
 
@@ -116,9 +114,7 @@ pub enum AlignContent {
 
 impl ToStyleMap for AlignContent {
     fn style_map(&self) -> StyleMap {
-        let mut map = StyleMap::default();
-        map.add(St::AlignContent, self);
-        map
+        StyleMap::default().add(St::AlignContent, self)
     }
 }
 
@@ -180,9 +176,7 @@ pub enum AlignItems {
 
 impl ToStyleMap for AlignItems {
     fn style_map(&self) -> StyleMap {
-        let mut map = StyleMap::default();
-        map.add(St::AlignItems, self);
-        map
+        StyleMap::default().add(St::AlignItems, self)
     }
 }
 
@@ -258,9 +252,7 @@ pub enum JustifySelf {
 
 impl ToStyleMap for JustifySelf {
     fn style_map(&self) -> StyleMap {
-        let mut map = StyleMap::default();
-        map.add(St::JustifySelf, self);
-        map
+        StyleMap::default().add(St::JustifySelf, self)
     }
 }
 
@@ -324,8 +316,6 @@ pub enum AlignSelf {
 
 impl ToStyleMap for AlignSelf {
     fn style_map(&self) -> StyleMap {
-        let mut map = StyleMap::default();
-        map.add(St::AlignSelf, self);
-        map
+        StyleMap::default().add(St::AlignSelf, self)
     }
 }

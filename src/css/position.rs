@@ -38,15 +38,14 @@ pub struct Position {
 
 impl ToStyleMap for Position {
     fn style_map(&self) -> StyleMap {
-        let mut map = StyleMap::default();
-        map.try_add(St::Position, self.position.as_ref())
+        StyleMap::default()
+            .try_add(St::Position, self.position.as_ref())
             .try_add(St::Left, self.left.as_ref())
             .try_add(St::Top, self.top.as_ref())
             .try_add(St::Right, self.right.as_ref())
             .try_add(St::Bottom, self.bottom.as_ref())
             .try_add(St::ZIndex, self.z_index.as_ref())
-            .try_add(St::Clip, self.clip.as_ref());
-        map
+            .try_add(St::Clip, self.clip.as_ref())
     }
 }
 

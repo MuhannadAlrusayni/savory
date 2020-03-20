@@ -74,18 +74,17 @@ pub struct Background {
 
 impl ToStyleMap for Background {
     fn style_map(&self) -> StyleMap {
-        let mut map = StyleMap::default();
-        map.try_add(St::BackgroundColor, self.color)
+        StyleMap::default()
+            .try_add(St::BackgroundColor, self.color)
             .try_add(St::BackgroundImage, self.image.as_ref())
             .try_add(St::BackgroundRepeat, self.repeat)
             .try_add(St::BackgroundAttachment, self.attachment)
-            .try_add(St::BackgroundPosition, self.position);
-        map
+            .try_add(St::BackgroundPosition, self.position)
     }
 }
 
 impl Background {
-    pub fn transparent(&mut self) -> &mut Self {
+    pub fn transparent(self) -> Self {
         self.set_color(Color::Transparent)
     }
 }

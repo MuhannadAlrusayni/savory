@@ -35,9 +35,9 @@ macro_rules! mouse_events {
                 $(
                     $( #[$doc] )?
                     pub fn $name(
-                        &mut self,
+                        mut self,
                         handler: impl FnOnce($ty) -> Msg + 'static + Clone,
-                    ) -> &mut Self {
+                    ) -> Self {
                         self.events.push($event($ev, handler));
                         self
                     }

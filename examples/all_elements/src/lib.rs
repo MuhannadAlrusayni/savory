@@ -9,6 +9,8 @@ pub enum Msg {
     Switch(switch::Msg),
     Entry(entry::Msg),
     SpinEntry(spin_entry::Msg),
+    Dialog(dialog::Msg),
+    DialogChild(button::Msg),
 }
 
 pub struct Page {
@@ -19,18 +21,29 @@ pub struct Page {
     switch: Switch<Msg>,
     entry: Entry<Msg>,
     spin_entry: SpinEntry<Msg>,
+    dialog: Dialog<Msg, Button<Msg>>,
 }
 
 impl Default for Page {
     fn default() -> Self {
+        let dialog = Dialog::new(Msg::Dialog, Button::with_label(Msg::DialogChild, "hmm"))
+            .open()
+            .and_user_style(|conf| {
+                conf.and_widget(|conf| conf.and_padding(|conf| conf.set_all(px(12))))
+            });
+
+        let button = Button::with_label(Msg::Button, "Click Here")
+            .and_events(|conf| conf.click(|_| Msg::Dialog(dialog::Msg::Show)));
+
         Self {
             theme: Ant::new(),
-            button: Button::with_label(Msg::Button, "Click Here"),
+            button,
             checkbox: Checkbox::with_label(Msg::Checkbox, "Checkbox element"),
             radio: Radio::with_label(Msg::Radio, "Radio element"),
             switch: Switch::new(Msg::Switch),
             entry: Entry::with_placeholder(Msg::Entry, "Ali Yousef"),
             spin_entry: SpinEntry::new(Msg::SpinEntry),
+            dialog,
         }
     }
 }
@@ -46,6 +59,8 @@ impl Model<Msg, ()> for Page {
             Msg::Switch(msg) => self.switch.update(msg, orders),
             Msg::Entry(msg) => self.entry.update(msg, orders),
             Msg::SpinEntry(msg) => self.spin_entry.update(msg, orders),
+            Msg::Dialog(msg) => self.dialog.update(msg, orders),
+            Msg::DialogChild(msg) => self.dialog.child.update(msg, orders),
         }
     }
 }
@@ -72,6 +87,7 @@ impl Render<Msg> for Page {
                 self.switch,
                 self.entry,
                 self.spin_entry,
+                self.dialog,
             })
             .render(theme)
     }

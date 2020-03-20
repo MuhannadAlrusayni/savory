@@ -28,4 +28,6 @@ pub trait Theme {
     fn entry<PMsg>(&self, _: &Entry<PMsg>) -> entry::Style;
 
     fn spin_entry<PMsg>(&self, _: &SpinEntry<PMsg>) -> spin_entry::Style;
+
+    fn dialog<PMsg, C>(&self, _: &Dialog<PMsg, C>) -> dialog::Style;
 }

@@ -46,9 +46,7 @@ impl ToStyleMap for Transition {
             transitions.push(trans.join(" "));
         }
 
-        let mut map = StyleMap::default();
-        map.add(St::Transition, transitions.join(", "));
-        map
+        StyleMap::default().add(St::Transition, transitions.join(", "))
     }
 }
 
@@ -59,24 +57,19 @@ impl Transition {
         }
     }
 
-    pub fn all(
-        &mut self,
-        get_trans: impl Fn(&mut TransitionValue) -> &mut TransitionValue,
-    ) -> &mut Self {
-        let mut trans_value = TransitionValue::new(sec(1.));
-        get_trans(&mut trans_value);
-        self.transitions.insert("all".into(), trans_value);
+    pub fn all(mut self, get_trans: impl Fn(TransitionValue) -> TransitionValue) -> Self {
+        self.transitions
+            .insert("all".into(), get_trans(TransitionValue::new(sec(1.))));
         self
     }
 
     pub fn add(
-        &mut self,
+        mut self,
         property: impl Into<Cow<'static, str>>,
-        get_trans: impl Fn(&mut TransitionValue) -> &mut TransitionValue,
-    ) -> &mut Self {
-        let mut trans_value = TransitionValue::new(sec(1.));
-        get_trans(&mut trans_value);
-        self.transitions.insert(property.into(), trans_value);
+        get_trans: impl Fn(TransitionValue) -> TransitionValue,
+    ) -> Self {
+        self.transitions
+            .insert(property.into(), get_trans(TransitionValue::new(sec(1.))));
         self
     }
 }
@@ -110,12 +103,12 @@ impl TransitionValue {
         }
     }
 
-    pub fn steps(&mut self, intervals: usize, pos: impl Into<StepsPos>) -> &mut Self {
+    pub fn steps(mut self, intervals: usize, pos: impl Into<StepsPos>) -> Self {
         self.timing_function = Some(TimingFunction::Steps(intervals, pos.into()));
         self
     }
 
-    pub fn cubic_bezier(&mut self, n1: f32, n2: f32, n3: f32, n4: f32) -> &mut Self {
+    pub fn cubic_bezier(mut self, n1: f32, n2: f32, n3: f32, n4: f32) -> Self {
         self.timing_function = Some(TimingFunction::CubicBezier(n1, n2, n3, n4));
         self
     }

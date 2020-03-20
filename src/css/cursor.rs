@@ -84,8 +84,6 @@ pub enum Cursor {
 
 impl ToStyleMap for Cursor {
     fn style_map(&self) -> StyleMap {
-        let mut map = StyleMap::default();
-        map.add(St::Cursor, self);
-        map
+        StyleMap::default().add(St::Cursor, self)
     }
 }

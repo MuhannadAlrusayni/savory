@@ -59,93 +59,86 @@ impl<PMsg: 'static> Flexbox<PMsg> {
         Item::with_content(content)
     }
 
-    pub fn add(&mut self, item: impl Into<Item<PMsg>>) -> &mut Self {
+    pub fn add(mut self, item: impl Into<Item<PMsg>>) -> Self {
         self.items.push(item.into());
         self
     }
 
-    pub fn try_add(&mut self, item: Option<impl Into<Item<PMsg>>>) -> &mut Self {
+    pub fn try_add(mut self, item: Option<impl Into<Item<PMsg>>>) -> Self {
         if let Some(item) = item {
             self.items.push(item.into())
         }
         self
     }
 
-    pub fn add_and(
-        &mut self,
-        config_item: impl FnOnce(&mut Item<PMsg>) -> &mut Item<PMsg> + 'static,
-    ) -> &mut Self {
-        let mut item = Self::item();
-        config_item(&mut item);
-        self.items.push(item);
+    pub fn add_and(mut self, config_item: impl FnOnce(Item<PMsg>) -> Item<PMsg> + 'static) -> Self {
+        self.items.push(config_item(Self::item()));
         self
     }
 
     pub fn try_add_and(
-        &mut self,
+        mut self,
         node: Option<Node<PMsg>>,
-        config_item: impl FnOnce(&mut Item<PMsg>) -> &mut Item<PMsg> + 'static,
-    ) -> &mut Self {
+        config_item: impl FnOnce(Item<PMsg>) -> Item<PMsg> + 'static,
+    ) -> Self {
         if let Some(node) = node {
-            let mut item = Self::item_with(node);
-            config_item(&mut item);
-            self.items.push(item);
+            self.items.push(config_item(Self::item_with(node)));
         }
         self
     }
 
-    pub fn add_items(&mut self, items: impl IntoIterator<Item = Node<PMsg>>) -> &mut Self {
+    pub fn add_items(mut self, items: impl IntoIterator<Item = Node<PMsg>>) -> Self {
         self.items
             .extend(items.into_iter().map(|node| Item::from(node)));
         self
     }
 
-    pub fn normal(&mut self) -> &mut Self {
+    pub fn normal(self) -> Self {
         self.set_justify_content(val::Normal)
             .set_align_content(val::Normal)
             .set_align_items(val::Normal)
     }
 
-    pub fn stretch(&mut self) -> &mut Self {
+    pub fn stretch(self) -> Self {
         self.set_justify_content(val::Stretch)
             .set_align_content(val::Stretch)
             .set_align_items(val::Stretch)
     }
 
-    pub fn center(&mut self) -> &mut Self {
+    pub fn center(self) -> Self {
         self.set_justify_content(val::Center)
             .set_align_content(val::Center)
             .set_align_items(val::Center)
     }
 
-    pub fn start(&mut self) -> &mut Self {
+    pub fn start(self) -> Self {
         self.set_justify_content(val::Start)
             .set_align_content(val::Start)
             .set_align_items(val::Start)
     }
 
-    pub fn end(&mut self) -> &mut Self {
+    pub fn end(self) -> Self {
         self.set_justify_content(val::End)
             .set_align_content(val::End)
             .set_align_items(val::End)
     }
 
-    pub fn space_between(&mut self) -> &mut Self {
+    pub fn space_between(self) -> Self {
         self.set_justify_content(val::SpaceBetween)
             .set_align_content(val::SpaceBetween)
     }
 
-    pub fn space_around(&mut self) -> &mut Self {
+    pub fn space_around(self) -> Self {
         self.set_justify_content(val::SpaceAround)
             .set_align_content(val::SpaceAround)
     }
 
-    pub fn space_evenly(&mut self) -> &mut Self {
+    pub fn space_evenly(self) -> Self {
         self.set_justify_content(val::SpaceEvenly)
             .set_align_content(val::SpaceEvenly)
     }
 
-    pub fn full_size(&mut self) -> &mut Self {
+    pub fn full_size(self) -> Self {
         self.and_user_style(|conf| conf.and_size(|size| size.full()))
     }
 }
@@ -230,21 +223,19 @@ impl<PMsg: 'static> Item<PMsg> {
     }
 
     pub fn with_content(arg: impl Into<ContentArg<PMsg>>) -> Self {
-        let mut item = Self::new();
-        item.set_content(arg);
-        item
+        Self::new().set_content(arg)
     }
 
-    pub fn auto_margin(&mut self) -> &mut Self {
+    pub fn auto_margin(self) -> Self {
         self.and_user_style(|conf| conf.and_margin(|margin| margin.auto()))
     }
 
-    pub fn set_content(&mut self, arg: impl Into<ContentArg<PMsg>>) -> &mut Self {
+    pub fn set_content(mut self, arg: impl Into<ContentArg<PMsg>>) -> Self {
         self.content = arg.into().0;
         self
     }
 
-    pub fn group(&mut self, group_id: impl Into<Order>) -> &mut Self {
+    pub fn group(self, group_id: impl Into<Order>) -> Self {
         self.set_order(group_id)
     }
 }
