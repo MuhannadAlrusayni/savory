@@ -1000,6 +1000,16 @@ impl Theme for Ant {
             val::Initial.into()
         };
 
+        // em unit
+        let container_width = 14.;
+        let container_height = 1.5;
+        let input_width = container_width - 0.6;
+        let input_height = 1.;
+        let font_size = 1.;
+        // px unit
+        let container_radius = 4;
+        let container_border_width = 1;
+
         let container = Style::default()
             .and_transition(|conf| {
                 conf.all(|val| {
@@ -1010,16 +1020,19 @@ impl Theme for Ant {
             .set_display(val::Flex)
             .set_align_items(val::Center)
             .set_justify_content(val::Center)
-            .and_padding(|conf| conf.set_y(px(4.)).set_x(px(11.)))
-            .set_gap(px(4.))
+            // .and_padding(|conf| conf.set_y(px(4.)).set_x(px(11.)))
+            // .set_gap(px(4.))
             .and_background(|conf| conf.set_color(bg))
             .and_border(|conf| {
                 conf.solid()
-                    .set_width(px(1.))
+                    .set_width(px(container_border_width))
                     .set_color(border)
-                    .set_radius(px(4.))
+                    .set_radius(px(container_radius))
             })
-            .and_size(|conf| conf.set_all_widths(em(14.)).set_all_heights(em(1.5)))
+            .and_size(|conf| {
+                conf.set_all_widths(em(container_width))
+                    .set_all_heights(em(container_height))
+            })
             .set_cursor(cursor)
             .merge(&entry.user_style().container);
 
@@ -1030,8 +1043,9 @@ impl Theme for Ant {
                         .cubic_bezier(0.645, 0.045, 0.355, 1.)
                 })
             })
-            .and_size(|conf| conf.set_width(1.).set_height(px(32.)))
+            .and_size(|conf| conf.set_width(em(input_width)).set_height(em(input_height)))
             .and_text(|conf| conf.set_color(fg))
+            .and_font(|conf| conf.set_size(em(font_size)))
             .and_border(|conf| conf.none())
             .and_background(|conf| conf.transparent())
             .add(St::WebkitAppearance, val::None)
@@ -1067,6 +1081,7 @@ impl Theme for Ant {
         let btns_container_height = height;
         let input_width = width - 0.6;
         let input_height = 1.;
+        let font_size = 1.;
         // px used here
         let radius = 4.;
         let border_width = 1.;
@@ -1075,7 +1090,6 @@ impl Theme for Ant {
         let btn_width = 1.;
         let btn_mouse_over_height = btn_height + 0.10;
         let btn_mouse_over_height_2 = btn_height - 0.10;
-        let font_size = 1.;
 
         let cursor: Cursor = if spin_entry.is_disabled() {
             val::NotAllowed.into()
