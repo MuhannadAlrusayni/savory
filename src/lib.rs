@@ -38,6 +38,7 @@
 //!   - [Switch](prelude::Switch)
 //!   - [Entry](prelude::Entry)
 //!   - [SpinEntry](prelude::SpinEntry)
+//!   - [Dialog](prelude::Dialog)
 //! - Statless
 //!   - [Icon](prelude::Icon)
 //!     - [HtmlIcon](prelude::HtmlIcon)
