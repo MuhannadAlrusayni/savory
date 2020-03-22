@@ -39,6 +39,7 @@
 //!   - [Entry](prelude::Entry)
 //!   - [SpinEntry](prelude::SpinEntry)
 //!   - [Dialog](prelude::Dialog)
+//!   - [MenuButton](prelude::MenuButton)
 //! - Statless
 //!   - [Icon](prelude::Icon)
 //!     - [HtmlIcon](prelude::HtmlIcon)
@@ -47,6 +48,8 @@
 //!   - [Popover](prelude::Popover)
 //!   - [Flexbox](prelude::Flexbox)
 //!     - [Item](prelude::flexbox::Item)
+//!   - [Label](prelude::Label)
+//!   - [HeaderBar](prelude::HeaderBar)
 //!
 //!
 //! [`Theme`]: crate::prelude::Theme
