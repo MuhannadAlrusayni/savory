@@ -4,10 +4,8 @@ use khalas::{css::unit::px, prelude::*, theme::ant::Ant};
 extern crate seed;
 
 pub struct MyApp {
-    spin_entry: SpinEntry<Msg>,
-    pop_btn: Button<Msg>,
+    menu_button: MenuButton<Msg, SpinEntry<Msg>>,
     theme: Ant,
-    popup: bool,
 }
 
 impl Default for MyApp {
@@ -18,22 +16,18 @@ impl Default for MyApp {
             .set_step(5.)
             .set_max(40.);
 
-        let pop_btn = Button::with_label(Msg::PopBtn, "Menu")
-            .and_events(|conf| conf.click(|_| Msg::TogglePopover));
+        let menu_button = MenuButton::new(Msg::MenuButton, "Menu", spin_entry);
 
         Self {
-            spin_entry,
-            pop_btn,
             theme: Ant::default(),
-            popup: false,
+            menu_button,
         }
     }
 }
 
 pub enum Msg {
     SpinEntry(spin_entry::Msg),
-    PopBtn(button::Msg),
-    TogglePopover,
+    MenuButton(menu_button::Msg),
 }
 
 impl Model<Msg, ()> for MyApp {
@@ -41,9 +35,8 @@ impl Model<Msg, ()> for MyApp {
 
     fn update(&mut self, msg: Msg, orders: &mut impl Orders<Msg, ()>) {
         match msg {
-            Msg::SpinEntry(msg) => self.spin_entry.update(msg, orders),
-            Msg::PopBtn(msg) => self.pop_btn.update(msg, orders),
-            Msg::TogglePopover => self.popup = !self.popup,
+            Msg::SpinEntry(msg) => self.menu_button.child.update(msg, orders),
+            Msg::MenuButton(msg) => self.menu_button.update(msg, orders),
         }
     }
 }
@@ -57,20 +50,12 @@ impl Render<Msg> for MyApp {
     }
 
     fn render_with_style(&self, theme: &impl Theme, _: Self::Style) -> Self::View {
-        let child = Flexbox::new()
-            .set_gap(px(8.))
-            .center()
-            .full_size()
-            .add(self.spin_entry.render(theme));
-
-        let popover = Popover::new(&self.pop_btn, &child)
-            .set_visible(self.popup)
-            .set_offset(4);
+        let menu_button = self.menu_button.render(theme);
 
         Flexbox::new()
             .center()
             .full_size()
-            .add(nodes![popover.render(theme)])
+            .add(nodes![menu_button])
             .render(theme)
     }
 }

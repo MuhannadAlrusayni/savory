@@ -12,6 +12,7 @@ pub mod prelude {
             checkbox::{self, Checkbox},
             dialog::{self, Dialog},
             entry::{self, Entry},
+            menu_button::{self, MenuButton},
             radio::{self, Radio},
             spin_entry::{self, SpinEntry},
             switch::{self, Switch},
