@@ -1,16 +1,16 @@
 //! Helper types used to map element message to parent message.
-
+use crate::prelude::*;
 use std::rc::Rc;
 
 /// Helper trait used to make types implement `seed::prelude::MessageMaper` to
 /// map thier messages using `MsgMapper` type
-pub trait MapWithMsgMapper<Msg, OtherMsg>: seed::prelude::MessageMapper<Msg, OtherMsg> {
+pub trait MessageMapperExt<Msg, OtherMsg>: MessageMapper<Msg, OtherMsg> {
     fn map_msg_with(self, map: &MsgMapper<Msg, OtherMsg>) -> Self::SelfWithOtherMs;
 }
 
-impl<T, Msg: 'static, OtherMsg: 'static> MapWithMsgMapper<Msg, OtherMsg> for T
+impl<T, Msg: 'static, OtherMsg: 'static> MessageMapperExt<Msg, OtherMsg> for T
 where
-    T: seed::prelude::MessageMapper<Msg, OtherMsg>,
+    T: MessageMapper<Msg, OtherMsg>,
 {
     fn map_msg_with(self, map: &MsgMapper<Msg, OtherMsg>) -> Self::SelfWithOtherMs {
         self.map_msg(map.map_msg_once().clone())

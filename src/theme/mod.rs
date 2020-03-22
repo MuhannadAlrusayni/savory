@@ -30,4 +30,8 @@ pub trait Theme {
     fn spin_entry<PMsg>(&self, _: &SpinEntry<PMsg>) -> spin_entry::Style;
 
     fn dialog<PMsg, C>(&self, _: &Dialog<PMsg, C>) -> dialog::Style;
+
+    fn header_bar<PMsg>(&self, _: &HeaderBar<PMsg>) -> header_bar::Style;
+
+    fn label<PMsg>(&self, _: &Label<PMsg>) -> label::Style;
 }

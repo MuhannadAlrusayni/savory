@@ -18,7 +18,9 @@ pub mod prelude {
         },
         display::{
             flexbox::{self, Flexbox},
+            header_bar::{self, HeaderBar},
             icon::{self, HtmlIcon, Icon, SvgIcon, UrlIcon},
+            label::{self, Label},
             popover::{self, Popover},
         },
     };

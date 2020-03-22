@@ -28,8 +28,9 @@ impl Default for Page {
     fn default() -> Self {
         let dialog = Dialog::new(Msg::Dialog, Button::with_label(Msg::DialogChild, "hmm"))
             .open()
-            .and_user_style(|conf| {
-                conf.and_widget(|conf| conf.and_padding(|conf| conf.set_all(px(12))))
+            .and_header_bar(|conf| {
+                conf.set_title("Title for the widget")
+                    .set_subtitle("subtitle for more description")
             });
 
         let button = Button::with_label(Msg::Button, "Click Here")

@@ -71,7 +71,7 @@ pub mod prelude {
     pub use crate::el::prelude::*;
     pub use crate::events::Events;
     pub use crate::model::Model;
-    pub use crate::msg_mapper::{MapWithMsgMapper, MsgMapper};
+    pub use crate::msg_mapper::{MessageMapperExt, MsgMapper};
     pub use crate::render::Render;
     pub use crate::routable::Routable;
     pub use crate::seed_ext::{ElExt, ElRefExt, NodeExt};

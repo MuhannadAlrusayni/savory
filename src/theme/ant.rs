@@ -1276,11 +1276,102 @@ impl Theme for Ant {
                     .and_text(|conf| conf.set_color(self.primary_text(true)))
                     .and_border(|conf| conf.set_radius(px(2)))
                     .set_display(val::Flex)
+                    .set_flex_direction(val::Column)
                     .set_align_content(val::Center)
                     .set_align_items(val::Center)
                     .set_justify_content(val::Center)
                     .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
                     .merge(&dialog.user_style().widget)
             })
+            .and_content(|conf| {
+                conf.and_padding(|conf| conf.set_all(em(1.)))
+                    .merge(&dialog.user_style().content)
+            })
+    }
+
+    fn header_bar<PMsg>(&self, header_bar: &HeaderBar<PMsg>) -> header_bar::Style {
+        // em units
+        let height = 2.5;
+        let button_size = height;
+        let subtitle_font_size = 0.6;
+        let title_container_padding = 1.;
+
+        let user_style = header_bar.user_style();
+
+        header_bar::Style::default()
+            .and_title(|conf| {
+                conf.and_text(|conf| conf.set_color(self.title(false)))
+                    .merge(&user_style.title)
+            })
+            .and_subtitle(|conf| {
+                conf.and_text(|conf| conf.set_color(self.secondary_text(false)))
+                    .and_font(|conf| conf.set_size(em(subtitle_font_size)))
+                    .merge(&user_style.subtitle)
+            })
+            .and_title_container(|conf| {
+                conf.set_display(val::Flex)
+                    .set_flex_direction(val::Column)
+                    .set_justify_content(val::Center)
+                    .set_align_items(val::Center)
+                    .set_align_content(val::Center)
+                    .set_flex_wrap(val::Nowrap)
+                    .and_padding(|conf| conf.set_x(em(title_container_padding)))
+                    .merge(&user_style.title_container)
+            })
+            .and_container(|conf| {
+                conf.set_display(val::Flex)
+                    .set_justify_content(val::SpaceBetween)
+                    .set_align_items(val::Stretch)
+                    .set_align_content(val::Stretch)
+                    .set_flex_wrap(val::Nowrap)
+                    .and_size(|conf| conf.set_all_heights(em(height)))
+                    .and_border(|conf| {
+                        conf.and_bottom(|conf| {
+                            conf.solid()
+                                .set_width(px(1))
+                                .set_color(self.gray(Variant::L200))
+                        })
+                    })
+                    .merge(&user_style.container)
+            })
+            .and_close_button(|conf| {
+                conf.and_button(|conf| {
+                    conf.and_size(|conf| conf.set_all(em(button_size)))
+                        .config(|conf| {
+                            if let Some(ref btn) = header_bar.close_button {
+                                if btn.is_mouse_over() {
+                                    conf.and_text(|conf| conf.set_color(self.primary_text(false)))
+                                } else {
+                                    conf.and_text(|conf| conf.set_color(self.secondary_text(false)))
+                                }
+                            } else {
+                                conf
+                            }
+                        })
+                        .set_cursor(val::Pointer)
+                        .and_background(|conf| conf.transparent())
+                        .and_border(|conf| conf.none())
+                        .add(St::Outline, val::None)
+                        .add(St::UserSelect, val::None)
+                        .add(St::BoxSizing, val::BorderBox)
+                        .and_font(|conf| conf.set_size(em(1.)))
+                        .and_margin(|conf| conf.zero())
+                        .and_padding(|conf| conf.zero())
+                        .merge(&user_style.close_button.button)
+                })
+                .and_common_container(|conf| {
+                    conf.set_display(val::Flex)
+                        .set_justify_content(val::Center)
+                        .set_align_items(val::Center)
+                        .set_align_content(val::Center)
+                        .and_margin(|conf| conf.zero())
+                        .and_padding(|conf| conf.zero())
+                        .merge(&user_style.close_button.common_container)
+                })
+            })
+    }
+
+    fn label<PMsg>(&self, _: &Label<PMsg>) -> label::Style {
+        label::Style::default()
     }
 }

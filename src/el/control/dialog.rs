@@ -7,6 +7,7 @@ pub enum Msg {
     MouseEnterWidget,
     MouseLeaveWidget,
     ClickedOutside,
+    CloseButton(button::Msg),
     // public messages
     Close,
     Show,
@@ -18,6 +19,8 @@ pub struct LocalEvents {
     pub background: Events<Msg>,
     #[rich(write(style = compose))]
     pub widget: Events<Msg>,
+    #[rich(write(style = compose))]
+    pub content: Events<Msg>,
 }
 
 #[derive(Rich)]
@@ -26,6 +29,8 @@ pub struct ParentEvents<PMsg> {
     pub background: Events<PMsg>,
     #[rich(write(style = compose))]
     pub widget: Events<PMsg>,
+    #[rich(write(style = compose))]
+    pub content: Events<PMsg>,
 }
 
 impl<PMsg> Default for ParentEvents<PMsg> {
@@ -33,6 +38,7 @@ impl<PMsg> Default for ParentEvents<PMsg> {
         Self {
             background: Events::default(),
             widget: Events::default(),
+            content: Events::default(),
         }
     }
 }
@@ -57,6 +63,8 @@ pub struct Dialog<PMsg, C> {
     user_style: UserStyle,
 
     // dialog element properties
+    #[rich(read, write(style = compose))]
+    header_bar: HeaderBar<Msg>,
     #[rich(read, write(style = compose))]
     pub child: C,
     #[rich(
@@ -85,11 +93,16 @@ impl<PMsg, C> Dialog<PMsg, C> {
                     .mouse_leave(|_| Msg::MouseLeaveWidget)
             });
 
+        let header_bar = HeaderBar::new().set_close_button(
+            Button::with_label(Msg::CloseButton, "X").and_events(|conf| conf.click(|_| Msg::Close)),
+        );
+
         Self {
             msg_mapper: msg_mapper.into(),
             local_events: local_events,
             events: ParentEvents::default(),
             user_style: UserStyle::default(),
+            header_bar,
             child,
             disabled: false,
             mouse_on_widget: false,
@@ -111,6 +124,11 @@ where
     fn update(&mut self, msg: Msg, orders: &mut impl Orders<PMsg, GMsg>) {
         let mut orders = orders.proxy(self.msg_mapper.map_msg_once());
         match msg {
+            Msg::CloseButton(msg) => {
+                if let Some(ref mut btn) = self.header_bar.close_button {
+                    btn.update(msg, &mut orders)
+                }
+            }
             Msg::MouseEnterWidget => {
                 self.mouse_on_widget = true;
                 orders.skip();
@@ -153,7 +171,9 @@ pub struct UserStyle {
     #[rich(write(style = compose))]
     pub background: css::Style,
     #[rich(write(style = compose))]
-    pub widget: css::Style,
+    pub widget: flexbox::Style,
+    #[rich(write(style = compose))]
+    pub content: flexbox::Style,
 }
 
 #[derive(Clone, Debug, Default, Rich)]
@@ -161,7 +181,9 @@ pub struct Style {
     #[rich(write(style = compose))]
     pub background: css::Style,
     #[rich(write(style = compose))]
-    pub widget: css::Style,
+    pub widget: flexbox::Style,
+    #[rich(write(style = compose))]
+    pub content: flexbox::Style,
 }
 
 impl<PMsg, C> Render<PMsg> for Dialog<PMsg, C>
@@ -177,11 +199,21 @@ where
     }
 
     fn render_with_style(&self, theme: &impl Theme, style: Self::Style) -> Self::View {
+        let content = div!()
+            .set_style(style.content)
+            .set_events(&self.local_events.content)
+            .map_msg_with(&self.msg_mapper)
+            .add_children(vec![self.child.render(theme)])
+            .add_events(&self.events.content);
+
         let widget = div!()
             .set_style(style.widget)
             .set_events(&self.local_events.widget)
             .map_msg_with(&self.msg_mapper)
-            .add_children(vec![self.child.render(theme)])
+            .add_children(vec![
+                self.header_bar.render(theme).map_msg_with(&self.msg_mapper),
+                content,
+            ])
             .add_events(&self.events.widget);
 
         div!()
