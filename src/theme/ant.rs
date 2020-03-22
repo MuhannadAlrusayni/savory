@@ -1329,7 +1329,7 @@ impl Theme for Ant {
                         conf.and_bottom(|conf| {
                             conf.solid()
                                 .set_width(px(1))
-                                .set_color(self.gray(Variant::L200))
+                                .set_color(self.gray(Variant::D600))
                         })
                     })
                     .merge(&user_style.container)
