@@ -2,6 +2,7 @@
 
 use crate::prelude::{El, UpdateEl};
 use seed::prelude::{ev, keyboard_ev, mouse_ev, pointer_ev, Ev, EventHandler};
+use std::any::{Any, TypeId};
 use wasm_bindgen::JsCast;
 
 pub struct Events<Msg> {
@@ -31,7 +32,7 @@ impl<Msg> UpdateEl<Msg> for Events<Msg> {
 macro_rules! mouse_events {
     ( $( $event:ident: $ty:ty { $( $(#[$doc:meta])? $name:ident = $ev:expr $(,)? )* } $(,)? )* ) => {
         $(
-            impl<Msg> Events<Msg> {
+            impl<Msg: 'static> Events<Msg> {
                 $(
                     $( #[$doc] )?
                     pub fn $name(
@@ -118,12 +119,19 @@ macro_rules! event_creator{
     ( $( $(#[$doc:meta])? $name:ident($ty:ty) $(,)? )* ) => {
         $(
             $( #[$doc] )?
-            fn $name<Ms>(
+            fn $name<Ms: 'static, HandlerMs: 'static>(
                 trigger: impl Into<Ev>,
-                handler: impl FnOnce($ty) -> Ms + 'static + Clone,
+                handler: impl FnOnce($ty) -> HandlerMs + 'static + Clone,
             ) -> EventHandler<Ms> {
+                let msg_type = TypeId::of::<HandlerMs>();
+                if msg_type != TypeId::of::<Ms>() && msg_type != TypeId::of::<()>() {
+                    panic!("Handler can return only Msg or ()!");
+                }
+
                 let closure_handler = move |event: web_sys::Event| {
-                    (handler.clone())(event.dyn_ref::<$ty>().unwrap().clone())
+                    let output = &mut Some(handler.clone()(event.dyn_ref::<$ty>().unwrap().clone())) as &mut dyn Any;
+                    output.downcast_mut::<Option<Ms>>().and_then(Option::take)
+                    // (handler.clone())(event.dyn_ref::<$ty>().unwrap().clone())
                 };
                 EventHandler::new(trigger, closure_handler)
             }
