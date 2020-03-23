@@ -1,4 +1,4 @@
-use khalas::{css::unit::px, prelude::*, theme::ant::Ant};
+use khalas::{prelude::*, theme::ant::Ant};
 
 #[macro_use]
 extern crate seed;
