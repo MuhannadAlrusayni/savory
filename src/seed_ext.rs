@@ -1,7 +1,42 @@
 use crate::prelude::*;
-use att::Attributes;
+use att::{Attribute, Attributes};
+use seed::virtual_dom::attrs::Attrs as SeedAttrs;
+use seed::virtual_dom::style::Style as SeedStyle;
+
+#[derive(From)]
+pub enum AddArgument<'a, Msg: 'static> {
+    #[from]
+    RefEvents(&'a Events<Msg>),
+    #[from]
+    Style(Style),
+    #[from]
+    Attribute(Attribute),
+    #[from]
+    Attributes(Attributes),
+    #[from]
+    Node(Node<Msg>),
+    #[from]
+    Nodes(Vec<Node<Msg>>),
+}
+
+#[derive(From)]
+pub enum SetArgument<'a, Msg: 'static> {
+    #[from]
+    RefEvents(&'a Events<Msg>),
+    #[from]
+    Style(Style),
+    #[from]
+    Attributes(Attributes),
+    #[from]
+    Node(Node<Msg>),
+    #[from]
+    Nodes(Vec<Node<Msg>>),
+}
 
 pub trait ElExt<Msg: 'static> {
+    fn add<'a>(self, val: impl Into<AddArgument<'a, Msg>>) -> Self;
+    fn set<'a>(self, val: impl Into<SetArgument<'a, Msg>>) -> Self;
+
     fn add_events(self, val: &Events<Msg>) -> Self;
     fn set_events(self, val: &Events<Msg>) -> Self;
     fn and_events(self, conf: impl FnOnce(Events<Msg>) -> Events<Msg>) -> Self;
@@ -11,11 +46,14 @@ pub trait ElExt<Msg: 'static> {
     fn set_style(self, val: Style) -> Self;
     fn and_style(self, conf: impl FnOnce(Style) -> Style) -> Self;
 
+    fn add_attribute(self, val: Attribute) -> Self;
+
     fn add_attributes(self, val: Attributes) -> Self;
     fn set_attributes(self, val: Attributes) -> Self;
     fn and_attributes(self, conf: impl FnOnce(Attributes) -> Attributes) -> Self;
 
     fn add_children(self, children: impl IntoIterator<Item = Node<Msg>>) -> Self;
+    fn set_children(self, children: impl IntoIterator<Item = Node<Msg>>) -> Self;
     fn el_ref<E: Clone>(self, reference: &ElRef<E>) -> Self;
 
     fn config(self, conf: impl FnOnce(El<Msg>) -> El<Msg>) -> Self;
@@ -29,6 +67,34 @@ pub trait ElExt<Msg: 'static> {
 }
 
 impl<Msg: 'static> ElExt<Msg> for El<Msg> {
+    fn add<'a>(mut self, val: impl Into<AddArgument<'a, Msg>>) -> Self {
+        match val.into() {
+            AddArgument::RefEvents(val) => self.add_events(val),
+            AddArgument::Style(val) => {
+                if let Some(style) = val.to_seed_style() {
+                    for (key, val) in style.vals.into_iter() {
+                        self.add_style(key, val);
+                    }
+                }
+                self
+            }
+            AddArgument::Attribute(val) => self.add_attribute(val),
+            AddArgument::Attributes(val) => self.add_attributes(val),
+            AddArgument::Node(val) => self.add_children(vec![val]),
+            AddArgument::Nodes(val) => self.add_children(val),
+        }
+    }
+
+    fn set<'a>(self, val: impl Into<SetArgument<'a, Msg>>) -> Self {
+        match val.into() {
+            SetArgument::RefEvents(val) => self.set_events(val),
+            SetArgument::Style(val) => self.set_style(val),
+            SetArgument::Attributes(val) => self.set_attributes(val),
+            SetArgument::Node(val) => self.set_children(vec![val]),
+            SetArgument::Nodes(val) => self.set_children(val),
+        }
+    }
+
     fn add_events(mut self, val: &Events<Msg>) -> Self {
         for event in val.clone().events.into_iter() {
             self.add_event_handler(event);
@@ -49,6 +115,8 @@ impl<Msg: 'static> ElExt<Msg> for El<Msg> {
     fn set_style(mut self, val: Style) -> Self {
         if let Some(style) = val.to_seed_style() {
             self.style = style;
+        } else {
+            self.style = SeedStyle::empty();
         }
         self
     }
@@ -57,13 +125,18 @@ impl<Msg: 'static> ElExt<Msg> for El<Msg> {
         self.set_style(conf(Style::default()))
     }
 
+    fn add_attribute(mut self, val: Attribute) -> Self {
+        val.update_el(&mut self);
+        self
+    }
+
     fn add_attributes(mut self, val: Attributes) -> Self {
         val.update_el(&mut self);
         self
     }
 
     fn set_attributes(mut self, val: Attributes) -> Self {
-        self.attrs = seed::virtual_dom::attrs::Attrs::empty();
+        self.attrs = SeedAttrs::empty();
         self.add_attributes(val)
     }
 
@@ -75,6 +148,11 @@ impl<Msg: 'static> ElExt<Msg> for El<Msg> {
         for child in children.into_iter() {
             self.add_child(child);
         }
+        self
+    }
+
+    fn set_children(mut self, children: impl IntoIterator<Item = Node<Msg>>) -> Self {
+        self.children = children.into_iter().collect();
         self
     }
 
@@ -109,6 +187,14 @@ impl<Msg: 'static> ElExt<Msg> for El<Msg> {
 }
 
 impl<Msg: 'static> ElExt<Msg> for Node<Msg> {
+    fn add<'a>(self, val: impl Into<AddArgument<'a, Msg>>) -> Self {
+        self.and_element(|el| el.add(val))
+    }
+
+    fn set<'a>(self, val: impl Into<SetArgument<'a, Msg>>) -> Self {
+        self.and_element(|el| el.set(val))
+    }
+
     fn add_events(self, val: &Events<Msg>) -> Self {
         self.and_element(|el| el.add_events(val))
     }
@@ -127,6 +213,14 @@ impl<Msg: 'static> ElExt<Msg> for Node<Msg> {
 
     fn and_style(self, conf: impl FnOnce(Style) -> Style) -> Self {
         self.and_element(|el| el.and_style(conf))
+    }
+
+    fn add_attribute(self, val: Attribute) -> Self {
+        self.and_element(|el| el.add_attribute(val))
+    }
+
+    fn set_children(self, val: impl IntoIterator<Item = Node<Msg>>) -> Self {
+        self.and_element(|el| el.set_children(val))
     }
 
     fn add_attributes(self, val: Attributes) -> Self {
