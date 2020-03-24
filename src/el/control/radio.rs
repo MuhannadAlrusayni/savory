@@ -219,37 +219,33 @@ impl<PMsg: 'static> Render<PMsg> for Radio<PMsg> {
     fn render_with_style(&self, _: &impl Theme, style: Self::Style) -> Self::View {
         let mut input = input!()
             .el_ref(&self.input_el_ref)
+            .set(style.input)
+            .set(&self.local_events.input)
             .and_attributes(|conf| {
                 conf.set_class("radio-input")
                     .set_disabled(self.disabled)
                     .set_checked(self.toggled)
                     .set_type(att::Type::Radio)
-            })
-            .set_style(style.input)
-            .set_events(&self.local_events.input);
+            });
 
         // add button div if the radio is toggled
         if self.is_toggled() {
-            let button = div!()
-                .and_attributes(|conf| conf.set_class("radio-button"))
-                .set_style(style.button);
+            let button = div!().set(style.button).add(att::class("radio-button"));
             input.add_child(button);
         }
 
-        let input = input
-            .map_msg_with(&self.msg_mapper)
-            .add_events(&self.events.input);
+        let input = input.map_msg_with(&self.msg_mapper).add(&self.events.input);
 
         match self.label.as_ref() {
             None => input,
             Some(lbl) => label!()
-                .and_attributes(|conf| conf.set_class("radio-label"))
                 .el_ref(&self.label_el_ref)
-                .set_style(style.label)
-                .set_events(&self.local_events.label)
+                .add(att::class("radio-label"))
+                .set(style.label)
+                .set(&self.local_events.label)
                 .map_msg_with(&self.msg_mapper)
-                .add_children(vec![input, plain![lbl.to_string()]])
-                .add_events(&self.events.label),
+                .add(vec![input, plain![lbl.to_string()]])
+                .add(&self.events.label),
         }
     }
 }

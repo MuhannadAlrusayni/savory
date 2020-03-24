@@ -200,27 +200,27 @@ where
 
     fn render_with_style(&self, theme: &impl Theme, style: Self::Style) -> Self::View {
         let content = div!()
-            .set_style(style.content)
-            .set_events(&self.local_events.content)
+            .set(style.content)
+            .set(&self.local_events.content)
             .map_msg_with(&self.msg_mapper)
-            .add_children(vec![self.child.render(theme)])
-            .add_events(&self.events.content);
+            .add(vec![self.child.render(theme)])
+            .add(&self.events.content);
 
         let widget = div!()
-            .set_style(style.widget)
-            .set_events(&self.local_events.widget)
+            .set(style.widget)
+            .set(&self.local_events.widget)
             .map_msg_with(&self.msg_mapper)
-            .add_children(vec![
+            .add(vec![
                 self.header_bar.render(theme).map_msg_with(&self.msg_mapper),
                 content,
             ])
-            .add_events(&self.events.widget);
+            .add(&self.events.widget);
 
         div!()
-            .set_style(style.background)
-            .set_events(&self.local_events.background)
+            .set(style.background)
+            .set(&self.local_events.background)
             .map_msg_with(&self.msg_mapper)
-            .add_children(vec![widget])
-            .add_events(&self.events.background)
+            .add(vec![widget])
+            .add(&self.events.background)
     }
 }

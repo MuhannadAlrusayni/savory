@@ -206,11 +206,11 @@ impl<PMsg: 'static> Render<PMsg> for Button<PMsg> {
         };
 
         button!()
-            .set_events(&self.local_events)
-            .set_style(style.button)
+            .set(&self.local_events)
+            .set(style.button)
             .and_attributes(|conf| conf.set_class("button").set_disabled(self.disabled))
             .map_msg_with(&self.msg_mapper)
-            .add_events(&self.events)
-            .add_children(inner)
+            .add(&self.events)
+            .add(inner)
     }
 }

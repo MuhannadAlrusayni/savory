@@ -102,15 +102,15 @@ impl<PMsg: 'static> Render<PMsg> for Switch<PMsg> {
 
     fn render_with_style(&self, _: &impl Theme, style: Self::Style) -> Self::View {
         let button = div!()
-            .and_attributes(|conf| conf.set_class("switch-button"))
-            .set_style(style.button);
+            .set(style.button)
+            .and_attributes(|conf| conf.set_class("switch-button"));
 
         button!()
-            .set_events(&self.local_events)
-            .set_style(style.background)
+            .set(&self.local_events)
+            .set(style.background)
             .and_attributes(|conf| conf.set_class("switch").set_disabled(self.disabled))
-            .add_children(vec![button])
+            .add(vec![button])
             .map_msg_with(&self.msg_mapper)
-            .add_events(&self.events)
+            .add(&self.events)
     }
 }

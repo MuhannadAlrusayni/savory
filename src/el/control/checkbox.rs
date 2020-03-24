@@ -166,39 +166,40 @@ impl<PMsg: 'static> Render<PMsg> for Checkbox<PMsg> {
     }
 
     fn render_with_style(&self, _: &impl Theme, style: Self::Style) -> Self::View {
-        let mut input = input!()
+        let Style {
+            button,
+            input,
+            label,
+        } = style;
+
+        let input = input!()
             .el_ref(&self.input_el_ref)
+            .set(input)
+            .set(&self.local_events.input)
             .and_attributes(|conf| {
                 conf.set_class("checkbox-input")
                     .set_disabled(self.disabled)
                     .set_checked(self.toggled)
                     .set_type(att::Type::Checkbox)
             })
-            .set_style(style.input)
-            .set_events(&self.local_events.input);
-
-        // add button div if the checkbox is toggled
-        if self.is_toggled() {
-            let button = div!()
-                .and_attributes(|conf| conf.set_class("checkbox-button"))
-                .set_style(style.button);
-            input.add_child(button);
-        }
-
-        let input = input
+            // add button if the checkbox is toggled
+            .config_if(self.is_toggled(), |conf| {
+                let button = div!().add(att::class("checkbox-button")).set(button);
+                conf.add(button)
+            })
             .map_msg_with(&self.msg_mapper)
-            .add_events(&self.events.input);
+            .add(&self.events.input);
 
         match self.label.as_ref() {
             None => input,
             Some(lbl) => label!()
-                .and_attributes(|conf| conf.set_class("checkbox-label"))
                 .el_ref(&self.label_el_ref)
-                .set_style(style.label)
-                .set_events(&self.local_events.label)
+                .add(att::class("checkbox-label"))
+                .set(label)
+                .set(&self.local_events.label)
                 .map_msg_with(&self.msg_mapper)
-                .add_children(vec![input, plain![lbl.to_string()]])
-                .add_events(&self.events.label),
+                .add(vec![input, plain![lbl.to_string()]])
+                .add(&self.events.label),
         }
     }
 }

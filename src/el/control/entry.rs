@@ -195,8 +195,8 @@ impl<PMsg: 'static> Render<PMsg> for Entry<PMsg> {
 
     fn render_with_style(&self, _: &impl Theme, style: Self::Style) -> Self::View {
         let input = input!()
-            .set_events(&self.local_events.input)
-            .set_style(style.input)
+            .set(&self.local_events.input)
+            .set(style.input)
             .and_attributes(|conf| {
                 conf.set_disabled(self.disabled)
                     .try_set_value(self.text.clone())
@@ -204,13 +204,13 @@ impl<PMsg: 'static> Render<PMsg> for Entry<PMsg> {
                     .try_set_placeholder(self.placeholder.clone())
             })
             .map_msg_with(&self.msg_mapper)
-            .add_events(&self.events.input);
+            .add(&self.events.input);
 
         div!()
-            .set_style(style.container)
-            .set_events(&self.local_events.container)
+            .set(style.container)
+            .set(&self.local_events.container)
             .map_msg_with(&self.msg_mapper)
-            .add_events(&self.events.container)
-            .add_children(vec![input])
+            .add(&self.events.container)
+            .add(vec![input])
     }
 }

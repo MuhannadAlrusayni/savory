@@ -444,9 +444,9 @@ impl<PMsg: 'static> Render<PMsg> for SpinEntry<PMsg> {
 
         // input
         let input = input!()
-            .set_events(&self.local_events.input)
             .el_ref(&self.el_ref)
-            .set_style(style.input)
+            .set(&self.local_events.input)
+            .set(style.input)
             .and_attributes(|conf| {
                 conf.set_class("spin-entry-input")
                     .set_disabled(self.disabled)
@@ -457,15 +457,15 @@ impl<PMsg: 'static> Render<PMsg> for SpinEntry<PMsg> {
                     .try_set_placeholder(self.placeholder.map(|val| val.to_string()))
             })
             .map_msg_with(&self.msg_mapper)
-            .add_events(&self.events.input);
+            .add(&self.events.input);
 
         // container
         div!()
-            .set_style(style.container)
-            .set_events(&self.local_events.container)
+            .set(style.container)
+            .set(&self.local_events.container)
             .and_attributes(|conf| conf.set_class("spin-entry"))
             .map_msg_with(&self.msg_mapper)
-            .add_events(&self.events.container)
-            .add_children(vec![input, btns_container])
+            .add(&self.events.container)
+            .add(vec![input, btns_container])
     }
 }
