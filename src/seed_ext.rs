@@ -9,7 +9,7 @@ pub enum AddArgument<'a, Msg: 'static> {
     RefEvents(&'a Events<Msg>),
     #[from]
     Style(Style),
-    #[from]
+    #[from(forward)]
     Attribute(Attribute),
     #[from]
     Attributes(Attributes),
