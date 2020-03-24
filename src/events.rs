@@ -131,7 +131,6 @@ macro_rules! event_creator{
                 let closure_handler = move |event: web_sys::Event| {
                     let output = &mut Some(handler.clone()(event.dyn_ref::<$ty>().unwrap().clone())) as &mut dyn Any;
                     output.downcast_mut::<Option<Ms>>().and_then(Option::take)
-                    // (handler.clone())(event.dyn_ref::<$ty>().unwrap().clone())
                 };
                 EventHandler::new(trigger, closure_handler)
             }
