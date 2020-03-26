@@ -13,6 +13,7 @@ pub mod prelude {
             dialog::{self, Dialog},
             entry::{self, Entry},
             menu_button::{self, MenuButton},
+            progress_bar::{self, ProgressBar},
             radio::{self, Radio},
             spin_entry::{self, SpinEntry},
             switch::{self, Switch},

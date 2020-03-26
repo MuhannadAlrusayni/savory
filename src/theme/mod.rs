@@ -34,4 +34,6 @@ pub trait Theme {
     fn header_bar<PMsg>(&self, _: &HeaderBar<PMsg>) -> header_bar::Style;
 
     fn label<PMsg>(&self, _: &Label<PMsg>) -> label::Style;
+
+    fn progress_bar<PMsg>(&self, _: &ProgressBar<PMsg>) -> progress_bar::Style;
 }

@@ -1374,4 +1374,49 @@ impl Theme for Ant {
     fn label<PMsg>(&self, _: &Label<PMsg>) -> label::Style {
         label::Style::default()
     }
+
+    fn progress_bar<PMsg>(&self, progress_bar: &ProgressBar<PMsg>) -> progress_bar::Style {
+        // em units
+        let height = 0.7;
+        let radius = height / 2.;
+
+        // percent units
+        let width = 1.;
+
+        progress_bar::Style::default()
+            .and_container(|conf| {
+                conf.and_border(|conf| conf.set_radius(em(radius)).none())
+                    .set_background(self.gray(Variant::L300))
+                    .and_size(|conf| conf.set_all_heights(em(height)).set_width(width))
+                    .and_transition(|conf| conf.all(|val| val.set_duration(sec(0.3)).ease()))
+                    .and_position(|conf| conf.relative())
+                    .add(St::Overflow, val::Hidden)
+            })
+            .and_indicator(|conf| {
+                conf.and_border(|conf| conf.set_radius(em(radius)))
+                    .config(|conf| {
+                        let color = progress_bar.get_color().unwrap_or_else(|| {
+                            match progress_bar.state() {
+                                progress_bar::State::Normal => self.brand(Variant::L500),
+                                progress_bar::State::Success => self.suggestion(),
+                                progress_bar::State::Failure => self.destructive(),
+                            }
+                            .into()
+                        });
+                        conf.set_background(color)
+                    })
+                    .and_transition(|conf| {
+                        conf.all(|val| {
+                            val.set_duration(sec(0.3))
+                                .cubic_bezier(0.645, 0.045, 0.355, 1.)
+                        })
+                    })
+                    .and_position(|conf| conf.absolute())
+                    .and_size(|conf| {
+                        let width = (progress_bar.value() - progress_bar.min()).abs()
+                            / (progress_bar.max() - progress_bar.min());
+                        conf.set_width(width as f32).set_all_heights(em(height))
+                    })
+            })
+    }
 }
