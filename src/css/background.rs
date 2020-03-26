@@ -72,6 +72,12 @@ pub struct Background {
     size: Option<Size>,
 }
 
+impl<T: Into<Color>> From<T> for Background {
+    fn from(source: T) -> Self {
+        Background::default().set_color(source.into())
+    }
+}
+
 impl ToStyleMap for Background {
     fn style_map(&self) -> StyleMap {
         StyleMap::default()
