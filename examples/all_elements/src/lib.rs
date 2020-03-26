@@ -11,6 +11,7 @@ pub enum Msg {
     SpinEntry(spin_entry::Msg),
     Dialog(dialog::Msg),
     DialogChild(button::Msg),
+    ProgressBar(progress_bar::Msg),
 }
 
 pub struct Page {
@@ -22,6 +23,7 @@ pub struct Page {
     entry: Entry<Msg>,
     spin_entry: SpinEntry<Msg>,
     dialog: Dialog<Msg, Button<Msg>>,
+    progress_bar: ProgressBar<Msg>,
 }
 
 impl Default for Page {
@@ -33,8 +35,10 @@ impl Default for Page {
                     .set_subtitle("subtitle for more description")
             });
 
-        let button = Button::with_label(Msg::Button, "Click Here")
-            .and_events(|conf| conf.click(|_| Msg::Dialog(dialog::Msg::Show)));
+        let button = Button::with_label(Msg::Button, "Click Here").and_events(|conf| {
+            conf.click(|_| Msg::Dialog(dialog::Msg::Show))
+                .click(|_| Msg::ProgressBar(progress_bar::Msg::Increment(2.)))
+        });
 
         Self {
             theme: Ant::new(),
@@ -45,6 +49,10 @@ impl Default for Page {
             entry: Entry::with_placeholder(Msg::Entry, "Ali Yousef"),
             spin_entry: SpinEntry::new(Msg::SpinEntry),
             dialog,
+            progress_bar: ProgressBar::new(Msg::ProgressBar)
+                .set_min(10.)
+                .set_max(25.)
+                .set_value(13.),
         }
     }
 }
@@ -62,6 +70,7 @@ impl Model<Msg, ()> for Page {
             Msg::SpinEntry(msg) => self.spin_entry.update(msg, orders),
             Msg::Dialog(msg) => self.dialog.update(msg, orders),
             Msg::DialogChild(msg) => self.dialog.child.update(msg, orders),
+            Msg::ProgressBar(msg) => self.progress_bar.update(msg, orders),
         }
     }
 }
@@ -83,6 +92,7 @@ impl Render<Msg> for Page {
             .add_items(renders! {
                 theme,
                 self.button,
+                self.progress_bar,
                 self.checkbox,
                 self.radio,
                 self.switch,
