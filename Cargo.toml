@@ -33,7 +33,8 @@ regex = "1.3.4"
 version = "^0.3.35"
 features = [
     "WheelEvent", "CompositionEvent", "HtmlInputElement", "InputEvent",
-    "FocusEvent", "DragEvent", "DomRect", "Element", "HtmlLabelElement"
+    "FocusEvent", "DragEvent", "DomRect", "Element", "HtmlLabelElement",
+    "UiEvent"
 ]
 
 [workspace]

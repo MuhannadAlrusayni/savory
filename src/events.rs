@@ -50,11 +50,33 @@ macro_rules! mouse_events {
 
 mouse_events! {
     ev: web_sys::Event {
+        scroll = Ev::Scroll,
+        after_print = Ev::AfterPrint,
+        before_print = Ev::BeforePrint,
+        app_installed = Ev::from("appinstalled"),
+        seeked = Ev::Seeked,
+        seeking = Ev::Seeking,
+        play = Ev::Play,
+        playing = Ev::Playing,
+        rate_change = Ev::RateChange,
+        can_play = Ev::CanPlay,
+        can_play_through = Ev::CanPlayThrough,
+        reset = Ev::from("reset"),
+        change = Ev::Change,
         load = Ev::Load,
         unload = Ev::Unload,
         abort = Ev::Abort,
         error = Ev::Error,
-        select = Ev::Select,
+        emptied = Ev::Emptied,
+        ended = Ev::Ended,
+        full_screen_change = Ev::FullScreenChange,
+        full_screen_error = Ev::FullScreenError,
+        invalid = Ev::from("invalid"),
+        offline = Ev::Offline,
+        online = Ev::Online,
+        select_start = Ev::from("selectstart"),
+        selectionchange = Ev::from("selectionchange"),
+        submit = Ev::Submit,
     }
     focus_ev: web_sys::FocusEvent {
         blur = Ev::Blur,
@@ -73,6 +95,7 @@ mouse_events! {
         mouse_out = Ev::MouseOut,
         mouse_over = Ev::MouseOver,
         mouse_up = Ev::MouseUp,
+        context_menu = Ev::ContextMenu,
     }
     pointer_ev: web_sys::PointerEvent {
         pointer_cancel = Ev::PointerCancel,
@@ -113,6 +136,10 @@ mouse_events! {
         drag_start = Ev::DragStart,
         drop = Ev::Drop,
     }
+    ui_ev: web_sys::UiEvent {
+        resize = Ev::Resize,
+        select = Ev::Select,
+    }
 }
 
 macro_rules! event_creator{
@@ -148,5 +175,7 @@ event_creator! {
     /// create `EventHandler` with `web_sys::DragEvent`
     drag_ev(web_sys::DragEvent),
     /// create `EventHandler` with `web_sys::InputEvent`
-    input_ev(web_sys::InputEvent)
+    input_ev(web_sys::InputEvent),
+    /// create `EventHandler` with `web_sys::UiEvent`
+    ui_ev(web_sys::UiEvent),
 }
