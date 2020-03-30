@@ -104,7 +104,10 @@ pub struct ProgressBar<PMsg> {
     // ProgressBar element properties
     #[rich(read(copy), write)]
     shape: Shape,
-    #[rich(read(copy), write)]
+    #[rich(read(copy), write, value_fns = {
+        success = State::Success,
+        failure = State::Failure,
+    })]
     state: State,
     #[rich(read(copy), write)]
     value: f64,
