@@ -26,6 +26,8 @@ pub struct Padding {
     left: Option<Length>,
 }
 
+impl_add_and_add_assign!(Padding { top right bottom left });
+
 impl From<Length> for Padding {
     fn from(source: Length) -> Self {
         Padding::default().set_all(source)

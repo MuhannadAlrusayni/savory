@@ -4,7 +4,10 @@ use crate::css::{
 };
 use derive_rich::Rich;
 use indexmap::IndexMap;
-use std::borrow::Cow;
+use std::{
+    borrow::Cow,
+    ops::{Add, AddAssign},
+};
 
 /// ```
 /// use khalas::css::{values as val, Style, unit::{sec, ms}};
@@ -29,6 +32,23 @@ use std::borrow::Cow;
 #[derive(Default, Clone, Debug, PartialEq, From)]
 pub struct Transition {
     pub transitions: IndexMap<Cow<'static, str>, TransitionValue>,
+}
+
+impl Add for Transition {
+    type Output = Self;
+
+    fn add(mut self, other: Self) -> Self::Output {
+        self += other;
+        self
+    }
+}
+
+impl AddAssign for Transition {
+    fn add_assign(&mut self, other: Self) {
+        for (name, val) in other.transitions.into_iter() {
+            self.transitions.insert(name, val);
+        }
+    }
 }
 
 impl ToStyleMap for Transition {

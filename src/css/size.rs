@@ -34,6 +34,8 @@ pub struct Size {
     max_height: Option<Length>,
 }
 
+impl_add_and_add_assign!(Size {width min_width max_width height min_height max_height});
+
 impl ToStyleMap for Size {
     fn style_map(&self) -> StyleMap {
         StyleMap::default()

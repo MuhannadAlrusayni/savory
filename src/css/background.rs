@@ -72,6 +72,17 @@ pub struct Background {
     size: Option<Size>,
 }
 
+impl_add_and_add_assign!(Background {
+    color
+    image { clone }
+    repeat
+    attachment
+    position
+    clip
+    origin
+    size
+});
+
 impl<T: Into<Color>> From<T> for Background {
     fn from(source: T) -> Self {
         Background::default().set_color(source.into())

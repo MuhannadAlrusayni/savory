@@ -1,9 +1,10 @@
 //! Types and traits for working with CSS.
 
+#[macro_use]
+pub mod style;
 pub mod background;
 pub mod border;
 pub mod color;
-pub mod style;
 pub mod values;
 // pub mod event;
 pub mod box_align;

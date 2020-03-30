@@ -36,6 +36,8 @@ pub struct Position {
     clip: Option<Clip>,
 }
 
+impl_add_and_add_assign!(Position { position left top right bottom z_index clip });
+
 impl ToStyleMap for Position {
     fn style_map(&self) -> StyleMap {
         StyleMap::default()

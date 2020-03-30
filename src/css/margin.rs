@@ -26,6 +26,8 @@ pub struct Margin {
     left: Option<Length>,
 }
 
+impl_add_and_add_assign!(Margin { top right bottom left });
+
 impl From<Length> for Margin {
     fn from(source: Length) -> Self {
         Self::default().set_all(source)

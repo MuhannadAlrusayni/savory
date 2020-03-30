@@ -62,6 +62,27 @@ pub struct Text {
     pub word_break: Option<WordBreak>,
 }
 
+impl_add_and_add_assign!(Text {
+    color
+    direction
+    letter_spacing
+    word_spacing
+    line_height
+    align
+    align_last
+    justify
+    indent
+    decoration
+    white_space
+    unicode_bidi
+    transform
+    overflow { clone }
+    vertical_align
+    writing_mode
+    word_wrap
+    word_break
+});
+
 impl ToStyleMap for Text {
     fn style_map(&self) -> StyleMap {
         StyleMap::default()
@@ -148,7 +169,7 @@ fn display_helper(value: &Option<impl ToString>) -> String {
         .unwrap_or("".into())
 }
 
-#[derive(Clone, Debug, PartialEq, Display, From)]
+#[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum TextDecoration {
     #[display(
         fmt = "{}{}{}",

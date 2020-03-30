@@ -3,6 +3,7 @@ use crate::prelude::{El, UpdateEl};
 use derive_rich::Rich;
 use indexmap::IndexMap;
 pub use seed::prelude::St;
+use std::ops::{Add, AddAssign};
 
 /// This is the main struct used to build and manipulate css properties, it
 /// provieds many methods to do that.
@@ -204,6 +205,55 @@ impl Style {
     }
 }
 
+impl Add for Style {
+    type Output = Self;
+
+    fn add(mut self, other: Self) -> Self::Output {
+        self += other;
+        self
+    }
+}
+
+impl AddAssign for Style {
+    fn add_assign(&mut self, other: Self) {
+        self.opacity = other.opacity.or(self.opacity);
+        self.gap = other.gap.or(self.gap);
+        self.flex_wrap = other.flex_wrap.or(self.flex_wrap);
+        self.flex_basis = other.flex_basis.or(self.flex_basis);
+        self.flex_direction = other.flex_direction.or(self.flex_direction);
+        self.order = other.order.or(self.order);
+        self.flex_grow = other.flex_grow.or(self.flex_grow);
+        self.flex_shrink = other.flex_shrink.or(self.flex_shrink);
+        self.justify_content = other.justify_content.or(self.justify_content);
+        self.align_content = other.align_content.or(self.align_content);
+        self.align_items = other.align_items.or(self.align_items);
+        self.justify_self = other.justify_self.or(self.justify_self);
+        self.align_self = other.align_self.or(self.align_self);
+        self.display = other.display.or(self.display);
+        self.visibility = other.visibility.or(self.visibility);
+        self.cursor = other.cursor.or(self.cursor);
+
+        fn sum_vals<T: Add<Output = T>>(val1: Option<T>, val2: Option<T>) -> Option<T> {
+            match (val1, val2) {
+                (Some(val1), Some(val2)) => Some(val1 + val2),
+                (Some(val), None) | (None, Some(val)) => Some(val),
+                (None, None) => None,
+            }
+        }
+
+        self.background = sum_vals(self.background.clone(), other.background);
+        self.border = sum_vals(self.border, other.border);
+        self.margin = sum_vals(self.margin, other.margin);
+        self.padding = sum_vals(self.padding, other.padding);
+        self.size = sum_vals(self.size, other.size);
+        self.transition = sum_vals(self.transition.clone(), other.transition);
+        self.position = sum_vals(self.position.clone(), other.position);
+        self.text = sum_vals(self.text.clone(), other.text);
+        self.font = sum_vals(self.font.clone(), other.font);
+        self.others += other.others;
+    }
+}
+
 impl<Msg> UpdateEl<Msg> for Style {
     fn update_el(self, el: &mut El<Msg>) {
         if let Some(style) = self.to_seed_style() {
@@ -261,6 +311,23 @@ pub struct StyleMap {
     pub map: IndexMap<St, String>,
 }
 
+impl Add for StyleMap {
+    type Output = Self;
+
+    fn add(mut self, other: Self) -> Self::Output {
+        self += other;
+        self
+    }
+}
+
+impl AddAssign for StyleMap {
+    fn add_assign(&mut self, other: Self) {
+        for (key, val) in other.map.into_iter() {
+            self.map.insert(key, val);
+        }
+    }
+}
+
 impl StyleMap {
     /// This method provied a way to add custom style or css style that doesn't
     /// have it's own method yet.
@@ -311,4 +378,37 @@ impl StyleMap {
 /// Any type that act like css property should implemente this trait
 pub trait ToStyleMap {
     fn style_map(&self) -> StyleMap;
+}
+
+// macro used to implemente Add and AddAssign for Style, and style properties
+#[macro_export]
+macro_rules! impl_add_and_add_assign {
+    ( @attr $ty:ident $attr:ident clone $(,)? ) => {
+        |s: &mut $ty| { s.$attr.clone() }
+    };
+
+    ( @attr $ty:ident $attr:ident $(,)? ) => {
+        |s: &mut $ty| { s.$attr }
+    };
+
+    ( $name:ident { $( $attr:ident $( { $($tokens:tt)* } $(,)? )? )* } ) => {
+        impl ::std::ops::Add for $name {
+            type Output = Self;
+
+            fn add(mut self, other: Self) -> Self::Output {
+                self += other;
+                self
+            }
+        }
+
+        impl ::std::ops::AddAssign for $name {
+            fn add_assign(&mut self, other: Self) {
+                $(
+                    let get_val = impl_add_and_add_assign!(@attr $name $attr $( $( $tokens )* )? );
+                    let val = get_val(self);
+                    self.$attr = other.$attr.or(val);
+                )*
+            }
+        }
+    };
 }

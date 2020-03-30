@@ -1,5 +1,6 @@
 use crate::css::{color::Color, unit::*, values as val, St, StyleMap, ToStyleMap};
 use derive_rich::Rich;
+use std::ops::{Add, AddAssign};
 
 /// ```
 /// use khalas::css::{values as val, Style, unit::px, Color};
@@ -32,6 +33,28 @@ pub struct Border {
     bottom_left: Option<Radius>,
     #[rich(read, write)]
     bottom_right: Option<Radius>,
+}
+
+impl Add for Border {
+    type Output = Self;
+
+    fn add(mut self, other: Self) -> Self::Output {
+        self += other;
+        self
+    }
+}
+
+impl AddAssign for Border {
+    fn add_assign(&mut self, other: Self) {
+        self.left += other.left;
+        self.top += other.top;
+        self.right += other.right;
+        self.bottom += other.bottom;
+        self.top_left = other.top_left.or_else(|| self.top_left);
+        self.top_right = other.top_right.or_else(|| self.top_right);
+        self.bottom_left = other.bottom_left.or_else(|| self.bottom_left);
+        self.bottom_right = other.bottom_right.or_else(|| self.bottom_right);
+    }
 }
 
 impl ToStyleMap for Border {
@@ -139,6 +162,23 @@ pub struct Side {
     width: Option<Width>,
     #[rich(read, write)]
     color: Option<Color>,
+}
+
+impl Add for Side {
+    type Output = Self;
+
+    fn add(mut self, other: Self) -> Self::Output {
+        self += other;
+        self
+    }
+}
+
+impl AddAssign for Side {
+    fn add_assign(&mut self, other: Self) {
+        self.style = other.style.or_else(|| self.style);
+        self.color = other.color.or_else(|| self.color);
+        self.width = other.width.or_else(|| self.width);
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]

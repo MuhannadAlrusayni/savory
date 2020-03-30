@@ -66,6 +66,8 @@ pub struct Font {
     pub weight: Option<Weight>,
 }
 
+impl_add_and_add_assign!(Font { weight variant style size family { clone } });
+
 impl ToStyleMap for Font {
     fn style_map(&self) -> StyleMap {
         StyleMap::default()
