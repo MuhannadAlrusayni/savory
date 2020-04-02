@@ -11,43 +11,19 @@ pub enum Msg {
     Toggle,
 }
 
-#[derive(Default, Rich)]
-pub struct LocalEvents {
-    #[rich(write(style = compose))]
-    pub label: Events<Msg>,
-    #[rich(write(style = compose))]
-    pub input: Events<Msg>,
-}
-
-#[derive(Rich)]
-pub struct ParentEvents<PMsg> {
-    #[rich(write(style = compose))]
-    pub label: Events<PMsg>,
-    #[rich(write(style = compose))]
-    pub input: Events<PMsg>,
-}
-
-impl<PMsg> Default for ParentEvents<PMsg> {
-    fn default() -> Self {
-        Self {
-            label: Events::default(),
-            input: Events::default(),
-        }
-    }
-}
-
-#[derive(Rich)]
+#[derive(Rich, Element)]
 pub struct Checkbox<PMsg> {
     // general element properties
     input_el_ref: ElRef<web_sys::HtmlInputElement>,
     label_el_ref: ElRef<web_sys::HtmlLabelElement>,
     msg_mapper: MsgMapper<Msg, PMsg>,
     #[rich(read, write(style = compose))]
-    local_events: LocalEvents,
+    local_events: Events<Msg>,
     #[rich(read, write(style = compose))]
-    events: ParentEvents<PMsg>,
+    events: Events<PMsg>,
     #[rich(read, write(style = compose))]
-    user_style: UserStyle,
+    #[element(theme_lens)]
+    user_style: Style,
 
     // checkbox element properties
     #[rich(read, write)]
@@ -60,16 +36,19 @@ pub struct Checkbox<PMsg> {
             copy, rename = is_disabled
         )
     )]
+    #[element(theme_lens)]
     disabled: bool,
     #[rich(read(
         /// Return `true` if checkbox element is focused
         copy, rename = is_focused
     ))]
+    #[element(theme_lens)]
     focus: bool,
     #[rich(read(
         /// Return `true` when mouse over checkbox element
         copy, rename = is_mouse_over
     ))]
+    #[element(theme_lens)]
     mouse_over: bool,
     #[rich(
         read(
@@ -78,37 +57,39 @@ pub struct Checkbox<PMsg> {
         ),
         value_fns = { toggled = true, toggle_off = false }
     )]
+    #[element(theme_lens)]
     toggled: bool,
 }
 
 impl<PMsg> Checkbox<PMsg> {
     pub fn new(msg_mapper: impl Into<MsgMapper<Msg, PMsg>>) -> Self {
-        let local_events = LocalEvents::default()
-            .and_input(|conf| {
-                conf.focus(|_| Msg::Focus)
-                    .blur(|_| Msg::Blur)
-                    .mouse_enter(|_| Msg::MouseEnter)
-                    .mouse_leave(|_| Msg::MouseLeave)
-                    .click(|_| Msg::Toggle)
-            })
-            .and_label(|conf| {
-                conf.mouse_enter(|_| Msg::MouseEnter)
-                    .mouse_leave(|_| Msg::MouseLeave)
-            });
+        todo!()
+        // let local_events = Events::default()
+        //     .insert("input", |conf| {
+        //         conf.focus(|_| Msg::Focus)
+        //             .blur(|_| Msg::Blur)
+        //             .mouse_enter(|_| Msg::MouseEnter)
+        //             .mouse_leave(|_| Msg::MouseLeave)
+        //             .click(|_| Msg::Toggle)
+        //     })
+        //     .insert("label", |conf| {
+        //         conf.mouse_enter(|_| Msg::MouseEnter)
+        //             .mouse_leave(|_| Msg::MouseLeave)
+        //     });
 
-        Self {
-            input_el_ref: ElRef::default(),
-            label_el_ref: ElRef::default(),
-            msg_mapper: msg_mapper.into(),
-            local_events,
-            events: ParentEvents::default(),
-            label: None,
-            user_style: UserStyle::default(),
-            disabled: false,
-            focus: false,
-            mouse_over: false,
-            toggled: false,
-        }
+        // Self {
+        //     input_el_ref: ElRef::default(),
+        //     label_el_ref: ElRef::default(),
+        //     msg_mapper: msg_mapper.into(),
+        //     local_events,
+        //     events: Events::default(),
+        //     label: None,
+        //     user_style: Style::default(),
+        //     disabled: false,
+        //     focus: false,
+        //     mouse_over: false,
+        //     toggled: false,
+        // }
     }
 
     pub fn with_label(
@@ -123,10 +104,10 @@ impl<PMsg> Checkbox<PMsg> {
     }
 }
 
-impl<GMsg, PMsg: 'static> Model<PMsg, GMsg> for Checkbox<PMsg> {
+impl<PMsg: 'static> Model<PMsg> for Checkbox<PMsg> {
     type Message = Msg;
 
-    fn update(&mut self, msg: Msg, _: &mut impl Orders<PMsg, GMsg>) {
+    fn update(&mut self, msg: Msg, _: &mut impl Orders<PMsg>) {
         match msg {
             Msg::MouseEnter => self.mouse_over = true,
             Msg::MouseLeave => self.mouse_over = false,
@@ -137,69 +118,45 @@ impl<GMsg, PMsg: 'static> Model<PMsg, GMsg> for Checkbox<PMsg> {
     }
 }
 
-#[derive(Clone, Debug, Default, Rich)]
-pub struct UserStyle {
-    #[rich(write(style = compose))]
-    pub input: css::Style,
-    #[rich(write(style = compose))]
-    pub button: css::Style,
-    #[rich(write(style = compose))]
-    pub label: css::Style,
-}
-
-#[derive(Clone, Debug, Default, Rich)]
-pub struct Style {
-    #[rich(write(style = compose))]
-    pub input: css::Style,
-    #[rich(write(style = compose))]
-    pub button: css::Style,
-    #[rich(write(style = compose))]
-    pub label: css::Style,
-}
-
-impl<PMsg: 'static> Render<PMsg> for Checkbox<PMsg> {
+impl<PMsg> Render for Checkbox<PMsg> {
     type View = Node<PMsg>;
-    type Style = Style;
 
-    fn style(&self, theme: &impl Theme) -> Self::Style {
-        theme.checkbox(self)
+    fn style(&self, theme: &Theme) -> Style {
+        theme.checkbox(self.theme_lens())
     }
 
-    fn render_with_style(&self, _: &impl Theme, style: Self::Style) -> Self::View {
-        let Style {
-            button,
-            input,
-            label,
-        } = style;
+    fn render_with_style(&self, _: &Theme, style: Style) -> Self::View {
+        todo!()
+        // let input = input!()
+        //     .set(att::class("checbox"))
+        //     .set(att::disabled(self.disabled))
+        //     .set(att::checked(self.toggled))
+        //     .set(att::Type::Checkbox)
+        //     .set(style["checkbox"])
+        //     .set(&self.local_events["checkbox"])
+        //     .map_msg_with(&self.msg_mapper)
+        //     .try_add(self.events.get("input"))
+        //     .el_ref(&self.input_el_ref)
+        //     // add button if the checkbox is toggled
+        //     .config_if(self.is_toggled(), |conf| {
+        //         let button = div!()
+        //             .add(att::class("checkbox-button"))
+        //             .set(style["checkbox-button"])
+        //             .map_msg_with(&self.msg_mapper)
+        //             .try_add(self.events.get("checkbox-button"));
+        //         conf.add(button)
+        //     });
 
-        let input = input!()
-            .el_ref(&self.input_el_ref)
-            .set(input)
-            .set(&self.local_events.input)
-            .and_attributes(|conf| {
-                conf.set_class("checkbox-input")
-                    .set_disabled(self.disabled)
-                    .set_checked(self.toggled)
-                    .set_type(att::Type::Checkbox)
-            })
-            // add button if the checkbox is toggled
-            .config_if(self.is_toggled(), |conf| {
-                let button = div!().add(att::class("checkbox-button")).set(button);
-                conf.add(button)
-            })
-            .map_msg_with(&self.msg_mapper)
-            .add(&self.events.input);
-
-        match self.label.as_ref() {
-            None => input,
-            Some(lbl) => label!()
-                .el_ref(&self.label_el_ref)
-                .add(att::class("checkbox-label"))
-                .set(label)
-                .set(&self.local_events.label)
-                .map_msg_with(&self.msg_mapper)
-                .add(vec![input, plain![lbl.to_string()]])
-                .add(&self.events.label),
-        }
+        // match self.label.as_ref() {
+        //     None => input,
+        //     Some(lbl) => label!()
+        //         .add(att::class("checkbox-label"))
+        //         .set(style["label"])
+        //         .set(&self.local_events["label"])
+        //         .map_msg_with(&self.msg_mapper)
+        //         .try_add(self.events.get("label"))
+        //         .add(vec![input, plain![lbl.to_string()]])
+        //         .el_ref(&self.label_el_ref),
+        // }
     }
 }

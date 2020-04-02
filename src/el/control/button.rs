@@ -1,4 +1,4 @@
-use crate::{css, prelude::*};
+use crate::prelude::*;
 use derive_rich::Rich;
 use std::borrow::Cow;
 
@@ -11,12 +11,6 @@ pub enum Kind {
     Dashed,
 }
 
-#[derive(Clone)]
-pub enum Inner<PMsg: 'static> {
-    Children(Vec<Node<PMsg>>),
-    Common(Option<Cow<'static, str>>, Option<Icon<PMsg>>),
-}
-
 #[derive(Debug, Copy, Clone)]
 pub enum Msg {
     MouseEnter,
@@ -26,23 +20,25 @@ pub enum Msg {
     Route,
 }
 
-pub type LocalEvents = Events<Msg>;
-pub type ParentEvents<PMsg> = Events<PMsg>;
-
-#[derive(Clone, Rich)]
-pub struct Button<PMsg: 'static> {
+#[derive(Rich, Element)]
+pub struct Button<PMsg> {
     // general element properties
     el_ref: ElRef<web_sys::HtmlInputElement>,
     msg_mapper: MsgMapper<Msg, PMsg>,
     #[rich(read, write(style = compose))]
-    local_events: LocalEvents,
+    local_events: Events<Msg>,
     #[rich(read, write(style = compose))]
-    events: ParentEvents<PMsg>,
+    events: Events<PMsg>,
     #[rich(read, write(style = compose))]
-    user_style: UserStyle,
+    #[element(theme_lens)]
+    user_style: Style,
 
     // button element properties
-    inner: Inner<PMsg>,
+    #[rich(write)]
+    #[element(theme_lens(nested))]
+    pub label: Option<Label<Msg>>,
+    #[rich(write)]
+    pub icon: Option<Icon<Msg>>,
     #[rich(read(copy), value_fns = {
         /// Change button kind to normal
         normal = Kind::Normal,
@@ -55,88 +51,69 @@ pub struct Button<PMsg: 'static> {
         /// Change button kind to dashed
         dashed = Kind::Dashed,
     })]
+    #[element(theme_lens)]
     kind: Option<Kind>,
     #[rich(read(copy), write)]
+    #[element(theme_lens)]
     block: bool,
     #[rich(read(copy), write)]
+    #[element(theme_lens)]
     ghost: bool,
     #[rich(read, write)]
+    #[element(theme_lens)]
     route: Option<Cow<'static, str>>,
     #[rich(read(copy, rename = is_disabled), write, value_fns = { disable = true, enable = false })]
+    #[element(theme_lens)]
     disabled: bool,
     #[rich(read(copy, rename = is_focused), write)]
+    #[element(theme_lens)]
     focus: bool,
     #[rich(read(copy, rename = is_mouse_over), write)]
+    #[element(theme_lens)]
     mouse_over: bool,
 }
 
 impl<PMsg> Button<PMsg> {
     pub fn new(msg_mapper: impl Into<MsgMapper<Msg, PMsg>>) -> Self {
-        let local_events = Events::default()
-            .focus(|_| Msg::Focus)
-            .blur(|_| Msg::Blur)
-            .mouse_enter(|_| Msg::MouseEnter)
-            .mouse_leave(|_| Msg::MouseLeave)
-            .click(|_| Msg::Route);
+        todo!()
+        // let local_events = Events::default().insert("button", |conf| {
+        //     conf.focus(|_| Msg::Focus)
+        //         .blur(|_| Msg::Blur)
+        //         .mouse_enter(|_| Msg::MouseEnter)
+        //         .mouse_leave(|_| Msg::MouseLeave)
+        //         .click(|_| Msg::Route)
+        // });
 
-        Button {
-            el_ref: ElRef::default(),
-            msg_mapper: msg_mapper.into(),
-            local_events,
-            events: Events::default(),
-            inner: Inner::Common(None, None),
-            kind: None,
-            block: false,
-            ghost: false,
-            user_style: UserStyle::default(),
-            route: None,
-            disabled: false,
-            focus: false,
-            mouse_over: false,
-        }
+        // Button {
+        //     el_ref: ElRef::default(),
+        //     msg_mapper: msg_mapper.into(),
+        //     local_events,
+        //     events: Events::default(),
+        //     label: None,
+        //     icon: None,
+        //     kind: None,
+        //     block: false,
+        //     ghost: false,
+        //     user_style: Style::default(),
+        //     route: None,
+        //     disabled: false,
+        //     focus: false,
+        //     mouse_over: false,
+        // }
     }
 
     pub fn with_label(
         msg_mapper: impl Into<MsgMapper<Msg, PMsg>>,
-        label: impl Into<Cow<'static, str>>,
+        label: impl Into<Label<Msg>>,
     ) -> Self {
         Button::new(msg_mapper).set_label(label)
     }
 
-    pub fn with_children(
+    pub fn with_icon(
         msg_mapper: impl Into<MsgMapper<Msg, PMsg>>,
-        children: Vec<Node<PMsg>>,
+        icon: impl Into<Icon<Msg>>,
     ) -> Self {
-        Button::new(msg_mapper).set_children(children)
-    }
-
-    pub fn label(&self) -> Option<&str> {
-        match self.inner {
-            Inner::Common(Some(ref lbl), _) => Some(lbl),
-            _ => None,
-        }
-    }
-
-    pub fn set_label(mut self, label: impl Into<Cow<'static, str>>) -> Self {
-        match self.inner {
-            Inner::Common(Some(ref mut lbl), _) => *lbl = label.into(),
-            Inner::Common(ref mut lbl, _) => *lbl = Some(label.into()),
-            _ => self.inner = Inner::Common(Some(label.into()), None),
-        };
-        self
-    }
-
-    pub fn set_children(mut self, children: Vec<Node<PMsg>>) -> Self {
-        self.inner = Inner::Children(children);
-        self
-    }
-
-    pub fn set_icon(mut self, new_icon: impl Into<Icon<PMsg>>) -> Self {
-        match self.inner {
-            Inner::Common(_, ref mut icon) => *icon = Some(new_icon.into()),
-            _ => self.inner = Inner::Common(None, Some(new_icon.into())),
-        };
-        self
+        Button::new(msg_mapper).set_icon(icon)
     }
 
     fn handle_route_msg(&mut self) {
@@ -151,10 +128,10 @@ impl<PMsg> Button<PMsg> {
     }
 }
 
-impl<GMsg, PMsg: 'static> Model<PMsg, GMsg> for Button<PMsg> {
+impl<PMsg: 'static> Model<PMsg> for Button<PMsg> {
     type Message = Msg;
 
-    fn update(&mut self, msg: Msg, _: &mut impl Orders<PMsg, GMsg>) {
+    fn update(&mut self, msg: Msg, _: &mut impl Orders<PMsg>) {
         match msg {
             Msg::MouseEnter => self.mouse_over = true,
             Msg::MouseLeave => self.mouse_over = false,
@@ -165,52 +142,23 @@ impl<GMsg, PMsg: 'static> Model<PMsg, GMsg> for Button<PMsg> {
     }
 }
 
-/// This style used by users when they want to change styles of SpinEntry
-#[derive(Clone, Default, Rich)]
-pub struct UserStyle {
-    #[rich(write(style = compose))]
-    pub button: css::Style,
-    #[rich(write(style = compose))]
-    pub common_container: flexbox::Style,
-}
-
-/// This style returned by the Theme and consumed by render function, thus the
-/// icons must be returned by the theme
-#[derive(Clone, Debug, Default, Rich)]
-pub struct Style {
-    #[rich(write(style = compose))]
-    pub button: css::Style,
-    #[rich(write(style = compose))]
-    pub common_container: flexbox::Style,
-}
-
-impl<PMsg: 'static> Render<PMsg> for Button<PMsg> {
+impl<PMsg> Render for Button<PMsg> {
     type View = Node<PMsg>;
-    type Style = Style;
 
-    fn style(&self, theme: &impl Theme) -> Self::Style {
-        theme.button(self)
+    fn style(&self, theme: &Theme) -> Style {
+        theme.button(self.theme_lens())
     }
 
-    fn render_with_style(&self, theme: &impl Theme, style: Self::Style) -> Self::View {
-        let inner = match self.inner {
-            Inner::Children(ref children) => children.clone(),
-            Inner::Common(ref label, ref icon) => {
-                let icon = icon.as_ref().map(|icon| icon.render(theme));
-                let label = label.as_ref().map(|lbl| plain!(lbl.clone()));
-                nodes![Flexbox::new()
-                    .try_add(icon)
-                    .try_add(label)
-                    .render_with_style(theme, style.common_container)]
-            }
-        };
-
-        button!()
-            .set(&self.local_events)
-            .set(style.button)
-            .and_attributes(|conf| conf.set_class("button").set_disabled(self.disabled))
-            .map_msg_with(&self.msg_mapper)
-            .add(&self.events)
-            .add(inner)
+    fn render_with_style(&self, theme: &Theme, style: Style) -> Self::View {
+        todo!()
+        // button!()
+        //     .add(att::class("button"))
+        //     .add(att::disabled(self.disabled))
+        //     .set(&self.local_events["button"])
+        //     .set(style["button"])
+        //     .map_msg_with(&self.msg_mapper)
+        //     .try_add(self.events.get("button"))
+        //     .try_add(self.icon.as_ref().map(|icon| icon.render(theme)))
+        //     .try_add(self.label.as_ref().map(|lbl| lbl.render(theme)))
     }
 }

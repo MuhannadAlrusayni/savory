@@ -12,6 +12,7 @@ pub enum Msg {
     Dialog(dialog::Msg),
     DialogChild(button::Msg),
     ProgressBar(progress_bar::Msg),
+    MenuButton(menu_button::Msg),
 }
 
 pub struct Page {
@@ -23,7 +24,8 @@ pub struct Page {
     entry: Entry<Msg>,
     spin_entry: SpinEntry<Msg>,
     dialog: Dialog<Msg, Button<Msg>>,
-    progress_bar: ProgressBar<Msg>,
+    // progress_bar: ProgressBar<Msg>,
+    menu_button: MenuButton<Msg, ProgressBar<Msg>>,
 }
 
 impl Default for Page {
@@ -39,6 +41,11 @@ impl Default for Page {
             conf.click(|_| Msg::Dialog(dialog::Msg::Show))
                 .click(|_| Msg::ProgressBar(progress_bar::Msg::Increment(2.)))
         });
+        let progrese_bar = ProgressBar::new(Msg::ProgressBar)
+            .failure()
+            .set_min(10.)
+            .set_max(25.)
+            .set_value(13.);
 
         Self {
             theme: Ant::new(),
@@ -49,18 +56,15 @@ impl Default for Page {
             entry: Entry::with_placeholder(Msg::Entry, "Ali Yousef"),
             spin_entry: SpinEntry::new(Msg::SpinEntry),
             dialog,
-            progress_bar: ProgressBar::new(Msg::ProgressBar)
-                .set_min(10.)
-                .set_max(25.)
-                .set_value(13.),
+            menu_button: MenuButton::new(Msg::MenuButton, "Progress Info", progrese_bar),
         }
     }
 }
 
-impl Model<Msg, ()> for Page {
+impl Model<Msg> for Page {
     type Message = Msg;
 
-    fn update(&mut self, msg: Msg, orders: &mut impl Orders<Msg, ()>) {
+    fn update(&mut self, msg: Msg, orders: &mut impl Orders<Msg>) {
         match msg {
             Msg::Button(msg) => self.button.update(msg, orders),
             Msg::Checkbox(msg) => self.checkbox.update(msg, orders),
@@ -70,7 +74,8 @@ impl Model<Msg, ()> for Page {
             Msg::SpinEntry(msg) => self.spin_entry.update(msg, orders),
             Msg::Dialog(msg) => self.dialog.update(msg, orders),
             Msg::DialogChild(msg) => self.dialog.child.update(msg, orders),
-            Msg::ProgressBar(msg) => self.progress_bar.update(msg, orders),
+            Msg::ProgressBar(msg) => self.menu_button.child.update(msg, orders),
+            Msg::MenuButton(msg) => self.menu_button.update(msg, orders),
         }
     }
 }
@@ -79,11 +84,11 @@ impl Render<Msg> for Page {
     type View = Node<Msg>;
     type Style = ();
 
-    fn style(&self, _: &impl Theme) -> Self::Style {
+    fn style(&self, _: &Theme) -> Style {
         ()
     }
 
-    fn render_with_style(&self, theme: &impl Theme, _: Self::Style) -> Self::View {
+    fn render_with_style(&self, theme: &Theme, _: Style) -> Self::View {
         Flexbox::new()
             .center()
             .full_size()
@@ -92,7 +97,7 @@ impl Render<Msg> for Page {
             .add_items(renders! {
                 theme,
                 self.button,
-                self.progress_bar,
+                self.menu_button,
                 self.checkbox,
                 self.radio,
                 self.switch,

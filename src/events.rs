@@ -32,12 +32,12 @@ impl<Msg> UpdateEl<Msg> for Events<Msg> {
 macro_rules! mouse_events {
     ( $( $event:ident: $ty:ty { $( $(#[$doc:meta])? $name:ident = $ev:expr $(,)? )* } $(,)? )* ) => {
         $(
-            impl<Msg: 'static> Events<Msg> {
+            impl<Ms: 'static> Events<Ms> {
                 $(
                     $( #[$doc] )?
                     pub fn $name(
                         mut self,
-                        handler: impl FnOnce($ty) -> Msg + 'static + Clone,
+                        handler: impl FnOnce($ty) -> Ms + 'static + Clone,
                     ) -> Self {
                         self.events.push($event($ev, handler));
                         self
@@ -152,7 +152,7 @@ macro_rules! event_creator{
             ) -> EventHandler<Ms> {
                 let msg_type = TypeId::of::<HandlerMs>();
                 if msg_type != TypeId::of::<Ms>() && msg_type != TypeId::of::<()>() {
-                    panic!("Handler can return only Msg or ()!");
+                    panic!("Handler can return only Ms or ()!");
                 }
 
                 let closure_handler = move |event: web_sys::Event| {

@@ -16,17 +16,17 @@
 //!     pub email: Cow<'static, str>,
 //! };
 //!
-//! impl<PMsg: 'static> Render<PMsg> for UserInfo {
+//! impl<PMsg> Render for UserInfo {
 //!     type View = Node<PMsg>;
 //!     type Style = Style;
 //!
-//!     fn style(&self, _: &impl Theme) -> Self::Style {
+//!     fn style(&self, _: &Theme) -> Style {
 //!         Style::default()
 //!             .and_background(|conf| conf.set_color(Color::Black))
 //!             .and_text(|conf| conf.set_color(Color::White))
 //!     }
 //!
-//!     fn render_with_style(&self, theme: &impl Theme, style: Self::Style) -> Self::View {
+//!     fn render_with_style(&self, theme: &Theme, style: Style) -> Self::View {
 //!         Flexbox::new()
 //!             .center()
 //!             .column()
@@ -45,10 +45,10 @@
 //! use khalas::{prelude::*, css::Color};
 //! use std::borrow::Cow;
 //!
-//! pub fn user_info<PMsg: 'static>(
+//! pub fn user_info<PMsg>(
 //!     username: Cow<'static, str>,
 //!     email: Cow<'static, str>,
-//!     theme: &impl Theme
+//!     theme: &Theme
 //! ) -> Node<PMsg> {
 //!     // creating element style
 //!     let style = Style::default()
@@ -84,24 +84,16 @@
 //! [`Render`]: crate::prelude::Render
 //! [`Node`]: crate::prelude::Node
 
-use crate::prelude::{El, Node, Theme, View};
+use crate::prelude::{Style, Theme};
 
 /// Main trait used to render elements.
-pub trait Render<PMsg: 'static> {
+pub trait Render {
     /// The returne type from `render` function
-    type View: View<PMsg>;
-    /// The style used to render this element
-    type Style;
+    type View;
 
     /// Return style for the current state of the element
-    fn style(&self, theme: &impl Theme) -> Self::Style;
-
-    /// Users will call this method to render the element, this method basiclly
-    /// will call `style` and pass the returned style to `render_with_style`.
-    ///
-    /// In most cases you don't need to implement this method yourself.
-    fn render(&self, theme: &impl Theme) -> Self::View {
-        self.render_with_style(theme, self.style(theme))
+    fn style(&self, theme: &Theme) -> Style {
+        Style::default()
     }
 
     /// This is the main method used to render element with the passed style
@@ -110,60 +102,47 @@ pub trait Render<PMsg: 'static> {
     ///
     /// - `Theme` is used here to provieds styles for other elements.
     /// - `Style` is used to style the element.
-    fn render_with_style(&self, _: &impl Theme, _: Self::Style) -> Self::View;
-}
-
-impl<PMsg: 'static> Render<PMsg> for Node<PMsg> {
-    type View = Node<PMsg>;
-    type Style = ();
-
-    fn style(&self, _: &impl Theme) -> Self::Style {
-        ()
-    }
-
-    fn render_with_style(&self, _: &impl Theme, _: Self::Style) -> Self::View {
-        self.clone()
+    fn render_with_style(&self, _: &Theme, _: Style) -> Self::View;
+    /// Users will call this method to render the element, this method basiclly
+    /// will call `style` and pass the returned style to `render_with_style`.
+    ///
+    /// In most cases you don't need to implement this method yourself.
+    fn render(&self, theme: &Theme) -> Self::View {
+        self.render_with_style(theme, self.style(theme))
     }
 }
 
-impl<PMsg: 'static> Render<PMsg> for Vec<Node<PMsg>> {
-    type View = Vec<Node<PMsg>>;
-    type Style = ();
+// impl<PMsg> Render for Node<PMsg> {
+//     type View = Node<PMsg>;
 
-    fn style(&self, _: &impl Theme) -> Self::Style {
-        ()
-    }
+//     fn render_with_style(&self, _: &Theme, _: Style) -> Self::View {
+//         self.clone()
+//     }
+// }
 
-    fn render_with_style(&self, _: &impl Theme, _: Self::Style) -> Self::View {
-        self.clone()
-    }
-}
+// impl<PMsg> Render for Vec<Node<PMsg>> {
+//     type View = Vec<Node<PMsg>>;
 
-impl<PMsg: 'static> Render<PMsg> for El<PMsg> {
-    type View = El<PMsg>;
-    type Style = ();
+//     fn render_with_style(&self, _: &Theme, _: Style) -> Self::View {
+//         self.clone()
+//     }
+// }
 
-    fn style(&self, _: &impl Theme) -> Self::Style {
-        ()
-    }
+// impl<PMsg> Render for El<PMsg> {
+//     type View = El<PMsg>;
 
-    fn render_with_style(&self, _: &impl Theme, _: Self::Style) -> Self::View {
-        self.clone()
-    }
-}
+//     fn render_with_style(&self, _: &Theme, _: Style) -> Self::View {
+//         self.clone()
+//     }
+// }
 
-impl<PMsg: 'static> Render<PMsg> for Vec<El<PMsg>> {
-    type View = Vec<El<PMsg>>;
-    type Style = ();
+// impl<PMsg> Render for Vec<El<PMsg>> {
+//     type View = Vec<El<PMsg>>;
 
-    fn style(&self, _: &impl Theme) -> Self::Style {
-        ()
-    }
-
-    fn render_with_style(&self, _: &impl Theme, _: Self::Style) -> Self::View {
-        self.clone()
-    }
-}
+//     fn render_with_style(&self, _: &Theme, _: Style) -> Self::View {
+//         self.clone()
+//     }
+// }
 
 /// calls `render(theme)` on all passed elements.
 #[macro_export]

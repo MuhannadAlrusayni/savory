@@ -1,9 +1,11 @@
 use crate::{
     css::{
+        self,
         unit::{em, ms, px, sec},
         values as val, Cursor, St,
     },
     prelude::*,
+    theme::ThemeImpl,
 };
 use palette::{Hsl, Hsla};
 
@@ -421,1002 +423,999 @@ impl Ant {
     //     unimplemented!()
     // }
 
-    fn button_normal<PMsg>(&self, btn: &Button<PMsg>) -> Style {
-        // colors
-        let (bg, fg, border_color) =
-            match (btn.is_disabled(), btn.is_focused(), btn.is_mouse_over()) {
-                // btn is disabled
-                (true, _, _) => (
-                    self.gray(Variant::L200),
-                    self.disable(false),
-                    self.gray(Variant::L400),
-                ),
-                // btn is not focused or hovered
-                (false, false, false) => {
-                    (self.white(), self.primary_text(false), self.border(false))
-                }
-                // btn is hovered or focused
-                _ => (
-                    self.white(),
-                    self.brand(Variant::L500),
-                    self.brand(Variant::L500),
-                ),
-            };
+    fn button_normal<'a>(&self, btn: ButtonLens<'a>) -> css::Style {
+        todo!()
+        // // colors
+        // let (bg, fg, border_color) =
+        //     match (btn.is_disabled(), btn.is_focused(), btn.is_mouse_over()) {
+        //         // btn is disabled
+        //         (true, _, _) => (
+        //             self.gray(Variant::L200),
+        //             self.disable(false),
+        //             self.gray(Variant::L400),
+        //         ),
+        //         // btn is not focused or hovered
+        //         (false, false, false) => {
+        //             (self.white(), self.primary_text(false), self.border(false))
+        //         }
+        //         // btn is hovered or focused
+        //         _ => (
+        //             self.white(),
+        //             self.brand(Variant::L500),
+        //             self.brand(Variant::L500),
+        //         ),
+        //     };
 
-        Style::default()
-            .and_border(|conf| {
-                conf.set_width(px(1.))
-                    .solid()
-                    .set_radius(px(4.))
-                    .set_color(border_color)
-            })
-            .and_background(|conf| conf.set_color(bg))
-            .and_text(|conf| conf.set_color(fg))
-            .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
+        // css::Style::default()
+        //     .and_border(|conf| {
+        //         conf.set_width(px(1.))
+        //             .solid()
+        //             .set_radius(px(4.))
+        //             .set_color(border_color)
+        //     })
+        //     .and_background(|conf| conf.set_color(bg))
+        //     .and_text(|conf| conf.set_color(fg))
+        //     .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
     }
 
-    fn button_suggestion<PMsg>(&self, btn: &Button<PMsg>) -> Style {
-        // colors
-        let (bg, fg, border_color) =
-            match (btn.is_disabled(), btn.is_focused(), btn.is_mouse_over()) {
-                // btn is disabled
-                (true, _, _) => (
-                    self.gray(Variant::L200),
-                    self.disable(false),
-                    self.gray(Variant::L400),
-                ),
-                // btn is not focused or hovered
-                (false, false, false) => (
-                    self.brand(Variant::L500),
-                    self.white(),
-                    self.brand(Variant::L500),
-                ),
-                // btn is hovered or focused
-                _ => (
-                    self.brand(Variant::L400),
-                    self.white(),
-                    self.brand(Variant::L400),
-                ),
-            };
+    fn button_suggestion<'a>(&self, btn: ButtonLens<'a>) -> css::Style {
+        todo!()
+        // // colors
+        // let (bg, fg, border_color) =
+        //     match (btn.is_disabled(), btn.is_focused(), btn.is_mouse_over()) {
+        //         // btn is disabled
+        //         (true, _, _) => (
+        //             self.gray(Variant::L200),
+        //             self.disable(false),
+        //             self.gray(Variant::L400),
+        //         ),
+        //         // btn is not focused or hovered
+        //         (false, false, false) => (
+        //             self.brand(Variant::L500),
+        //             self.white(),
+        //             self.brand(Variant::L500),
+        //         ),
+        //         // btn is hovered or focused
+        //         _ => (
+        //             self.brand(Variant::L400),
+        //             self.white(),
+        //             self.brand(Variant::L400),
+        //         ),
+        //     };
 
-        Style::default()
-            .and_border(|conf| {
-                conf.set_width(px(1.))
-                    .solid()
-                    .set_radius(px(4.))
-                    .set_color(border_color)
-            })
-            .and_background(|conf| conf.set_color(bg))
-            .and_text(|conf| conf.set_color(fg))
-            .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
+        // css::Style::default()
+        //     .and_border(|conf| {
+        //         conf.set_width(px(1.))
+        //             .solid()
+        //             .set_radius(px(4.))
+        //             .set_color(border_color)
+        //     })
+        //     .and_background(|conf| conf.set_color(bg))
+        //     .and_text(|conf| conf.set_color(fg))
+        //     .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
     }
 
-    fn button_destructive<PMsg>(&self, btn: &Button<PMsg>) -> Style {
-        // colors
-        let (bg, fg, border_color) =
-            match (btn.is_disabled(), btn.is_focused(), btn.is_mouse_over()) {
-                // btn is disabled
-                (true, _, _) => (
-                    self.gray(Variant::L200),
-                    self.disable(false),
-                    self.gray(Variant::L400),
-                ),
-                // btn is not focused or hovered
-                (false, false, false) => (
-                    self.dust_red(Variant::L500),
-                    self.white(),
-                    self.dust_red(Variant::L500),
-                ),
-                // btn is hovered or focused
-                _ => (
-                    self.dust_red(Variant::L400),
-                    self.white(),
-                    self.dust_red(Variant::L400),
-                ),
-            };
+    fn button_destructive<'a>(&self, btn: ButtonLens<'a>) -> css::Style {
+        todo!()
+        // // colors
+        // let (bg, fg, border_color) =
+        //     match (btn.is_disabled(), btn.is_focused(), btn.is_mouse_over()) {
+        //         // btn is disabled
+        //         (true, _, _) => (
+        //             self.gray(Variant::L200),
+        //             self.disable(false),
+        //             self.gray(Variant::L400),
+        //         ),
+        //         // btn is not focused or hovered
+        //         (false, false, false) => (
+        //             self.dust_red(Variant::L500),
+        //             self.white(),
+        //             self.dust_red(Variant::L500),
+        //         ),
+        //         // btn is hovered or focused
+        //         _ => (
+        //             self.dust_red(Variant::L400),
+        //             self.white(),
+        //             self.dust_red(Variant::L400),
+        //         ),
+        //     };
 
-        Style::default()
-            .and_border(|conf| {
-                conf.set_width(px(1.))
-                    .solid()
-                    .set_radius(px(4.))
-                    .set_color(border_color)
-            })
-            .and_background(|conf| conf.set_color(bg))
-            .and_text(|conf| conf.set_color(fg))
-            .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
+        // css::Style::default()
+        //     .and_border(|conf| {
+        //         conf.set_width(px(1.))
+        //             .solid()
+        //             .set_radius(px(4.))
+        //             .set_color(border_color)
+        //     })
+        //     .and_background(|conf| conf.set_color(bg))
+        //     .and_text(|conf| conf.set_color(fg))
+        //     .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
     }
 
-    fn button_link<PMsg>(&self, btn: &Button<PMsg>) -> Style {
-        // colors
-        let (bg, fg) = match (btn.is_disabled(), btn.is_focused(), btn.is_mouse_over()) {
-            (true, _, _) => (self.white(), self.disable(false)),
-            // btn is not focused or hovered
-            (false, false, false) => (self.white(), self.brand(Variant::L500)),
-            // btn is hovered or focused
-            _ => (self.white(), self.brand(Variant::L400)),
-        };
+    fn button_link<'a>(&self, btn: ButtonLens<'a>) -> css::Style {
+        todo!()
+        // // colors
+        // let (bg, fg) = match (btn.is_disabled(), btn.is_focused(), btn.is_mouse_over()) {
+        //     (true, _, _) => (self.white(), self.disable(false)),
+        //     // btn is not focused or hovered
+        //     (false, false, false) => (self.white(), self.brand(Variant::L500)),
+        //     // btn is hovered or focused
+        //     _ => (self.white(), self.brand(Variant::L400)),
+        // };
 
-        Style::default()
-            .and_text(|conf| conf.set_color(fg))
-            .and_border(|conf| {
-                conf.set_width(px(0.))
-                    .solid()
-                    .set_radius(px(4.))
-                    .set_color(bg)
-            })
-            .and_background(|conf| conf.set_color(bg))
+        // css::Style::default()
+        //     .and_text(|conf| conf.set_color(fg))
+        //     .and_border(|conf| {
+        //         conf.set_width(px(0.))
+        //             .solid()
+        //             .set_radius(px(4.))
+        //             .set_color(bg)
+        //     })
+        //     .and_background(|conf| conf.set_color(bg))
     }
 
-    fn button_dashed<PMsg>(&self, btn: &Button<PMsg>) -> Style {
-        // colors
-        let (bg, fg, border_color) =
-            match (btn.is_disabled(), btn.is_focused(), btn.is_mouse_over()) {
-                (true, _, _) => (
-                    self.gray(Variant::L200),
-                    self.disable(false),
-                    self.gray(Variant::L400),
-                ),
-                // btn is not focused or hovered
-                (false, false, false) => (
-                    self.white(),
-                    self.primary_text(false),
-                    self.gray(Variant::D600),
-                ),
-                // btn is hovered or focused
-                _ => (
-                    self.white(),
-                    self.brand(Variant::L500),
-                    self.brand(Variant::L500),
-                ),
-            };
+    fn button_dashed<'a>(&self, btn: ButtonLens<'a>) -> css::Style {
+        todo!()
+        //     // colors
+        //     let (bg, fg, border_color) = match (btn.disabled, btn.focused, btn.mouse_over) {
+        //         (true, _, _) => (
+        //             self.gray(Variant::L200),
+        //             self.disable(false),
+        //             self.gray(Variant::L400),
+        //         ),
+        //         // btn is not focused or hovered
+        //         (false, false, false) => (
+        //             self.white(),
+        //             self.primary_text(false),
+        //             self.gray(Variant::D600),
+        //         ),
+        //         // btn is hovered or focused
+        //         _ => (
+        //             self.white(),
+        //             self.brand(Variant::L500),
+        //             self.brand(Variant::L500),
+        //         ),
+        //     };
 
-        Style::default()
-            .and_border(|conf| {
-                conf.set_width(px(1.))
-                    .dashed()
-                    .set_radius(px(4.))
-                    .set_color(border_color)
-            })
-            .and_background(|conf| conf.set_color(bg))
-            .and_text(|conf| conf.set_color(fg))
-            .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
+        //     css::Style::default()
+        //         .and_border(|conf| {
+        //             conf.set_width(px(1.))
+        //                 .dashed()
+        //                 .set_radius(px(4.))
+        //                 .set_color(border_color)
+        //         })
+        //         .and_background(|conf| conf.set_color(bg))
+        //         .and_text(|conf| conf.set_color(fg))
+        //         .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
     }
 }
 
-impl Theme for Ant {
-    fn flexbox<PMsg: 'static>(&self, flex: &Flexbox<PMsg>) -> flexbox::Style {
-        Style::default()
-            .set_display(val::Flex)
-            .try_set_flex_direction(flex.get_direction())
-            .try_set_flex_wrap(flex.get_wrap())
-            .try_set_justify_content(flex.get_justify_content())
-            .try_set_align_items(flex.get_align_items())
-            .try_set_align_content(flex.get_align_content())
-            .try_set_gap(flex.get_gap())
-            .merge(flex.user_style())
+impl ThemeImpl for Ant {
+    fn flexbox<'a>(&self, flex: FlexboxLens<'a>) -> Style {
+        todo!()
+        // Style::default()
+        //     .set_display(val::Flex)
+        //     .try_set_flex_direction(flex.get_direction())
+        //     .try_set_flex_wrap(flex.get_wrap())
+        //     .try_set_justify_content(flex.get_justify_content())
+        //     .try_set_align_items(flex.get_align_items())
+        //     .try_set_align_content(flex.get_align_content())
+        //     .try_set_gap(flex.get_gap())
+        //     .merge(flex.user_style())
     }
 
-    fn flexbox_item<PMsg: 'static>(&self, item: &flexbox::Item<PMsg>) -> flexbox::ItemStyle {
-        Style::default()
-            .try_add(St::Order, item.get_order())
-            .try_add(St::FlexGrow, item.get_grow())
-            .try_add(St::FlexShrink, item.get_shrink())
-            .try_merge(item.get_basis().as_ref())
-            .try_merge(item.get_align_self().as_ref())
-            .merge(item.user_style())
+    fn flexbox_item<'a>(&self, item: flexbox::ItemLens<'a>) -> Style {
+        todo!()
+        // Style::default()
+        //     .try_add(St::Order, item.get_order())
+        //     .try_add(St::FlexGrow, item.get_grow())
+        //     .try_add(St::FlexShrink, item.get_shrink())
+        //     .try_merge(item.get_basis().as_ref())
+        //     .try_merge(item.get_align_self().as_ref())
+        //     .merge(item.user_style())
     }
 
     // fn grid(&self) -> Style;
 
-    fn popover<'a, PMsg, C, T>(&self, popover: &Popover<'a, PMsg, C, T>) -> popover::Style {
-        let container = Style::default().and_position(|conf| conf.relative());
+    fn popover<'a>(&self, popover: PopoverLens<'a>) -> Style {
+        todo!()
+        // let container = Style::default().and_position(|conf| conf.relative());
 
-        let panel = Style::default()
-            .and_transition(|conf| {
-                conf.add("opacity", |conf| conf.set_duration(ms(150.)).ease())
-                    .add("transform", |conf| conf.set_duration(ms(150.)).ease())
-                    .add("visibility", |conf| conf.set_duration(ms(150.)).ease())
-            })
-            .and_position(|conf| conf.absolute())
-            .and_background(|conf| conf.set_color(self.white()))
-            .and_border(|conf| {
-                conf.set_color(self.border(false))
-                    .none()
-                    .set_width(px(0.))
-                    .set_radius(px(4.))
-            })
-            .add(St::BoxShadow, "0 2px 8px rgba(0, 35, 11, 0.15)")
-            .and_padding(|conf| conf.set_x(px(4.)).set_y(px(2)))
-            .and_margin(|conf| conf.set_top(px(popover.offset())))
-            .config_if_else(
-                popover.is_visible(),
-                |conf| conf.set_opacity(1.).set_visibility(val::Visible),
-                |conf| conf.set_visibility(val::Hidden).set_opacity(0.),
-            );
+        // let panel = Style::default()
+        //     .and_transition(|conf| {
+        //         conf.add("opacity", |conf| conf.set_duration(ms(150.)).ease())
+        //             .add("transform", |conf| conf.set_duration(ms(150.)).ease())
+        //             .add("visibility", |conf| conf.set_duration(ms(150.)).ease())
+        //     })
+        //     .and_position(|conf| conf.absolute())
+        //     .and_background(|conf| conf.set_color(self.white()))
+        //     .and_border(|conf| {
+        //         conf.set_color(self.border(false))
+        //             .none()
+        //             .set_width(px(0.))
+        //             .set_radius(px(4.))
+        //     })
+        //     .add(St::BoxShadow, "0 2px 8px rgba(0, 35, 11, 0.15)")
+        //     .and_padding(|conf| conf.set_x(px(4.)).set_y(px(2)))
+        //     .and_margin(|conf| conf.set_top(px(popover.offset())))
+        //     .config_if_else(
+        //         popover.is_visible(),
+        //         |conf| conf.set_opacity(1.).set_visibility(val::Visible),
+        //         |conf| conf.set_visibility(val::Hidden).set_opacity(0.),
+        //     );
 
-        popover::Style { container, panel }
+        // popover::Style { container, panel }
     }
 
-    fn svg_icon<PMsg: 'static>(&self, icon: &SvgIcon<PMsg>) -> icon::SvgStyle {
-        Style::default().merge(icon.user_style())
+    fn svg_icon<'a>(&self, icon: SvgIconLens<'a>) -> Style {
+        todo!()
+        // Style::default().merge(icon.user_style())
     }
 
-    fn html_icon<PMsg>(&self, icon: &HtmlIcon<PMsg>) -> icon::HtmlStyle {
-        Style::default().merge(icon.user_style())
+    fn html_icon<'a>(&self, icon: HtmlIconLens<'a>) -> Style {
+        todo!()
+        // Style::default().merge(icon.user_style())
     }
 
-    fn url_icon<PMsg>(&self, icon: &UrlIcon<PMsg>) -> icon::UrlStyle {
-        Style::default().merge(icon.user_style())
+    fn url_icon<'a>(&self, icon: UrlIconLens<'a>) -> Style {
+        todo!()
+        // Style::default().merge(icon.user_style())
     }
 
     // TODO: handle is_loading()
     // TODO: handle btn.is_block()
     // TODO: handle btn.is_ghost()
-    fn button<PMsg>(&self, btn: &Button<PMsg>) -> button::Style {
-        let cursor: Cursor = if btn.is_disabled() {
-            val::NotAllowed.into()
-        } else {
-            val::Initial.into()
-        };
+    fn button<'a>(&self, btn: ButtonLens<'a>) -> Style {
+        todo!()
+        // let cursor: Cursor = if btn.is_disabled() {
+        //     val::NotAllowed.into()
+        // } else {
+        //     val::Initial.into()
+        // };
 
-        let button = match btn.get_kind() {
-            Some(button::Kind::Normal) | None => self.button_normal(btn),
-            Some(button::Kind::Suggestion) => self.button_suggestion(btn),
-            Some(button::Kind::Destructive) => self.button_destructive(btn),
-            Some(button::Kind::Link) => self.button_link(btn),
-            Some(button::Kind::Dashed) => self.button_dashed(btn),
-        }
-        .and_padding(|conf| conf.set_x(px(15.)).set_y(px(0.)))
-        .and_size(|conf| conf.set_all_heights(px(32.)))
-        .and_transition(|conf| {
-            conf.all(|val| {
-                val.set_duration(sec(0.3))
-                    .cubic_bezier(0.645, 0.045, 0.355, 1.)
-            })
-        })
-        .and_text(|conf| {
-            conf.and_decoration(|d| d.set_line(val::None))
-                .set_line_height(1.499)
-                .set_white_space(val::Nowrap)
-        })
-        .and_font(|conf| conf.set_size(px(14.)).weight_400())
-        .set_cursor(cursor)
-        .add(St::Outline, val::None)
-        .add(St::UserSelect, val::None)
-        .add(St::BoxSizing, val::BorderBox)
-        .merge(&btn.user_style().button);
-
-        let common_container = flexbox::Style::default()
-            .set_display(val::Flex)
-            .set_align_content(val::Center)
-            .set_align_items(val::Center)
-            .set_justify_content(val::Center)
-            .and_size(|conf| conf.full())
-            .set_gap(px(4))
-            .merge(&btn.user_style().common_container);
-
-        button::Style {
-            button,
-            common_container,
-        }
+        // Style::default().insert("button", |_| {
+        //     match btn.get_kind() {
+        //         Some(button::Kind::Normal) | None => self.button_normal(btn),
+        //         Some(button::Kind::Suggestion) => self.button_suggestion(btn),
+        //         Some(button::Kind::Destructive) => self.button_destructive(btn),
+        //         Some(button::Kind::Link) => self.button_link(btn),
+        //         Some(button::Kind::Dashed) => self.button_dashed(btn),
+        //     }
+        //     .and_padding(|conf| conf.set_x(px(15.)).set_y(px(0.)))
+        //     .and_size(|conf| conf.set_all_heights(px(32.)))
+        //     .and_transition(|conf| {
+        //         conf.all(|val| {
+        //             val.set_duration(sec(0.3))
+        //                 .cubic_bezier(0.645, 0.045, 0.355, 1.)
+        //         })
+        //     })
+        //     .and_text(|conf| {
+        //         conf.and_decoration(|d| d.set_line(val::None))
+        //             .set_line_height(1.499)
+        //             .set_white_space(val::Nowrap)
+        //     })
+        //     .and_font(|conf| conf.set_size(px(14.)).weight_400())
+        //     .set_cursor(cursor)
+        //     .add(St::Outline, val::None)
+        //     .add(St::UserSelect, val::None)
+        //     .add(St::BoxSizing, val::BorderBox)
+        //     .merge(&btn.user_style().button)
+        // })
     }
 
-    fn switch<PMsg>(&self, switch: &Switch<PMsg>) -> switch::Style {
-        let width = 44.;
-        let height = 22.;
-        let btn_size = height - 3.;
-        let top = 3. / 2.;
-        let left = 3. / 2.;
+    fn switch<'a>(&self, switch: SwitchLens<'a>) -> Style {
+        todo!()
+        // let width = 44.;
+        // let height = 22.;
+        // let btn_size = height - 3.;
+        // let top = 3. / 2.;
+        // let left = 3. / 2.;
 
-        let cursor: Cursor = if switch.is_disabled() {
-            val::NotAllowed.into()
-        } else {
-            val::Initial.into()
-        };
+        // let cursor: Cursor = if switch.is_disabled() {
+        //     val::NotAllowed.into()
+        // } else {
+        //     val::Initial.into()
+        // };
 
-        let bg_color = if switch.is_toggled() {
-            self.brand(Variant::L500)
-        } else {
-            self.gray(Variant::L500)
-        };
+        // let bg_color = if switch.is_toggled() {
+        //     self.brand(Variant::L500)
+        // } else {
+        //     self.gray(Variant::L500)
+        // };
 
-        let background = Style::default()
-            .config_if(switch.is_disabled(), |conf| conf.set_opacity(0.4))
-            .set_cursor(cursor)
-            .and_position(|conf| conf.relative())
-            .and_background(|conf| conf.set_color(bg_color))
-            .and_transition(|conf| {
-                conf.all(|val| {
-                    val.set_duration(sec(0.3))
-                        .cubic_bezier(0.645, 0.045, 0.355, 1.)
-                })
-            })
-            .and_border(|conf| {
-                conf.transparent()
-                    .set_width(px(0.))
-                    .set_radius(px(height / 2.))
-                    .none()
-            })
-            .set_display(val::InlineBlock)
-            .and_text(|conf| conf.and_decoration(|d| d.set_line(val::None)))
-            // .add(St::Outline, val::None)
-            .add(St::UserSelect, val::None)
-            .add(St::BoxSizing, val::BorderBox)
-            .and_size(|conf| conf.set_all_heights(px(height)).set_all_widths(px(width)))
-            .merge(&switch.user_style().background);
+        // let background = Style::default()
+        //     .config_if(switch.is_disabled(), |conf| conf.set_opacity(0.4))
+        //     .set_cursor(cursor)
+        //     .and_position(|conf| conf.relative())
+        //     .and_background(|conf| conf.set_color(bg_color))
+        //     .and_transition(|conf| {
+        //         conf.all(|val| {
+        //             val.set_duration(sec(0.3))
+        //                 .cubic_bezier(0.645, 0.045, 0.355, 1.)
+        //         })
+        //     })
+        //     .and_border(|conf| {
+        //         conf.transparent()
+        //             .set_width(px(0.))
+        //             .set_radius(px(height / 2.))
+        //             .none()
+        //     })
+        //     .set_display(val::InlineBlock)
+        //     .and_text(|conf| conf.and_decoration(|d| d.set_line(val::None)))
+        //     // .add(St::Outline, val::None)
+        //     .add(St::UserSelect, val::None)
+        //     .add(St::BoxSizing, val::BorderBox)
+        //     .and_size(|conf| conf.set_all_heights(px(height)).set_all_widths(px(width)))
+        //     .merge(&switch.user_style().background);
 
-        let button = Style::default()
-            .config_if(switch.is_toggled(), |conf| {
-                conf.add(St::Transform, format!("translateX({})", px(width / 2.)))
-            })
-            .and_position(|conf| conf.absolute().set_top(px(top)).set_left(px(left)))
-            .and_transition(|conf| {
-                conf.all(|val| {
-                    val.set_duration(sec(0.3))
-                        .cubic_bezier(0.645, 0.045, 0.355, 1.)
-                })
-            })
-            .and_background(|conf| conf.set_color(self.white()))
-            .and_border(|conf| conf.set_width(px(0.)).transparent().none().set_radius(0.5))
-            .add(St::BoxShadow, "0 2px 4px 0 rgba(0, 35, 11, 0.2)")
-            .and_size(|conf| conf.resize(px(btn_size), px(btn_size)))
-            .merge(&switch.user_style().button);
+        // let button = Style::default()
+        //     .config_if(switch.is_toggled(), |conf| {
+        //         conf.add(St::Transform, format!("translateX({})", px(width / 2.)))
+        //     })
+        //     .and_position(|conf| conf.absolute().set_top(px(top)).set_left(px(left)))
+        //     .and_transition(|conf| {
+        //         conf.all(|val| {
+        //             val.set_duration(sec(0.3))
+        //                 .cubic_bezier(0.645, 0.045, 0.355, 1.)
+        //         })
+        //     })
+        //     .and_background(|conf| conf.set_color(self.white()))
+        //     .and_border(|conf| conf.set_width(px(0.)).transparent().none().set_radius(0.5))
+        //     .add(St::BoxShadow, "0 2px 4px 0 rgba(0, 35, 11, 0.2)")
+        //     .and_size(|conf| conf.resize(px(btn_size), px(btn_size)))
+        //     .merge(&switch.user_style().button);
 
-        switch::Style { background, button }
+        // switch::Style { background, button }
     }
 
-    fn checkbox<PMsg>(&self, checkbox: &Checkbox<PMsg>) -> checkbox::Style {
-        let (bg, fg, border) = match (
-            checkbox.is_disabled(),
-            checkbox.is_focused(),
-            checkbox.is_mouse_over(),
-        ) {
-            (true, _, _) => (
-                self.gray(Variant::L200),
-                self.disable(false),
-                self.gray(Variant::L400),
-            ),
-            (false, false, false) => {
-                if checkbox.is_toggled() {
-                    (
-                        self.brand(Variant::L500),
-                        self.white(),
-                        self.brand(Variant::L500),
-                    )
-                } else {
-                    (self.white(), self.white(), self.border(false))
-                }
-            }
-            _ => {
-                if checkbox.is_toggled() {
-                    (
-                        self.brand(Variant::L500),
-                        self.white(),
-                        self.brand(Variant::L500),
-                    )
-                } else {
-                    (self.white(), self.white(), self.brand(Variant::L500))
-                }
-            }
-        };
+    fn checkbox<'a>(&self, checkbox: CheckboxLens<'a>) -> Style {
+        todo!()
+        // let (bg, fg, border) = match (
+        //     checkbox.is_disabled(),
+        //     checkbox.is_focused(),
+        //     checkbox.is_mouse_over(),
+        // ) {
+        //     (true, _, _) => (
+        //         self.gray(Variant::L200),
+        //         self.disable(false),
+        //         self.gray(Variant::L400),
+        //     ),
+        //     (false, false, false) => {
+        //         if checkbox.is_toggled() {
+        //             (
+        //                 self.brand(Variant::L500),
+        //                 self.white(),
+        //                 self.brand(Variant::L500),
+        //             )
+        //         } else {
+        //             (self.white(), self.white(), self.border(false))
+        //         }
+        //     }
+        //     _ => {
+        //         if checkbox.is_toggled() {
+        //             (
+        //                 self.brand(Variant::L500),
+        //                 self.white(),
+        //                 self.brand(Variant::L500),
+        //             )
+        //         } else {
+        //             (self.white(), self.white(), self.brand(Variant::L500))
+        //         }
+        //     }
+        // };
 
-        let cursor: Cursor = if checkbox.is_disabled() {
-            val::NotAllowed.into()
-        } else {
-            val::Initial.into()
-        };
+        // let cursor: Cursor = if checkbox.is_disabled() {
+        //     val::NotAllowed.into()
+        // } else {
+        //     val::Initial.into()
+        // };
 
-        let input = Style::default()
-            .and_transition(|conf| {
-                conf.all(|conf| {
-                    conf.set_duration(sec(0.3))
-                        .cubic_bezier(0.645, 0.045, 0.355, 1.)
-                })
-            })
-            .set_cursor(cursor)
-            .set_display(val::Flex)
-            .set_justify_content(val::Center)
-            .set_align_items(val::Center)
-            .add(St::WebkitAppearance, val::None)
-            .add(St::Appearance, val::None)
-            .and_size(|conf| conf.set_all(px(16.)))
-            .and_border(|conf| {
-                conf.solid()
-                    .set_width(px(1.))
-                    .set_color(border)
-                    .set_radius(px(2.))
-            })
-            .and_background(|conf| conf.set_color(bg))
-            .and_text(|conf| conf.set_color(fg))
-            .merge(&checkbox.user_style().input);
+        // let input = Style::default()
+        //     .and_transition(|conf| {
+        //         conf.all(|conf| {
+        //             conf.set_duration(sec(0.3))
+        //                 .cubic_bezier(0.645, 0.045, 0.355, 1.)
+        //         })
+        //     })
+        //     .set_cursor(cursor)
+        //     .set_display(val::Flex)
+        //     .set_justify_content(val::Center)
+        //     .set_align_items(val::Center)
+        //     .add(St::WebkitAppearance, val::None)
+        //     .add(St::Appearance, val::None)
+        //     .and_size(|conf| conf.set_all(px(16.)))
+        //     .and_border(|conf| {
+        //         conf.solid()
+        //             .set_width(px(1.))
+        //             .set_color(border)
+        //             .set_radius(px(2.))
+        //     })
+        //     .and_background(|conf| conf.set_color(bg))
+        //     .and_text(|conf| conf.set_color(fg))
+        //     .merge(&checkbox.user_style().input);
 
-        let button = Style::default()
-            .config_if(checkbox.is_toggled(), |conf| {
-                conf.set_cursor(cursor)
-                    .and_transition(|conf| {
-                        conf.all(|val| {
-                            val.set_duration(sec(0.3))
-                                .cubic_bezier(0.645, 0.045, 0.355, 1.)
-                        })
-                    })
-                    .and_size(|conf| conf.resize(0.2, 0.55))
-                    .and_border(|conf| {
-                        conf.and_bottom(|conf| conf.solid().set_width(px(2.)).set_color(fg))
-                            .and_right(|conf| conf.solid().set_width(px(2.)).set_color(fg))
-                    })
-                    .and_margin(|conf| conf.set_bottom(px(2.)))
-                    .add(St::Transform, "rotate(45deg)")
-            })
-            .merge(&checkbox.user_style().button);
+        // let button = Style::default()
+        //     .config_if(checkbox.is_toggled(), |conf| {
+        //         conf.set_cursor(cursor)
+        //             .and_transition(|conf| {
+        //                 conf.all(|val| {
+        //                     val.set_duration(sec(0.3))
+        //                         .cubic_bezier(0.645, 0.045, 0.355, 1.)
+        //                 })
+        //             })
+        //             .and_size(|conf| conf.resize(0.2, 0.55))
+        //             .and_border(|conf| {
+        //                 conf.and_bottom(|conf| conf.solid().set_width(px(2.)).set_color(fg))
+        //                     .and_right(|conf| conf.solid().set_width(px(2.)).set_color(fg))
+        //             })
+        //             .and_margin(|conf| conf.set_bottom(px(2.)))
+        //             .add(St::Transform, "rotate(45deg)")
+        //     })
+        //     .merge(&checkbox.user_style().button);
 
-        let label = Style::default()
-            .config_if(checkbox.is_disabled(), |conf| {
-                conf.and_text(|conf| conf.set_color(self.disable(false)))
-            })
-            .and_transition(|conf| {
-                conf.all(|val| {
-                    val.set_duration(sec(0.3))
-                        .cubic_bezier(0.645, 0.045, 0.355, 1.)
-                })
-            })
-            .set_cursor(cursor)
-            .set_display(val::Flex)
-            .set_gap(px(4))
-            .merge(&checkbox.user_style().label);
+        // let label = Style::default()
+        //     .config_if(checkbox.is_disabled(), |conf| {
+        //         conf.and_text(|conf| conf.set_color(self.disable(false)))
+        //     })
+        //     .and_transition(|conf| {
+        //         conf.all(|val| {
+        //             val.set_duration(sec(0.3))
+        //                 .cubic_bezier(0.645, 0.045, 0.355, 1.)
+        //         })
+        //     })
+        //     .set_cursor(cursor)
+        //     .set_display(val::Flex)
+        //     .set_gap(px(4))
+        //     .merge(&checkbox.user_style().label);
 
-        checkbox::Style {
-            input,
-            button,
-            label,
-        }
+        // checkbox::Style {
+        //     input,
+        //     button,
+        //     label,
+        // }
     }
 
-    fn radio<PMsg>(&self, radio: &Radio<PMsg>) -> radio::Style {
-        let (bg, fg, border) = match (
-            radio.is_disabled(),
-            radio.is_focused(),
-            radio.is_mouse_over(),
-        ) {
-            (true, _, _) => (
-                self.gray(Variant::L200),
-                self.disable(false),
-                self.gray(Variant::L400),
-            ),
-            (false, false, false) => {
-                if radio.is_toggled() {
-                    (
-                        self.white(),
-                        self.brand(Variant::L500),
-                        self.brand(Variant::L500),
-                    )
-                } else {
-                    (self.white(), self.white(), self.border(false))
-                }
-            }
-            _ => {
-                if radio.is_toggled() {
-                    (
-                        self.white(),
-                        self.brand(Variant::L500),
-                        self.brand(Variant::L500),
-                    )
-                } else {
-                    (self.white(), self.white(), self.brand(Variant::L500))
-                }
-            }
-        };
+    fn radio<'a>(&self, radio: RadioLens<'a>) -> Style {
+        todo!()
+        // let (bg, fg, border) = match (
+        //     radio.is_disabled(),
+        //     radio.is_focused(),
+        //     radio.is_mouse_over(),
+        // ) {
+        //     (true, _, _) => (
+        //         self.gray(Variant::L200),
+        //         self.disable(false),
+        //         self.gray(Variant::L400),
+        //     ),
+        //     (false, false, false) => {
+        //         if radio.is_toggled() {
+        //             (
+        //                 self.white(),
+        //                 self.brand(Variant::L500),
+        //                 self.brand(Variant::L500),
+        //             )
+        //         } else {
+        //             (self.white(), self.white(), self.border(false))
+        //         }
+        //     }
+        //     _ => {
+        //         if radio.is_toggled() {
+        //             (
+        //                 self.white(),
+        //                 self.brand(Variant::L500),
+        //                 self.brand(Variant::L500),
+        //             )
+        //         } else {
+        //             (self.white(), self.white(), self.brand(Variant::L500))
+        //         }
+        //     }
+        // };
 
-        let cursor: Cursor = if radio.is_disabled() {
-            val::NotAllowed.into()
-        } else {
-            val::Initial.into()
-        };
+        // let cursor: Cursor = if radio.is_disabled() {
+        //     val::NotAllowed.into()
+        // } else {
+        //     val::Initial.into()
+        // };
 
-        let input = Style::default()
-            .and_transition(|conf| {
-                conf.all(|val| {
-                    val.set_duration(sec(0.3))
-                        .cubic_bezier(0.645, 0.045, 0.355, 1.)
-                })
-            })
-            .set_cursor(cursor)
-            .set_display(val::Flex)
-            .and_margin(|conf| conf.zero())
-            .set_justify_content(val::Center)
-            .set_align_items(val::Center)
-            .add(St::WebkitAppearance, val::None)
-            .and_text(|conf| conf.set_color(fg))
-            .and_size(|conf| conf.set_all(px(16)))
-            .and_border(|conf| {
-                conf.solid()
-                    .set_width(px(1.))
-                    .set_color(border)
-                    .set_radius(0.5)
-            })
-            .and_background(|conf| conf.set_color(bg))
-            .merge(&radio.user_style().input);
+        // let input = Style::default()
+        //     .and_transition(|conf| {
+        //         conf.all(|val| {
+        //             val.set_duration(sec(0.3))
+        //                 .cubic_bezier(0.645, 0.045, 0.355, 1.)
+        //         })
+        //     })
+        //     .set_cursor(cursor)
+        //     .set_display(val::Flex)
+        //     .and_margin(|conf| conf.zero())
+        //     .set_justify_content(val::Center)
+        //     .set_align_items(val::Center)
+        //     .add(St::WebkitAppearance, val::None)
+        //     .and_text(|conf| conf.set_color(fg))
+        //     .and_size(|conf| conf.set_all(px(16)))
+        //     .and_border(|conf| {
+        //         conf.solid()
+        //             .set_width(px(1.))
+        //             .set_color(border)
+        //             .set_radius(0.5)
+        //     })
+        //     .and_background(|conf| conf.set_color(bg))
+        //     .merge(&radio.user_style().input);
 
-        let button = Style::default()
-            .config_if(radio.is_toggled(), |conf| {
-                conf.set_cursor(cursor)
-                    .and_size(|conf| conf.resize(0.6, 0.6))
-                    .and_border(|conf| conf.none().set_radius(0.5))
-                    .and_background(|conf| conf.set_color(fg))
-            })
-            .and_transition(|conf| {
-                conf.all(|val| {
-                    val.set_duration(sec(0.3))
-                        .cubic_bezier(0.645, 0.045, 0.355, 1.)
-                })
-            })
-            .merge(&radio.user_style().button);
+        // let button = Style::default()
+        //     .config_if(radio.is_toggled(), |conf| {
+        //         conf.set_cursor(cursor)
+        //             .and_size(|conf| conf.resize(0.6, 0.6))
+        //             .and_border(|conf| conf.none().set_radius(0.5))
+        //             .and_background(|conf| conf.set_color(fg))
+        //     })
+        //     .and_transition(|conf| {
+        //         conf.all(|val| {
+        //             val.set_duration(sec(0.3))
+        //                 .cubic_bezier(0.645, 0.045, 0.355, 1.)
+        //         })
+        //     })
+        //     .merge(&radio.user_style().button);
 
-        let label = Style::default()
-            .config_if(radio.is_disabled(), |conf| {
-                conf.and_text(|conf| conf.set_color(self.disable(false)))
-            })
-            .and_transition(|conf| {
-                conf.all(|val| {
-                    val.set_duration(sec(0.3))
-                        .cubic_bezier(0.645, 0.045, 0.355, 1.)
-                })
-            })
-            .set_cursor(cursor)
-            .set_display(val::Flex)
-            .set_align_items(val::Center)
-            .set_gap(px(4.))
-            .merge(&radio.user_style().label);
+        // let label = Style::default()
+        //     .config_if(radio.is_disabled(), |conf| {
+        //         conf.and_text(|conf| conf.set_color(self.disable(false)))
+        //     })
+        //     .and_transition(|conf| {
+        //         conf.all(|val| {
+        //             val.set_duration(sec(0.3))
+        //                 .cubic_bezier(0.645, 0.045, 0.355, 1.)
+        //         })
+        //     })
+        //     .set_cursor(cursor)
+        //     .set_display(val::Flex)
+        //     .set_align_items(val::Center)
+        //     .set_gap(px(4.))
+        //     .merge(&radio.user_style().label);
 
-        radio::Style {
-            input,
-            button,
-            label,
-        }
+        // radio::Style {
+        //     input,
+        //     button,
+        //     label,
+        // }
     }
 
-    fn entry<PMsg>(&self, entry: &Entry<PMsg>) -> entry::Style {
-        let (bg, fg, border) = match (
-            entry.is_disabled(),
-            entry.is_focused(),
-            entry.is_mouse_over(),
-        ) {
-            (true, _, _) => (
-                self.gray(Variant::L200),
-                self.disable(false),
-                self.gray(Variant::L400),
-            ),
-            (false, false, false) => (self.white(), self.primary_text(false), self.border(false)),
-            _ => (
-                self.white(),
-                self.primary_text(false),
-                self.brand(Variant::L500),
-            ),
-        };
+    fn entry<'a>(&self, entry: EntryLens<'a>) -> Style {
+        todo!()
+        // let (bg, fg, border) = match (
+        //     entry.is_disabled(),
+        //     entry.is_focused(),
+        //     entry.is_mouse_over(),
+        // ) {
+        //     (true, _, _) => (
+        //         self.gray(Variant::L200),
+        //         self.disable(false),
+        //         self.gray(Variant::L400),
+        //     ),
+        //     (false, false, false) => (self.white(), self.primary_text(false), self.border(false)),
+        //     _ => (
+        //         self.white(),
+        //         self.primary_text(false),
+        //         self.brand(Variant::L500),
+        //     ),
+        // };
 
-        let cursor: Cursor = if entry.is_disabled() {
-            val::NotAllowed.into()
-        } else {
-            val::Initial.into()
-        };
+        // let cursor: Cursor = if entry.is_disabled() {
+        //     val::NotAllowed.into()
+        // } else {
+        //     val::Initial.into()
+        // };
 
-        // em unit
-        let container_width = 14.;
-        let container_height = 1.5;
-        let input_width = container_width - 0.6;
-        let input_height = 1.;
-        let font_size = 1.;
-        // px unit
-        let container_radius = 4;
-        let container_border_width = 1;
+        // // em unit
+        // let container_width = 14.;
+        // let container_height = 1.5;
+        // let input_width = container_width - 0.6;
+        // let input_height = 1.;
+        // let font_size = 1.;
+        // // px unit
+        // let container_radius = 4;
+        // let container_border_width = 1;
 
-        let container = Style::default()
-            .and_transition(|conf| {
-                conf.all(|val| {
-                    val.set_duration(sec(0.3))
-                        .cubic_bezier(0.645, 0.045, 0.355, 1.)
-                })
-            })
-            .set_display(val::Flex)
-            .set_align_items(val::Center)
-            .set_justify_content(val::Center)
-            // .and_padding(|conf| conf.set_y(px(4.)).set_x(px(11.)))
-            // .set_gap(px(4.))
-            .and_background(|conf| conf.set_color(bg))
-            .and_border(|conf| {
-                conf.solid()
-                    .set_width(px(container_border_width))
-                    .set_color(border)
-                    .set_radius(px(container_radius))
-            })
-            .and_size(|conf| {
-                conf.set_all_widths(em(container_width))
-                    .set_all_heights(em(container_height))
-            })
-            .set_cursor(cursor)
-            .merge(&entry.user_style().container);
+        // let container = Style::default()
+        //     .and_transition(|conf| {
+        //         conf.all(|val| {
+        //             val.set_duration(sec(0.3))
+        //                 .cubic_bezier(0.645, 0.045, 0.355, 1.)
+        //         })
+        //     })
+        //     .set_display(val::Flex)
+        //     .set_align_items(val::Center)
+        //     .set_justify_content(val::Center)
+        //     // .and_padding(|conf| conf.set_y(px(4.)).set_x(px(11.)))
+        //     // .set_gap(px(4.))
+        //     .and_background(|conf| conf.set_color(bg))
+        //     .and_border(|conf| {
+        //         conf.solid()
+        //             .set_width(px(container_border_width))
+        //             .set_color(border)
+        //             .set_radius(px(container_radius))
+        //     })
+        //     .and_size(|conf| {
+        //         conf.set_all_widths(em(container_width))
+        //             .set_all_heights(em(container_height))
+        //     })
+        //     .set_cursor(cursor)
+        //     .merge(&entry.user_style().container);
 
-        let input = Style::default()
-            .and_transition(|conf| {
-                conf.all(|val| {
-                    val.set_duration(sec(0.3))
-                        .cubic_bezier(0.645, 0.045, 0.355, 1.)
-                })
-            })
-            .and_size(|conf| conf.set_width(em(input_width)).set_height(em(input_height)))
-            .and_text(|conf| conf.set_color(fg))
-            .and_font(|conf| conf.set_size(em(font_size)))
-            .and_border(|conf| conf.none())
-            .and_background(|conf| conf.transparent())
-            .add(St::WebkitAppearance, val::None)
-            .set_cursor(cursor)
-            .merge(&entry.user_style().input);
+        // let input = Style::default()
+        //     .and_transition(|conf| {
+        //         conf.all(|val| {
+        //             val.set_duration(sec(0.3))
+        //                 .cubic_bezier(0.645, 0.045, 0.355, 1.)
+        //         })
+        //     })
+        //     .and_size(|conf| conf.set_width(em(input_width)).set_height(em(input_height)))
+        //     .and_text(|conf| conf.set_color(fg))
+        //     .and_font(|conf| conf.set_size(em(font_size)))
+        //     .and_border(|conf| conf.none())
+        //     .and_background(|conf| conf.transparent())
+        //     .add(St::WebkitAppearance, val::None)
+        //     .set_cursor(cursor)
+        //     .merge(&entry.user_style().input);
 
-        entry::Style { container, input }
+        // entry::Style { container, input }
     }
 
-    fn spin_entry<PMsg>(&self, spin_entry: &SpinEntry<PMsg>) -> spin_entry::Style {
-        let (bg, fg, border) = match (
-            spin_entry.is_disabled(),
-            spin_entry.is_focused(),
-            spin_entry.is_mouse_over(),
-        ) {
-            (true, _, _) => (
-                self.gray(Variant::L200),
-                self.disable(false),
-                self.gray(Variant::L400),
-            ),
-            (false, false, false) => (self.white(), self.primary_text(false), self.border(false)),
-            _ => (
-                self.white(),
-                self.primary_text(false),
-                self.brand(Variant::L500),
-            ),
-        };
+    fn spin_entry<'a>(&self, spin_entry: SpinEntryLens<'a>) -> Style {
+        todo!()
+        // let (bg, fg, border) = match (
+        //     spin_entry.is_disabled(),
+        //     spin_entry.is_focused(),
+        //     spin_entry.is_mouse_over(),
+        // ) {
+        //     (true, _, _) => (
+        //         self.gray(Variant::L200),
+        //         self.disable(false),
+        //         self.gray(Variant::L400),
+        //     ),
+        //     (false, false, false) => (self.white(), self.primary_text(false), self.border(false)),
+        //     _ => (
+        //         self.white(),
+        //         self.primary_text(false),
+        //         self.brand(Variant::L500),
+        //     ),
+        // };
 
-        // em unit used here
-        let width = 4.;
-        let height = 1.5;
-        let btns_container_width = 1.;
-        let btns_container_height = height;
-        let input_width = width - 0.6;
-        let input_height = 1.;
-        let font_size = 1.;
-        // px used here
-        let radius = 4.;
-        let border_width = 1.;
-        // percent units used here
-        let btn_height = 0.5;
-        let btn_width = 1.;
-        let btn_mouse_over_height = btn_height + 0.10;
-        let btn_mouse_over_height_2 = btn_height - 0.10;
+        // // em unit used here
+        // let width = 4.;
+        // let height = 1.5;
+        // let btns_container_width = 1.;
+        // let btns_container_height = height;
+        // let input_width = width - 0.6;
+        // let input_height = 1.;
+        // let font_size = 1.;
+        // // px used here
+        // let radius = 4.;
+        // let border_width = 1.;
+        // // percent units used here
+        // let btn_height = 0.5;
+        // let btn_width = 1.;
+        // let btn_mouse_over_height = btn_height + 0.10;
+        // let btn_mouse_over_height_2 = btn_height - 0.10;
 
-        let cursor: Cursor = if spin_entry.is_disabled() {
-            val::NotAllowed.into()
-        } else {
-            val::Initial.into()
-        };
+        // let cursor: Cursor = if spin_entry.is_disabled() {
+        //     val::NotAllowed.into()
+        // } else {
+        //     val::Initial.into()
+        // };
 
-        let container = Style::default()
-            .and_position(|conf| conf.relative())
-            .and_transition(|conf| {
-                conf.all(|val| {
-                    val.set_duration(sec(0.3))
-                        .cubic_bezier(0.645, 0.045, 0.355, 1.)
-                })
-            })
-            .set_display(val::Flex)
-            .set_align_items(val::Center)
-            .set_justify_content(val::Center)
-            .and_background(|conf| conf.set_color(bg))
-            .and_border(|conf| {
-                conf.solid()
-                    .set_width(px(border_width))
-                    .set_color(border)
-                    .set_radius(px(radius))
-            })
-            .and_size(|conf| conf.set_all_widths(em(width)).set_all_heights(em(height)))
-            .set_cursor(cursor)
-            .merge(&spin_entry.user_style().container);
+        // let (inc_btn_height, dec_btn_height) = match (
+        //     spin_entry.increment_button.is_mouse_over(),
+        //     spin_entry.decrement_button.is_mouse_over(),
+        // ) {
+        //     (true, _) => (btn_mouse_over_height, btn_mouse_over_height_2),
+        //     (_, true) => (btn_mouse_over_height_2, btn_mouse_over_height),
+        //     (false, false) => (btn_height, btn_height),
+        // };
 
-        let input = Style::default()
-            .and_transition(|conf| {
-                conf.all(|val| {
-                    val.set_duration(sec(0.3))
-                        .cubic_bezier(0.645, 0.045, 0.355, 1.)
-                })
-            })
-            .and_size(|conf| conf.set_width(em(input_width)).set_height(em(input_height)))
-            .and_text(|conf| conf.set_color(fg))
-            .and_font(|conf| conf.set_size(em(font_size)))
-            .and_border(|conf| conf.none())
-            .and_background(|conf| conf.transparent())
-            .add(St::WebkitAppearance, val::None)
-            .set_cursor(cursor)
-            .merge(&spin_entry.user_style().input);
+        // Style::default()
+        //     .insert("spin-entry", |conf| {
+        //         conf.and_position(|conf| conf.relative())
+        //             .and_transition(|conf| {
+        //                 conf.all(|val| {
+        //                     val.set_duration(sec(0.3))
+        //                         .cubic_bezier(0.645, 0.045, 0.355, 1.)
+        //                 })
+        //             })
+        //             .set_display(val::Flex)
+        //             .set_align_items(val::Center)
+        //             .set_justify_content(val::Center)
+        //             .and_background(|conf| conf.set_color(bg))
+        //             .and_border(|conf| {
+        //                 conf.solid()
+        //                     .set_width(px(border_width))
+        //                     .set_color(border)
+        //                     .set_radius(px(radius))
+        //             })
+        //             .and_size(|conf| conf.set_all_widths(em(width)).set_all_heights(em(height)))
+        //             .set_cursor(cursor)
+        //             .merge(&spin_entry.user_style().container);
+        //     })
+        //     .insert("input", |conf| {
+        //         conf.and_transition(|conf| {
+        //             conf.all(|val| {
+        //                 val.set_duration(sec(0.3))
+        //                     .cubic_bezier(0.645, 0.045, 0.355, 1.)
+        //             })
+        //         })
+        //         .and_size(|conf| conf.set_width(em(input_width)).set_height(em(input_height)))
+        //         .and_text(|conf| conf.set_color(fg))
+        //         .and_font(|conf| conf.set_size(em(font_size)))
+        //         .and_border(|conf| conf.none())
+        //         .and_background(|conf| conf.transparent())
+        //         .add(St::WebkitAppearance, val::None)
+        //         .set_cursor(cursor)
+        //         .merge(&spin_entry.user_style().input)
+        //     })
+        //     .insert("increment-button", |conf| {
+        //         conf.and_transition(|conf| {
+        //             conf.all(|val| {
+        //                 val.set_duration(sec(0.3))
+        //                     .cubic_bezier(0.645, 0.045, 0.355, 1.)
+        //             })
+        //         })
+        //         .and_font(|conf| conf.set_size(em(0.6)))
+        //         .and_text(|conf| conf.set_color(self.secondary_text(false)))
+        //         .and_background(|conf| conf.set_color(self.white()))
+        //         .and_border(|conf| conf.none().set_top_right(px(radius)))
+        //         .and_size(|conf| conf.set_width(btn_width).set_height(inc_btn_height))
+        //         .merge(&spin_entry.user_style().decrement_button.button)
+        //     })
+        //     // .insert("increment-button-container", |conf| {
+        //     //     conf.set_display(val::Flex)
+        //     //         .set_align_items(val::Center)
+        //     //         .set_align_content(val::Center)
+        //     //         .set_justify_content(val::Center)
+        //     //         .merge(&spin_entry.user_style().decrement_button.common_container)
+        //     // })
+        //     .insert("decrement-button", |conf| {
+        //         conf.and_transition(|conf| {
+        //             conf.all(|val| {
+        //                 val.set_duration(sec(0.3))
+        //                     .cubic_bezier(0.645, 0.045, 0.355, 1.)
+        //             })
+        //         })
+        //         .and_font(|conf| conf.set_size(em(0.6)))
+        //         .and_text(|conf| conf.set_color(self.secondary_text(false)))
+        //         .and_background(|conf| conf.set_color(self.white()))
+        //         .and_border(|conf| {
+        //             conf.none().set_bottom_right(px(radius)).and_top(|conf| {
+        //                 conf.solid()
+        //                     .set_width(px(border_width))
+        //                     .set_color(self.gray(Variant::L300))
+        //             })
+        //         })
+        //         .and_size(|conf| conf.set_width(btn_width).set_height(dec_btn_height))
+        //         .merge(&spin_entry.user_style().decrement_button.button)
+        //     })
+        // // .insert("decrement-button-container", |conf| {
+        // //     conf.set_display(val::Flex)
+        // //         .set_align_items(val::Center)
+        // //         .set_align_content(val::Center)
+        // //         .set_justify_content(val::Center)
+        // //         .merge(&spin_entry.user_style().decrement_button.common_container)
+        // // })
 
-        let buttons_container = Style::default()
-            .and_position(|conf| conf.absolute().set_right(px(0.)))
-            .and_transition(|conf| {
-                conf.all(|val| {
-                    val.set_duration(sec(0.3))
-                        .cubic_bezier(0.645, 0.045, 0.355, 1.)
-                })
-            })
-            .set_display(val::Flex)
-            .set_flex_direction(val::Column)
-            .and_size(|conf| {
-                conf.set_width(em(btns_container_width))
-                    .set_height(em(btns_container_height))
-            })
-            .and_border(|conf| {
-                conf.and_left(|conf| {
-                    conf.solid()
-                        .set_width(px(border_width))
-                        .set_color(self.gray(Variant::L300))
-                })
-            })
-            .config(
-                |conf| match (spin_entry.is_mouse_over(), spin_entry.is_disabled()) {
-                    (true, false) => conf.set_opacity(1.).set_visibility(val::Visible),
-                    _ => conf.set_opacity(0.).set_visibility(val::Hidden),
-                },
-            )
-            .merge(&spin_entry.user_style().buttons_container);
-
-        let (inc_btn_height, dec_btn_height) = match (
-            spin_entry.increment_button.is_mouse_over(),
-            spin_entry.decrement_button.is_mouse_over(),
-        ) {
-            (true, _) => (btn_mouse_over_height, btn_mouse_over_height_2),
-            (_, true) => (btn_mouse_over_height_2, btn_mouse_over_height),
-            (false, false) => (btn_height, btn_height),
-        };
-
-        let increment_button = button::Style::default()
-            .and_common_container(|conf| {
-                conf.set_display(val::Flex)
-                    .set_align_items(val::Center)
-                    .set_align_content(val::Center)
-                    .set_justify_content(val::Center)
-                    .merge(&spin_entry.user_style().decrement_button.common_container)
-            })
-            .and_button(|conf| {
-                conf.and_transition(|conf| {
-                    conf.all(|val| {
-                        val.set_duration(sec(0.3))
-                            .cubic_bezier(0.645, 0.045, 0.355, 1.)
-                    })
-                })
-                .and_font(|conf| conf.set_size(em(0.6)))
-                .and_text(|conf| conf.set_color(self.secondary_text(false)))
-                .and_background(|conf| conf.set_color(self.white()))
-                .and_border(|conf| conf.none().set_top_right(px(radius)))
-                .and_size(|conf| conf.set_width(btn_width).set_height(inc_btn_height))
-                .merge(&spin_entry.user_style().decrement_button.button)
-            });
-        let decrement_button = button::Style::default()
-            .and_common_container(|conf| {
-                conf.set_display(val::Flex)
-                    .set_align_items(val::Center)
-                    .set_align_content(val::Center)
-                    .set_justify_content(val::Center)
-                    .merge(&spin_entry.user_style().decrement_button.common_container)
-            })
-            .and_button(|conf| {
-                conf.and_transition(|conf| {
-                    conf.all(|val| {
-                        val.set_duration(sec(0.3))
-                            .cubic_bezier(0.645, 0.045, 0.355, 1.)
-                    })
-                })
-                .and_font(|conf| conf.set_size(em(0.6)))
-                .and_text(|conf| conf.set_color(self.secondary_text(false)))
-                .and_background(|conf| conf.set_color(self.white()))
-                .and_border(|conf| {
-                    conf.none().set_bottom_right(px(radius)).and_top(|conf| {
-                        conf.solid()
-                            .set_width(px(border_width))
-                            .set_color(self.gray(Variant::L300))
-                    })
-                })
-                .and_size(|conf| conf.set_width(btn_width).set_height(dec_btn_height))
-                .merge(&spin_entry.user_style().decrement_button.button)
-            });
-
-        spin_entry::Style {
-            container,
-            input,
-            buttons_container,
-            increment_button,
-            decrement_button,
-        }
+        // // let buttons_container = Style::default()
+        // //     .and_position(|conf| conf.absolute().set_right(px(0.)))
+        // //     .and_transition(|conf| {
+        // //         conf.all(|val| {
+        // //             val.set_duration(sec(0.3))
+        // //                 .cubic_bezier(0.645, 0.045, 0.355, 1.)
+        // //         })
+        // //     })
+        // //     .set_display(val::Flex)
+        // //     .set_flex_direction(val::Column)
+        // //     .and_size(|conf| {
+        // //         conf.set_width(em(btns_container_width))
+        // //             .set_height(em(btns_container_height))
+        // //     })
+        // //     .and_border(|conf| {
+        // //         conf.and_left(|conf| {
+        // //             conf.solid()
+        // //                 .set_width(px(border_width))
+        // //                 .set_color(self.gray(Variant::L300))
+        // //         })
+        // //     })
+        // //     .config(
+        // //         |conf| match (spin_entry.is_mouse_over(), spin_entry.is_disabled()) {
+        // //             (true, false) => conf.set_opacity(1.).set_visibility(val::Visible),
+        // //             _ => conf.set_opacity(0.).set_visibility(val::Hidden),
+        // //         },
+        // //     )
+        // //     .merge(&spin_entry.user_style().buttons_container);
     }
 
-    fn dialog<PMsg, C>(&self, dialog: &Dialog<PMsg, C>) -> dialog::Style {
-        dialog::Style::default()
-            .and_background(|conf| {
-                conf.and_position(|conf| conf.absolute().set_z_index(500))
-                    .and_background(|conf| conf.set_color(Hsla::new(0.0, 0., 0., 0.5)))
-                    .and_size(|conf| conf.full())
-                    .and_transition(|conf| {
-                        conf.all(|val| {
-                            val.set_duration(sec(0.3))
-                                .cubic_bezier(0.645, 0.045, 0.355, 1.)
-                        })
-                    })
-                    .config(|conf| {
-                        use dialog::State::*;
-                        match dialog.state() {
-                            Closed => conf.set_display(val::None),
-                            Opening => conf
-                                .set_display(val::Flex)
-                                .set_align_content(val::Center)
-                                .set_align_items(val::Center)
-                                .set_justify_content(val::Center)
-                                .set_opacity(0.0),
-                            Opened => conf
-                                .set_display(val::Flex)
-                                .set_align_content(val::Center)
-                                .set_align_items(val::Center)
-                                .set_justify_content(val::Center)
-                                .set_opacity(1.0),
-                            Closing => conf
-                                .set_display(val::Flex)
-                                .set_align_content(val::Center)
-                                .set_align_items(val::Center)
-                                .set_justify_content(val::Center)
-                                .set_opacity(0.0),
-                        }
-                    })
-                    .merge(&dialog.user_style().background)
-            })
-            .and_widget(|conf| {
-                conf.and_background(|conf| conf.set_color(self.white()))
-                    .and_text(|conf| conf.set_color(self.primary_text(true)))
-                    .and_border(|conf| conf.set_radius(px(2)))
-                    .set_display(val::Flex)
-                    .set_flex_direction(val::Column)
-                    .set_align_content(val::Center)
-                    .set_align_items(val::Center)
-                    .set_justify_content(val::Center)
-                    .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
-                    .merge(&dialog.user_style().widget)
-            })
-            .and_content(|conf| {
-                conf.and_padding(|conf| conf.set_all(em(1.)))
-                    .merge(&dialog.user_style().content)
-            })
+    fn dialog<'a>(&self, dialog: DialogLens<'a>) -> Style {
+        todo!()
+        // Style::default()
+        //     .insert("dialog-background", |conf| {
+        //         conf.and_position(|conf| conf.absolute().set_z_index(500))
+        //             .and_background(|conf| conf.set_color(Hsla::new(0.0, 0., 0., 0.5)))
+        //             .and_size(|conf| conf.full())
+        //             .and_transition(|conf| {
+        //                 conf.all(|val| {
+        //                     val.set_duration(sec(0.3))
+        //                         .cubic_bezier(0.645, 0.045, 0.355, 1.)
+        //                 })
+        //             })
+        //             .config(|conf| {
+        //                 use dialog::State::*;
+        //                 match dialog.state() {
+        //                     Closed => conf.set_display(val::None),
+        //                     Opening => conf
+        //                         .set_display(val::Flex)
+        //                         .set_align_content(val::Center)
+        //                         .set_align_items(val::Center)
+        //                         .set_justify_content(val::Center)
+        //                         .set_opacity(0.0),
+        //                     Opened => conf
+        //                         .set_display(val::Flex)
+        //                         .set_align_content(val::Center)
+        //                         .set_align_items(val::Center)
+        //                         .set_justify_content(val::Center)
+        //                         .set_opacity(1.0),
+        //                     Closing => conf
+        //                         .set_display(val::Flex)
+        //                         .set_align_content(val::Center)
+        //                         .set_align_items(val::Center)
+        //                         .set_justify_content(val::Center)
+        //                         .set_opacity(0.0),
+        //                 }
+        //             })
+        //             .merge(&dialog.user_style().background)
+        //     })
+        //     .insert("dialog", |conf| {
+        //         conf.and_background(|conf| conf.set_color(self.white()))
+        //             .and_text(|conf| conf.set_color(self.primary_text(true)))
+        //             .and_border(|conf| conf.set_radius(px(2)))
+        //             .set_display(val::Flex)
+        //             .set_flex_direction(val::Column)
+        //             .set_align_content(val::Center)
+        //             .set_align_items(val::Center)
+        //             .set_justify_content(val::Center)
+        //             .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
+        //             .merge(&dialog.user_style().widget)
+        //     })
+        //     .insert("content", |conf| {
+        //         conf.and_padding(|conf| conf.set_all(em(1.)))
+        //             .merge(&dialog.user_style().content)
+        //     })
     }
 
-    fn header_bar<PMsg>(&self, header_bar: &HeaderBar<PMsg>) -> header_bar::Style {
-        // em units
-        let height = 2.5;
-        let button_size = height;
-        let subtitle_font_size = 0.6;
-        let title_container_padding = 1.;
+    fn header_bar<'a>(&self, header_bar: HeaderBarLens<'a>) -> Style {
+        todo!()
+        // // em units
+        // let height = 2.5;
+        // let button_size = height;
+        // let subtitle_font_size = 0.6;
+        // let title_container_padding = 1.;
 
-        let user_style = header_bar.user_style();
+        // let user_style = header_bar.user_style();
 
-        header_bar::Style::default()
-            .and_title(|conf| {
-                conf.and_text(|conf| conf.set_color(self.title(false)))
-                    .merge(&user_style.title)
-            })
-            .and_subtitle(|conf| {
-                conf.and_text(|conf| conf.set_color(self.secondary_text(false)))
-                    .and_font(|conf| conf.set_size(em(subtitle_font_size)))
-                    .merge(&user_style.subtitle)
-            })
-            .and_title_container(|conf| {
-                conf.set_display(val::Flex)
-                    .set_flex_direction(val::Column)
-                    .set_justify_content(val::Center)
-                    .set_align_items(val::Center)
-                    .set_align_content(val::Center)
-                    .set_flex_wrap(val::Nowrap)
-                    .and_padding(|conf| conf.set_x(em(title_container_padding)))
-                    .merge(&user_style.title_container)
-            })
-            .and_container(|conf| {
-                conf.set_display(val::Flex)
-                    .set_justify_content(val::SpaceBetween)
-                    .set_align_items(val::Stretch)
-                    .set_align_content(val::Stretch)
-                    .set_flex_wrap(val::Nowrap)
-                    .and_size(|conf| conf.set_all_heights(em(height)))
-                    .and_border(|conf| {
-                        conf.and_bottom(|conf| {
-                            conf.solid()
-                                .set_width(px(1))
-                                .set_color(self.gray(Variant::D600))
-                        })
-                    })
-                    .merge(&user_style.container)
-            })
-            .and_close_button(|conf| {
-                conf.and_button(|conf| {
-                    conf.and_size(|conf| conf.set_all(em(button_size)))
-                        .config(|conf| {
-                            if let Some(ref btn) = header_bar.close_button {
-                                if btn.is_mouse_over() {
-                                    conf.and_text(|conf| conf.set_color(self.primary_text(false)))
-                                } else {
-                                    conf.and_text(|conf| conf.set_color(self.secondary_text(false)))
-                                }
-                            } else {
-                                conf
-                            }
-                        })
-                        .set_cursor(val::Pointer)
-                        .and_background(|conf| conf.transparent())
-                        .and_border(|conf| conf.none())
-                        .add(St::Outline, val::None)
-                        .add(St::UserSelect, val::None)
-                        .add(St::BoxSizing, val::BorderBox)
-                        .and_font(|conf| conf.set_size(em(1.)))
-                        .and_margin(|conf| conf.zero())
-                        .and_padding(|conf| conf.zero())
-                        .merge(&user_style.close_button.button)
-                })
-                .and_common_container(|conf| {
-                    conf.set_display(val::Flex)
-                        .set_justify_content(val::Center)
-                        .set_align_items(val::Center)
-                        .set_align_content(val::Center)
-                        .and_margin(|conf| conf.zero())
-                        .and_padding(|conf| conf.zero())
-                        .merge(&user_style.close_button.common_container)
-                })
-            })
+        // Style::default()
+        //     .insert("title", |conf| {
+        //         conf.and_text(|conf| conf.set_color(self.title(false)))
+        //             .merge(&user_style.title)
+        //     })
+        //     .insert("subtitle", |conf| {
+        //         conf.and_text(|conf| conf.set_color(self.secondary_text(false)))
+        //             .and_font(|conf| conf.set_size(em(subtitle_font_size)))
+        //             .merge(&user_style.subtitle)
+        //     })
+        //     .insert("title-container", |conf| {
+        //         conf.set_display(val::Flex)
+        //             .set_flex_direction(val::Column)
+        //             .set_justify_content(val::Center)
+        //             .set_align_items(val::Center)
+        //             .set_align_content(val::Center)
+        //             .set_flex_wrap(val::Nowrap)
+        //             .and_padding(|conf| conf.set_x(em(title_container_padding)))
+        //             .merge(&user_style.title_container)
+        //     })
+        //     .insert("close-button", |conf| {
+        //         conf.and_size(|conf| conf.set_all(em(button_size)))
+        //             .config(|conf| {
+        //                 if let Some(ref btn) = header_bar.close_button {
+        //                     if btn.is_mouse_over() {
+        //                         conf.and_text(|conf| conf.set_color(self.primary_text(false)))
+        //                     } else {
+        //                         conf.and_text(|conf| conf.set_color(self.secondary_text(false)))
+        //                     }
+        //                 } else {
+        //                     conf
+        //                 }
+        //             })
+        //             .set_cursor(val::Pointer)
+        //             .and_background(|conf| conf.transparent())
+        //             .and_border(|conf| conf.none())
+        //             .add(St::Outline, val::None)
+        //             .add(St::UserSelect, val::None)
+        //             .add(St::BoxSizing, val::BorderBox)
+        //             .and_font(|conf| conf.set_size(em(1.)))
+        //             .and_margin(|conf| conf.zero())
+        //             .and_padding(|conf| conf.zero())
+        //             .merge(&user_style.close_button.button)
+        //     })
+        //     .insert("close-button-container", |conf| {
+        //         conf.set_display(val::Flex)
+        //             .set_justify_content(val::Center)
+        //             .set_align_items(val::Center)
+        //             .set_align_content(val::Center)
+        //             .and_margin(|conf| conf.zero())
+        //             .and_padding(|conf| conf.zero())
+        //             .merge(&user_style.close_button.common_container)
+        //     })
+        //     .insert("container", |conf| {
+        //         conf.set_display(val::Flex)
+        //             .set_justify_content(val::SpaceBetween)
+        //             .set_align_items(val::Stretch)
+        //             .set_align_content(val::Stretch)
+        //             .set_flex_wrap(val::Nowrap)
+        //             .and_size(|conf| conf.set_all_heights(em(height)))
+        //             .and_border(|conf| {
+        //                 conf.and_bottom(|conf| {
+        //                     conf.solid()
+        //                         .set_width(px(1))
+        //                         .set_color(self.gray(Variant::D600))
+        //                 })
+        //             })
+        //             .merge(&user_style.container)
+        //     })
     }
 
-    fn label<PMsg>(&self, _: &Label<PMsg>) -> label::Style {
-        label::Style::default()
+    fn label<'a>(&self, _: LabelLens<'a>) -> Style {
+        todo!()
+        // Style::default()
     }
 
-    fn progress_bar<PMsg>(&self, progress_bar: &ProgressBar<PMsg>) -> progress_bar::Style {
-        // em units
-        let height = 0.7;
-        let radius = height / 2.;
+    fn progress_bar<'a>(&self, progress_bar: ProgressBarLens<'a>) -> Style {
+        todo!()
+        // // em units
+        // let height = 0.7;
+        // let radius = height / 2.;
 
-        // percent units
-        let width = 1.;
+        // // percent units
+        // let width = 1.;
 
-        progress_bar::Style::default()
-            .and_container(|conf| {
-                conf.and_border(|conf| conf.set_radius(em(radius)).none())
-                    .set_background(self.gray(Variant::L300))
-                    .and_size(|conf| conf.set_all_heights(em(height)).set_width(width))
-                    .and_transition(|conf| conf.all(|val| val.set_duration(sec(0.3)).ease()))
-                    .and_position(|conf| conf.relative())
-                    .add(St::Overflow, val::Hidden)
-            })
-            .and_indicator(|conf| {
-                conf.and_border(|conf| conf.set_radius(em(radius)))
-                    .config(|conf| {
-                        let color = progress_bar.get_color().unwrap_or_else(|| {
-                            match progress_bar.state() {
-                                progress_bar::State::Normal => self.brand(Variant::L500),
-                                progress_bar::State::Success => self.suggestion(),
-                                progress_bar::State::Failure => self.destructive(),
-                            }
-                            .into()
-                        });
-                        conf.set_background(color)
-                    })
-                    .and_transition(|conf| {
-                        conf.all(|val| {
-                            val.set_duration(sec(0.3))
-                                .cubic_bezier(0.645, 0.045, 0.355, 1.)
-                        })
-                    })
-                    .and_position(|conf| conf.absolute())
-                    .and_size(|conf| {
-                        let width = (progress_bar.value() - progress_bar.min()).abs()
-                            / (progress_bar.max() - progress_bar.min());
-                        conf.set_width(width as f32).set_all_heights(em(height))
-                    })
-            })
+        // progress_bar::Style::default()
+        //     .and_container(|conf| {
+        //         conf.and_border(|conf| conf.set_radius(em(radius)).none())
+        //             .set_background(self.gray(Variant::L300))
+        //             .and_size(|conf| conf.set_all_heights(em(height)).set_width(width))
+        //             .and_transition(|conf| conf.all(|val| val.set_duration(sec(0.3)).ease()))
+        //             .and_position(|conf| conf.relative())
+        //             .add(St::Overflow, val::Hidden)
+        //     })
+        //     .and_indicator(|conf| {
+        //         conf.and_border(|conf| conf.set_radius(em(radius)))
+        //             .config(|conf| {
+        //                 let color = progress_bar.get_color().unwrap_or_else(|| {
+        //                     match progress_bar.state() {
+        //                         progress_bar::State::Normal => self.brand(Variant::L500),
+        //                         progress_bar::State::Success => self.suggestion(),
+        //                         progress_bar::State::Failure => self.destructive(),
+        //                     }
+        //                     .into()
+        //                 });
+        //                 conf.set_background(color)
+        //             })
+        //             .and_transition(|conf| {
+        //                 conf.all(|val| {
+        //                     val.set_duration(sec(0.3))
+        //                         .cubic_bezier(0.645, 0.045, 0.355, 1.)
+        //                 })
+        //             })
+        //             .and_position(|conf| conf.absolute())
+        //             .and_size(|conf| {
+        //                 let width = (progress_bar.value() - progress_bar.min()).abs()
+        //                     / (progress_bar.max() - progress_bar.min());
+        //                 conf.set_width(width as f32).set_all_heights(em(height))
+        //             })
+        //     })
     }
 }

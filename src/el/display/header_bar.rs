@@ -1,22 +1,27 @@
 use crate::prelude::*;
 use derive_rich::Rich;
 
-#[derive(Rich)]
-pub struct HeaderBar<PMsg: 'static> {
+#[derive(Rich, Element)]
+pub struct HeaderBar<PMsg> {
     // general element properties
     #[rich(read, write(style = compose))]
     events: Events<PMsg>,
     #[rich(read, write(style = compose))]
-    user_style: UserStyle,
+    #[element(theme_lens)]
+    user_style: Style,
 
     // dialog element properties
     #[rich(read, write)]
+    #[element(theme_lens(nested))]
     title: Option<Label<PMsg>>,
     #[rich(read, write)]
+    #[element(theme_lens(nested))]
     subtitle: Option<Label<PMsg>>,
     #[rich(read, write)]
+    #[element(theme_lens(nested))]
     pub close_button: Option<Button<PMsg>>,
     #[rich(read(rename = is_hidden), write)]
+    #[element(theme_lens)]
     hidden: bool,
 }
 
@@ -30,7 +35,7 @@ impl<PMsg> HeaderBar<PMsg> {
     pub fn new() -> Self {
         Self {
             events: Events::default(),
-            user_style: UserStyle::default(),
+            user_style: Style::default(),
             title: None,
             subtitle: None,
             close_button: None,
@@ -39,72 +44,38 @@ impl<PMsg> HeaderBar<PMsg> {
     }
 }
 
-#[derive(Clone, Debug, Default, Rich)]
-pub struct UserStyle {
-    #[rich(write(style = compose))]
-    pub title_container: flexbox::Style,
-    #[rich(write(style = compose))]
-    pub container: flexbox::Style,
-    #[rich(write(style = compose))]
-    pub title: label::Style,
-    #[rich(write(style = compose))]
-    pub subtitle: label::Style,
-    #[rich(write(style = compose))]
-    pub close_button: button::Style,
-}
-
-#[derive(Clone, Debug, Default, Rich)]
-pub struct Style {
-    #[rich(write(style = compose))]
-    pub title_container: flexbox::Style,
-    #[rich(write(style = compose))]
-    pub container: flexbox::Style,
-    #[rich(write(style = compose))]
-    pub title: label::Style,
-    #[rich(write(style = compose))]
-    pub subtitle: label::Style,
-    #[rich(write(style = compose))]
-    pub close_button: button::Style,
-}
-
-impl<PMsg: 'static> Render<PMsg> for HeaderBar<PMsg> {
+impl<PMsg> Render for HeaderBar<PMsg> {
     type View = Node<PMsg>;
-    type Style = Style;
 
-    fn style(&self, theme: &impl Theme) -> Self::Style {
-        theme.header_bar(self)
+    fn style(&self, theme: &Theme) -> Style {
+        theme.header_bar(self.theme_lens())
     }
 
-    fn render_with_style(&self, theme: &impl Theme, style: Self::Style) -> Self::View {
-        let Style {
-            title_container,
-            container,
-            title,
-            subtitle,
-            close_button,
-        } = style;
-        let title_style = title;
-        let subtitle_style = subtitle;
-        let title = Flexbox::new()
-            .try_add(
-                self.title
-                    .as_ref()
-                    .map(|t| t.render_with_style(theme, title_style)),
-            )
-            .try_add(
-                self.subtitle
-                    .as_ref()
-                    .map(|s| s.render_with_style(theme, subtitle_style)),
-            )
-            .render_with_style(theme, title_container);
+    fn render_with_style(&self, theme: &Theme, style: Style) -> Self::View {
+        todo!()
+        // let title =
+        //     Flexbox::new()
+        //         .try_add(
+        //             self.title.as_ref().map(|t| {
+        //                 t.render_with_style(theme, style.sub_style(vec![("label", "title")]))
+        //             }),
+        //         )
+        //         .try_add(self.subtitle.as_ref().map(|s| {
+        //             s.render_with_style(theme, style.sub_style(vec![("label", "subtitle")]))
+        //         }))
+        //         .render_with_style(theme, style.sub_style(vec![("flexbox", "title-container")]));
 
-        Flexbox::new()
-            .try_add(
-                self.close_button
-                    .as_ref()
-                    .map(|btn| btn.render_with_style(theme, close_button)),
-            )
-            .add(title)
-            .render_with_style(theme, container)
+        // Flexbox::new()
+        //     .try_add(self.close_button.as_ref().map(|btn| {
+        //         btn.render_with_style(
+        //             theme,
+        //             style.sub_style(vec![
+        //                 ("button", "close-button"),
+        //                 ("common-container", "close-button-container"),
+        //             ]),
+        //         )
+        //     }))
+        //     .add(title)
+        //     .render_with_style(theme, style.sub_style(vec![("flexbox", "container")]))
     }
 }

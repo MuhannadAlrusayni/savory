@@ -1,9 +1,9 @@
-use crate::{css, prelude::*};
+use crate::prelude::*;
 use derive_rich::Rich;
 use std::borrow::Cow;
 
 #[derive(Clone, From)]
-pub enum Icon<PMsg: 'static> {
+pub enum Icon<PMsg> {
     #[from]
     Svg(SvgIcon<PMsg>),
     #[from]
@@ -12,15 +12,14 @@ pub enum Icon<PMsg: 'static> {
     Url(UrlIcon<PMsg>),
 }
 
-impl<PMsg: 'static> Render<PMsg> for Icon<PMsg> {
+impl<PMsg> Render for Icon<PMsg> {
     type View = Node<PMsg>;
-    type Style = ();
 
-    fn style(&self, _: &impl Theme) -> Self::Style {
-        ()
+    fn style(&self, _: &Theme) -> Style {
+        Style::default()
     }
 
-    fn render_with_style(&self, theme: &impl Theme, _: Self::Style) -> Self::View {
+    fn render_with_style(&self, theme: &Theme, _: Style) -> Self::View {
         match self {
             Self::Svg(icon) => icon.render(theme),
             Self::Html(icon) => icon.render(theme),
@@ -29,7 +28,7 @@ impl<PMsg: 'static> Render<PMsg> for Icon<PMsg> {
     }
 }
 
-impl<PMsg: 'static> Icon<PMsg> {
+impl<PMsg> Icon<PMsg> {
     pub fn svg(draw: impl IntoIterator<Item = Node<PMsg>>) -> SvgIcon<PMsg> {
         SvgIcon::new(draw)
     }
@@ -43,56 +42,57 @@ impl<PMsg: 'static> Icon<PMsg> {
     }
 }
 
-#[derive(Clone, Rich)]
-pub struct SvgIcon<PMsg: 'static> {
+#[derive(Clone, Element, Rich)]
+pub struct SvgIcon<PMsg> {
     #[rich(read, write(style = compose))]
     events: Events<PMsg>,
     #[rich(read, write(style = compose))]
-    user_style: SvgUserStyle,
+    #[element(theme_lens)]
+    user_style: Style,
     #[rich(read(copy), write)]
+    #[element(theme_lens)]
     view_box: Option<att::ViewBox>,
     #[rich(read, write)]
     draw: Vec<Node<PMsg>>,
 }
 
-impl<PMsg: 'static> SvgIcon<PMsg> {
+impl<PMsg> SvgIcon<PMsg> {
     pub fn new(draw: impl IntoIterator<Item = Node<PMsg>>) -> Self {
         Self {
             events: Events::default(),
-            user_style: SvgUserStyle::default(),
+            user_style: Style::default(),
             view_box: None,
             draw: draw.into_iter().collect(),
         }
     }
 }
 
-pub type SvgUserStyle = css::Style;
-pub type SvgStyle = css::Style;
-
-impl<PMsg: 'static> Render<PMsg> for SvgIcon<PMsg> {
+impl<PMsg> Render for SvgIcon<PMsg> {
     type View = Node<PMsg>;
-    type Style = SvgStyle;
 
-    fn style(&self, theme: &impl Theme) -> Self::Style {
-        theme.svg_icon(self)
+    fn style(&self, theme: &Theme) -> Style {
+        theme.svg_icon(self.theme_lens())
     }
 
-    fn render_with_style(&self, _: &impl Theme, style: Self::Style) -> Self::View {
-        svg!()
-            .set_style(style)
-            .set_events(&self.events)
-            .and_attributes(|conf| conf.try_set_view_box(self.view_box))
-            .add_children(self.draw.clone())
+    fn render_with_style(&self, _: &Theme, style: Style) -> Self::View {
+        todo!()
+        // svg!()
+        //     .and_attributes(|conf| conf.set_class("svg-icon").try_set_view_box(self.view_box))
+        //     .set(style["svg-icon"])
+        //     .try_set_events(self.events.get("svg-icon"))
+        //     .add(self.draw.clone())
     }
 }
 
-#[derive(Clone, Rich)]
+#[derive(Clone, Element, Rich)]
 pub struct HtmlIcon<PMsg> {
     #[rich(read, write(style = compose))]
     events: Events<PMsg>,
     #[rich(read, write(style = compose))]
-    user_style: HtmlUserStyle,
+    #[element(theme_lens)]
+    user_style: Style,
     #[rich(read(copy), write)]
+    #[element(theme_lens)]
     view_box: Option<att::ViewBox>,
     #[rich(read, write)]
     html: Cow<'static, str>,
@@ -102,39 +102,37 @@ impl<PMsg> HtmlIcon<PMsg> {
     pub fn new(html: impl Into<Cow<'static, str>>) -> Self {
         Self {
             events: Events::default(),
-            user_style: HtmlUserStyle::default(),
+            user_style: Style::default(),
             view_box: None,
             html: html.into(),
         }
     }
 }
 
-pub type HtmlUserStyle = css::Style;
-pub type HtmlStyle = css::Style;
-
-impl<PMsg: 'static> Render<PMsg> for HtmlIcon<PMsg> {
+impl<PMsg> Render for HtmlIcon<PMsg> {
     type View = Node<PMsg>;
-    type Style = HtmlStyle;
 
-    fn style(&self, theme: &impl Theme) -> Self::Style {
-        theme.html_icon(self)
+    fn style(&self, theme: &Theme) -> Style {
+        theme.html_icon(self.theme_lens())
     }
 
-    fn render_with_style(&self, _: &impl Theme, style: Self::Style) -> Self::View {
-        svg!()
-            .set_style(style)
-            .and_attributes(|conf| conf.try_set_view_box(self.view_box))
-            .set_events(&self.events)
-            .add_children(raw![self.html.as_ref()])
+    fn render_with_style(&self, _: &Theme, style: Style) -> Self::View {
+        todo!()
+        // svg!()
+        //     .set(style["html-icon"])
+        //     .and_attributes(|conf| conf.set_class("html-icon").try_set_view_box(self.view_box))
+        //     .try_set_events(self.events.get("html-icon"))
+        //     .add(raw![self.html.as_ref()])
     }
 }
 
-#[derive(Rich, Clone)]
+#[derive(Rich, Element, Clone)]
 pub struct UrlIcon<PMsg> {
     #[rich(read, write(style = compose))]
     events: Events<PMsg>,
     #[rich(read, write(style = compose))]
-    user_style: UrlUserStyle,
+    #[element(theme_lens)]
+    user_style: Style,
     #[rich(read, write)]
     url: Cow<'static, str>,
 }
@@ -149,27 +147,25 @@ impl<PMsg> UrlIcon<PMsg> {
     pub fn new(url: impl Into<Cow<'static, str>>) -> Self {
         Self {
             events: Events::default(),
-            user_style: UrlUserStyle::default(),
+            user_style: Style::default(),
             url: url.into(),
         }
     }
 }
 
-pub type UrlUserStyle = css::Style;
-pub type UrlStyle = css::Style;
-
-impl<PMsg: 'static> Render<PMsg> for UrlIcon<PMsg> {
+impl<PMsg> Render for UrlIcon<PMsg> {
     type View = Node<PMsg>;
-    type Style = UrlStyle;
 
-    fn style(&self, theme: &impl Theme) -> Self::Style {
-        theme.url_icon(self)
+    fn style(&self, theme: &Theme) -> Style {
+        theme.url_icon(self.theme_lens())
     }
 
-    fn render_with_style(&self, _: &impl Theme, style: Self::Style) -> Self::View {
-        img!()
-            .set_style(style)
-            .set_events(&self.events)
-            .and_attributes(|conf| conf.set_src(self.url.clone()))
+    fn render_with_style(&self, _: &Theme, style: Style) -> Self::View {
+        todo!()
+        // img!()
+        //     .set(att::class("url-icon"))
+        //     .set(att::src(self.url.clone()))
+        //     .set(style["url-icon"])
+        //     .try_set_events(self.events.get("url-icon"))
     }
 }

@@ -1,28 +1,34 @@
-use crate::{css, prelude::*};
+use crate::prelude::*;
 use derive_rich::Rich;
 
 // TODO: add placement property
-#[derive(Clone, Rich)]
-pub struct Popover<'a, PMsg, C, T> {
+#[derive(Clone, Rich, Element)]
+pub struct Popover<'a, PMsg> {
     #[rich(read, write(style = compose))]
     events: Events<PMsg>,
     #[rich(read, write(style = compose))]
-    user_style: UserStyle,
+    #[element(theme_lens)]
+    user_style: Style,
     #[rich(read, write)]
-    child: &'a C,
+    child: &'a dyn Render<View = Node<PMsg>>,
     #[rich(read, write)]
-    target: &'a T,
+    target: &'a dyn Render<View = Node<PMsg>>,
     #[rich(write, read(copy, rename = is_visible), value_fns = { popup = true, popdown = false })]
+    #[element(theme_lens)]
     visible: bool,
     #[rich(read(copy), write)]
+    #[element(theme_lens)]
     offset: i8,
 }
 
-impl<'a, PMsg, C, T> Popover<'a, PMsg, C, T> {
-    pub fn new(target: &'a T, child: &'a C) -> Self {
+impl<'a, PMsg> Popover<'a, PMsg> {
+    pub fn new(
+        target: &'a impl Render<View = Node<PMsg>>,
+        child: &'a impl Render<View = Node<PMsg>>,
+    ) -> Self {
         Self {
             events: Events::default(),
-            user_style: UserStyle::default(),
+            user_style: Style::default(),
             child,
             target,
             visible: false,
@@ -31,43 +37,25 @@ impl<'a, PMsg, C, T> Popover<'a, PMsg, C, T> {
     }
 }
 
-#[derive(Clone, Debug, Default, Rich)]
-pub struct UserStyle {
-    #[rich(write(style = compose))]
-    pub container: css::Style,
-    #[rich(write(style = compose))]
-    pub panel: css::Style,
-}
-
-#[derive(Clone, Debug, Default, Rich)]
-pub struct Style {
-    #[rich(write(style = compose))]
-    pub container: css::Style,
-    #[rich(write(style = compose))]
-    pub panel: css::Style,
-}
-
-impl<'a, PMsg: 'static, C, T> Render<PMsg> for Popover<'a, PMsg, C, T>
-where
-    PMsg: 'static,
-    C: Render<PMsg, View = Node<PMsg>>,
-    T: Render<PMsg, View = Node<PMsg>>,
-{
+impl<'a, PMsg> Render for Popover<'a, PMsg> {
     type View = Node<PMsg>;
-    type Style = Style;
 
-    fn style(&self, theme: &impl Theme) -> Self::Style {
-        theme.popover(self)
+    fn style(&self, theme: &Theme) -> Style {
+        theme.popover(self.theme_lens())
     }
 
-    fn render_with_style(&self, theme: &impl Theme, style: Self::Style) -> Self::View {
-        let panel = div!()
-            .set_style(style.panel)
-            .add_children(vec![self.child.render(theme)]);
+    fn render_with_style(&self, theme: &Theme, style: Style) -> Self::View {
+        todo!()
+        // let panel = div!()
+        //     .set(att::class("panel"))
+        //     .set(style["panel"])
+        //     .try_set(self.events.get("panel"))
+        //     .add(self.child.render(theme));
 
-        div!()
-            .set_style(style.container)
-            .set_events(&self.events)
-            .add_children(vec![self.target.render(theme), panel])
+        // div!()
+        //     .set(att::class("popover"))
+        //     .set(style["popover"])
+        //     .try_set(self.events.get("popover"))
+        //     .add(vec![self.target.render(theme), panel])
     }
 }

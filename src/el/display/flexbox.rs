@@ -1,46 +1,53 @@
 use crate::{
-    css::{self, box_align::*, flexbox::*, gap::Gap, values as val},
+    css::{box_align::*, flexbox::*, gap::Gap, values as val},
     prelude::*,
 };
 use derive_rich::Rich;
 use std::default::Default;
 
-#[derive(Clone, Rich, Default)]
-pub struct Flexbox<PMsg: 'static> {
+#[derive(Element, Rich, Default)]
+pub struct Flexbox<'a, PMsg> {
     #[rich(read, write(style = compose))]
     events: Events<PMsg>,
     #[rich(read, write(style = compose))]
-    user_style: UserStyle,
+    #[element(theme_lens)]
+    user_style: Style,
     #[rich(read, write(style = compose))]
-    items: Vec<Item<PMsg>>,
+    items: Vec<Item<'a, PMsg>>,
     #[rich(read(copy), value_fns = {
         row = val::Row,
         reversed_row = val::RowReverse,
         column = val::Column,
         reversed_column = val::ColumnReverse,
     })]
+    #[element(theme_lens)]
     direction: Option<Direction>,
     #[rich(read(copy), value_fns = {
         wrap = val::Wrap,
         no_wrap = val::Nowrap,
         reversed_wrap = val::WrapReverse,
     })]
+    #[element(theme_lens)]
     wrap: Option<Wrap>,
     #[rich(read(copy), write)]
+    #[element(theme_lens)]
     justify_content: Option<JustifyContent>,
     #[rich(read(copy), write)]
+    #[element(theme_lens)]
     align_items: Option<AlignItems>,
     #[rich(read(copy), write)]
+    #[element(theme_lens)]
     align_content: Option<AlignContent>,
     #[rich(read(copy), write)]
+    #[element(theme_lens)]
     gap: Option<Gap>,
 }
 
-impl<PMsg: 'static> Flexbox<PMsg> {
+impl<'a, PMsg> Flexbox<'a, PMsg> {
     pub fn new() -> Self {
         Self {
             events: Events::default(),
-            user_style: UserStyle::default(),
+            user_style: Style::default(),
             items: vec![],
             direction: None,
             wrap: None,
@@ -51,45 +58,63 @@ impl<PMsg: 'static> Flexbox<PMsg> {
         }
     }
 
-    pub fn item() -> Item<PMsg> {
-        Item::new()
+    pub fn item_with(content: &'a dyn Render<View = Node<PMsg>>) -> Item<'a, PMsg> {
+        Item::new(content)
     }
 
-    pub fn item_with(content: impl Into<ContentArg<PMsg>>) -> Item<PMsg> {
-        Item::with_content(content)
+    pub fn add(mut self, el: &'a dyn Render<View = Node<PMsg>>) -> Self {
+        self.items.push(Item::new(el));
+        self
     }
 
-    pub fn add(mut self, item: impl Into<Item<PMsg>>) -> Self {
+    pub fn try_add(self, item: Option<&'a dyn Render<View = Node<PMsg>>>) -> Self {
+        if let Some(item) = item {
+            self.add(item)
+        } else {
+            self
+        }
+    }
+
+    pub fn add_item(mut self, item: impl Into<Item<'a, PMsg>>) -> Self {
         self.items.push(item.into());
         self
     }
 
-    pub fn try_add(mut self, item: Option<impl Into<Item<PMsg>>>) -> Self {
+    pub fn try_add_item(self, item: Option<impl Into<Item<'a, PMsg>>>) -> Self {
         if let Some(item) = item {
-            self.items.push(item.into())
+            self.add_item(item)
+        } else {
+            self
         }
-        self
     }
 
-    pub fn add_and(mut self, config_item: impl FnOnce(Item<PMsg>) -> Item<PMsg> + 'static) -> Self {
-        self.items.push(config_item(Self::item()));
-        self
-    }
-
-    pub fn try_add_and(
+    pub fn add_item_and(
         mut self,
-        node: Option<Node<PMsg>>,
-        config_item: impl FnOnce(Item<PMsg>) -> Item<PMsg> + 'static,
+        content: &'a dyn Render<View = Node<PMsg>>,
+        config_item: impl FnOnce(Item<'a, PMsg>) -> Item<'a, PMsg> + 'static,
+    ) -> Self {
+        self.items.push(config_item(Item::new(content)));
+        self
+    }
+
+    pub fn try_add_item_and(
+        self,
+        node: Option<&'a dyn Render<View = Node<PMsg>>>,
+        config_item: impl FnOnce(Item<'a, PMsg>) -> Item<'a, PMsg> + 'static,
     ) -> Self {
         if let Some(node) = node {
-            self.items.push(config_item(Self::item_with(node)));
+            self.add_item_and(node, config_item)
+        } else {
+            self
         }
-        self
     }
 
-    pub fn add_items(mut self, items: impl IntoIterator<Item = Node<PMsg>>) -> Self {
+    pub fn add_items(
+        mut self,
+        items: impl IntoIterator<Item = &'a dyn Render<View = Node<PMsg>>>,
+    ) -> Self {
         self.items
-            .extend(items.into_iter().map(|node| Item::from(node)));
+            .extend(items.into_iter().map(|node| Item::new(node)));
         self
     }
 
@@ -139,48 +164,55 @@ impl<PMsg: 'static> Flexbox<PMsg> {
     }
 
     pub fn full_size(self) -> Self {
-        self.and_user_style(|conf| conf.and_size(|size| size.full()))
+        todo!()
+        // self.and_user_style(|conf| conf.and_size(|size| size.full()))
     }
 }
 
-pub type Style = css::Style;
-pub type UserStyle = css::Style;
-
-impl<PMsg: 'static> Render<PMsg> for Flexbox<PMsg> {
+impl<'a, PMsg> Render for Flexbox<'a, PMsg> {
     type View = Node<PMsg>;
-    type Style = Style;
 
-    fn style(&self, theme: &impl Theme) -> Self::Style {
-        theme.flexbox(self)
+    fn style(&self, theme: &Theme) -> Style {
+        theme.flexbox(self.theme_lens())
     }
 
-    fn render_with_style(&self, theme: &impl Theme, style: Self::Style) -> Self::View {
-        div![
-            self.events.events.clone(),
-            style,
-            // items
-            self.items.iter().map(|item| item.render(theme)),
-        ]
+    fn render_with_style(&self, theme: &Theme, style: Style) -> Self::View {
+        todo!()
+        // div!()
+        //     .set(att::class("flexbox"))
+        //     .set(&self.events["flexbox"])
+        //     .set(style["flexbox"])
+        //     .add(
+        //         self.items
+        //             .iter()
+        //             .map(|item| item.render(theme))
+        //             .collect::<Vec<Node<PMsg>>>(),
+        //     )
     }
 }
 
 // ---- Flexbox Item ----
 
-#[derive(Clone, Rich, Default)]
-pub struct Item<PMsg: 'static> {
+#[derive(Rich, Element)]
+pub struct Item<'a, PMsg> {
     #[rich(read, write(style = compose))]
     events: Events<PMsg>,
     #[rich(read, write(style = compose))]
-    user_style: ItemUserStyle,
+    #[element(theme_lens)]
+    user_style: Style,
     #[rich(read, write(style = compose))]
-    content: Vec<Node<PMsg>>,
+    content: &'a dyn Render<View = Node<PMsg>>,
     #[rich(read(copy), write)]
+    #[element(theme_lens)]
     order: Option<Order>,
     #[rich(read(copy), write)]
+    #[element(theme_lens)]
     grow: Option<Grow>,
     #[rich(read(copy), write)]
+    #[element(theme_lens)]
     shrink: Option<Shrink>,
     #[rich(read(copy), write)]
+    #[element(theme_lens)]
     basis: Option<Basis>,
     #[rich(read(copy), value_fns = {
         auto = val::Auto,
@@ -190,29 +222,19 @@ pub struct Item<PMsg: 'static> {
         start = val::Start,
         end = val::End,
     })]
+    #[element(theme_lens)]
     align_self: Option<AlignSelf>,
     #[rich(read(copy, rename = is_flatten), value_fns = { flatten = true, wrapped = false })]
+    #[element(theme_lens)]
     flatten: bool,
 }
 
-impl<PMsg: 'static> From<Vec<Node<PMsg>>> for Item<PMsg> {
-    fn from(source: Vec<Node<PMsg>>) -> Self {
-        Item::with_content(source)
-    }
-}
-
-impl<PMsg: 'static> From<Node<PMsg>> for Item<PMsg> {
-    fn from(source: Node<PMsg>) -> Self {
-        Item::with_content(source)
-    }
-}
-
-impl<PMsg: 'static> Item<PMsg> {
-    pub fn new() -> Self {
+impl<'a, PMsg> Item<'a, PMsg> {
+    pub fn new(content: &'a dyn Render<View = Node<PMsg>>) -> Self {
         Self {
             events: Events::default(),
-            user_style: ItemUserStyle::default(),
-            content: vec![],
+            user_style: Style::default(),
+            content: content,
             order: None,
             grow: None,
             shrink: None,
@@ -222,17 +244,9 @@ impl<PMsg: 'static> Item<PMsg> {
         }
     }
 
-    pub fn with_content(arg: impl Into<ContentArg<PMsg>>) -> Self {
-        Self::new().set_content(arg)
-    }
-
     pub fn auto_margin(self) -> Self {
-        self.and_user_style(|conf| conf.and_margin(|margin| margin.auto()))
-    }
-
-    pub fn set_content(mut self, arg: impl Into<ContentArg<PMsg>>) -> Self {
-        self.content = arg.into().0;
-        self
+        todo!()
+        // self.and_user_style(|conf| conf.and_margin(|margin| margin.auto()))
     }
 
     pub fn group(self, group_id: impl Into<Order>) -> Self {
@@ -240,57 +254,23 @@ impl<PMsg: 'static> Item<PMsg> {
     }
 }
 
-pub struct ContentArg<PMsg: 'static>(Vec<Node<PMsg>>);
+impl<'a, PMsg> Render for Item<'a, PMsg> {
+    type View = Node<PMsg>;
 
-impl<PMsg: 'static> From<Node<PMsg>> for ContentArg<PMsg> {
-    fn from(source: Node<PMsg>) -> Self {
-        Self(vec![source])
-    }
-}
-
-impl<PMsg: 'static> From<Vec<Node<PMsg>>> for ContentArg<PMsg> {
-    fn from(source: Vec<Node<PMsg>>) -> Self {
-        Self(source)
-    }
-}
-
-pub type ItemStyle = css::Style;
-pub type ItemUserStyle = css::Style;
-
-impl<PMsg: 'static> Render<PMsg> for Item<PMsg> {
-    type View = Vec<Node<PMsg>>;
-    type Style = Style;
-
-    fn style(&self, theme: &impl Theme) -> Self::Style {
-        theme.flexbox_item(self)
+    fn style(&self, theme: &Theme) -> Style {
+        theme.flexbox_item(self.theme_lens())
     }
 
-    fn render_with_style(&self, _: &impl Theme, style: Self::Style) -> Self::View {
-        if self.is_flatten() {
-            self.content
-                .clone()
-                .into_iter()
-                .map(|mut node| {
-                    // add self.events to every node
-                    for event in self.events.events.clone().into_iter() {
-                        node.add_listener(event);
-                    }
-                    // add style to every node
-                    if let Some(style) = style.to_seed_style() {
-                        for (key, value) in style.vals.into_iter() {
-                            node.add_style(key, value);
-                        }
-                    }
-                    node
-                })
-                .collect()
-        } else {
-            vec![div![
-                self.events.events.clone(),
-                style,
-                // child
-                self.content.clone()
-            ]]
-        }
+    fn render_with_style(&self, theme: &Theme, style: Style) -> Self::View {
+        todo!()
+        // if self.is_flatten() {
+        //     self.content.render(theme)
+        // } else {
+        //     div!()
+        //         .add(self.content.render(theme))
+        //         .set(att::class("flexbox-item"))
+        // }
+        // .set(&self.events["flexbox-item"])
+        // .set(style["flexbox-item"])
     }
 }

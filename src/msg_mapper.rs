@@ -13,7 +13,7 @@ where
     T: MessageMapper<Msg, OtherMsg>,
 {
     fn map_msg_with(self, map: &MsgMapper<Msg, OtherMsg>) -> Self::SelfWithOtherMs {
-        self.map_msg(map.map_msg_once().clone())
+        self.map_msg(map.map_msg_once())
     }
 }
 

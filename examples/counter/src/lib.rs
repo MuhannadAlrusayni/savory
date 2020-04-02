@@ -33,7 +33,7 @@ pub enum Msg {
 impl Model<Msg, ()> for MyApp {
     type Message = Msg;
 
-    fn update(&mut self, msg: Msg, orders: &mut impl Orders<Msg, ()>) {
+    fn update(&mut self, msg: Msg, orders: &mut impl Orders<Msg>) {
         match msg {
             Msg::SpinEntry(msg) => self.menu_button.child.update(msg, orders),
             Msg::MenuButton(msg) => self.menu_button.update(msg, orders),
@@ -45,11 +45,11 @@ impl Render<Msg> for MyApp {
     type View = Node<Msg>;
     type Style = ();
 
-    fn style(&self, _: &impl Theme) -> Self::Style {
+    fn style(&self, _: &Theme) -> Style {
         ()
     }
 
-    fn render_with_style(&self, theme: &impl Theme, _: Self::Style) -> Self::View {
+    fn render_with_style(&self, theme: &Theme, _: Style) -> Self::View {
         let menu_button = self.menu_button.render(theme);
 
         Flexbox::new()

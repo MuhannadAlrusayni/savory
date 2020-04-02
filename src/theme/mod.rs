@@ -2,38 +2,56 @@
 
 pub mod ant;
 
-use crate::el::prelude::*;
+use crate::prelude::*;
+use std::{ops::Deref, rc::Rc};
 
-pub trait Theme {
-    fn flexbox<PMsg: 'static>(&self, _: &Flexbox<PMsg>) -> flexbox::Style;
+#[derive(Clone)]
+pub struct Theme(Rc<dyn ThemeImpl>);
 
-    fn flexbox_item<PMsg: 'static>(&self, _: &flexbox::Item<PMsg>) -> flexbox::ItemStyle;
+impl Deref for Theme {
+    type Target = dyn ThemeImpl;
 
-    fn popover<'a, PMsg, C, T>(&self, _: &Popover<'a, PMsg, C, T>) -> popover::Style;
+    fn deref(&self) -> &Self::Target {
+        self.0.deref()
+    }
+}
 
-    fn svg_icon<PMsg: 'static>(&self, _: &SvgIcon<PMsg>) -> icon::SvgStyle;
+pub trait ThemeLens<'a> {
+    type Lens: 'a;
 
-    fn html_icon<PMsg>(&self, _: &HtmlIcon<PMsg>) -> icon::HtmlStyle;
+    fn theme_lens(&'a self) -> Self::Lens;
+}
 
-    fn url_icon<PMsg>(&self, _: &UrlIcon<PMsg>) -> icon::UrlStyle;
+pub trait ThemeImpl {
+    fn flexbox<'a>(&self, el: flexbox::FlexboxLens<'a>) -> Style;
 
-    fn button<PMsg>(&self, _: &Button<PMsg>) -> button::Style;
+    fn flexbox_item<'a>(&self, _: flexbox::ItemLens<'a>) -> Style;
 
-    fn switch<PMsg>(&self, _: &Switch<PMsg>) -> switch::Style;
+    fn popover<'a>(&self, _: popover::PopoverLens<'a>) -> Style;
 
-    fn checkbox<PMsg>(&self, _: &Checkbox<PMsg>) -> checkbox::Style;
+    fn svg_icon<'a>(&self, _: icon::SvgIconLens<'a>) -> Style;
 
-    fn radio<PMsg>(&self, _: &Radio<PMsg>) -> radio::Style;
+    fn html_icon<'a>(&self, _: icon::HtmlIconLens<'a>) -> Style;
 
-    fn entry<PMsg>(&self, _: &Entry<PMsg>) -> entry::Style;
+    fn url_icon<'a>(&self, _: icon::UrlIconLens<'a>) -> Style;
 
-    fn spin_entry<PMsg>(&self, _: &SpinEntry<PMsg>) -> spin_entry::Style;
+    fn button<'a>(&self, _: button::ButtonLens<'a>) -> Style;
 
-    fn dialog<PMsg, C>(&self, _: &Dialog<PMsg, C>) -> dialog::Style;
+    fn switch<'a>(&self, _: switch::SwitchLens<'a>) -> Style;
 
-    fn header_bar<PMsg>(&self, _: &HeaderBar<PMsg>) -> header_bar::Style;
+    fn checkbox<'a>(&self, _: checkbox::CheckboxLens<'a>) -> Style;
 
-    fn label<PMsg>(&self, _: &Label<PMsg>) -> label::Style;
+    fn radio<'a>(&self, _: radio::RadioLens<'a>) -> Style;
 
-    fn progress_bar<PMsg>(&self, _: &ProgressBar<PMsg>) -> progress_bar::Style;
+    fn entry<'a>(&self, _: entry::EntryLens<'a>) -> Style;
+
+    fn spin_entry<'a>(&self, _: spin_entry::SpinEntryLens<'a>) -> Style;
+
+    fn dialog<'a>(&self, _: dialog::DialogLens<'a>) -> Style;
+
+    fn header_bar<'a>(&self, _: header_bar::HeaderBarLens<'a>) -> Style;
+
+    fn label<'a>(&self, _: label::LabelLens<'a>) -> Style;
+
+    fn progress_bar<'a>(&self, _: progress_bar::ProgressBarLens<'a>) -> Style;
 }

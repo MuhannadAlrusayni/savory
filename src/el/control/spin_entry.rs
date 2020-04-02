@@ -14,33 +14,8 @@ pub enum Msg {
     DecrementButton(button::Msg),
 }
 
-#[derive(Default, Rich)]
-pub struct LocalEvents {
-    #[rich(write(style = compose))]
-    pub container: Events<Msg>,
-    #[rich(write(style = compose))]
-    pub input: Events<Msg>,
-}
-
-#[derive(Rich)]
-pub struct ParentEvents<PMsg> {
-    #[rich(write(style = compose))]
-    pub container: Events<PMsg>,
-    #[rich(write(style = compose))]
-    pub input: Events<PMsg>,
-}
-
-impl<PMsg> Default for ParentEvents<PMsg> {
-    fn default() -> Self {
-        Self {
-            container: Events::default(),
-            input: Events::default(),
-        }
-    }
-}
-
 // TODO: add way to accept custom format (e.g. `100%`, `45$`)
-#[derive(Rich)]
+#[derive(Rich, Element)]
 pub struct SpinEntry<PMsg> {
     el_ref: ElRef<web_sys::HtmlInputElement>,
     msg_mapper: MsgMapper<Msg, PMsg>,
@@ -53,7 +28,7 @@ pub struct SpinEntry<PMsg> {
             /// after next render
             style = compose
         ))]
-    local_events: LocalEvents,
+    local_events: Events<Msg>,
     #[rich(
         read(
             /// Return reference for the storde parent events.
@@ -63,7 +38,7 @@ pub struct SpinEntry<PMsg> {
             /// after next render
             style = compose
         ))]
-    events: ParentEvents<PMsg>,
+    events: Events<PMsg>,
     #[rich(
         read(
             /// Return reference to the user style.
@@ -73,7 +48,8 @@ pub struct SpinEntry<PMsg> {
             /// changes on this style will overrides the theme style.
             style = compose
         ))]
-    user_style: UserStyle,
+    #[element(theme_lens)]
+    user_style: Style,
     #[rich(read(
         /// Return the current value if there is any.
         copy
@@ -105,16 +81,19 @@ pub struct SpinEntry<PMsg> {
         /// Return `true` if spin entry is disabled
         copy, rename = is_disabled
     ),)]
+    #[element(theme_lens)]
     disabled: bool,
     #[rich(read(
         /// Return `true` if spin entry is focused
         copy, rename = is_focused
     ))]
+    #[element(theme_lens)]
     focus: bool,
     #[rich(read(
         /// Return `true` if mouse is over
         copy, rename = is_mouse_over
     ))]
+    #[element(theme_lens)]
     mouse_over: bool,
 
     // children elements
@@ -137,41 +116,42 @@ pub struct SpinEntry<PMsg> {
 // TODO: add fn unset_placeholder()
 impl<PMsg> SpinEntry<PMsg> {
     pub fn new(msg_mapper: impl Into<MsgMapper<Msg, PMsg>>) -> Self {
-        let local_events = LocalEvents::default()
-            .and_input(|conf| {
-                conf.input(|_| Msg::Input)
-                    .focus(|_| Msg::Focus)
-                    .blur(|_| Msg::Blur)
-            })
-            .and_container(|conf| {
-                conf.mouse_enter(|_| Msg::MouseEnter)
-                    .mouse_leave(|_| Msg::MouseLeave)
-            });
+        todo!()
+        // let local_events = Events::default()
+        //     .insert("input", |conf| {
+        //         conf.input(|_| Msg::Input)
+        //             .focus(|_| Msg::Focus)
+        //             .blur(|_| Msg::Blur)
+        //     })
+        //     .insert("container", |conf| {
+        //         conf.mouse_enter(|_| Msg::MouseEnter)
+        //             .mouse_leave(|_| Msg::MouseLeave)
+        //     });
 
-        let increment_button = Button::with_label(Msg::IncrementButton, "+")
-            .and_events(|conf| conf.click(|_| Msg::Increment));
+        // let increment_button = Button::with_label(Msg::IncrementButton, "+")
+        //     .and_events(|conf| conf.insert("button", |conf| conf.click(|_| Msg::Increment)));
 
-        let decrement_button = Button::with_label(Msg::DecrementButton, "-")
-            .and_events(|conf| conf.click(|_| Msg::Decrement));
+        // let decrement_button = Button::with_label(Msg::DecrementButton, "-")
+        //     .and_events(|conf| conf.insert("button", |conf| conf.click(|_| Msg::Decrement)));
 
-        Self {
-            el_ref: ElRef::default(),
-            msg_mapper: msg_mapper.into(),
-            local_events,
-            events: ParentEvents::default(),
-            value: None,
-            vis_value: "".into(),
-            max: None,
-            min: None,
-            step: 1.,
-            placeholder: None,
-            user_style: UserStyle::default(),
-            disabled: false,
-            focus: false,
-            mouse_over: false,
-            increment_button,
-            decrement_button,
-        }
+        // Self {
+        //     el_ref: ElRef::default(),
+        //     msg_mapper: msg_mapper.into(),
+        //     local_events,
+        //     events: Events::default(),
+        //     value: None,
+        //     vis_value: "".into(),
+        //     max: None,
+        //     min: None,
+        //     step: 1.,
+        //     placeholder: None,
+        //     user_style: Style::default(),
+        //     disabled: false,
+        //     focus: false,
+        //     mouse_over: false,
+        //     increment_button,
+        //     decrement_button,
+        // }
     }
 
     pub fn set_min(mut self, min: f64) -> Self {
@@ -370,10 +350,10 @@ impl<PMsg> SpinEntry<PMsg> {
     }
 }
 
-impl<GMsg: 'static, PMsg: 'static> Model<PMsg, GMsg> for SpinEntry<PMsg> {
+impl<PMsg: 'static> Model<PMsg> for SpinEntry<PMsg> {
     type Message = Msg;
 
-    fn update(&mut self, msg: Msg, orders: &mut impl Orders<PMsg, GMsg>) {
+    fn update(&mut self, msg: Msg, orders: &mut impl Orders<PMsg>) {
         let mut orders = orders.proxy(self.msg_mapper.map_msg_once());
 
         match msg {
@@ -390,82 +370,78 @@ impl<GMsg: 'static, PMsg: 'static> Model<PMsg, GMsg> for SpinEntry<PMsg> {
     }
 }
 
-/// This style used by users when they want to override the defualt theme style.
-#[derive(Clone, Default, Rich)]
-pub struct UserStyle {
-    #[rich(write(style = compose))]
-    pub container: css::Style,
-    #[rich(write(style = compose))]
-    pub input: css::Style,
-    #[rich(write(style = compose))]
-    pub buttons_container: flexbox::Style,
-    #[rich(write(style = compose))]
-    pub increment_button: button::Style,
-    #[rich(write(style = compose))]
-    pub decrement_button: button::Style,
-}
+// /// This style used by users when they want to override the defualt theme style.
+// #[derive(Clone, Default, Rich)]
+// pub struct UserStyle {
+//     #[rich(write(style = compose))]
+//     pub container: css::Style,
+//     #[rich(write(style = compose))]
+//     pub input: css::Style,
+//     #[rich(write(style = compose))]
+//     pub buttons_container: flexbox::Style,
+//     #[rich(write(style = compose))]
+//     pub increment_button: button::Style,
+//     #[rich(write(style = compose))]
+//     pub decrement_button: button::Style,
+// }
 
-/// This style returned by the Theme and consumed by render function
-#[derive(Clone, Rich)]
-pub struct Style {
-    #[rich(write(style = compose))]
-    pub container: css::Style,
-    #[rich(write(style = compose))]
-    pub input: css::Style,
-    #[rich(write(style = compose))]
-    pub buttons_container: flexbox::Style,
-    #[rich(write(style = compose))]
-    pub increment_button: button::Style,
-    #[rich(write(style = compose))]
-    pub decrement_button: button::Style,
-}
+// /// This style returned by the Theme and consumed by render function
+// #[derive(Clone, Rich)]
+// pub struct Style {
+//     #[rich(write(style = compose))]
+//     pub container: css::Style,
+//     #[rich(write(style = compose))]
+//     pub input: css::Style,
+//     #[rich(write(style = compose))]
+//     pub buttons_container: flexbox::Style,
+//     #[rich(write(style = compose))]
+//     pub increment_button: button::Style,
+//     #[rich(write(style = compose))]
+//     pub decrement_button: button::Style,
+// }
 
-impl<PMsg: 'static> Render<PMsg> for SpinEntry<PMsg> {
+impl<PMsg> Render for SpinEntry<PMsg> {
     type View = Node<PMsg>;
-    type Style = Style;
 
-    fn style(&self, theme: &impl Theme) -> Self::Style {
-        theme.spin_entry(self)
+    fn style(&self, theme: &Theme) -> Style {
+        theme.spin_entry(self.theme_lens())
     }
 
-    fn render_with_style(&self, theme: &impl Theme, style: Self::Style) -> Self::View {
-        let inc_btn = self
-            .increment_button
-            .render_with_style(theme, style.increment_button);
-        let dec_btn = self
-            .decrement_button
-            .render_with_style(theme, style.decrement_button);
+    fn render_with_style(&self, theme: &Theme, style: Style) -> Self::View {
+        todo!()
+        // let inc_btn = self
+        //     .increment_button
+        //     .render_with_style(theme, style["increment-button"])
+        //     .map_msg_with(&self.msg_mapper);
+        // let dec_btn = self
+        //     .decrement_button
+        //     .render_with_style(theme, style["decrement-button"])
+        //     .map_msg_with(&self.msg_mapper);
 
-        let btns_container = Flexbox::new()
-            .add(inc_btn)
-            .add(dec_btn)
-            .render_with_style(theme, style.buttons_container)
-            .map_msg_with(&self.msg_mapper);
+        // // input
+        // let input = input!()
+        //     .el_ref(&self.el_ref)
+        //     .set(&self.local_events["input"])
+        //     .set(style["input"])
+        //     .and_attributes(|conf| {
+        //         conf.set_class("input")
+        //             .set_disabled(self.disabled)
+        //             .set_value(self.vis_value.clone())
+        //             .set_step(self.step)
+        //             .try_set_max(self.max)
+        //             .try_set_min(self.min)
+        //             .try_set_placeholder(self.placeholder.map(|val| val.to_string()))
+        //     })
+        //     .map_msg_with(&self.msg_mapper)
+        //     .try_add(self.events.get("input"));
 
-        // input
-        let input = input!()
-            .el_ref(&self.el_ref)
-            .set(&self.local_events.input)
-            .set(style.input)
-            .and_attributes(|conf| {
-                conf.set_class("spin-entry-input")
-                    .set_disabled(self.disabled)
-                    .set_value(self.vis_value.clone())
-                    .set_step(self.step)
-                    .try_set_max(self.max)
-                    .try_set_min(self.min)
-                    .try_set_placeholder(self.placeholder.map(|val| val.to_string()))
-            })
-            .map_msg_with(&self.msg_mapper)
-            .add(&self.events.input);
-
-        // container
-        div!()
-            .set(style.container)
-            .set(&self.local_events.container)
-            .and_attributes(|conf| conf.set_class("spin-entry"))
-            .map_msg_with(&self.msg_mapper)
-            .add(&self.events.container)
-            .add(vec![input, btns_container])
+        // // container
+        // div!()
+        //     .add(att::class("spin-entry"))
+        //     .set(style["container"])
+        //     .set(&self.local_events["container"])
+        //     .map_msg_with(&self.msg_mapper)
+        //     .try_add(self.events.get("container"))
+        //     .add(vec![input, inc_btn, dec_btn])
     }
 }

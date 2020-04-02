@@ -1,14 +1,15 @@
-use crate::{css, prelude::*};
+use crate::prelude::*;
 use derive_rich::Rich;
 use std::borrow::Cow;
 
-#[derive(Rich)]
+#[derive(Rich, Element)]
 pub struct Label<PMsg> {
     // general element properties
     #[rich(read, write(style = compose))]
     events: Events<PMsg>,
     #[rich(read, write(style = compose))]
-    user_style: UserStyle,
+    #[element(theme_lens)]
+    user_style: Style,
     // label element properties
     #[rich(read, write)]
     text: Cow<'static, str>,
@@ -36,27 +37,25 @@ impl<PMsg> Label<PMsg> {
     pub fn new(text: impl Into<Cow<'static, str>>) -> Self {
         Self {
             events: Events::default(),
-            user_style: UserStyle::default(),
+            user_style: Style::default(),
             text: text.into(),
         }
     }
 }
 
-pub type UserStyle = css::Style;
-pub type Style = css::Style;
-
-impl<PMsg: 'static> Render<PMsg> for Label<PMsg> {
+impl<PMsg> Render for Label<PMsg> {
     type View = Node<PMsg>;
-    type Style = Style;
 
-    fn style(&self, theme: &impl Theme) -> Self::Style {
-        theme.label(self)
+    fn style(&self, theme: &Theme) -> Style {
+        theme.label(self.theme_lens())
     }
 
-    fn render_with_style(&self, _: &impl Theme, style: Self::Style) -> Self::View {
-        span!()
-            .add_children(vec![plain![self.text.to_string()]])
-            .set_style(style)
-            .set_events(&self.events)
+    fn render_with_style(&self, _: &Theme, style: Style) -> Self::View {
+        todo!()
+        // span!()
+        //     .set(att::class("label"))
+        //     .add_children(vec![plain![self.text.to_string()]])
+        //     .set_style(style["label"])
+        //     .try_set_events(self.events.get("label"))
     }
 }

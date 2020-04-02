@@ -70,15 +70,16 @@ pub mod theme;
 /// khalas prelude.
 pub mod prelude {
     pub use crate::attribute as att;
-    pub use crate::css::Style;
-    pub use crate::el::prelude::*;
-    pub use crate::events::Events;
+    pub use crate::el::{prelude::*, Events, Style};
     pub use crate::model::Model;
     pub use crate::msg_mapper::{MessageMapperExt, MsgMapper};
     pub use crate::render::Render;
     pub use crate::routable::Routable;
-    pub use crate::seed_ext::{ElExt, ElRefExt, NodeExt};
-    pub use crate::theme::Theme;
+    pub use crate::seed_ext::{
+        AddForEl, ElExt, ElRefExt, NodeExt, SetForEl, TryAddForEl, TrySetForEl,
+    };
+    pub use crate::theme::{Theme, ThemeLens};
+    pub use khalas_macros::Element;
     pub use seed::prelude::{
         AfterMount, App, BeforeMount, El, ElRef, MessageMapper, MountType, Orders,
         RenderTimestampDelta, UpdateEl, UpdateElForIterator, UrlHandling, View,

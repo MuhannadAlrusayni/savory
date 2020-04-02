@@ -66,56 +66,38 @@ pub enum Msg {
     ChangeState(State),
 }
 
-#[derive(Default, Rich)]
-pub struct LocalEvents {
-    #[rich(write(style = compose))]
-    pub container: Events<Msg>,
-    #[rich(write(style = compose))]
-    pub indicator: Events<Msg>,
-}
-
-#[derive(Rich)]
-pub struct ParentEvents<PMsg> {
-    #[rich(write(style = compose))]
-    pub container: Events<PMsg>,
-    #[rich(write(style = compose))]
-    pub indicator: Events<PMsg>,
-}
-
-impl<PMsg> Default for ParentEvents<PMsg> {
-    fn default() -> Self {
-        Self {
-            container: Events::default(),
-            indicator: Events::default(),
-        }
-    }
-}
-
-#[derive(Rich)]
+#[derive(Rich, Element)]
 pub struct ProgressBar<PMsg> {
     // general element properties
     msg_mapper: MsgMapper<Msg, PMsg>,
     #[rich(read, write(style = compose))]
-    local_events: LocalEvents,
+    local_events: Events<Msg>,
     #[rich(read, write(style = compose))]
-    events: ParentEvents<PMsg>,
+    events: Events<PMsg>,
     #[rich(read, write(style = compose))]
-    user_style: UserStyle,
+    #[element(theme_lens)]
+    user_style: Style,
     // ProgressBar element properties
     #[rich(read(copy), write)]
+    #[element(theme_lens)]
     shape: Shape,
     #[rich(read(copy), write, value_fns = {
         success = State::Success,
         failure = State::Failure,
     })]
+    #[element(theme_lens)]
     state: State,
     #[rich(read(copy), write)]
+    #[element(theme_lens)]
     value: f64,
     #[rich(read(copy), write)]
+    #[element(theme_lens)]
     max: f64,
     #[rich(read(copy), write)]
+    #[element(theme_lens)]
     min: f64,
     #[rich(read(copy), write)]
+    #[element(theme_lens)]
     color: Option<css::Color>,
 }
 
@@ -123,9 +105,9 @@ impl<PMsg> ProgressBar<PMsg> {
     pub fn new(msg_mapper: impl Into<MsgMapper<Msg, PMsg>>) -> Self {
         Self {
             msg_mapper: msg_mapper.into(),
-            local_events: LocalEvents::default(),
-            events: ParentEvents::default(),
-            user_style: UserStyle::default(),
+            local_events: Events::default(),
+            events: Events::default(),
+            user_style: Style::default(),
             shape: Shape::line(),
             state: State::Normal,
             value: 0.0,
@@ -136,10 +118,10 @@ impl<PMsg> ProgressBar<PMsg> {
     }
 }
 
-impl<PMsg: 'static, GMsg> Model<PMsg, GMsg> for ProgressBar<PMsg> {
+impl<PMsg: 'static> Model<PMsg> for ProgressBar<PMsg> {
     type Message = Msg;
 
-    fn update(&mut self, msg: Self::Message, orders: &mut impl Orders<PMsg, GMsg>) {
+    fn update(&mut self, msg: Self::Message, orders: &mut impl Orders<PMsg>) {
         match msg {
             Msg::Increment(val) => {
                 log!("inc value: ", val);
@@ -188,43 +170,25 @@ impl<PMsg: 'static, GMsg> Model<PMsg, GMsg> for ProgressBar<PMsg> {
     }
 }
 
-#[derive(Clone, Default, Rich)]
-pub struct UserStyle {
-    #[rich(write(style = compose))]
-    container: css::Style,
-    #[rich(write(style = compose))]
-    indicator: css::Style,
-}
-
-#[derive(Clone, Default, Rich)]
-pub struct Style {
-    #[rich(write(style = compose))]
-    container: css::Style,
-    #[rich(write(style = compose))]
-    indicator: css::Style,
-}
-
-impl<PMsg: 'static> Render<PMsg> for ProgressBar<PMsg> {
+impl<PMsg> Render for ProgressBar<PMsg> {
     type View = Node<PMsg>;
-    type Style = Style;
 
-    fn style(&self, theme: &impl Theme) -> Self::Style {
-        theme.progress_bar(self)
+    fn style(&self, theme: &Theme) -> Style {
+        theme.progress_bar(self.theme_lens())
     }
 
-    fn render_with_style(&self, _: &impl Theme, style: Self::Style) -> Self::View {
-        let indicator = div!()
-            .set(style.indicator)
-            .set(&self.local_events.container)
-            .map_msg_with(&self.msg_mapper)
-            .add(&self.events.indicator);
+    fn render_with_style(&self, _: &Theme, style: Style) -> Self::View {
+        todo!()
+        // let indicator = div!()
+        //     .set(style["indicator"])
+        //     .map_msg_with(&self.msg_mapper)
+        //     .try_add(self.events.get("indicator"));
 
-        div!()
-            .set(style.container)
-            .set(&self.local_events.container)
-            .add(att::class("progress-bar-container"))
-            .map_msg_with(&self.msg_mapper)
-            .add(&self.events.container)
-            .add(indicator)
+        // div!()
+        //     .set(style["progress-bar"])
+        //     .add(att::class("progress-bar"))
+        //     .map_msg_with(&self.msg_mapper)
+        //     .try_add(self.events.get("progress-bar"))
+        //     .add(indicator)
     }
 }

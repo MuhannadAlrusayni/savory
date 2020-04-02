@@ -14,13 +14,11 @@ use crate::prelude::{Orders, Render};
 /// by calling `orders.skip()` if the update doesn't affect the appearance of
 /// the element, we can do other things using `orders` methods, you maight want
 /// to check it's docs.
-pub trait Model<PMsg, GMsg>: Render<PMsg>
-where
-    PMsg: 'static,
-{
+// TODO: rename to Element
+pub trait Model<PMsg: 'static>: Render {
     /// The model message type
     type Message;
 
     /// update method that recive `Self::Message` and update the model state accordingly.
-    fn update(&mut self, _: Self::Message, _: &mut impl Orders<PMsg, GMsg>);
+    fn update(&mut self, _: Self::Message, _: &mut impl Orders<PMsg>);
 }
