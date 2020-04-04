@@ -1,4 +1,4 @@
-//! Khalas is library that provides you a set of themeable elements.
+//! Savory is library that provides you a set of themeable elements.
 //!
 //! Elements have been built using a set of core traits [`Render`], [`Model`] and
 //! [`Theme`], usully users of the library will only need to implement [`Render`]
@@ -6,12 +6,12 @@
 //!
 //! # Core Concept
 //!
-//! Khalas have be designed in a way that decouples themes development from
+//! Savory have be designed in a way that decouples themes development from
 //! elements development, this is achieved using two traits [`Theme`] and
 //! [`Render`].
 //!
-//! [`Theme`] trait is responseable on styling khalas elements, this trait
-//! basiclly have methods for every elements in khalas, these methods take
+//! [`Theme`] trait is responseable on styling savory elements, this trait
+//! basiclly have methods for every elements in savory, these methods take
 //! element and return style for the element, the returned style is used when
 //! rendering the element.
 //!
@@ -24,7 +24,7 @@
 //! on handling the model messages and updating the model state accordingly.
 //!
 //! # Elements
-//! There are two element types we can create in khalas:
+//! There are two element types we can create in savory:
 //!
 //! - **Statful elements** those who implement [`Render`] and [`Model`].
 //! - **Stateless elements** those who implement [`Render`] only.
@@ -56,39 +56,18 @@
 //! [`Render`]: crate::prelude::Render
 //! [`Model`]: crate::prelude::Model
 
-pub mod attribute;
-pub mod css;
-pub mod el;
-pub mod events;
-pub mod model;
+pub mod element;
 pub mod msg_mapper;
+pub mod orders_ext;
 pub mod render;
-pub mod routable;
-pub mod seed_ext;
-pub mod theme;
 
-/// khalas prelude.
+/// savory prelude.
 pub mod prelude {
-    pub use crate::attribute as att;
-    pub use crate::el::{prelude::*, Events, Style};
-    pub use crate::model::Model;
-    pub use crate::msg_mapper::{MessageMapperExt, MsgMapper};
-    pub use crate::render::Render;
-    pub use crate::routable::Routable;
-    pub use crate::seed_ext::{
-        AddForEl, ElExt, ElRefExt, NodeExt, SetForEl, TryAddForEl, TrySetForEl,
+    pub use crate::{
+        element::{AppElement, AppElementExt, Element},
+        msg_mapper::{MessageMapperExt, MsgMapper},
+        orders_ext::OrdersExt,
+        render::Render,
     };
-    pub use crate::theme::{Theme, ThemeLens};
-    pub use khalas_macros::Element;
-    pub use seed::prelude::{
-        AfterMount, App, BeforeMount, El, ElRef, MessageMapper, MountType, Orders,
-        RenderTimestampDelta, UpdateEl, UpdateElForIterator, UrlHandling, View,
-    };
-    pub use wasm_bindgen::prelude::*;
+    pub use seed::prelude::{MessageMapper, Node, Orders, RenderTimestampDelta, Url};
 }
-
-#[macro_use]
-extern crate seed;
-
-#[macro_use]
-extern crate derive_more;

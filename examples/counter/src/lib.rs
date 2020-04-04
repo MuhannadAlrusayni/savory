@@ -1,15 +1,21 @@
-use khalas::{prelude::*, theme::ant::Ant};
-
-#[macro_use]
-extern crate seed;
+use savory::prelude::*;
+use savory_elements::prelude::*;
+use wasm_bindgen::prelude::*;
 
 pub struct MyApp {
     menu_button: MenuButton<Msg, SpinEntry<Msg>>,
-    theme: Ant,
+    theme: Theme,
 }
 
-impl Default for MyApp {
-    fn default() -> Self {
+pub enum Msg {
+    SpinEntry(spin_entry::Msg),
+    MenuButton(menu_button::Msg),
+}
+
+impl AppElement for MyApp {
+    type Message = Msg;
+
+    fn init(url: Url, orders: &mut impl Orders<Msg>) -> Self {
         let spin_entry = SpinEntry::new(Msg::SpinEntry)
             .set_min(-40.)
             .set_placeholder(44.)
@@ -19,54 +25,32 @@ impl Default for MyApp {
         let menu_button = MenuButton::new(Msg::MenuButton, "Menu", spin_entry);
 
         Self {
-            theme: Ant::default(),
+            theme: Theme::default(),
             menu_button,
         }
     }
-}
-
-pub enum Msg {
-    SpinEntry(spin_entry::Msg),
-    MenuButton(menu_button::Msg),
-}
-
-impl Model<Msg, ()> for MyApp {
-    type Message = Msg;
 
     fn update(&mut self, msg: Msg, orders: &mut impl Orders<Msg>) {
         match msg {
             Msg::SpinEntry(msg) => self.menu_button.child.update(msg, orders),
             Msg::MenuButton(msg) => self.menu_button.update(msg, orders),
-        }
+        };
     }
 }
 
-impl Render<Msg> for MyApp {
-    type View = Node<Msg>;
-    type Style = ();
+impl Render for MyApp {
+    type Output = Node<Msg>;
 
-    fn style(&self, _: &Theme) -> Style {
-        ()
-    }
-
-    fn render_with_style(&self, theme: &Theme, _: Style) -> Self::View {
-        let menu_button = self.menu_button.render(theme);
-
+    fn render(&self) -> Self::Output {
         Flexbox::new()
             .center()
             .full_size()
-            .add(nodes![menu_button])
-            .render(theme)
+            .add(&self.menu_button)
+            .render()
     }
 }
 
 #[wasm_bindgen(start)]
 pub fn render() {
-    App::builder(
-        |msg, model: &mut MyApp, orders| {
-            model.update(msg, orders);
-        },
-        |model| model.render(&model.theme),
-    )
-    .build_and_start();
+    MyApp::start();
 }

@@ -8,7 +8,7 @@
 //! Here is simple example on implementing [`Render`] trait:
 //! ```
 //! #[macro_use] extern crate seed;
-//! use khalas::{prelude::*, css::Color};
+//! use savory::{prelude::*, css::Color};
 //! use std::borrow::Cow;
 //!
 //! pub struct UserInfo {
@@ -17,7 +17,7 @@
 //! };
 //!
 //! impl<PMsg> Render for UserInfo {
-//!     type View = Node<PMsg>;
+//!     type Output = Node<PMsg>;
 //!     type Style = Style;
 //!
 //!     fn style(&self, _: &Theme) -> Style {
@@ -26,7 +26,7 @@
 //!             .and_text(|conf| conf.set_color(Color::White))
 //!     }
 //!
-//!     fn render_with_style(&self, theme: &Theme, style: Style) -> Self::View {
+//!     fn render(&self) -> Self::Output {
 //!         Flexbox::new()
 //!             .center()
 //!             .column()
@@ -42,7 +42,7 @@
 //! the same element with standalone function:
 //! ```
 //! #[macro_use] extern crate seed;
-//! use khalas::{prelude::*, css::Color};
+//! use savory::{prelude::*, css::Color};
 //! use std::borrow::Cow;
 //!
 //! pub fn user_info<PMsg>(
@@ -84,74 +84,13 @@
 //! [`Render`]: crate::prelude::Render
 //! [`Node`]: crate::prelude::Node
 
-use crate::prelude::{Style, Theme};
-
 /// Main trait used to render elements.
 pub trait Render {
     /// The returne type from `render` function
-    type View;
+    type Output;
 
-    /// Return style for the current state of the element
-    fn style(&self, theme: &Theme) -> Style {
-        Style::default()
-    }
-
-    /// This is the main method used to render element with the passed style
+    /// This is the main method used to render element
     ///
-    /// # Arguments
-    ///
-    /// - `Theme` is used here to provieds styles for other elements.
-    /// - `Style` is used to style the element.
-    fn render_with_style(&self, _: &Theme, _: Style) -> Self::View;
-    /// Users will call this method to render the element, this method basiclly
-    /// will call `style` and pass the returned style to `render_with_style`.
-    ///
-    /// In most cases you don't need to implement this method yourself.
-    fn render(&self, theme: &Theme) -> Self::View {
-        self.render_with_style(theme, self.style(theme))
-    }
-}
-
-// impl<PMsg> Render for Node<PMsg> {
-//     type View = Node<PMsg>;
-
-//     fn render_with_style(&self, _: &Theme, _: Style) -> Self::View {
-//         self.clone()
-//     }
-// }
-
-// impl<PMsg> Render for Vec<Node<PMsg>> {
-//     type View = Vec<Node<PMsg>>;
-
-//     fn render_with_style(&self, _: &Theme, _: Style) -> Self::View {
-//         self.clone()
-//     }
-// }
-
-// impl<PMsg> Render for El<PMsg> {
-//     type View = El<PMsg>;
-
-//     fn render_with_style(&self, _: &Theme, _: Style) -> Self::View {
-//         self.clone()
-//     }
-// }
-
-// impl<PMsg> Render for Vec<El<PMsg>> {
-//     type View = Vec<El<PMsg>>;
-
-//     fn render_with_style(&self, _: &Theme, _: Style) -> Self::View {
-//         self.clone()
-//     }
-// }
-
-/// calls `render(theme)` on all passed elements.
-#[macro_export]
-macro_rules! renders {
-    ( $theme:ident, $( $element:expr $(,)? )+ ) => {
-        vec![
-            $(
-                $element.render($theme),
-            )*
-        ]
-    }
+    /// Elements need to implement this method and return rendered element.
+    fn render(&self) -> Self::Output;
 }

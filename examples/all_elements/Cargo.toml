@@ -10,7 +10,9 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
+savory = { path = "../../" }
+savory_elements = { path = "../../savory_elements" }
+savory_html = { path = "../../savory_html" }
 seed = { git = "https://github.com/David-OConnor/seed" }
 web-sys = "^0.3"
-khalas = { path = "../../" }
 wasm-bindgen = "0.2.55"
