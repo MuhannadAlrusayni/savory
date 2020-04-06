@@ -4,6 +4,7 @@ pub mod attr;
 pub mod field;
 
 use attr::lens::Lens;
+use attr::props::Props;
 use field::Field;
 
 pub fn expand_element(input: &syn::DeriveInput) -> Result<proc_macro2::TokenStream, syn::Error> {
@@ -38,8 +39,10 @@ fn element_impl(
         .collect::<Result<Vec<Field>, syn::Error>>()?;
 
     let lens_impl = Lens::expand_lens(input, &fields);
+    let props_impl = Props::expand_props(input, &fields);
 
     Ok(quote! {
         #lens_impl
+        #props_impl
     })
 }

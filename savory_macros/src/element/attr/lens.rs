@@ -28,6 +28,7 @@ impl Lens {
                     .iter()
                     .filter_map(|att| match att {
                         Attribute::Lens(lens) => Some(lens),
+                        _ => None,
                     })
                     .nth(0)
                     .map(|lens| (field, lens))
