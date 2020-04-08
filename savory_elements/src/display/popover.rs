@@ -5,7 +5,7 @@ use savory_html::prelude::*;
 
 // TODO: add placement property
 #[derive(Clone, Rich, Element)]
-#[element(style("hm", "ddd"))]
+#[element(style(panel, popover), events(panel, popover))]
 pub struct Popover<PMsg, C, T> {
     #[element(props(required))]
     msg_mapper: MsgMapper<Msg, PMsg>,
@@ -18,7 +18,7 @@ pub struct Popover<PMsg, C, T> {
     #[element(props)]
     style: Option<Style>,
     #[rich(read)]
-    #[element(props)]
+    #[element(props(default = "Theme::default()"))]
     theme: Theme,
 
     #[rich(read)]
@@ -33,16 +33,6 @@ pub struct Popover<PMsg, C, T> {
     #[rich(read(copy))]
     #[element(theme_lens, props(default = "0"))]
     offset: i8,
-}
-
-crate::style_type! {
-    panel,
-    popover,
-}
-
-crate::events_type! {
-    panel,
-    popover,
 }
 
 pub enum Msg {
@@ -62,9 +52,9 @@ where
     GMsg: 'static,
 {
     type Message = Msg;
-    type Props = Props<PMsg>;
+    type Props = Props<PMsg, C, T>;
 
-    fn init(props: Props<PMsg>, orders: &mut impl Orders<PMsg, GMsg>) -> Self {
+    fn init(props: Props<PMsg, C, T>, orders: &mut impl Orders<PMsg, GMsg>) -> Self {
         let mut orders = orders.proxy_with(&props.msg_mapper);
         orders.subscribe(|theme: ThemeChanged| Msg::SetTheme(theme.0));
 

@@ -5,7 +5,7 @@ use savory_html::prelude::*;
 use std::borrow::Cow;
 
 #[derive(Rich, Element)]
-#[element(style(hms, h))]
+#[element(style(button), events(button))]
 pub struct Button<PMsg> {
     // general element properties
     el_ref: ElRef<web_sys::HtmlInputElement>,
@@ -41,14 +41,6 @@ pub struct Button<PMsg> {
     #[rich(read(copy, rename = is_mouse_over))]
     #[element(theme_lens)]
     mouse_over: bool,
-}
-
-// crate::style_type! {
-//     button,
-// }
-
-crate::events_type! {
-    button,
 }
 
 pub enum Msg {

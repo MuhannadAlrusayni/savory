@@ -4,24 +4,29 @@ use savory::prelude::*;
 use savory_html::prelude::*;
 
 #[derive(Rich, Element)]
+#[element(style(button, switch), events(button, switch))]
 pub struct Switch<PMsg> {
     // general element properties
+    #[element(props(required))]
     msg_mapper: MsgMapper<Msg, PMsg>,
     #[rich(read)]
     local_events: Events<Msg>,
     #[rich(read)]
+    #[element(props(default = "Events::default()"))]
     events: Events<PMsg>,
     #[rich(read)]
+    #[element(props)]
     style: Option<Style>,
     #[rich(read)]
+    #[element(props)]
     theme: Theme,
 
     // switch element properties
     #[rich(read(copy, rename = is_toggled))]
-    #[element(theme_lens)]
+    #[element(theme_lens, props(default = "false"))]
     toggled: bool,
     #[rich(read(copy, rename = is_disabled))]
-    #[element(theme_lens)]
+    #[element(theme_lens, props(default = "false"))]
     disabled: bool,
     #[rich(read(copy, rename = is_focused))]
     #[element(theme_lens)]
@@ -29,16 +34,6 @@ pub struct Switch<PMsg> {
     #[rich(read(copy, rename = is_mouse_over))]
     #[element(theme_lens)]
     mouse_over: bool,
-}
-
-crate::style_type! {
-    button,
-    switch,
-}
-
-crate::events_type! {
-    button,
-    switch,
 }
 
 pub enum Msg {
@@ -57,13 +52,14 @@ pub enum Msg {
 
 impl<PMsg: 'static, GMsg: 'static> Element<PMsg, GMsg> for Switch<PMsg> {
     type Message = Msg;
+    type Props = Props<PMsg>;
 
     fn init(
-        msg_mapper: impl Into<MsgMapper<Msg, PMsg>>,
+        // msg_mapper: impl Into<MsgMapper<Msg, PMsg>>,
+        props: Self::Props,
         orders: &mut impl Orders<PMsg, GMsg>,
     ) -> Self {
-        let msg_mapper = msg_mapper.into();
-        let mut orders = orders.proxy_with(&msg_mapper);
+        let mut orders = orders.proxy_with(&props.msg_mapper);
         orders.subscribe(|theme: ThemeChanged| Msg::SetTheme(theme.0));
 
         let local_events = Events::default().and_switch(|conf| {
