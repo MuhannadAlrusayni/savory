@@ -38,19 +38,19 @@ impl AppElement for MyApp {
     }
 }
 
-impl Render for MyApp {
+impl View for MyApp {
     type Output = Node<Msg>;
 
-    fn render(&self) -> Self::Output {
+    fn view(&self) -> Self::Output {
         Flexbox::new()
             .center()
             .full_size()
             .add(&self.menu_button)
-            .render()
+            .view()
     }
 }
 
 #[wasm_bindgen(start)]
-pub fn render() {
+pub fn view() {
     MyApp::start();
 }

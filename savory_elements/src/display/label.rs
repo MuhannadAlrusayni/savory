@@ -5,7 +5,7 @@ use savory::prelude::*;
 use savory_html::prelude::*;
 use std::borrow::Cow;
 
-#[derive(Rich, Element)]
+#[derive(Rich, Clone, Element)]
 pub struct Label<PMsg> {
     // general element properties
     #[rich(read, write(style = compose))]
@@ -27,10 +27,10 @@ crate::events_type! {
     label,
 }
 
-impl<PMsg> Render for Label<PMsg> {
+impl<PMsg> View for Label<PMsg> {
     type Output = Node<PMsg>;
 
-    fn render(&self) -> Self::Output {
+    fn view(&self) -> Self::Output {
         todo!();
         // span!()
         //     .set(att::class("label"))

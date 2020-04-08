@@ -37,10 +37,10 @@ impl<PMsg> Html<PMsg> {
     }
 }
 
-impl<PMsg> Render for Html<PMsg> {
+impl<PMsg> View for Html<PMsg> {
     type Output = Node<PMsg>;
 
-    fn render(&self) -> Self::Output {
+    fn view(&self) -> Self::Output {
         todo!()
         // svg!()
         //     .set(style["html-icon"])

@@ -33,6 +33,14 @@ pub trait OrdersExt<Ms: 'static, GMs: 'static>: Orders<Ms, GMs> {
     ) -> CmdHandle {
         self.perform_g_cmd_with_handle(cmds::timeout(ms, handler))
     }
+
+    fn proxy_with<ChildMs: 'static>(
+        &mut self,
+        map: &MsgMapper<ChildMs, Ms>,
+        // f: impl FnOnce(ChildMs) -> Ms + 'static + Clone
+    ) -> seed::app::OrdersProxy<ChildMs, Self::AppMs, Self::Mdl, Self::ElC, GMs> {
+        self.proxy(map.map_msg_once())
+    }
 }
 
 impl<T, Ms: 'static, GMs: 'static> OrdersExt<Ms, GMs> for T where T: Orders<Ms, GMs> {}

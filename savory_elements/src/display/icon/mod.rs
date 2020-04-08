@@ -20,14 +20,32 @@ pub enum Icon<PMsg> {
     Url(Url<PMsg>),
 }
 
-impl<PMsg> Render for Icon<PMsg> {
+pub enum IconLens<'lens> {
+    Svg(svg::SvgLens<'lens>),
+    Html(html::HtmlLens<'lens>),
+    Url(url::UrlLens<'lens>),
+}
+
+impl<'lens, PMsg> crate::theme::ThemeLens<'lens> for Icon<PMsg> {
+    type Lens = IconLens<'lens>;
+
+    fn theme_lens(&'lens self) -> Self::Lens {
+        match self {
+            Self::Svg(svg) => IconLens::Svg(svg.theme_lens()),
+            Self::Html(html) => IconLens::Html(html.theme_lens()),
+            Self::Url(url) => IconLens::Url(url.theme_lens()),
+        }
+    }
+}
+
+impl<PMsg> View for Icon<PMsg> {
     type Output = Node<PMsg>;
 
-    fn render(&self) -> Self::Output {
+    fn view(&self) -> Self::Output {
         match self {
-            Self::Svg(icon) => icon.render(),
-            Self::Html(icon) => icon.render(),
-            Self::Url(icon) => icon.render(),
+            Self::Svg(icon) => icon.view(),
+            Self::Html(icon) => icon.view(),
+            Self::Url(icon) => icon.view(),
         }
     }
 }

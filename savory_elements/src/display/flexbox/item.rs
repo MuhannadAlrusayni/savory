@@ -15,7 +15,7 @@ pub struct Item<'a, PMsg> {
     #[element(theme_lens)]
     style: Option<Style>,
     #[rich(read, write(style = compose))]
-    content: &'a dyn Render<Output = Node<PMsg>>,
+    content: &'a dyn View<Output = Node<PMsg>>,
     #[rich(read(copy), write)]
     #[element(theme_lens)]
     order: Option<Order>,
@@ -52,7 +52,7 @@ crate::events_type! {
 }
 
 impl<'a, PMsg> Item<'a, PMsg> {
-    pub fn new(content: &'a dyn Render<Output = Node<PMsg>>) -> Self {
+    pub fn new(content: &'a dyn View<Output = Node<PMsg>>) -> Self {
         Self {
             events: Events::default(),
             style: None,
@@ -76,16 +76,16 @@ impl<'a, PMsg> Item<'a, PMsg> {
     }
 }
 
-impl<'a, PMsg> Render for Item<'a, PMsg> {
+impl<'a, PMsg> View for Item<'a, PMsg> {
     type Output = Node<PMsg>;
 
-    fn render(&self) -> Self::Output {
+    fn view(&self) -> Self::Output {
         todo!()
         // if self.is_flatten() {
-        //     self.content.render(theme)
+        //     self.content.view(theme)
         // } else {
         //     div!()
-        //         .add(self.content.render(theme))
+        //         .add(self.content.view(theme))
         //         .set(att::class("flexbox-item"))
         // }
         // .set(&self.events["flexbox-item"])

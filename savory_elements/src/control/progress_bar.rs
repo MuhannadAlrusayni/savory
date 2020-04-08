@@ -3,45 +3,46 @@ use derive_rich::Rich;
 use savory::prelude::*;
 use savory_html::prelude::*;
 
-#[derive(Element)]
+#[derive(Element, Rich)]
 pub struct ProgressBar<PMsg> {
     // general element properties
-    msg_mapper: MsgMapper<Msg<PMsg>, PMsg>,
-    local_events: Events<Msg<PMsg>>,
+    msg_mapper: MsgMapper<Msg, PMsg>,
+    // local_events: Events<Msg>,
+    #[rich(read)]
     events: Events<PMsg>,
+    #[rich(read)]
     style: Option<Style>,
+    #[rich(read)]
     theme: Theme,
+
     // ProgressBar element properties
+    #[rich(read(copy))]
     #[element(theme_lens)]
     shape: Shape,
+    #[rich(read(copy))]
     #[element(theme_lens)]
     state: State,
+    #[rich(read(copy))]
     #[element(theme_lens)]
     value: f64,
+    #[rich(read(copy))]
     #[element(theme_lens)]
     max: f64,
+    #[rich(read(copy))]
     #[element(theme_lens)]
     min: f64,
+    #[rich(read(copy))]
     #[element(theme_lens)]
     color: Option<css::Color>,
 }
 
-crate::style_type! {
-    indicator,
-    progress_bar,
-}
-
-crate::events_type! {
-    indicator,
-    progress_bar,
-}
-
-pub enum Msg<PMsg> {
+pub enum Msg {
+    SetTheme(Theme),
     SetStyle(Box<dyn FnOnce(Style) -> Style>),
-    SetEvents(Box<dyn FnOnce(Events<PMsg>) -> Events<PMsg>>),
     // shape msgs
-    UseLine,
-    UseVerticalLine,
+    UseHLine,
+    UseVLine,
+    UseCircle,
     // state msgs
     SetState(State),
     UseNormalState,
@@ -59,21 +60,23 @@ pub enum Msg<PMsg> {
 }
 
 impl<PMsg: 'static, GMsg: 'static> Element<PMsg, GMsg> for ProgressBar<PMsg> {
-    type Message = Msg<PMsg>;
+    type Message = Msg;
 
     fn init(
-        msg_mapper: impl Into<MsgMapper<Msg<PMsg>, PMsg>>,
+        msg_mapper: impl Into<MsgMapper<Msg, PMsg>>,
         orders: &mut impl Orders<PMsg, GMsg>,
     ) -> Self {
-        orders.subscribe(ThemeChanged);
+        let msg_mapper = msg_mapper.into();
+        let mut orders = orders.proxy_with(&msg_mapper);
+        orders.subscribe(|theme: ThemeChanged| Msg::SetTheme(theme.0));
 
         Self {
-            msg_mapper: msg_mapper.into(),
-            local_events: Events::default(),
+            msg_mapper: msg_mapper,
+            // local_events: Events::default(),
             events: Events::default(),
             style: None,
             theme: Theme::default(),
-            shape: Shape::HorizontalLine,
+            shape: Shape::HLine,
             state: State::Normal,
             value: 0.0,
             max: 100.0,
@@ -83,15 +86,14 @@ impl<PMsg: 'static, GMsg: 'static> Element<PMsg, GMsg> for ProgressBar<PMsg> {
     }
 
     fn update(&mut self, msg: Self::Message, orders: &mut impl Orders<PMsg, GMsg>) {
-        let mut orders = orders.proxy(self.msg_mapper.map_msg_once());
+        let mut orders = orders.proxy_with(&self.msg_mapper);
 
         match msg {
-            Msg::SetStyle(get_style) => {
-                self.style = Some(get_style(self.theme.progress_bar(self.theme_lens())));
-            }
-            Msg::SetEvents(get_events) => self.events = get_events(self.events.clone()),
-            Msg::UseLine => self.shape = Shape::HorizontalLine,
-            Msg::UseVerticalLine => self.shape = Shape::VerticalLine,
+            Msg::SetTheme(val) => self.set_theme(val, &mut orders),
+            Msg::SetStyle(val) => self.set_style(val, &mut orders),
+            Msg::UseHLine => self.set_shape(Shape::HLine, &mut orders),
+            Msg::UseVLine => self.set_shape(Shape::VLine, &mut orders),
+            Msg::UseCircle => self.set_shape(Shape::Circle, &mut orders),
             Msg::SetState(val) => self.set_state(val, &mut orders),
             Msg::UseNormalState => self.set_state(State::Normal, &mut orders),
             Msg::UseSuccessState => self.set_state(State::Success, &mut orders),
@@ -106,31 +108,68 @@ impl<PMsg: 'static, GMsg: 'static> Element<PMsg, GMsg> for ProgressBar<PMsg> {
     }
 }
 
-impl<PMsg> Render for ProgressBar<PMsg> {
+crate::style_type! {
+    indicator,
+    progress_bar,
+}
+
+crate::events_type! {
+    indicator,
+    progress_bar,
+}
+
+impl<PMsg: 'static> View for ProgressBar<PMsg> {
     type Output = Node<PMsg>;
 
-    fn render(&self) -> Self::Output {
-        // let indicator = html::div()
-        //     .set(self.style.indicator)
-        //     .map_msg_with(&self.msg_mapper)
-        //     .add()
-        todo!()
-        // let indicator = div!()
-        //     .set(style["indicator"])
-        //     .map_msg_with(&self.msg_mapper)
-        //     .try_add(self.events.get("indicator"));
+    fn view(&self) -> Self::Output {
+        let view = |style: &Style| {
+            let indicator = html::div()
+                .set(att::class("indicator"))
+                .set(&style.indicator)
+                .map_msg_with(&self.msg_mapper)
+                .add(&self.events.indicator);
 
-        // div!()
-        //     .set(style["progress-bar"])
-        //     .add(att::class("progress-bar"))
-        //     .map_msg_with(&self.msg_mapper)
-        //     .try_add(self.events.get("progress-bar"))
-        //     .add(indicator)
+            html::div()
+                .set(att::class("progress_bar"))
+                .set(&style.progress_bar)
+                .map_msg_with(&self.msg_mapper)
+                .add(&self.events.progress_bar)
+                .add(indicator)
+        };
+
+        match self.style {
+            Some(ref style) => view(&style),
+            None => view(&self.theme.progress_bar(self.theme_lens())),
+        }
     }
 }
 
 impl<PMsg: 'static> ProgressBar<PMsg> {
-    fn set_state<GMsg>(&mut self, val: State, orders: &mut impl Orders<Msg<PMsg>, GMsg>) {
+    pub fn and_events<GMsg: 'static>(
+        &mut self,
+        get_val: impl FnOnce(Events<PMsg>) -> Events<PMsg>,
+        _orders: &mut impl Orders<PMsg, GMsg>,
+    ) {
+        self.events = get_val(self.events.clone());
+    }
+
+    fn set_theme<GMsg: 'static>(&mut self, val: Theme, orders: &mut impl Orders<Msg, GMsg>) {
+        self.theme = val;
+    }
+
+    fn set_style<GMsg: 'static>(
+        &mut self,
+        get_val: impl FnOnce(Style) -> Style,
+        _orders: &mut impl Orders<Msg, GMsg>,
+    ) {
+        // FIXME: finder better way, that doesn't need to clone the style
+        self.style = match self.style {
+            Some(ref style) => Some(get_val(style.clone())),
+            None => Some(get_val(self.theme.progress_bar(self.theme_lens()))),
+        };
+    }
+
+    fn set_state<GMsg>(&mut self, val: State, orders: &mut impl Orders<Msg, GMsg>) {
         if self.state != val {
             self.state = val;
         } else {
@@ -138,7 +177,7 @@ impl<PMsg: 'static> ProgressBar<PMsg> {
         }
     }
 
-    fn set_shape<GMsg>(&mut self, val: Shape, orders: &mut impl Orders<Msg<PMsg>, GMsg>) {
+    fn set_shape<GMsg>(&mut self, val: Shape, orders: &mut impl Orders<Msg, GMsg>) {
         if self.shape != val {
             self.shape = val;
         } else {
@@ -146,7 +185,7 @@ impl<PMsg: 'static> ProgressBar<PMsg> {
         }
     }
 
-    fn set_value<GMsg>(&mut self, val: f64, orders: &mut impl Orders<Msg<PMsg>, GMsg>) {
+    fn set_value<GMsg>(&mut self, val: f64, orders: &mut impl Orders<Msg, GMsg>) {
         let min = self.min;
         let max = self.max;
         let value = self.value;
@@ -162,31 +201,15 @@ impl<PMsg: 'static> ProgressBar<PMsg> {
         }
     }
 
-    fn increment<GMsg>(&mut self, val: f64, orders: &mut impl Orders<Msg<PMsg>, GMsg>) {
+    fn increment<GMsg>(&mut self, val: f64, orders: &mut impl Orders<Msg, GMsg>) {
         self.set_value(self.value + val, orders);
-        // if self.value < self.max {
-        //     self.value = match self.value + val {
-        //         x if x <= self.max => x,
-        //         _ => self.max,
-        //     };
-        // } else {
-        //     orders.skip();
-        // }
     }
 
-    fn decrement<GMsg>(&mut self, val: f64, orders: &mut impl Orders<Msg<PMsg>, GMsg>) {
+    fn decrement<GMsg>(&mut self, val: f64, orders: &mut impl Orders<Msg, GMsg>) {
         self.set_value(self.value - val, orders);
-        // if self.value > self.min {
-        //     self.value = match self.value - val {
-        //         x if x >= self.min => x,
-        //         _ => self.min,
-        //     };
-        // } else {
-        //     orders.skip();
-        // }
     }
 
-    fn set_max<GMsg>(&mut self, val: f64, orders: &mut impl Orders<Msg<PMsg>, GMsg>) {
+    fn set_max<GMsg>(&mut self, val: f64, orders: &mut impl Orders<Msg, GMsg>) {
         let min = self.min;
         let max = self.max;
 
@@ -204,7 +227,7 @@ impl<PMsg: 'static> ProgressBar<PMsg> {
         }
     }
 
-    fn set_min<GMsg>(&mut self, val: f64, orders: &mut impl Orders<Msg<PMsg>, GMsg>) {
+    fn set_min<GMsg>(&mut self, val: f64, orders: &mut impl Orders<Msg, GMsg>) {
         let min = self.min;
         let max = self.max;
 
@@ -222,7 +245,7 @@ impl<PMsg: 'static> ProgressBar<PMsg> {
         }
     }
 
-    fn set_color<GMsg>(&mut self, val: css::Color, orders: &mut impl Orders<Msg<PMsg>, GMsg>) {
+    fn set_color<GMsg>(&mut self, val: css::Color, orders: &mut impl Orders<Msg, GMsg>) {
         match self.color {
             Some(color) if color != val => self.color = Some(val),
             None => self.color = Some(val),
@@ -242,7 +265,7 @@ pub enum State {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Shape {
-    HorizontalLine,
-    VerticalLine,
+    HLine,
+    VLine,
     Circle,
 }

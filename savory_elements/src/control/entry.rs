@@ -56,7 +56,6 @@ crate::events_type! {
     container,
 }
 
-#[derive(Debug, Clone)]
 pub enum Msg {
     MouseEnter,
     MouseLeave,
@@ -86,10 +85,10 @@ impl<PMsg: 'static, GMsg: 'static> Element<PMsg, GMsg> for Entry<PMsg> {
     }
 }
 
-impl<PMsg> Render for Entry<PMsg> {
+impl<PMsg> View for Entry<PMsg> {
     type Output = Node<PMsg>;
 
-    fn render(&self) -> Self::Output {
+    fn view(&self) -> Self::Output {
         todo!()
         // let input = input!()
         //     .set(&self.local_events["input"])
@@ -125,7 +124,7 @@ impl<PMsg> Entry<PMsg> {
 
         // Self {
         //     el_ref: ElRef::default(),
-        //     msg_mapper: msg_mapper.into(),
+        //     msg_mapper: msg_mapper,
         //     local_events,
         //     events: Events::default(),
         //     style: None,

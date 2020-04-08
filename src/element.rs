@@ -6,7 +6,7 @@
 //! # TODO Helper types
 
 use crate::prelude::*;
-use seed::{app::UndefinedGMsg, prelude::View};
+use seed::{app::UndefinedGMsg, prelude::View as SeedView};
 
 // This trait used to handle model messages and update the model state accordingly.
 
@@ -15,9 +15,11 @@ use seed::{app::UndefinedGMsg, prelude::View};
 // by calling `orders.skip()` if the update doesn't affect the appearance of
 // the element, we can do other things using `orders` methods, you maight want
 // to check it's docs.
-pub trait Element<PMsg: 'static, GMsg = UndefinedGMsg>: Render {
+pub trait Element<PMsg: 'static, GMsg = UndefinedGMsg>: View {
     /// Element message
     type Message;
+    /// properties used to initialize this element
+    type Props;
 
     /// Create and initialize the element
     ///
@@ -26,10 +28,17 @@ pub trait Element<PMsg: 'static, GMsg = UndefinedGMsg>: Render {
     ///   Message
     /// - `orders` used to interacte with the runtime, such as subscribing to
     ///   messages, or sending messages ..etc.
-    fn init(
-        map_msg: impl Into<MsgMapper<Self::Message, PMsg>>,
+    fn init(props: Self::Props, orders: &mut impl Orders<PMsg, GMsg>) -> Self;
+
+    fn updates(
+        &mut self,
+        msgs: impl IntoIterator<Item = Self::Message>,
         orders: &mut impl Orders<PMsg, GMsg>,
-    ) -> Self;
+    ) {
+        for msg in msgs.into_iter() {
+            self.update(msg, orders);
+        }
+    }
 
     /// update method that recive `Self::Message` and update the model state accordingly.
     fn update(&mut self, _: Self::Message, _: &mut impl Orders<PMsg, GMsg>);
@@ -39,7 +48,7 @@ pub trait Element<PMsg: 'static, GMsg = UndefinedGMsg>: Render {
 ///
 /// The `init` function takes `Url` insted if `MsgMapper` as it's first
 /// argument.
-pub trait AppElement<GMsg = UndefinedGMsg>: Render {
+pub trait AppElement<GMsg = UndefinedGMsg>: View {
     /// App message
     type Message: 'static;
 
@@ -59,7 +68,7 @@ pub trait AppElementExt<GMsg = UndefinedGMsg>: AppElement<GMsg>
 where
     Self: Sized,
     GMsg: 'static,
-    Self::Output: View<Self::Message> + 'static,
+    Self::Output: SeedView<Self::Message> + 'static,
 {
     fn start() -> seed::app::App<Self::Message, Self, Self::Output, GMsg> {
         Self::start_at("root")
@@ -70,7 +79,7 @@ where
             root_el,
             |url, orders| Self::init(url, orders),
             |msg, app, orders| app.update(msg, orders),
-            |app| app.render(),
+            |app| app.view(),
         )
     }
 }
@@ -79,6 +88,6 @@ impl<T, GMsg> AppElementExt<GMsg> for T
 where
     Self: AppElement<GMsg>,
     GMsg: 'static,
-    Self::Output: View<Self::Message> + 'static,
+    Self::Output: SeedView<Self::Message> + 'static,
 {
 }

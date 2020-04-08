@@ -36,10 +36,10 @@ impl<PMsg> Svg<PMsg> {
     }
 }
 
-impl<PMsg> Render for Svg<PMsg> {
+impl<PMsg> View for Svg<PMsg> {
     type Output = Node<PMsg>;
 
-    fn render(&self) -> Self::Output {
+    fn view(&self) -> Self::Output {
         todo!()
         // svg!()
         //     .and_attributes(|conf| conf.set_class("svg-icon").try_set_view_box(self.view_box))

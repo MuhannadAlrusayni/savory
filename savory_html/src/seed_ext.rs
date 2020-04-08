@@ -138,6 +138,30 @@ impl<T: Into<Attribute>, Msg> TryAddForEl<Option<T>> for Node<Msg> {
     }
 }
 
+impl<Msg> TryAddForEl<Option<Node<Msg>>> for El<Msg> {
+    fn try_add(self, val: Option<Node<Msg>>) -> Self {
+        self.try_add_children(val.map(|node| vec![node]))
+    }
+}
+
+impl<Msg> TryAddForEl<Option<Node<Msg>>> for Node<Msg> {
+    fn try_add(self, val: Option<Node<Msg>>) -> Self {
+        self.and_element(|el| el.try_add(val))
+    }
+}
+
+impl<Msg> TryAddForEl<Option<Vec<Node<Msg>>>> for El<Msg> {
+    fn try_add(self, val: Option<Vec<Node<Msg>>>) -> Self {
+        self.try_add_children(val)
+    }
+}
+
+impl<Msg> TryAddForEl<Option<Vec<Node<Msg>>>> for Node<Msg> {
+    fn try_add(self, val: Option<Vec<Node<Msg>>>) -> Self {
+        self.and_element(|el| el.try_add(val))
+    }
+}
+
 // impl SetForEl
 impl<Msg> SetForEl<&Events<Msg>> for El<Msg> {
     fn set(self, val: &Events<Msg>) -> Self {
@@ -297,6 +321,7 @@ pub trait ElExt<Msg> {
     fn and_attributes(self, conf: impl FnOnce(Attributes) -> Attributes) -> Self;
 
     fn add_children(self, children: impl IntoIterator<Item = Node<Msg>>) -> Self;
+    fn try_add_children(self, children: Option<impl IntoIterator<Item = Node<Msg>>>) -> Self;
     fn set_children(self, children: impl IntoIterator<Item = Node<Msg>>) -> Self;
     fn try_set_children(self, children: Option<impl IntoIterator<Item = Node<Msg>>>) -> Self;
 
@@ -422,6 +447,14 @@ impl<Msg> ElExt<Msg> for El<Msg> {
         self
     }
 
+    fn try_add_children(self, children: Option<impl IntoIterator<Item = Node<Msg>>>) -> Self {
+        if let Some(children) = children {
+            self.add_children(children)
+        } else {
+            self
+        }
+    }
+
     fn set_children(mut self, children: impl IntoIterator<Item = Node<Msg>>) -> Self {
         self.children = children.into_iter().collect();
         self
@@ -518,10 +551,6 @@ impl<Msg> ElExt<Msg> for Node<Msg> {
         self.and_element(|el| el.try_set_attribute(val))
     }
 
-    fn set_children(self, val: impl IntoIterator<Item = Node<Msg>>) -> Self {
-        self.and_element(|el| el.set_children(val))
-    }
-
     fn add_attributes(self, val: Attributes) -> Self {
         self.and_element(|el| el.add_attributes(val))
     }
@@ -536,6 +565,14 @@ impl<Msg> ElExt<Msg> for Node<Msg> {
 
     fn add_children(self, children: impl IntoIterator<Item = Node<Msg>>) -> Self {
         self.and_element(|el| el.add_children(children))
+    }
+
+    fn try_add_children(self, children: Option<impl IntoIterator<Item = Node<Msg>>>) -> Self {
+        self.and_element(|el| el.try_add_children(children))
+    }
+
+    fn set_children(self, val: impl IntoIterator<Item = Node<Msg>>) -> Self {
+        self.and_element(|el| el.set_children(val))
     }
 
     fn try_set_children(self, children: Option<impl IntoIterator<Item = Node<Msg>>>) -> Self {

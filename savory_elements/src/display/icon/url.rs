@@ -39,10 +39,10 @@ impl<PMsg> Url<PMsg> {
     }
 }
 
-impl<PMsg> Render for Url<PMsg> {
+impl<PMsg> View for Url<PMsg> {
     type Output = Node<PMsg>;
 
-    fn render(&self) -> Self::Output {
+    fn view(&self) -> Self::Output {
         todo!()
         // img!()
         //     .set(att::class("url-icon"))

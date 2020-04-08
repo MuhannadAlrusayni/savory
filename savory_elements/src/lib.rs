@@ -8,10 +8,6 @@ pub mod display;
 pub mod theme;
 
 pub use self::prelude::*;
-// pub use seed::prelude::{
-//     AfterMount, App, BeforeMount, El, ElRef, GetElement, MessageMapper, MountType, Node,
-//     Orders, RenderTimestampDelta, UpdateEl, UpdateElForIterator, Url, UrlHandling, View,
-// };
 
 pub mod prelude {
     pub use super::{

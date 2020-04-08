@@ -49,7 +49,6 @@ crate::events_type! {
     content,
 }
 
-#[derive(Debug, Copy, Clone)]
 pub enum Msg {
     // internal messages
     MouseEnterWidget,
@@ -65,7 +64,7 @@ impl<PMsg, GMsg, C> Element<PMsg, GMsg> for Dialog<PMsg, C>
 where
     PMsg: 'static,
     GMsg: 'static,
-    C: Render<Output = Node<PMsg>>,
+    C: View<Output = Node<PMsg>>,
 {
     type Message = Msg;
 
@@ -77,7 +76,7 @@ where
     }
 
     fn update(&mut self, msg: Msg, orders: &mut impl Orders<PMsg, GMsg>) {
-        let mut orders = orders.proxy(self.msg_mapper.map_msg_once());
+        let mut orders = orders.proxy_with(&self.msg_mapper);
         match msg {
             Msg::CloseButton(msg) => {
                 if let Some(ref mut btn) = self.header_bar.close_button {
@@ -121,20 +120,20 @@ where
     }
 }
 
-impl<PMsg, C> Render for Dialog<PMsg, C>
+impl<PMsg, C> View for Dialog<PMsg, C>
 where
-    C: Render<Output = Node<PMsg>>,
+    C: View<Output = Node<PMsg>>,
 {
     type Output = Node<PMsg>;
 
-    fn render(&self) -> Self::Output {
+    fn view(&self) -> Self::Output {
         todo!()
         // let content = div!()
         //     .add(att::class("content"))
         //     .set(style["content"])
         //     .set(&self.local_events["content"])
         //     .map_msg_with(&self.msg_mapper)
-        //     .add(self.child.render(theme))
+        //     .add(self.child.view(theme))
         //     .try_add(self.events.get("content"));
 
         // let dialog = div!()
@@ -143,7 +142,7 @@ where
         //     .set(&self.local_events["dialog"])
         //     .map_msg_with(&self.msg_mapper)
         //     .add(vec![
-        //         self.header_bar.render(theme).map_msg_with(&self.msg_mapper),
+        //         self.header_bar.view(theme).map_msg_with(&self.msg_mapper),
         //         content,
         //     ])
         //     .try_add(self.events.get("dialog"));
@@ -180,7 +179,7 @@ impl<PMsg, C> Dialog<PMsg, C> {
         //     .set_title(title);
 
         // Self {
-        //     msg_mapper: msg_mapper.into(),
+        //     msg_mapper: msg_mapper,
         //     local_events: local_events,
         //     events: Events::default(),
         //     style: None,

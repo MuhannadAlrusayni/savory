@@ -1,21 +1,21 @@
 //! Savory is library that provides you a set of themeable elements.
 //!
-//! Elements have been built using a set of core traits [`Render`], [`Model`] and
-//! [`Theme`], usully users of the library will only need to implement [`Render`]
+//! Elements have been built using a set of core traits [`View`], [`Model`] and
+//! [`Theme`], usully users of the library will only need to implement [`View`]
 //! and [`Model`] traits to build thier own custom elements.
 //!
 //! # Core Concept
 //!
 //! Savory have be designed in a way that decouples themes development from
 //! elements development, this is achieved using two traits [`Theme`] and
-//! [`Render`].
+//! [`View`].
 //!
 //! [`Theme`] trait is responseable on styling savory elements, this trait
 //! basiclly have methods for every elements in savory, these methods take
 //! element and return style for the element, the returned style is used when
 //! rendering the element.
 //!
-//! [`Render`] trait has three methods `render`, `render_with_style` and
+//! [`View`] trait has three methods `render`, `render_with_style` and
 //! `style`, `style` method used to construct element style, while
 //! `render_with_style` method used to build the HTML structure, `render` has
 //! default implementation.
@@ -26,8 +26,8 @@
 //! # Elements
 //! There are two element types we can create in savory:
 //!
-//! - **Statful elements** those who implement [`Render`] and [`Model`].
-//! - **Stateless elements** those who implement [`Render`] only.
+//! - **Statful elements** those who implement [`View`] and [`Model`].
+//! - **Stateless elements** those who implement [`View`] only.
 //!
 //! ## Avaliable Elements
 //! Here is a list of the currently avaliable elements:
@@ -53,13 +53,13 @@
 //!
 //!
 //! [`Theme`]: crate::prelude::Theme
-//! [`Render`]: crate::prelude::Render
+//! [`View`]: crate::prelude::View
 //! [`Model`]: crate::prelude::Model
 
 pub mod element;
 pub mod msg_mapper;
 pub mod orders_ext;
-pub mod render;
+pub mod view;
 
 /// savory prelude.
 pub mod prelude {
@@ -67,7 +67,7 @@ pub mod prelude {
         element::{AppElement, AppElementExt, Element},
         msg_mapper::{MessageMapperExt, MsgMapper},
         orders_ext::OrdersExt,
-        render::Render,
+        view::View,
     };
-    pub use seed::prelude::{MessageMapper, Node, Orders, RenderTimestampDelta, Url};
+    pub use seed::prelude::{MessageMapper, Node, Orders, Url};
 }

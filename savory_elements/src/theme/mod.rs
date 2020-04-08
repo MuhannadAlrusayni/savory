@@ -15,6 +15,7 @@ impl Default for Theme {
 }
 
 /// Subscribe to theme changes
+#[derive(Clone)]
 pub struct ThemeChanged(pub Theme);
 
 impl Deref for Theme {
@@ -39,6 +40,8 @@ pub trait ThemeImpl {
     fn url_icon<'a>(&self, _: icon::url::UrlLens<'a>) -> icon::url::Style;
 
     fn button<'a>(&self, _: button::ButtonLens<'a>) -> button::Style;
+
+    fn menu_button<'a>(&self, _: menu_button::MenuButtonLens<'a>) -> menu_button::Style;
 
     fn switch<'a>(&self, _: switch::SwitchLens<'a>) -> switch::Style;
 

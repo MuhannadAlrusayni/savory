@@ -71,16 +71,16 @@ impl<'a, PMsg> Flexbox<'a, PMsg> {
         }
     }
 
-    pub fn item_with(content: &'a dyn Render<Output = Node<PMsg>>) -> Item<'a, PMsg> {
+    pub fn item_with(content: &'a dyn View<Output = Node<PMsg>>) -> Item<'a, PMsg> {
         Item::new(content)
     }
 
-    pub fn add(mut self, el: &'a dyn Render<Output = Node<PMsg>>) -> Self {
+    pub fn add(mut self, el: &'a dyn View<Output = Node<PMsg>>) -> Self {
         self.items.push(Item::new(el));
         self
     }
 
-    pub fn try_add(self, item: Option<&'a dyn Render<Output = Node<PMsg>>>) -> Self {
+    pub fn try_add(self, item: Option<&'a dyn View<Output = Node<PMsg>>>) -> Self {
         if let Some(item) = item {
             self.add(item)
         } else {
@@ -103,7 +103,7 @@ impl<'a, PMsg> Flexbox<'a, PMsg> {
 
     pub fn add_item_and(
         mut self,
-        content: &'a dyn Render<Output = Node<PMsg>>,
+        content: &'a dyn View<Output = Node<PMsg>>,
         config_item: impl FnOnce(Item<'a, PMsg>) -> Item<'a, PMsg> + 'static,
     ) -> Self {
         self.items.push(config_item(Item::new(content)));
@@ -112,7 +112,7 @@ impl<'a, PMsg> Flexbox<'a, PMsg> {
 
     pub fn try_add_item_and(
         self,
-        node: Option<&'a dyn Render<Output = Node<PMsg>>>,
+        node: Option<&'a dyn View<Output = Node<PMsg>>>,
         config_item: impl FnOnce(Item<'a, PMsg>) -> Item<'a, PMsg> + 'static,
     ) -> Self {
         if let Some(node) = node {
@@ -122,7 +122,7 @@ impl<'a, PMsg> Flexbox<'a, PMsg> {
         }
     }
 
-    pub fn add_items(mut self, items: Vec<&'a dyn Render<Output = Node<PMsg>>>) -> Self {
+    pub fn add_items(mut self, items: Vec<&'a dyn View<Output = Node<PMsg>>>) -> Self {
         let items = items
             .into_iter()
             .map(|item| Item::new(item))
@@ -182,10 +182,10 @@ impl<'a, PMsg> Flexbox<'a, PMsg> {
     }
 }
 
-impl<'a, PMsg> Render for Flexbox<'a, PMsg> {
+impl<'a, PMsg> View for Flexbox<'a, PMsg> {
     type Output = Node<PMsg>;
 
-    fn render(&self) -> Self::Output {
+    fn view(&self) -> Self::Output {
         todo!()
         // let style = self.style.unwrap_or_else(|| self.theme.flexbox(self));
         // div!()
@@ -195,7 +195,7 @@ impl<'a, PMsg> Render for Flexbox<'a, PMsg> {
         //     .add(
         //         self.items
         //             .iter()
-        //             .map(|item| item.render())
+        //             .map(|item| item.view())
         //             .collect::<Vec<Node<PMsg>>>(),
         //     )
     }

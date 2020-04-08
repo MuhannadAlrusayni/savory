@@ -61,10 +61,10 @@ impl<PMsg> Default for HeaderBar<PMsg> {
     }
 }
 
-impl<PMsg> Render for HeaderBar<PMsg> {
+impl<PMsg> View for HeaderBar<PMsg> {
     type Output = Node<PMsg>;
 
-    fn render(&self) -> Self::Output {
+    fn view(&self) -> Self::Output {
         todo!()
 
         // let title =

@@ -10,218 +10,231 @@ pub struct Radio<PMsg> {
     input_el_ref: ElRef<web_sys::HtmlInputElement>,
     label_el_ref: ElRef<web_sys::HtmlLabelElement>,
     msg_mapper: MsgMapper<Msg, PMsg>,
-    #[rich(read, write(style = compose))]
+    #[rich(read)]
     local_events: Events<Msg>,
-    #[rich(read, write(style = compose))]
+    #[rich(read)]
     events: Events<PMsg>,
-    #[rich(read, write(style = compose))]
-    #[element(theme_lens)]
+    #[rich(read)]
     style: Option<Style>,
+    #[rich(read)]
+    theme: Theme,
 
     // radio element properties
-    #[rich(read, write)]
-    label: Option<Cow<'static, str>>,
-    #[rich(
-        read(
-            /// Return `true` if radio element is disabled
-            copy, rename = is_disabled
-        ),
-        write,
-        value_fns = { enable = false, disable = true }
-    )]
-    #[element(theme_lens)]
-    disabled: bool,
-    #[rich(read(
-        /// Return `true` if radio element is focused
-        copy, rename = is_focused
-    ))]
-    #[element(theme_lens)]
-    focus: bool,
-    #[rich(read(
-        /// Return `true` when mouse over radio element
-        copy, rename = is_mouse_over
-    ))]
-    #[element(theme_lens)]
-    mouse_over: bool,
-    #[rich(
-        read(
-            /// Return `true` if radio element is toggled
-            copy, rename = is_toggled
-        ),
-        write,
-        value_fns = { toggled = true, toggle_off = false }
-    )]
+    #[rich(read(copy, rename = is_toggled))]
     #[element(theme_lens)]
     toggled: bool,
+    #[rich(read)]
+    label: Option<Cow<'static, str>>,
+    #[rich(read(copy, rename = is_disabled))]
+    #[element(theme_lens)]
+    disabled: bool,
+    #[rich(read(copy, rename = is_focused))]
+    #[element(theme_lens)]
+    focused: bool,
+    #[rich(read(copy, rename = is_mouse_over))]
+    #[element(theme_lens)]
+    mouse_over: bool,
 }
 
 crate::style_type! {
-    button,
     radio,
+    button,
     label,
 }
 
 crate::events_type! {
-    button,
     radio,
+    button,
     label,
 }
 
-#[derive(Debug, Copy, Clone)]
 pub enum Msg {
-    MouseEnter,
-    MouseLeave,
-    Focus,
-    Blur,
+    SetTheme(Theme),
+    SetStyle(Box<dyn FnOnce(Style) -> Style>),
+    SetLabel(Cow<'static, str>),
+    TrySetLabel(Option<Cow<'static, str>>),
+    SetToggled(bool),
     Toggle,
+    ToggleOn,
+    ToggleOff,
+    SetDisabled(bool),
+    Disable,
+    Enable,
+    SetFocus(bool),
+    SetMouseOver(bool),
 }
 
 impl<PMsg: 'static> Element<PMsg> for Radio<PMsg> {
     type Message = Msg;
 
     fn init(msg_mapper: impl Into<MsgMapper<Msg, PMsg>>, orders: &mut impl Orders<PMsg>) -> Self {
-        todo!()
+        let msg_mapper = msg_mapper.into();
+        let mut orders = orders.proxy_with(&msg_mapper);
+        orders.subscribe(|theme: ThemeChanged| Msg::SetTheme(theme.0));
+
+        let local_events = Events::default()
+            .and_radio(|conf| {
+                conf.focus(|_| Msg::SetFocus(true))
+                    .blur(|_| Msg::SetFocus(false))
+                    .mouse_enter(|_| Msg::SetMouseOver(true))
+                    .mouse_leave(|_| Msg::SetMouseOver(false))
+                    .click(|_| Msg::Toggle)
+            })
+            .and_label(|conf| {
+                conf.mouse_enter(|_| Msg::SetMouseOver(true))
+                    .mouse_leave(|_| Msg::SetMouseOver(false))
+            });
+
+        Self {
+            theme: Theme::default(),
+            input_el_ref: ElRef::default(),
+            label_el_ref: ElRef::default(),
+            msg_mapper: msg_mapper,
+            local_events,
+            events: Events::default(),
+            label: None,
+            style: None,
+            disabled: false,
+            focused: false,
+            mouse_over: false,
+            toggled: false,
+        }
     }
 
-    fn update(&mut self, msg: Msg, _: &mut impl Orders<PMsg>) {
+    fn update(&mut self, msg: Msg, orders: &mut impl Orders<PMsg>) {
+        let mut orders = orders.proxy_with(&self.msg_mapper);
+
         match msg {
-            Msg::MouseEnter => self.mouse_over = true,
-            Msg::MouseLeave => self.mouse_over = false,
-            Msg::Focus => self.focus = true,
-            Msg::Blur => self.focus = false,
-            Msg::Toggle => self.handle_toggle_msg(),
+            Msg::SetTheme(val) => self.set_theme(val, &mut orders),
+            Msg::SetStyle(val) => self.set_style(val, &mut orders),
+            Msg::SetLabel(val) => self.try_set_label(Some(val), &mut orders),
+            Msg::TrySetLabel(val) => self.try_set_label(val, &mut orders),
+            Msg::SetToggled(val) => self.set_toggled(val, &mut orders),
+            Msg::Toggle => self.set_toggled(!self.toggled, &mut orders),
+            Msg::ToggleOn => self.set_toggled(true, &mut orders),
+            Msg::ToggleOff => self.set_toggled(false, &mut orders),
+            Msg::SetDisabled(val) => self.set_disabled(val, &mut orders),
+            Msg::Disable => self.set_disabled(true, &mut orders),
+            Msg::Enable => self.set_disabled(false, &mut orders),
+            Msg::SetFocus(val) => self.set_focused(val, &mut orders),
+            Msg::SetMouseOver(val) => self.set_mouse_over(val, &mut orders),
         }
     }
 }
 
-impl<PMsg> Render for Radio<PMsg> {
+impl<PMsg: 'static> View for Radio<PMsg> {
     type Output = Node<PMsg>;
 
-    fn render(&self) -> Self::Output {
-        todo!()
-        // let mut input = input!()
-        //     .set(att::class("radio"))
-        //     .set(att::disabled(self.disabled))
-        //     .set(att::checked(self.toggled))
-        //     .set(att::Type::Radio)
-        //     .set(style["radio"])
-        //     .set(&self.local_events["radio"])
-        //     .map_msg_with(&self.msg_mapper)
-        //     .try_add(self.events.get("radio"))
-        //     .el_ref(&self.input_el_ref)
-        //     // add button div if the radio is toggled
-        //     .config_if(self.is_toggled(), |conf| {
-        //         let button = div!()
-        //             .add(att::class("radio-button"))
-        //             .set(style["radio-button"])
-        //             .map_msg_with(&self.msg_mapper)
-        //             .try_add(self.events.get("radio-button"));
-        //         conf.add(button)
-        //     });
+    fn view(&self) -> Self::Output {
+        let view = |style: &Style| {
+            let radio = html::input()
+                .set(att::class("radio"))
+                .set(att::class("radio"))
+                .set(att::disabled(self.disabled))
+                .set(att::checked(self.toggled))
+                .set(att::Type::Radio)
+                .set(&style.radio)
+                .set(&self.local_events.radio)
+                .map_msg_with(&self.msg_mapper)
+                .add(&self.events.radio)
+                .el_ref(&self.input_el_ref)
+                // add button if the radio is toggled
+                .config_if(self.is_toggled(), |conf| {
+                    let button = html::div()
+                        .add(att::class("button"))
+                        .set(&style.button)
+                        .map_msg_with(&self.msg_mapper)
+                        .add(&self.events.button);
+                    conf.add(button)
+                });
 
-        // match self.label.as_ref() {
-        //     None => input,
-        //     Some(lbl) => label!()
-        //         .add(att::class("radio-label"))
-        //         .set(style["label"])
-        //         .set(&self.local_events["label"])
-        //         .map_msg_with(&self.msg_mapper)
-        //         .try_add(self.events.get("label"))
-        //         .add(vec![input, plain![lbl.to_string()]])
-        //         .el_ref(&self.label_el_ref),
-        // }
+            match self.label.as_ref() {
+                None => radio,
+                Some(lbl) => html::label()
+                    .add(att::class("label"))
+                    .set(&style.label)
+                    .set(&self.local_events.label)
+                    .map_msg_with(&self.msg_mapper)
+                    .add(&self.events.label)
+                    .add(radio)
+                    .add(html::text(lbl.clone()))
+                    .el_ref(&self.label_el_ref),
+            }
+        };
+
+        match self.style {
+            Some(ref style) => view(&style),
+            None => view(&self.theme.radio(self.theme_lens())),
+        }
     }
 }
 
-impl<PMsg> Radio<PMsg> {
-    pub fn new(msg_mapper: impl Into<MsgMapper<Msg, PMsg>>) -> Self {
-        todo!()
-        // let local_events = Events::default()
-        //     .insert("input", |conf| {
-        //         conf.focus(|_| Msg::Focus)
-        //             .blur(|_| Msg::Blur)
-        //             .mouse_enter(|_| Msg::MouseEnter)
-        //             .mouse_leave(|_| Msg::MouseLeave)
-        //             .click(|_| Msg::Toggle)
-        //     })
-        //     .insert("label", |conf| {
-        //         conf.mouse_enter(|_| Msg::MouseEnter)
-        //             .mouse_leave(|_| Msg::MouseLeave)
-        //     });
-
-        // Self {
-        //     input_el_ref: ElRef::default(),
-        //     label_el_ref: ElRef::default(),
-        //     msg_mapper: msg_mapper.into(),
-        //     local_events,
-        //     events: Events::default(),
-        //     label: None,
-        //     style: None,
-        //     disabled: false,
-        //     focus: false,
-        //     mouse_over: false,
-        //     toggled: false,
-        // }
+impl<PMsg: 'static> Radio<PMsg> {
+    pub fn and_events<GMsg: 'static>(
+        &mut self,
+        get_val: impl FnOnce(Events<PMsg>) -> Events<PMsg>,
+        _orders: &mut impl Orders<PMsg, GMsg>,
+    ) {
+        self.events = get_val(self.events.clone());
     }
 
-    pub fn with_label(
-        msg_mapper: impl Into<MsgMapper<Msg, PMsg>>,
-        lbl: impl Into<Cow<'static, str>>,
-    ) -> Self {
-        Self::new(msg_mapper).set_label(lbl)
+    fn set_theme<GMsg: 'static>(&mut self, val: Theme, _orders: &mut impl Orders<Msg, GMsg>) {
+        self.theme = val;
     }
 
-    // pub fn set_label(self, val: impl Into<Cow<'static, str>>) -> Self {
-    //     let val = val.into();
-    //     self.label_el_ref
-    //         .get_then(|el| el.set_inner_text(val.as_ref()));
-    //     self.label = Some(val.into());
-    //     self
-    // }
+    fn set_style<GMsg: 'static>(
+        &mut self,
+        get_val: impl FnOnce(Style) -> Style,
+        _orders: &mut impl Orders<Msg, GMsg>,
+    ) {
+        // FIXME: finder better way, that doesn't need to clone the style
+        self.style = match self.style {
+            Some(ref style) => Some(get_val(style.clone())),
+            None => Some(get_val(self.theme.radio(self.theme_lens()))),
+        };
+    }
 
-    // pub fn disable(self) -> Self {
-    //     self.input_el_ref.get_then(|el| el.set_disabled(true));
-    //     self.disabled = true;
-    //     self
-    // }
+    fn try_set_label<GMsg: 'static>(
+        &mut self,
+        val: Option<Cow<'static, str>>,
+        orders: &mut impl Orders<Msg, GMsg>,
+    ) {
+        if self.label != val {
+            self.label = val;
+        } else {
+            orders.skip();
+        }
+    }
 
-    // pub fn enable(self) -> Self {
-    //     self.input_el_ref.get_then(|el| el.set_disabled(false));
-    //     self.disabled = false;
-    //     self
-    // }
+    fn set_toggled<GMsg: 'static>(&mut self, val: bool, orders: &mut impl Orders<Msg, GMsg>) {
+        if self.toggled != val {
+            self.toggled = val;
+        } else {
+            orders.skip();
+        }
+    }
 
-    // pub fn set_disabled(self, val: bool) -> Self {
-    //     if let Some(input) = self.input_el_ref.get() {
-    //         input.set_disabled(val);
-    //     }
-    //     self.disabled = val;
-    //     self
-    // }
+    fn set_disabled<GMsg: 'static>(&mut self, val: bool, orders: &mut impl Orders<Msg, GMsg>) {
+        if self.disabled != val {
+            self.disabled = val;
+        } else {
+            orders.skip();
+        }
+    }
 
-    // pub fn toggle_on(self) -> Self {
-    //     self.toggled = true;
-    //     self
-    // }
+    fn set_focused<GMsg: 'static>(&mut self, val: bool, orders: &mut impl Orders<Msg, GMsg>) {
+        if self.focused != val {
+            self.focused = val;
+        } else {
+            orders.skip();
+        }
+    }
 
-    // pub fn toggle_off(self) -> Self {
-    //     self.toggled = false;
-    //     self
-    // }
-
-    // pub fn set_toggle(self, val: bool) -> Self {
-    //     if val {
-    //         self.toggle_on()
-    //     } else {
-    //         self.toggle_off()
-    //     }
-    // }
-
-    // pub fn toggle(self) -> Self {
-    //     self.set_toggle(!self.toggled)
-    // }
-
-    pub fn handle_toggle_msg(&mut self) {
-        self.toggled = !self.toggled;
+    fn set_mouse_over<GMsg: 'static>(&mut self, val: bool, orders: &mut impl Orders<Msg, GMsg>) {
+        if self.mouse_over != val {
+            self.mouse_over = val;
+        } else {
+            orders.skip();
+        }
     }
 }

@@ -1,12 +1,24 @@
 //! Types and functions for working with elements events.
 
 use crate::prelude::{El, UpdateEl};
-use seed::prelude::{ev, keyboard_ev, mouse_ev, pointer_ev, Ev, EventHandler};
+use seed::prelude::{ev, keyboard_ev, mouse_ev, pointer_ev, Ev, EventHandler, MessageMapper};
 use std::any::{Any, TypeId};
 use wasm_bindgen::JsCast;
 
 pub struct Events<Msg> {
     pub events: Vec<EventHandler<Msg>>,
+}
+
+impl<Ms: 'static, OtherMs: 'static> MessageMapper<Ms, OtherMs> for Events<Ms> {
+    type SelfWithOtherMs = Events<OtherMs>;
+
+    fn map_msg(self, f: impl FnOnce(Ms) -> OtherMs + 'static + Clone) -> Self::SelfWithOtherMs {
+        let mut events = vec![];
+        for event in self.events.into_iter() {
+            events.push(event.map_msg(f.clone()));
+        }
+        Events { events }
+    }
 }
 
 impl<Msg> Clone for Events<Msg> {
