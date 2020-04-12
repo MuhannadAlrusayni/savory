@@ -1,0 +1,22 @@
+[package]
+name = "savory_derive"
+description = "Custom derive support for savory crates"
+version = "0.4.0"
+authors = ["Muhannad Alrusayni <Muhannad.Alrusayni@gmail.com>"]
+edition = "2018"
+readme = "../README.MD"
+license = "MIT OR Apache-2.0"
+repository = "https://gitlab.com/MAlrusayni/savory"
+homepage = "https://gitlab.com/MAlrusayni/savory"
+documentation = "https://docs.rs/savory"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = { version = "1.0.13", features = ["full", "extra-traits"] }
+quote = "1.0.2"
+proc-macro2 = "1.0.7"
+darling = "0.10.2"

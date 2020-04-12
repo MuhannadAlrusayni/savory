@@ -1,0 +1,17 @@
+[package]
+name = "savory"
+description = "Library for building user interface"
+version = "0.0.1"
+authors = ["Muhannad Alrusayni <Muhannad.Alrusayni@gmail.com>"]
+edition = "2018"
+readme = "../README.MD"
+keywords = ["savory", "cli", "application"]
+categories = ["command-line-interface"]
+license = "MIT OR Apache-2.0"
+repository = "https://gitlab.com/MAlrusayni/savory"
+homepage = "https://gitlab.com/MAlrusayni/savory"
+documentation = "https://docs.rs/savory"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]

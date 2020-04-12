@@ -1,0 +1,34 @@
+[package]
+name = "savory_elements"
+description = "UI Elements built using Savory"
+version = "0.4.0"
+authors = ["Muhannad Alrusayni <Muhannad.Alrusayni@gmail.com>"]
+edition = "2018"
+readme = "../README.MD"
+keywords = ["savory", "seed", "element", "component", "SPA"]
+categories = ["gui", "wasm", "web-programming"]
+license = "MIT OR Apache-2.0"
+repository = "https://gitlab.com/MAlrusayni/savory/elements"
+homepage = "https://gitlab.com/MAlrusayni/savory/elements"
+documentation = "https://docs.rs/savory_elements"
+
+[badges]
+maintenance = { status = "actively-developed" }
+
+[dependencies]
+savory_core = { path = "../core" }
+savory_html = { path = "../html" }
+savory_derive = { path = "../derive" }
+
+derive_rich = { git = "https://gitlab.com/MAlrusayni/derive_rich", version = "0.4.1" }
+derive_more = "0.99.2"
+palette = "0.4.1"
+seed = { git = "https://github.com/David-OConnor/seed", version = "0.6.0" }
+
+[dependencies.web-sys]
+version = "^0.3.35"
+features = [
+    "WheelEvent", "CompositionEvent", "HtmlInputElement", "InputEvent",
+    "FocusEvent", "DragEvent", "DomRect", "Element", "HtmlLabelElement",
+    "UiEvent"
+]

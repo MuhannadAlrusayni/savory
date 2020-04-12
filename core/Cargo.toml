@@ -1,0 +1,27 @@
+[package]
+name = "savory_core"
+description = "Library for building user interface"
+version = "0.4.0"
+authors = ["Muhannad Alrusayni <Muhannad.Alrusayni@gmail.com>"]
+edition = "2018"
+readme = "../README.MD"
+keywords = ["web", "seed", "SPA", "wasm", "framework"]
+categories = ["gui", "wasm", "web-programming"]
+license = "MIT OR Apache-2.0"
+repository = "https://gitlab.com/MAlrusayni/savory"
+homepage = "https://gitlab.com/MAlrusayni/savory"
+documentation = "https://docs.rs/savory"
+
+[badges]
+maintenance = { status = "actively-developed" }
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+seed = { git = "https://github.com/David-OConnor/seed", version = "0.6.0" }
+
+# [workspace]
+# members = [
+#     "examples/counter",
+#     "examples/all_elements"
+# ]
