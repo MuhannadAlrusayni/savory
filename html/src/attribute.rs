@@ -1537,7 +1537,6 @@ pub enum Shape {
 #[derive(Debug, Display, PartialEq, PartialOrd, Copy, Clone, From)]
 pub enum Step {
     #[from]
-    #[display(fmt = "{}", _0)]
     Number(f64),
     #[display(fmt = "any")]
     Any,
@@ -1555,9 +1554,8 @@ pub enum Translate {
 pub enum Target {
     #[display(fmt = "_blank")]
     Blank,
-    /// reslove to `self`
     #[display(fmt = "_self")]
-    CurrentFrame,
+    Self_,
     #[display(fmt = "_parent")]
     Parent,
     #[display(fmt = "_top")]

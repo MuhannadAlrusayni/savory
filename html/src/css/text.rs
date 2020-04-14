@@ -166,7 +166,7 @@ fn display_helper(value: &Option<impl ToString>) -> String {
     value
         .as_ref()
         .map(|v| v.to_string() + " ")
-        .unwrap_or("".into())
+        .unwrap_or_else(|| "".into())
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
