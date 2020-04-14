@@ -32,55 +32,55 @@ use std::ops::{Add, AddAssign};
 /// ```
 #[derive(Default, PartialEq, Debug, Clone, Rich)]
 pub struct Style {
-    #[rich(write, write(option))]
+    #[rich(write(rename = opacity), write(option, rename = try_opacity))]
     pub opacity: Option<Opacity>,
-    #[rich(write, write(option))]
+    #[rich(write(rename = gap), write(option, rename = try_gap))]
     pub gap: Option<Gap>,
-    #[rich(write, write(option))]
+    #[rich(write(rename = flex_wrap), write(option, rename = try_flex_wrap))]
     pub flex_wrap: Option<flexbox::Wrap>,
-    #[rich(write, write(option))]
+    #[rich(write(rename = flex_basis), write(option, rename = try_flex_basis))]
     pub flex_basis: Option<flexbox::Basis>,
-    #[rich(write, write(option))]
+    #[rich(write(rename = flex_direction), write(option, rename = try_flex_direction))]
     pub flex_direction: Option<flexbox::Direction>,
-    #[rich(write, write(option))]
+    #[rich(write(rename = order), write(option, rename = try_order))]
     pub order: Option<flexbox::Order>,
-    #[rich(write, write(option))]
+    #[rich(write(rename = flex_grow), write(option, rename = try_flex_grow))]
     pub flex_grow: Option<flexbox::Grow>,
-    #[rich(write, write(option))]
+    #[rich(write(rename = flex_shrink), write(option, rename = try_flex_shrink))]
     pub flex_shrink: Option<flexbox::Shrink>,
-    #[rich(write, write(option))]
+    #[rich(write(rename = justify_content), write(option, rename = try_justify_content))]
     pub justify_content: Option<box_align::JustifyContent>,
-    #[rich(write, write(option))]
+    #[rich(write(rename = align_content), write(option, rename = try_align_content))]
     pub align_content: Option<box_align::AlignContent>,
-    #[rich(write, write(option))]
+    #[rich(write(rename = align_items), write(option, rename = try_align_items))]
     pub align_items: Option<box_align::AlignItems>,
-    #[rich(write, write(option))]
+    #[rich(write(rename = justify_self), write(option, rename = try_justify_self))]
     pub justify_self: Option<box_align::JustifySelf>,
-    #[rich(write, write(option))]
+    #[rich(write(rename = align_self), write(option, rename = try_align_self))]
     pub align_self: Option<box_align::AlignSelf>,
-    #[rich(write, write(option))]
+    #[rich(write(rename = display), write(option, rename = try_display))]
     pub display: Option<Display>,
-    #[rich(write, write(option))]
+    #[rich(write(rename = visibility), write(option, rename = try_visibility))]
     pub visibility: Option<Visibility>,
-    #[rich(write, write(option))]
+    #[rich(write(rename = cursor), write(option, rename = try_cursor))]
     pub cursor: Option<Cursor>,
-    #[rich(write(style = compose), write, write(option))]
+    #[rich(write(style = compose), write(rename = background), write(option, rename = try_background))]
     pub background: Option<Background>,
-    #[rich(write(style = compose), write, write(option))]
+    #[rich(write(style = compose), write(rename = border), write(option, rename = try_border))]
     pub border: Option<Border>,
-    #[rich(write(style = compose), write, write(option))]
+    #[rich(write(style = compose), write(rename = margin), write(option, rename = try_margin))]
     pub margin: Option<Margin>,
-    #[rich(write(style = compose), write, write(option))]
+    #[rich(write(style = compose), write(rename = padding), write(option, rename = try_padding))]
     pub padding: Option<Padding>,
-    #[rich(write(style = compose), write, write(option))]
+    #[rich(write(style = compose), write(rename = size), write(option, rename = try_size))]
     pub size: Option<Size>,
-    #[rich(write(style = compose), write, write(option))]
+    #[rich(write(style = compose), write(rename = transition), write(option, rename = try_transition))]
     pub transition: Option<Transition>,
-    #[rich(write(style = compose), write, write(option))]
+    #[rich(write(style = compose), write(rename = position), write(option, rename = try_position))]
     pub position: Option<Position>,
-    #[rich(write(style = compose), write, write(option))]
+    #[rich(write(style = compose), write(rename = text), write(option, rename = try_text))]
     pub text: Option<Text>,
-    #[rich(write(style = compose), write, write(option))]
+    #[rich(write(style = compose), write(rename = font), write(option, rename = try_font))]
     pub font: Option<Font>,
     #[rich(write(
         /// Here goes other css properties those doesn't have their own method
