@@ -11,6 +11,7 @@ license = "MIT OR Apache-2.0"
 repository = "https://gitlab.com/MAlrusayni/savory/tree/master/elements"
 homepage = "https://gitlab.com/MAlrusayni/savory"
 documentation = "https://docs.rs/savory_elements"
+include = [ "src/**/*", "Cargo.toml", "README.MD" ]
 
 [badges]
 maintenance = { status = "actively-developed" }

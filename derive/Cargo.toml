@@ -9,6 +9,7 @@ license = "MIT OR Apache-2.0"
 repository = "https://gitlab.com/MAlrusayni/savory/tree/master/derive"
 homepage = "https://gitlab.com/MAlrusayni/savory"
 documentation = "https://docs.rs/savory_elements"
+include = [ "src/**/*", "Cargo.toml" ]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
