@@ -12,6 +12,9 @@ extern crate seed;
 #[macro_use]
 extern crate derive_more;
 
+#[macro_use]
+extern crate paste;
+
 pub mod prelude {
     pub use crate::{
         attribute as att, css, el as html,

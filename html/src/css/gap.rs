@@ -1,4 +1,4 @@
-use crate::css::{unit::*, St, StyleMap, ToStyleMap};
+use crate::css::{unit::*, St, StyleValues, UpdateStyleValues};
 
 /// ```
 /// use savory::css::{Style, unit::{px, em}};
@@ -11,6 +11,7 @@ use crate::css::{unit::*, St, StyleMap, ToStyleMap};
 ///      .set_gap((em(4.), em(8.)));
 /// ```
 #[derive(Clone, Debug, Copy, PartialEq, Display)]
+#[display(fmt = "gap: {};")]
 pub enum Gap {
     Value(LengthPercent),
     #[display(fmt = "{} {}", _0, _1)]
@@ -38,8 +39,8 @@ where
     }
 }
 
-impl ToStyleMap for Gap {
-    fn style_map(&self) -> StyleMap {
-        StyleMap::default().add(St::Gap, self)
+impl UpdateStyleValues for Gap {
+    fn update_style_values(self, values: StyleValues) -> StyleValues {
+        values.add(St::Gap, self)
     }
 }

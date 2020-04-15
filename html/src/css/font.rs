@@ -1,4 +1,4 @@
-use crate::css::{unit::*, values as val, St, StyleMap, ToStyleMap};
+use crate::css::{unit::*, values as val, St, StyleValues, UpdateStyleValues};
 use derive_rich::Rich;
 use std::borrow::Cow;
 
@@ -66,11 +66,9 @@ pub struct Font {
     pub weight: Option<Weight>,
 }
 
-impl_add_and_add_assign!(Font { weight variant style size family { clone } });
-
-impl ToStyleMap for Font {
-    fn style_map(&self) -> StyleMap {
-        StyleMap::default()
+impl UpdateStyleValues for Font {
+    fn update_style_values(self, values: StyleValues) -> StyleValues {
+        values
             .try_add(St::FontFamily, self.family.clone())
             .try_add(St::FontSize, self.size)
             .try_add(St::FontStyle, self.style)

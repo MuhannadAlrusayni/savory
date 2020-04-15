@@ -426,13 +426,13 @@ impl ThemeImpl for Ant {
     fn flexbox<'a>(&self) -> flexbox::ThemeStyler<'a> {
         let styler = |lens: &flexbox::FlexboxLens<'a>| {
             flexbox::Style::default().and_flexbox(|conf| {
-                conf.set_display(val::Flex)
-                    .try_set_flex_direction(lens.direction.copied())
-                    .try_set_flex_wrap(lens.wrap.copied())
-                    .try_set_justify_content(lens.justify_content.copied())
-                    .try_set_align_items(lens.align_items.copied())
-                    .try_set_align_content(lens.align_content.copied())
-                    .try_set_gap(lens.gap.copied())
+                conf.display(val::Flex)
+                    .try_flex_direction(lens.direction.copied())
+                    .try_flex_wrap(lens.wrap.copied())
+                    .try_justify_content(lens.justify_content.copied())
+                    .try_align_items(lens.align_items.copied())
+                    .try_align_content(lens.align_content.copied())
+                    .try_gap(lens.gap.copied())
             })
         };
         styler.into()
@@ -444,8 +444,8 @@ impl ThemeImpl for Ant {
                 conf.try_add(St::Order, lens.order.copied())
                     .try_add(St::FlexGrow, lens.grow.copied())
                     .try_add(St::FlexShrink, lens.shrink.copied())
-                    .try_merge(lens.basis)
-                    .try_merge(lens.align_self)
+                    .try_merge(lens.basis.copied())
+                    .try_merge(lens.align_self.copied())
             })
         };
         styler.into()
@@ -465,7 +465,7 @@ impl ThemeImpl for Ant {
                             .add("transform", |conf| conf.set_duration(ms(150.)).ease())
                             .add("visibility", |conf| conf.set_duration(ms(150.)).ease())
                     })
-                    .set_display(val::Flex)
+                    .display(val::Flex)
                     .and_position(|conf| conf.absolute())
                     .and_background(|conf| conf.set_color(white))
                     .and_border(|conf| {
@@ -479,8 +479,8 @@ impl ThemeImpl for Ant {
                     .and_margin(|conf| conf.set_top(px(*lens.offset)))
                     .config_if_else(
                         *lens.toggled,
-                        |conf| conf.set_opacity(1.).set_visibility(val::Visible),
-                        |conf| conf.set_visibility(val::Hidden).set_opacity(0.),
+                        |conf| conf.opacity(1.).visibility(val::Visible),
+                        |conf| conf.visibility(val::Hidden).opacity(0.),
                     )
                 })
         };
@@ -638,7 +638,7 @@ impl ThemeImpl for Ant {
                         .set_white_space(val::Nowrap)
                 })
                 .and_font(|conf| conf.set_size(px(14.)).weight_400())
-                .set_cursor(cursor)
+                .cursor(cursor)
                 .add(St::Outline, val::None)
                 .add(St::UserSelect, val::None)
                 .add(St::BoxSizing, val::BorderBox)
@@ -667,8 +667,8 @@ impl ThemeImpl for Ant {
             switch::Style::default()
                 .and_switch(|conf| {
                     let bg_color = if *lens.toggled { brand_500 } else { gray_500 };
-                    conf.config_if(*lens.disabled, |conf| conf.set_opacity(0.4))
-                        .set_cursor(cursor)
+                    conf.config_if(*lens.disabled, |conf| conf.opacity(0.4))
+                        .cursor(cursor)
                         .and_position(|conf| conf.relative())
                         .and_background(|conf| conf.set_color(bg_color))
                         .and_transition(|conf| {
@@ -683,7 +683,7 @@ impl ThemeImpl for Ant {
                                 .set_radius(px(height / 2.))
                                 .none()
                         })
-                        .set_display(val::InlineBlock)
+                        .display(val::InlineBlock)
                         .and_text(|conf| conf.and_decoration(|d| d.set_line(val::None)))
                         // .add(St::Outline, val::None)
                         .add(St::UserSelect, val::None)
@@ -746,10 +746,10 @@ impl ThemeImpl for Ant {
                                 .cubic_bezier(0.645, 0.045, 0.355, 1.)
                         })
                     })
-                    .set_cursor(cursor)
-                    .set_display(val::Flex)
-                    .set_justify_content(val::Center)
-                    .set_align_items(val::Center)
+                    .cursor(cursor)
+                    .display(val::Flex)
+                    .justify_content(val::Center)
+                    .align_items(val::Center)
                     .add(St::WebkitAppearance, val::None)
                     .add(St::Appearance, val::None)
                     .and_size(|conf| conf.set_all(px(16.)))
@@ -764,7 +764,7 @@ impl ThemeImpl for Ant {
                 })
                 .and_button(|conf| {
                     conf.config_if(*lens.toggled, |conf| {
-                        conf.set_cursor(cursor)
+                        conf.cursor(cursor)
                             .and_transition(|conf| {
                                 conf.all(|val| {
                                     val.set_duration(sec(0.3))
@@ -790,9 +790,9 @@ impl ThemeImpl for Ant {
                                 .cubic_bezier(0.645, 0.045, 0.355, 1.)
                         })
                     })
-                    .set_cursor(cursor)
-                    .set_display(val::Flex)
-                    .set_gap(px(4))
+                    .cursor(cursor)
+                    .display(val::Flex)
+                    .gap(px(4))
                 })
         };
         styler.into()
@@ -834,11 +834,11 @@ impl ThemeImpl for Ant {
                                 .cubic_bezier(0.645, 0.045, 0.355, 1.)
                         })
                     })
-                    .set_cursor(cursor)
-                    .set_display(val::Flex)
+                    .cursor(cursor)
+                    .display(val::Flex)
                     .and_margin(|conf| conf.zero())
-                    .set_justify_content(val::Center)
-                    .set_align_items(val::Center)
+                    .justify_content(val::Center)
+                    .align_items(val::Center)
                     .add(St::WebkitAppearance, val::None)
                     .and_text(|conf| conf.set_color(fg))
                     .and_size(|conf| conf.set_all(px(16)))
@@ -852,7 +852,7 @@ impl ThemeImpl for Ant {
                 })
                 .and_button(|conf| {
                     conf.config_if(*lens.toggled, |conf| {
-                        conf.set_cursor(cursor)
+                        conf.cursor(cursor)
                             .and_size(|conf| conf.resize(0.6, 0.6))
                             .and_border(|conf| conf.none().set_radius(0.5))
                             .and_background(|conf| conf.set_color(fg))
@@ -874,10 +874,10 @@ impl ThemeImpl for Ant {
                                 .cubic_bezier(0.645, 0.045, 0.355, 1.)
                         })
                     })
-                    .set_cursor(cursor)
-                    .set_display(val::Flex)
-                    .set_align_items(val::Center)
-                    .set_gap(px(4.))
+                    .cursor(cursor)
+                    .display(val::Flex)
+                    .align_items(val::Center)
+                    .gap(px(4.))
                 })
         };
         styler.into()
@@ -923,11 +923,11 @@ impl ThemeImpl for Ant {
                                 .cubic_bezier(0.645, 0.045, 0.355, 1.)
                         })
                     })
-                    .set_display(val::Flex)
-                    .set_align_items(val::Center)
-                    .set_justify_content(val::Center)
+                    .display(val::Flex)
+                    .align_items(val::Center)
+                    .justify_content(val::Center)
                     // .and_padding(|conf| conf.set_y(px(4.)).set_x(px(11.)))
-                    // .set_gap(px(4.))
+                    // .gap(px(4.))
                     .and_background(|conf| conf.set_color(bg))
                     .and_border(|conf| {
                         conf.solid()
@@ -939,7 +939,7 @@ impl ThemeImpl for Ant {
                         conf.set_all_widths(em(container_width))
                             .set_all_heights(em(container_height))
                     })
-                    .set_cursor(cursor)
+                    .cursor(cursor)
                 })
                 .and_input(|conf| {
                     conf.and_transition(|conf| {
@@ -954,7 +954,7 @@ impl ThemeImpl for Ant {
                     .and_border(|conf| conf.none())
                     .and_background(|conf| conf.transparent())
                     .add(St::WebkitAppearance, val::None)
-                    .set_cursor(cursor)
+                    .cursor(cursor)
                 })
         };
         styler.into()
@@ -993,9 +993,9 @@ impl ThemeImpl for Ant {
         };
         // centered flex conf
         let centered_flex = move |conf: css::Style| {
-            conf.set_display(val::Flex)
-                .set_align_items(val::Center)
-                .set_justify_content(val::Center)
+            conf.display(val::Flex)
+                .align_items(val::Center)
+                .justify_content(val::Center)
         };
 
         let styler = move |lens: &spin_entry::SpinEntryLens<'a>| {
@@ -1048,7 +1048,7 @@ impl ThemeImpl for Ant {
                                 .set_radius(px(radius))
                         })
                         .and_size(|conf| conf.set_all_widths(em(width)).set_all_heights(em(height)))
-                        .set_cursor(cursor)
+                        .cursor(cursor)
                 })
                 .and_input(|conf| {
                     conf.and_transition(|conf| {
@@ -1063,7 +1063,7 @@ impl ThemeImpl for Ant {
                     .and_border(|conf| conf.none())
                     .and_background(|conf| conf.transparent())
                     .add(St::WebkitAppearance, val::None)
-                    .set_cursor(cursor)
+                    .cursor(cursor)
                 })
                 .and_increment_button(|conf| {
                     conf.and_label(|conf| {
@@ -1073,7 +1073,7 @@ impl ThemeImpl for Ant {
                     })
                     .and_button(|conf| {
                         centered_flex(conf)
-                            .set_opacity(btns_opacity)
+                            .opacity(btns_opacity)
                             .and_transition(|conf| {
                                 conf.all(|val| {
                                     val.set_duration(sec(0.3))
@@ -1099,7 +1099,7 @@ impl ThemeImpl for Ant {
                     })
                     .and_button(|conf| {
                         centered_flex(conf)
-                            .set_opacity(btns_opacity)
+                            .opacity(btns_opacity)
                             .and_transition(|conf| {
                                 conf.all(|val| {
                                     val.set_duration(sec(0.3))
@@ -1150,25 +1150,25 @@ impl ThemeImpl for Ant {
                     .config(|conf| {
                         use dialog::State::*;
                         match lens.state {
-                            Closed => conf.set_display(val::None),
+                            Closed => conf.display(val::None),
                             Opening => conf
-                                .set_display(val::Flex)
-                                .set_align_content(val::Center)
-                                .set_align_items(val::Center)
-                                .set_justify_content(val::Center)
-                                .set_opacity(0.0),
+                                .display(val::Flex)
+                                .align_content(val::Center)
+                                .align_items(val::Center)
+                                .justify_content(val::Center)
+                                .opacity(0.0),
                             Opened => conf
-                                .set_display(val::Flex)
-                                .set_align_content(val::Center)
-                                .set_align_items(val::Center)
-                                .set_justify_content(val::Center)
-                                .set_opacity(1.0),
+                                .display(val::Flex)
+                                .align_content(val::Center)
+                                .align_items(val::Center)
+                                .justify_content(val::Center)
+                                .opacity(1.0),
                             Closing => conf
-                                .set_display(val::Flex)
-                                .set_align_content(val::Center)
-                                .set_align_items(val::Center)
-                                .set_justify_content(val::Center)
-                                .set_opacity(0.0),
+                                .display(val::Flex)
+                                .align_content(val::Center)
+                                .align_items(val::Center)
+                                .justify_content(val::Center)
+                                .opacity(0.0),
                         }
                     })
                 })
@@ -1176,11 +1176,11 @@ impl ThemeImpl for Ant {
                     conf.and_background(|conf| conf.set_color(white))
                         .and_text(|conf| conf.set_color(primary_text))
                         .and_border(|conf| conf.set_radius(px(2)))
-                        .set_display(val::Flex)
-                        .set_flex_direction(val::Column)
-                        .set_align_content(val::Center)
-                        .set_align_items(val::Center)
-                        .set_justify_content(val::Center)
+                        .display(val::Flex)
+                        .flex_direction(val::Column)
+                        .align_content(val::Center)
+                        .align_items(val::Center)
+                        .justify_content(val::Center)
                         .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
                 })
         };
@@ -1212,12 +1212,12 @@ impl ThemeImpl for Ant {
                     })
                 })
                 .and_titles_container(|conf| {
-                    conf.set_display(val::Flex)
-                        .set_flex_direction(val::Column)
-                        .set_justify_content(val::Center)
-                        .set_align_items(val::Center)
-                        .set_align_content(val::Center)
-                        .set_flex_wrap(val::Nowrap)
+                    conf.display(val::Flex)
+                        .flex_direction(val::Column)
+                        .justify_content(val::Center)
+                        .align_items(val::Center)
+                        .align_content(val::Center)
+                        .flex_wrap(val::Nowrap)
                         .and_padding(|conf| conf.set_x(em(title_container_padding)))
                 })
                 .and_close_button(|conf| {
@@ -1234,7 +1234,7 @@ impl ThemeImpl for Ant {
                                     conf
                                 }
                             })
-                            .set_cursor(val::Pointer)
+                            .cursor(val::Pointer)
                             .and_background(|conf| conf.transparent())
                             .and_border(|conf| conf.none())
                             .add(St::Outline, val::None)
@@ -1246,11 +1246,11 @@ impl ThemeImpl for Ant {
                     })
                 })
                 .and_header_bar(|conf| {
-                    conf.set_display(val::Flex)
-                        .set_justify_content(val::SpaceBetween)
-                        .set_align_items(val::Stretch)
-                        .set_align_content(val::Stretch)
-                        .set_flex_wrap(val::Nowrap)
+                    conf.display(val::Flex)
+                        .justify_content(val::SpaceBetween)
+                        .align_items(val::Stretch)
+                        .align_content(val::Stretch)
+                        .flex_wrap(val::Nowrap)
                         .and_size(|conf| conf.set_all_heights(em(height)))
                         .and_border(|conf| {
                             conf.and_bottom(|conf| {
@@ -1287,7 +1287,7 @@ impl ThemeImpl for Ant {
             progress_bar::Style::default()
                 .and_progress_bar(|conf| {
                     conf.and_border(|conf| conf.set_radius(em(radius)).none())
-                        .set_background(gray_300)
+                        .background(gray_300)
                         .and_size(|conf| conf.set_all_heights(em(height)).set_width(width))
                         .and_transition(|conf| conf.all(|val| val.set_duration(sec(0.3)).ease()))
                         .and_position(|conf| conf.relative())
@@ -1304,7 +1304,7 @@ impl ThemeImpl for Ant {
                                 }
                                 .into()
                             });
-                            conf.set_background(color)
+                            conf.background(color)
                         })
                         .and_transition(|conf| {
                             conf.all(|val| {

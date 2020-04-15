@@ -26,8 +26,8 @@
 //!     fn view(&self) -> Self::Output {
 //!         let style = css::Style::default()
 //!             .and_size(|conf| conf.full())
-//!             .set_display(val::Flex)
-//!             .set_flex_direction(val::Column)
+//!             .display(val::Flex)
+//!             .flex_direction(val::Column)
 //!             .justify_content(val::Center)
 //!             .align_content(val::Center)
 //!             .align_items(val::Center);
@@ -57,8 +57,8 @@
 //!     // creating element style
 //!     let style = css::Style::default()
 //!         .and_size(|conf| conf.full())
-//!         .set_display(val::Flex)
-//!         .set_flex_direction(val::Column)
+//!         .display(val::Flex)
+//!         .flex_direction(val::Column)
 //!         .justify_content(val::Center)
 //!         .align_content(val::Center)
 //!         .align_items(val::Center);

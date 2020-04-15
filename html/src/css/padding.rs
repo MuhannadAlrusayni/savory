@@ -1,6 +1,6 @@
 use super::{
     unit::{self, *},
-    values as val, St, StyleMap, ToStyleMap,
+    values as val, St, StyleValues, UpdateStyleValues,
 };
 use derive_rich::Rich;
 
@@ -26,17 +26,15 @@ pub struct Padding {
     left: Option<Length>,
 }
 
-impl_add_and_add_assign!(Padding { top right bottom left });
-
 impl From<Length> for Padding {
     fn from(source: Length) -> Self {
         Padding::default().set_all(source)
     }
 }
 
-impl ToStyleMap for Padding {
-    fn style_map(&self) -> StyleMap {
-        StyleMap::default()
+impl UpdateStyleValues for Padding {
+    fn update_style_values(self, values: StyleValues) -> StyleValues {
+        values
             .try_add(St::PaddingTop, self.top)
             .try_add(St::PaddingRight, self.right)
             .try_add(St::PaddingBottom, self.bottom)

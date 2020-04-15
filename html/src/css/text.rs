@@ -1,4 +1,4 @@
-use crate::css::{color::Color, unit::*, values as val, St, StyleMap, ToStyleMap};
+use crate::css::{color::Color, unit::*, values as val, St, StyleValues, UpdateStyleValues};
 use derive_rich::Rich;
 use std::borrow::Cow;
 
@@ -14,7 +14,7 @@ use std::borrow::Cow;
 ///             .set_color(Rgb::new(0.5, 0.1, 0.1))
 ///             // or we can use HTML colors
 ///             .set_color(Color::BlueViolet)
-///             .set_align(val::Center)
+///             .align(val::Center)
 ///             .set_transform(val::Capitalize)
 ///             .set_indent(em(2.))
 ///     });
@@ -62,30 +62,9 @@ pub struct Text {
     pub word_break: Option<WordBreak>,
 }
 
-impl_add_and_add_assign!(Text {
-    color
-    direction
-    letter_spacing
-    word_spacing
-    line_height
-    align
-    align_last
-    justify
-    indent
-    decoration
-    white_space
-    unicode_bidi
-    transform
-    overflow { clone }
-    vertical_align
-    writing_mode
-    word_wrap
-    word_break
-});
-
-impl ToStyleMap for Text {
-    fn style_map(&self) -> StyleMap {
-        StyleMap::default()
+impl UpdateStyleValues for Text {
+    fn update_style_values(self, values: StyleValues) -> StyleValues {
+        values
             .try_add(St::Color, self.color)
             .try_add(St::Direction, self.direction)
             .try_add(St::LetterSpacing, self.letter_spacing)

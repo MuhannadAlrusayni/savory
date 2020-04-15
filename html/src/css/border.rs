@@ -1,4 +1,4 @@
-use crate::css::{color::Color, unit::*, values as val, St, StyleMap, ToStyleMap};
+use crate::css::{color::Color, unit::*, values as val, St, StyleValues, UpdateStyleValues};
 use derive_rich::Rich;
 use std::ops::{Add, AddAssign};
 
@@ -57,9 +57,9 @@ impl AddAssign for Border {
     }
 }
 
-impl ToStyleMap for Border {
-    fn style_map(&self) -> StyleMap {
-        StyleMap::default()
+impl UpdateStyleValues for Border {
+    fn update_style_values(self, values: StyleValues) -> StyleValues {
+        values
             // left side
             .try_add(St::BorderLeftColor, self.left.color)
             .try_add(St::BorderLeftWidth, self.left.width)

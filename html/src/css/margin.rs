@@ -1,6 +1,6 @@
 use crate::css::{
     unit::{self, *},
-    values as val, St, StyleMap, ToStyleMap,
+    values as val, St, StyleValues, UpdateStyleValues,
 };
 use derive_rich::Rich;
 
@@ -26,17 +26,15 @@ pub struct Margin {
     left: Option<Length>,
 }
 
-impl_add_and_add_assign!(Margin { top right bottom left });
-
 impl From<Length> for Margin {
     fn from(source: Length) -> Self {
         Self::default().set_all(source)
     }
 }
 
-impl ToStyleMap for Margin {
-    fn style_map(&self) -> StyleMap {
-        StyleMap::default()
+impl UpdateStyleValues for Margin {
+    fn update_style_values(self, values: StyleValues) -> StyleValues {
+        values
             .try_add(St::MarginTop, self.top)
             .try_add(St::MarginRight, self.right)
             .try_add(St::MarginBottom, self.bottom)

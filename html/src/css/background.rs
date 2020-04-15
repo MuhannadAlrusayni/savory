@@ -1,4 +1,4 @@
-use crate::css::{color::Color, unit::*, values as val, St, StyleMap, ToStyleMap};
+use crate::css::{color::Color, unit::*, values as val, St, StyleValues, UpdateStyleValues};
 use derive_rich::Rich;
 
 /// ```
@@ -72,26 +72,15 @@ pub struct Background {
     size: Option<Size>,
 }
 
-impl_add_and_add_assign!(Background {
-    color
-    image { clone }
-    repeat
-    attachment
-    position
-    clip
-    origin
-    size
-});
-
 impl<T: Into<Color>> From<T> for Background {
     fn from(source: T) -> Self {
         Background::default().set_color(source.into())
     }
 }
 
-impl ToStyleMap for Background {
-    fn style_map(&self) -> StyleMap {
-        StyleMap::default()
+impl UpdateStyleValues for Background {
+    fn update_style_values(self, values: StyleValues) -> StyleValues {
+        values
             .try_add(St::BackgroundColor, self.color)
             .try_add(St::BackgroundImage, self.image.as_ref())
             .try_add(St::BackgroundRepeat, self.repeat)

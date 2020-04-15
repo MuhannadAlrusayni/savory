@@ -1,13 +1,10 @@
 use crate::css::{
     unit::{sec, Ms, Sec},
-    values as val, St, StyleMap, ToStyleMap,
+    values as val, St, StyleValues, UpdateStyleValues,
 };
 use derive_rich::Rich;
 use indexmap::IndexMap;
-use std::{
-    borrow::Cow,
-    ops::{Add, AddAssign},
-};
+use std::borrow::Cow;
 
 /// ```
 /// use savory::css::{values as val, Style, unit::{sec, ms}};
@@ -34,25 +31,8 @@ pub struct Transition {
     pub transitions: IndexMap<Cow<'static, str>, TransitionValue>,
 }
 
-impl Add for Transition {
-    type Output = Self;
-
-    fn add(mut self, other: Self) -> Self::Output {
-        self += other;
-        self
-    }
-}
-
-impl AddAssign for Transition {
-    fn add_assign(&mut self, other: Self) {
-        for (name, val) in other.transitions.into_iter() {
-            self.transitions.insert(name, val);
-        }
-    }
-}
-
-impl ToStyleMap for Transition {
-    fn style_map(&self) -> StyleMap {
+impl UpdateStyleValues for Transition {
+    fn update_style_values(self, values: StyleValues) -> StyleValues {
         let mut transitions = vec![];
         for (property, value) in self.transitions.iter() {
             let mut trans = vec![property.to_string()];
@@ -66,7 +46,7 @@ impl ToStyleMap for Transition {
             transitions.push(trans.join(" "));
         }
 
-        StyleMap::default().add(St::Transition, transitions.join(", "))
+        values.add(St::Transition, transitions.join(", "))
     }
 }
 

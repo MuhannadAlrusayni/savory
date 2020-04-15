@@ -1,6 +1,6 @@
 use crate::css::{
     unit::{self, *},
-    values as val, St, StyleMap, ToStyleMap,
+    values as val, St, StyleValues, UpdateStyleValues,
 };
 use derive_rich::Rich;
 
@@ -34,11 +34,9 @@ pub struct Size {
     max_height: Option<Length>,
 }
 
-impl_add_and_add_assign!(Size {width min_width max_width height min_height max_height});
-
-impl ToStyleMap for Size {
-    fn style_map(&self) -> StyleMap {
-        StyleMap::default()
+impl UpdateStyleValues for Size {
+    fn update_style_values(self, values: StyleValues) -> StyleValues {
+        values
             .try_add(St::Width, self.width)
             .try_add(St::MinWidth, self.min_width)
             .try_add(St::MaxWidth, self.max_width)

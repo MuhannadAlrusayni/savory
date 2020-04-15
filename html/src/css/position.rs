@@ -1,4 +1,4 @@
-use crate::css::{unit::*, values as val, St, StyleMap, ToStyleMap};
+use crate::css::{unit::*, values as val, St, StyleValues, UpdateStyleValues};
 use derive_rich::Rich;
 
 /// ```
@@ -36,11 +36,9 @@ pub struct Position {
     clip: Option<Clip>,
 }
 
-impl_add_and_add_assign!(Position { position left top right bottom z_index clip });
-
-impl ToStyleMap for Position {
-    fn style_map(&self) -> StyleMap {
-        StyleMap::default()
+impl UpdateStyleValues for Position {
+    fn update_style_values(self, values: StyleValues) -> StyleValues {
+        values
             .try_add(St::Position, self.position.as_ref())
             .try_add(St::Left, self.left.as_ref())
             .try_add(St::Top, self.top.as_ref())
