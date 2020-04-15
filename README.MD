@@ -1,9 +1,9 @@
 # Savory
 **Rust / Wasm frontend library for building user interfaces.**
 
-[![master docs](https://img.shields.io/badge/docs-master-blue.svg)](https://malrusayni.gitlab.io/savory/savory/)
+[![master docs](https://img.shields.io/badge/docs-master-blue.svg)](https://malrusayni.gitlab.io/savory/savory_core/)
 &middot;
-[![crate info](https://img.shields.io/crates/v/savory.svg)](https://crates.io/crates/savory)
+[![crate info](https://img.shields.io/crates/v/savory.svg)](https://crates.io/crates/savory_core)
 &middot;
 [![pipeline](https://gitlab.com/MAlrusayni/savory/badges/master/pipeline.svg)](https://gitlab.com/MAlrusayni/savory/pipelines)
 &middot;
@@ -36,7 +36,7 @@ Savory tries to make writing UI elements fun and boilerplate free.
 
 Savory crates:
 - `savory`: savory CLI
-- [`savory_core`]: Library for building user interface (this crate)
+- [`savory_core`]: Library for building user interface
 - [`savory_html`]: Typed HTML for Savory
 - [`savory_elements`]: UI Elements based on Savory
 - [`savory_derive`]: Helper derives
