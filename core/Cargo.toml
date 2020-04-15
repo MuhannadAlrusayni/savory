@@ -21,8 +21,6 @@ maintenance = { status = "actively-developed" }
 [dependencies]
 seed = { git = "https://github.com/David-OConnor/seed", version = "0.6.0" }
 
-# [workspace]
-# members = [
-#     "examples/counter",
-#     "examples/all_elements"
-# ]
+[dev-dependencies]
+savory_html = { path = "../html" }
+wasm-bindgen = "0.2.55"

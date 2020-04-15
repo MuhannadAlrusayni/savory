@@ -3,11 +3,11 @@ pub mod svg;
 pub mod url;
 
 use savory_core::prelude::*;
-
-use html::Html;
 use std::borrow::Cow;
-use svg::Svg;
-use url::Url;
+
+pub use html::Html;
+pub use svg::Svg;
+pub use url::Url;
 
 #[derive(Clone, From)]
 pub enum Icon<PMsg> {

@@ -5,7 +5,7 @@ use crate::css::{
 use derive_rich::Rich;
 
 /// ```
-/// use savory::css::{Style, unit::em};
+/// use savory_html::css::{Style, unit::em};
 ///
 /// Style::default()
 ///     .and_size(|conf| {

@@ -1,13 +1,15 @@
-//! Traits used to generate elements styles.
+//! Traits and types used to generate elements/views styles.
 
 pub mod ant;
 
 use crate::prelude::*;
 use std::{ops::Deref, rc::Rc};
 
+/// Type that hold `ThemeImpl` trait
 #[derive(Clone)]
 pub struct Theme(Rc<dyn ThemeImpl>);
 
+/// The defaut theme is Ant (for now :D)
 impl Default for Theme {
     fn default() -> Self {
         Self(Rc::new(ant::Ant::default()))
@@ -26,6 +28,7 @@ impl Deref for Theme {
     }
 }
 
+/// Trait used by theme types to generate elements/views styles.
 pub trait ThemeImpl {
     // views
     fn flexbox<'a>(&self) -> flexbox::ThemeStyler<'a>;
@@ -62,12 +65,16 @@ pub trait ThemeImpl {
     fn progress_bar<'a>(&self) -> progress_bar::ThemeStyler<'a>;
 }
 
+/// Trait used to exteract element/view data that is needed by the theme to
+/// generate style
 pub trait ThemeLens<'a> {
     type Lens: 'a;
 
     fn theme_lens(&'a self) -> Self::Lens;
 }
 
+/// Type the hold function that takes ThemeLens::Lens and return Style, this
+/// function is used every time when elemet/view get viewed
 pub struct Styler<E, S>(Rc<dyn Fn(&E) -> S>);
 
 impl<E, S> Styler<E, S> {

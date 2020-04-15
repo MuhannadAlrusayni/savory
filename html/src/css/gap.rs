@@ -1,14 +1,14 @@
 use crate::css::{unit::*, St, StyleValues, UpdateStyleValues};
 
 /// ```
-/// use savory::css::{Style, unit::{px, em}};
+/// use savory_html::css::{Style, unit::{px, em}};
 ///
 /// let mut style = Style::default();
-/// style.set_gap(px(2))
+/// style.gap(px(2))
 ///      // this can take percent value too (.e.g 40%).
-///      .set_gap(0.4)
+///      .gap(0.4)
 ///      // and can take row and column each with different value
-///      .set_gap((em(4.), em(8.)));
+///      .gap((em(4.), em(8.)));
 /// ```
 #[derive(Clone, Debug, Copy, PartialEq, Display)]
 pub enum Gap {

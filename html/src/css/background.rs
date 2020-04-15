@@ -2,7 +2,7 @@ use crate::css::{color::Color, unit::*, values as val, St, StyleValues, UpdateSt
 use derive_rich::Rich;
 
 /// ```
-/// use savory::css::{values as val, Style, Color, unit::em};
+/// use savory_html::css::{values as val, Style, Color, unit::em};
 ///
 /// Style::default()
 ///     .and_background(|conf| {

@@ -13,7 +13,7 @@
 
 Savory is library for building user interface based on Seed
 
-[Documentation](https://malrusayni.gitlab.io/savory/savory/)
+[Documentation](https://malrusayni.gitlab.io/savory/savory_core/)
 
 # Features
 
@@ -22,24 +22,29 @@ Savory is library for building user interface based on Seed
   composable.
 - **Elements**: Savory uses elements as core building unit when building
   stateful UI. Elements owns thier state and handle user inputs via messages.
-- **Collection of UI elements**: Savory ships with collection of resuable
-  and themeable UI elements.
+- **Collection of UI elements**: Savory ships with collection of resuable and
+  themeable UI elements.
 - **Theme**: UI elements can be themed by any type that implement `ThemeImpl`
   trait, themes have full control on the element appearance.
 - **Typed HTML**: Use typed CSS and HTML attributes, Savory try hard not to rely
   on strings when creating CSS and HTML attributes since these can produce hard
   to debug bugs.
-- **Enhance Seed API**: Enhancement on Seed API that makes working with `Node`, `Orders`
-  fun and less code to write.
+- **Enhance Seed API**: Enhancement on Seed API that makes working with `Node`,
+  `Orders` fun.
 
 Savory tries to make writing UI elements fun and boilerplate free.
 
-Savory consist of 5 crates:
-- `savory_core`: Core Traits (this crate)
-- `savory_html`: HTML Views
-- `savory_elements`: UI Elements
-- `savory_derive`: Helper Derives
-- `savory`: CLI (not implemented yet)
+Savory crates:
+- `savory`: savory CLI
+- [`savory_core`]: Library for building user interface (this crate)
+- [`savory_html`]: Typed HTML for Savory
+- [`savory_elements`]: UI Elements based on Savory
+- [`savory_derive`]: Helper derives
+
+[`savory_core`]: https://gitlab.com/MAlrusayni/savory/tree/master/core
+[`savory_html`]: https://gitlab.com/MAlrusayni/savory/tree/master/html
+[`savory_elements`]: https://gitlab.com/MAlrusayni/savory/tree/master/elements
+[`savory_derive`]: https://gitlab.com/MAlrusayni/savory/tree/master
 
 # Examples
 

@@ -1,3 +1,5 @@
+//! Reusable elements
+
 pub mod button;
 pub mod checkbox;
 pub mod dialog;

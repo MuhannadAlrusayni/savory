@@ -1,68 +1,30 @@
 //! Savory is library for building user interface.
 //!
-//! Savory consist of 3 crates:
+//! Savory crates:
 //! - `savory`: savory CLI
-//! - `savory_core`: Core crate (this crate)
-//! - `savory_html`: HTML views
-//! - `savory_elements`: Resuable styleful elements
-//! - `savory_derive`: Helper derives
-//!
-//!
-//! Elements have been built using a set of core traits [`View`], [`Model`] and
-//! [`Theme`], usully users of the library will only need to implement [`View`]
-//! and [`Model`] traits to build thier own custom elements.
+//! - [`savory_core`]: Library for building user interface (this crate)
+//! - [`savory_html`]: Typed HTML for Savory
+//! - [`savory_elements`]: UI Elements based on Savory
+//! - [`savory_derive`]: Helper derives
 //!
 //! # Core Concept
 //!
-//! Savory have be designed in a way that decouples themes development from
-//! elements development, this is achieved using two traits [`Theme`] and
-//! [`View`].
+//! Savory have two main types **View** and **Element**, View produce static HTML,
+//! while Element produce interactive HTML, as simple as that.
 //!
-//! [`Theme`] trait is responseable on styling savory elements, this trait
-//! basiclly have methods for every elements in savory, these methods take
-//! element and return style for the element, the returned style is used when
-//! rendering the element.
+//! Elements types must implemente [`Element`] and [`View`] traits, which would
+//! make them interactive.
 //!
-//! [`View`] trait has three methods `render`, `render_with_style` and
-//! `style`, `style` method used to construct element style, while
-//! `render_with_style` method used to build the HTML structure, `render` has
-//! default implementation.
-//!
-//! There is another core trait which is [`Model`], this trait is responseable
-//! on handling the model messages and updating the model state accordingly.
-//!
-//! # Elements
-//! There are two element types we can create in savory:
-//!
-//! - **Statful elements** those who implement [`View`] and [`Model`].
-//! - **Stateless elements** those who implement [`View`] only.
-//!
-//! ## Avaliable Elements
-//! Here is a list of the currently avaliable elements:
-//! - Statful
-//!   - [Button](prelude::Button)
-//!   - [Checkbox](prelude::Checkbox)
-//!   - [Radio](prelude::Radio)
-//!   - [Switch](prelude::Switch)
-//!   - [Entry](prelude::Entry)
-//!   - [SpinEntry](prelude::SpinEntry)
-//!   - [Dialog](prelude::Dialog)
-//!   - [MenuButton](prelude::MenuButton)
-//! - Statless
-//!   - [Icon](prelude::Icon)
-//!     - [HtmlIcon](prelude::HtmlIcon)
-//!     - [SvgIcon](prelude::SvgIcon)
-//!     - [UrlIcon](prelude::UrlIcon)
-//!   - [Popover](prelude::Popover)
-//!   - [Flexbox](prelude::Flexbox)
-//!     - [Item](prelude::flexbox::Item)
-//!   - [Label](prelude::Label)
-//!   - [HeaderBar](prelude::HeaderBar)
+//! View types must implemente [`View`] trait, that would produce the static
+//! HTML.
 //!
 //!
-//! [`Theme`]: crate::prelude::Theme
 //! [`View`]: crate::prelude::View
-//! [`Model`]: crate::prelude::Model
+//! [`Element`]: crate::prelude::Element
+//! [`savory_core`]: https://gitlab.com/MAlrusayni/savory/tree/master/core
+//! [`savory_html`]: https://gitlab.com/MAlrusayni/savory/tree/master/html
+//! [`savory_elements`]: https://gitlab.com/MAlrusayni/savory/tree/master/elements
+//! [`savory_derive`]: https://gitlab.com/MAlrusayni/savory/tree/master
 
 #![forbid(unsafe_code)]
 

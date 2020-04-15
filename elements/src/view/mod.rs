@@ -1,3 +1,5 @@
+//! Reusable views
+
 pub mod flexbox;
 pub mod header_bar;
 pub mod icon;

@@ -3,7 +3,7 @@ use derive_rich::Rich;
 use std::borrow::Cow;
 
 /// ```
-/// use savory::css::{values as val, Style, Color, unit::em};
+/// use savory_html::css::{values as val, Style, Color, unit::em};
 /// use palette::rgb::Rgb;
 ///
 /// let mut style = Style::default();

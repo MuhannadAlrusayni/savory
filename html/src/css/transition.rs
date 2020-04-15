@@ -7,7 +7,7 @@ use indexmap::IndexMap;
 use std::borrow::Cow;
 
 /// ```
-/// use savory::css::{values as val, Style, unit::{sec, ms}};
+/// use savory_html::css::{values as val, Style, unit::{sec, ms}};
 ///
 /// let mut style = Style::default();
 /// style

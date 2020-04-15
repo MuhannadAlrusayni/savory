@@ -76,8 +76,8 @@
 //! # `View` & `StyledView` traits vs Standalone functions
 //!
 //! **Traits approach** is pretty verbose for simple elements, but it works well
-//! with bigger elements, types that implemente `View` can be storde as trait
-//! object, views that implemente `StyledView` can be viewed with diffrent style
+//! with bigger elements, types that implement `View` can be storde as trait
+//! object, views that implement `StyledView` can be viewed with diffrent style
 //! thus we can reuse it in many other context.
 //!
 //! **Standalone functions** are simple to write and read, but they become complex

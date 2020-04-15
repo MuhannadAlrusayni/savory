@@ -20,12 +20,12 @@ use seed::{app::UndefinedGMsg, prelude::IntoNodes};
 /// Trait used to create element and handle element messages and update
 /// element state accordingly.
 ///
-/// Element messages is emitted when HTML events trigger, handling these
-/// messages is done inside the method `update`, both `init` function and
-/// `update` method receive `orders` argument which provide many useful methods
-/// to interact with the runtime library [Seed], for example we can subscribe to
-/// messages of some type, we can send messages to other elemenrs, we can
-/// perform async blocks and many more things (see [`Orders`]).
+/// Element messages can be emitted by HTML events or by other elements,
+/// handling these messages is done inside the method `update`, both `init`
+/// function and `update` method receive `orders` argument which provide many
+/// useful methods to interact with the runtime library [Seed], for example we
+/// can subscribe to messages of some type, we can send messages to other
+/// elemenrs, we can perform async blocks and many more things (see [`Orders`]).
 ///
 /// [Seed]: https://seed-rs.org
 /// [`Orders`]: crate::prelude::Orders
@@ -79,7 +79,37 @@ where
     ///
     /// # Example
     /// ```
-    /// impl AppElement for MyApp { .. }
+    /// use savory_core::prelude::*;
+    /// use wasm_bindgen::prelude::*;
+    ///
+    /// pub struct MyApp;
+    ///
+    /// pub enum Msg {
+    ///     FooMessage,
+    /// }
+    ///
+    /// impl AppElement for MyApp {
+    ///     type Message = Msg;
+    ///
+    ///     fn init(url: Url, orders: &mut impl Orders<Msg>) -> Self {
+    ///         // initialize the app goes here
+    ///         todo!()
+    ///     }
+    ///
+    ///     fn update(&mut self, msg: Msg, orders: &mut impl Orders<Msg>) {
+    ///         // handling app messages goes here
+    ///         todo!()
+    ///     }
+    /// }
+    ///
+    /// impl View for MyApp {
+    ///     type Output = Node<Msg>;
+    ///
+    ///     fn view(&self) -> Self::Output {
+    ///         // viewing the app goes here
+    ///         todo!()
+    ///     }
+    /// }
     ///
     /// #[wasm_bindgen(start)]
     /// pub fn view() {
@@ -91,16 +121,6 @@ where
     }
 
     /// Start app element at specifec node that matchs the `id` passed
-    ///
-    /// # Example
-    /// ```
-    /// impl AppElement for MyApp { .. }
-    ///
-    /// #[wasm_bindgen(start)]
-    /// pub fn view() {
-    ///     MyApp::start_at("my-app");
-    /// }
-    /// ```
     fn start_at(id: &str) -> seed::app::App<Self::Message, Self, Self::Output, GMsg> {
         seed::app::App::start(
             id,

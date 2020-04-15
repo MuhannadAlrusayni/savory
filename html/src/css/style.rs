@@ -9,25 +9,25 @@ pub use seed::prelude::St;
 /// provieds many methods to do that.
 ///
 /// ```
-/// use savory::css::{Style, Color, unit::{ms, px}, St};
+/// use savory_html::css::{Style, Color, unit::{ms, px}, St};
 ///
 /// let mut style = Style::default();
 /// style
 ///     .and_transition(|conf| {
 ///         conf
-///             .add("opacity", |conf| conf.set_duration(ms(150.)).ease())
-///             .add("transform", |conf| conf.set_duration(ms(150.)).ease())
-///             .add("visibility", |conf| conf.set_duration(ms(150.)).ease())
+///             .add("opacity", |conf| conf.duration(ms(150.)).ease())
+///             .add("transform", |conf| conf.duration(ms(150.)).ease())
+///             .add("visibility", |conf| conf.duration(ms(150.)).ease())
 ///     })
 ///     .and_position(|conf| conf.absolute())
 ///     .and_background(|conf| conf.color(Color::White))
 ///     .and_border(|conf| {
 ///         conf.none()
-///             .set_width(px(0))
-///             .set_radius(px(4))
+///             .width(px(0))
+///             .radius(px(4))
 ///     })
-///     .and_padding(|conf| conf.set_x(px(4)).set_y(px(2)))
-///     .and_margin(|conf| conf.set_top(px(2)))
+///     .and_padding(|conf| conf.x(px(4)).y(px(2)))
+///     .and_margin(|conf| conf.top(px(2)))
 ///     .add(St::BoxShadow, "0 2px 8px rgba(0, 35, 11, 0.15)");
 /// ```
 #[derive(Default, PartialEq, Debug, Clone)]
@@ -80,7 +80,7 @@ impl Style {
     /// This method accept closure that configure the style
     ///
     /// ```
-    /// use savory::css::{Style, values as val, Color};
+    /// use savory_html::css::{Style, values as val, Color};
     ///
     /// let angle = 1;
     /// let mut style = Style::default();
@@ -212,8 +212,6 @@ impl Style {
     }
 }
 
-impl Style {}
-
 impl<Msg> UpdateEl<Msg> for Style {
     fn update_el(self, el: &mut El<Msg>) {
         if let Some(style) = self.to_seed_style() {
@@ -238,7 +236,7 @@ impl StyleValues {
     /// have it's own method yet.
     ///
     /// ```
-    /// use savory::css::{StyleValues, UpdateStyleValues, values as val, St};
+    /// use savory_html::css::{StyleValues, UpdateStyleValues, values as val, St};
     ///
     /// let mut map = StyleValues::default();
     /// map.add(St::UserSelect, val::None)
