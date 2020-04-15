@@ -4,20 +4,20 @@ use derive_rich::Rich;
 /// ```
 /// use savory::css::{values as val, Style, Color, unit::em};
 ///
-/// let mut style = Style::default();
-/// style
+/// Style::default()
 ///     .and_background(|conf| {
-///         conf.set_image("/bg/fullpage.png")
+///         conf.image("/bg/fullpage.png")
+///             .color(Color::White)
 ///             .scroll()
 ///     });
 /// ```
 #[derive(Rich, Clone, Debug, PartialEq, Default)]
 pub struct Background {
-    #[rich(read, write)]
-    color: Option<Color>,
+    #[rich(write(rename = color))]
+    pub color: Option<Color>,
     // TODO: support multiple images
-    #[rich(read, write, value_fns = { empty = val::None })]
-    image: Option<Image>,
+    #[rich(write(rename = image), value_fns = { empty = val::None })]
+    pub image: Option<Image>,
     #[rich(value_fns = {
         repeat_x = val::RepeatX,
         repeat_y = val::RepeatY,
@@ -28,16 +28,16 @@ pub struct Background {
         initial_repeat = val::Initial,
         inherit_repeat = val::Inherit,
     })]
-    repeat: Option<Repeat>,
-    #[rich(value_fns = {
+    pub repeat: Option<Repeat>,
+    #[rich(write(rename = attachment), value_fns = {
         scroll = val::Scroll,
         fixed = val::Fixed,
         local = val::Local,
         initial_attachment = val::Initial,
         inherit_attachment = val::Inherit,
     })]
-    attachment: Option<Attachment>,
-    #[rich(read, write, value_fns = {
+    pub attachment: Option<Attachment>,
+    #[rich(write(rename = position), value_fns = {
         left_top = (Horizontal::from(val::Left), val::Top.into()),
         center_top = (Horizontal::from(val::Center), val::Top.into()),
         right_top = (Horizontal::from(val::Right), val::Top.into()),
@@ -48,20 +48,20 @@ pub struct Background {
         center_bottom = (Horizontal::from(val::Center), val::Bottom.into()),
         right_bottom = (Horizontal::from(val::Right), val::Bottom.into()),
     })]
-    position: Option<Position>,
-    #[rich(value_fns = {
+    pub position: Option<Position>,
+    #[rich(write(rename = clip), value_fns = {
         fill_under_border = val::BorderBox,
         fill_inside_border = val::PaddingBox,
         fill_under_content = val::ContentBox,
     })]
-    clip: Option<Clip>,
-    #[rich(value_fns = {
+    pub clip: Option<Clip>,
+    #[rich(write(rename = origin), value_fns = {
         image_fill_under_border = val::BorderBox,
         image_inside_border = val::PaddingBox,
         image_under_content = val::ContentBox,
     })]
-    origin: Option<Origin>,
-    #[rich(read, write, value_fns = {
+    pub origin: Option<Origin>,
+    #[rich(write(rename = size), value_fns = {
         full = (1.0, 1.0),
         half = (0.5, 0.5),
         quarter = (0.25, 0.25),
@@ -69,12 +69,12 @@ pub struct Background {
         cover = val::Cover,
         contain = val::Contain,
     })]
-    size: Option<Size>,
+    pub size: Option<Size>,
 }
 
 impl<T: Into<Color>> From<T> for Background {
     fn from(source: T) -> Self {
-        Background::default().set_color(source.into())
+        Background::default().color(source.into())
     }
 }
 
@@ -89,12 +89,6 @@ impl UpdateStyleValues for Background {
     }
 }
 
-impl Background {
-    pub fn transparent(self) -> Self {
-        self.set_color(Color::Transparent)
-    }
-}
-
 #[derive(Clone, Debug, PartialEq, Display, From)]
 pub enum Image {
     #[from]
@@ -106,35 +100,22 @@ pub enum Image {
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum Repeat {
-    #[from]
     RepeatX(val::RepeatX),
-    #[from]
     RepeatY(val::RepeatY),
-    #[from]
     Repeat(val::Repeat),
-    #[from]
     Space(val::Space),
-    #[from]
     Round(val::Round),
-    #[from]
     NoRepeat(val::NoRepeat),
-    #[from]
     Initial(val::Initial),
-    #[from]
     Inherit(val::Inherit),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum Attachment {
-    #[from]
     Scroll(val::Scroll),
-    #[from]
     Fixed(val::Fixed),
-    #[from]
     Local(val::Local),
-    #[from]
     Initial(val::Initial),
-    #[from]
     Inherit(val::Inherit),
 }
 
@@ -205,15 +186,10 @@ impl From<(f32, f32)> for Position {
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum Box {
-    #[from]
     BorderBox(val::BorderBox),
-    #[from]
     PaddingBox(val::PaddingBox),
-    #[from]
     ContentBox(val::ContentBox),
-    #[from]
     Initial(val::Initial),
-    #[from]
     Inherit(val::Inherit),
 }
 
@@ -222,16 +198,11 @@ pub type Origin = Box;
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum Size {
-    #[from]
     #[display(fmt = "{} {}", _0, _1)]
     WidthHeight(LengthPercent, LengthPercent),
-    #[from]
     Auto(val::Auto),
-    #[from]
     Cover(val::Cover),
-    #[from]
     Contain(val::Contain),
-    #[from]
     Initial(val::Initial),
 }
 

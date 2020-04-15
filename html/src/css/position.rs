@@ -4,16 +4,15 @@ use derive_rich::Rich;
 /// ```
 /// use savory::css::{Style, unit::px};
 ///
-/// let mut style = Style::default();
-/// style
+/// Style::default()
 ///     .and_position(|conf| {
-///         conf.absolute().set_top(px(28)).set_left(px(40))
+///         conf.absolute().top(px(28)).left(px(40))
 ///     });
 /// ```
 #[derive(Rich, Clone, Copy, Debug, PartialEq, Default)]
 pub struct Position {
-    #[rich(value_fns = {
-        static_pos = val::Static,
+    #[rich(write(rename = position), write(option, rename = try_position), value_fns = {
+        static_ = val::Static,
         absolute = val::Absolute,
         fixed = val::Fixed,
         relative = val::Relative,
@@ -21,19 +20,73 @@ pub struct Position {
         initial = val::Initial,
         inherit = val::Inherit,
     })]
-    position: Option<PositionType>,
-    #[rich(write)]
-    left: Option<PostionLength>,
-    #[rich(write)]
-    top: Option<PostionLength>,
-    #[rich(write)]
-    right: Option<PostionLength>,
-    #[rich(write)]
-    bottom: Option<PostionLength>,
-    #[rich(write)]
-    z_index: Option<i32>,
-    #[rich(write(style = compose))]
-    clip: Option<Clip>,
+    pub position: Option<PositionType>,
+    #[rich(write(rename = left), write(option, rename = try_left))]
+    pub left: Option<PostionLength>,
+    #[rich(write(rename = top), write(option, rename = try_top))]
+    pub top: Option<PostionLength>,
+    #[rich(write(rename = right), write(option, rename = try_right))]
+    pub right: Option<PostionLength>,
+    #[rich(write(rename = bottom), write(option, rename = try_bottom))]
+    pub bottom: Option<PostionLength>,
+    #[rich(write(rename = z_index), write(option, rename = try_z_index))]
+    pub z_index: Option<i32>,
+    #[rich(write(rename = clip), write(option, rename = try_clip))]
+    pub clip: Option<Clip>,
+}
+
+impl Position {
+    pub fn move_top(self) -> Self {
+        self.top(px(0))
+    }
+
+    pub fn move_right(self) -> Self {
+        self.right(px(0))
+    }
+
+    pub fn move_bottom(self) -> Self {
+        self.bottom(px(0))
+    }
+
+    pub fn move_left(self) -> Self {
+        self.left(px(0))
+    }
+
+    pub fn move_top_stretch(self) -> Self {
+        self.move_top().move_left().move_right()
+    }
+
+    pub fn move_right_stretch(self) -> Self {
+        self.move_right().move_top().move_bottom()
+    }
+
+    pub fn move_bottom_stretch(self) -> Self {
+        self.move_bottom().move_left().move_right()
+    }
+
+    pub fn move_left_stretch(self) -> Self {
+        self.move_left().move_top().move_bottom()
+    }
+
+    pub fn move_top_right(self) -> Self {
+        self.move_top().move_right()
+    }
+
+    pub fn move_top_left(self) -> Self {
+        self.move_top().move_left()
+    }
+
+    pub fn move_bottom_right(self) -> Self {
+        self.move_bottom().move_right()
+    }
+
+    pub fn move_bottom_left(self) -> Self {
+        self.move_bottom().move_left()
+    }
+
+    pub fn cover(self) -> Self {
+        self.move_top_right().move_bottom_left()
+    }
 }
 
 impl UpdateStyleValues for Position {
@@ -80,17 +133,7 @@ pub enum Clip {
     Inherit(val::Inherit),
 }
 
-impl Default for Clip {
-    fn default() -> Self {
-        val::Initial.into()
-    }
-}
-
 impl Clip {
-    pub fn auto(self) -> Self {
-        val::Auto.into()
-    }
-
     pub fn rect(
         top: impl Into<ClipRectLength>,
         right: impl Into<ClipRectLength>,
@@ -103,14 +146,6 @@ impl Clip {
             bottom: bottom.into(),
             left: left.into(),
         }
-    }
-
-    pub fn initial(self) -> Self {
-        val::Initial.into()
-    }
-
-    pub fn inherit(self) -> Self {
-        val::Inherit.into()
     }
 }
 
@@ -130,18 +165,11 @@ pub enum ClipRectLength {
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum PositionType {
-    #[from]
     Static(val::Static),
-    #[from]
     Absolute(val::Absolute),
-    #[from]
     Fixed(val::Fixed),
-    #[from]
     Relative(val::Relative),
-    #[from]
     Sticky(val::Sticky),
-    #[from]
     Initial(val::Initial),
-    #[from]
     Inherit(val::Inherit),
 }

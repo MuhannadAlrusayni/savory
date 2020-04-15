@@ -1,60 +1,36 @@
 use crate::css::{color::Color, unit::*, values as val, St, StyleValues, UpdateStyleValues};
 use derive_rich::Rich;
-use std::ops::{Add, AddAssign};
 
 /// ```
 /// use savory::css::{values as val, Style, unit::px, Color};
 ///
-/// let mut style = Style::default();
-/// style
+/// Style::default()
 ///     .and_border(|conf| {
 ///         conf.solid() // or .style(val::Solid)
-///             .set_width(px(2))
-///             .set_color(Color::DimGray)
-///             .set_radius(px(4))
+///             .width(px(2))
+///             .color(Color::DimGray)
+///             .radius(px(4))
 ///     });
 /// ```
 // TODO: add shadow
 #[derive(Rich, Copy, Clone, Debug, PartialEq, Default)]
 pub struct Border {
-    #[rich(read, write(style = compose))]
-    left: Side,
-    #[rich(read, write(style = compose))]
-    top: Side,
-    #[rich(read, write(style = compose))]
-    right: Side,
-    #[rich(read, write(style = compose))]
-    bottom: Side,
-    #[rich(read, write)]
-    top_left: Option<Radius>,
-    #[rich(read, write)]
-    top_right: Option<Radius>,
-    #[rich(read, write)]
-    bottom_left: Option<Radius>,
-    #[rich(read, write)]
-    bottom_right: Option<Radius>,
-}
-
-impl Add for Border {
-    type Output = Self;
-
-    fn add(mut self, other: Self) -> Self::Output {
-        self += other;
-        self
-    }
-}
-
-impl AddAssign for Border {
-    fn add_assign(&mut self, other: Self) {
-        self.left += other.left;
-        self.top += other.top;
-        self.right += other.right;
-        self.bottom += other.bottom;
-        self.top_left = other.top_left.or_else(|| self.top_left);
-        self.top_right = other.top_right.or_else(|| self.top_right);
-        self.bottom_left = other.bottom_left.or_else(|| self.bottom_left);
-        self.bottom_right = other.bottom_right.or_else(|| self.bottom_right);
-    }
+    #[rich(write(rename = left), write(style = compose))]
+    pub left: Side,
+    #[rich(write(rename = top), write(style = compose))]
+    pub top: Side,
+    #[rich(write(rename = right), write(style = compose))]
+    pub right: Side,
+    #[rich(write(rename = bottom), write(style = compose))]
+    pub bottom: Side,
+    #[rich(write(rename = top_left), write(option, rename = try_top_left))]
+    pub top_left: Option<Radius>,
+    #[rich(write(rename = top_right), write(option, rename = try_top_right))]
+    pub top_right: Option<Radius>,
+    #[rich(write(rename = bottom_left), write(option, rename = try_bottom_left))]
+    pub bottom_left: Option<Radius>,
+    #[rich(write(rename = bottom_right), write(option, rename = try_bottom_right))]
+    pub bottom_right: Option<Radius>,
 }
 
 impl UpdateStyleValues for Border {
@@ -84,6 +60,12 @@ impl UpdateStyleValues for Border {
     }
 }
 
+impl<T: Into<Color>> From<T> for Border {
+    fn from(source: T) -> Self {
+        Self::default().color(source.into())
+    }
+}
+
 macro_rules! sides_style_shortcut_functions {
     ( $( $fn:ident() $(,)? )* ) => {
         $(
@@ -102,31 +84,31 @@ impl Border {
             .and_bottom(value)
     }
 
-    pub fn set_style(self, style: impl Into<Style>) -> Self {
+    pub fn style(self, style: impl Into<Style>) -> Self {
         let style = style.into();
-        self.all_side(|side| side.set_style(style))
+        self.all_side(|side| side.style(style))
     }
 
-    pub fn set_width(self, width: impl Into<Width>) -> Self {
+    pub fn width(self, width: impl Into<Width>) -> Self {
         let width = width.into();
-        self.all_side(|side| side.set_width(width))
+        self.all_side(|side| side.width(width))
     }
 
-    pub fn set_color(self, color: impl Into<Color>) -> Self {
+    pub fn color(self, color: impl Into<Color>) -> Self {
         let color = color.into();
-        self.all_side(|side| side.set_color(color))
+        self.all_side(|side| side.color(color))
     }
 
     pub fn transparent(self) -> Self {
-        self.set_color(Color::Transparent)
+        self.color(Color::Transparent)
     }
 
-    pub fn set_radius(self, rad: impl Into<Radius>) -> Self {
+    pub fn radius(self, rad: impl Into<Radius>) -> Self {
         let rad = rad.into();
-        self.set_top_left(rad)
-            .set_top_right(rad)
-            .set_bottom_left(rad)
-            .set_bottom_right(rad)
+        self.top_left(rad)
+            .top_right(rad)
+            .bottom_left(rad)
+            .bottom_right(rad)
     }
 
     sides_style_shortcut_functions! {
@@ -137,7 +119,7 @@ impl Border {
 
 #[derive(Rich, Copy, Clone, Debug, PartialEq, From, Default)]
 pub struct Side {
-    #[rich(write, read, value_fns = {
+    #[rich(write(rename = style), write(option, rename = try_style), value_fns = {
         none = val::None,
         hidden = val::Hidden,
         dotted = val::Dotted,
@@ -151,77 +133,42 @@ pub struct Side {
         initial_style = val::Initial,
         inherit_style = val::Inherit,
     })]
-    style: Option<Style>,
-    #[rich(read, write, value_fns = {
+    pub style: Option<Style>,
+    #[rich(write(rename = width), write(option, rename = try_width), value_fns = {
         thick = val::Thick,
         thin = val::Thin,
         medium = val::Medium,
         initial_width = val::Initial,
         inherit_width = val::Inherit,
     })]
-    width: Option<Width>,
-    #[rich(read, write)]
-    color: Option<Color>,
-}
-
-impl Add for Side {
-    type Output = Self;
-
-    fn add(mut self, other: Self) -> Self::Output {
-        self += other;
-        self
-    }
-}
-
-impl AddAssign for Side {
-    fn add_assign(&mut self, other: Self) {
-        self.style = other.style.or_else(|| self.style);
-        self.color = other.color.or_else(|| self.color);
-        self.width = other.width.or_else(|| self.width);
-    }
+    pub width: Option<Width>,
+    #[rich(write(rename = color), write(option, rename = try_color))]
+    pub color: Option<Color>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum Style {
-    #[from]
     None(val::None),
-    #[from]
     Hidden(val::Hidden),
-    #[from]
     Dotted(val::Dotted),
-    #[from]
     Dashed(val::Dashed),
-    #[from]
     Solid(val::Solid),
-    #[from]
     Double(val::Double),
-    #[from]
     Groove(val::Groove),
-    #[from]
     Ridge(val::Ridge),
-    #[from]
     Inset(val::Inset),
-    #[from]
     Outset(val::Outset),
-    #[from]
     Initial(val::Initial),
-    #[from]
     Inherit(val::Inherit),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum Width {
-    #[from]
     Length(Length),
-    #[from]
     Thin(val::Thin),
-    #[from]
     Medium(val::Medium),
-    #[from]
     Thick(val::Thick),
-    #[from]
     Initial(val::Initial),
-    #[from]
     Inherit(val::Inherit),
 }
 

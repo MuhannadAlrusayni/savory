@@ -6,13 +6,12 @@ use std::borrow::Cow;
 /// use savory::css::{values as val, Style, Color, unit::em};
 /// use palette::rgb::Rgb;
 ///
-/// let mut style = Style::default();
-/// style
+/// Style::default()
 ///     .and_font(|conf| {
 ///         // set the font size to xx-large
 ///         conf.xx_large()
 ///             // we can set the font size with unit functions too
-///             .set_size(em(1.5))
+///             .size(em(1.5))
 ///             // set font variant to smal-caps
 ///             .small_caps()
 ///             // set font to be bold
@@ -23,9 +22,9 @@ use std::borrow::Cow;
 /// ```
 #[derive(Rich, Clone, Debug, PartialEq, Default)]
 pub struct Font {
-    #[rich(write)]
+    #[rich(write(rename = family), write(option, rename = try_family))]
     pub family: Option<Family>,
-    #[rich(write, value_fns = {
+    #[rich(write(rename = size), write(option, rename = try_size), value_fns = {
         medium = val::Medium,
         xx_small = val::XXSmall,
         x_small = val::XSmall,
@@ -37,18 +36,18 @@ pub struct Font {
         larger = val::Larger,
     })]
     pub size: Option<Size>,
-    #[rich(write, value_fns = {
+    #[rich(write(rename = style), write(option, rename = try_style), value_fns = {
         normal_style = val::Normal,
         italic = val::Italic,
         oblique = val::Oblique,
     })]
     pub style: Option<Style>,
-    #[rich(write, value_fns = {
+    #[rich(write(rename = variant), write(option, rename = try_variant), value_fns = {
         normal_variant = val::Normal,
         small_caps = val::SmallCaps,
     })]
     pub variant: Option<Variant>,
-    #[rich(write, value_fns = {
+    #[rich(write(rename = weight), write(option, rename = try_weight), value_fns = {
         normal_weight = val::Normal,
         bold = val::Bold,
         bolder = val::Bolder,
@@ -79,12 +78,9 @@ impl UpdateStyleValues for Font {
 
 #[derive(Clone, Debug, PartialEq, Display, From)]
 pub enum Family {
-    #[from]
     #[display(fmt = "{}", "_0.join(\" \")")]
     Family(Vec<Cow<'static, str>>),
-    #[from]
     Initial(val::Initial),
-    #[from]
     Inherit(val::Inherit),
 }
 
@@ -120,57 +116,35 @@ impl From<Vec<&'static str>> for Family {
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum Size {
-    #[from]
     Medium(val::Medium),
-    #[from]
     XXSmall(val::XXSmall),
-    #[from]
     XSmall(val::XSmall),
-    #[from]
     Small(val::Small),
-    #[from]
     Large(val::Large),
-    #[from]
     XLarge(val::XLarge),
-    #[from]
     XXLarge(val::XXLarge),
-    #[from]
     Smaller(val::Smaller),
-    #[from]
     Larger(val::Larger),
-    #[from]
     Length(Length),
-    #[from]
     Percent(Percent),
-    #[from]
     Initial(val::Initial),
-    #[from]
     Inherit(val::Inherit),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum Style {
-    #[from]
     Normal(val::Normal),
-    #[from]
     Italic(val::Italic),
-    #[from]
     Oblique(val::Oblique),
-    #[from]
     Initial(val::Initial),
-    #[from]
     Inherit(val::Inherit),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum Variant {
-    #[from]
     Normal(val::Normal),
-    #[from]
     SmallCaps(val::SmallCaps),
-    #[from]
     Initial(val::Initial),
-    #[from]
     Inherit(val::Inherit),
 }
 

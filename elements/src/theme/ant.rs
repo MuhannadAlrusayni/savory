@@ -4,7 +4,7 @@ use palette::{Hsl, Hsla};
 use savory_html::css::{
     self,
     unit::{em, ms, px, sec},
-    values as val, Cursor, St,
+    values as val, Color, Cursor, St,
 };
 
 pub fn contrast_ratio(background_light: f32, foreground_light: f32) -> f32 {
@@ -461,22 +461,17 @@ impl ThemeImpl for Ant {
                 .and_popover(|conf| conf.and_position(|conf| conf.relative()))
                 .and_panel(|conf| {
                     conf.and_transition(|conf| {
-                        conf.add("opacity", |conf| conf.set_duration(ms(150.)).ease())
-                            .add("transform", |conf| conf.set_duration(ms(150.)).ease())
-                            .add("visibility", |conf| conf.set_duration(ms(150.)).ease())
+                        conf.add("opacity", |conf| conf.duration(ms(150.)).ease())
+                            .add("transform", |conf| conf.duration(ms(150.)).ease())
+                            .add("visibility", |conf| conf.duration(ms(150.)).ease())
                     })
                     .display(val::Flex)
                     .and_position(|conf| conf.absolute())
-                    .and_background(|conf| conf.set_color(white))
-                    .and_border(|conf| {
-                        conf.set_color(border)
-                            .none()
-                            .set_width(px(0.))
-                            .set_radius(px(4.))
-                    })
+                    .background(white)
+                    .and_border(|conf| conf.color(border).none().width(px(0.)).radius(px(4.)))
                     .add(St::BoxShadow, "0 2px 8px rgba(0, 35, 11, 0.15)")
-                    .and_padding(|conf| conf.set_x(px(4.)).set_y(px(2)))
-                    .and_margin(|conf| conf.set_top(px(*lens.offset)))
+                    .and_padding(|conf| conf.x(px(4.)).y(px(2)))
+                    .and_margin(|conf| conf.top(px(*lens.offset)))
                     .config_if_else(
                         *lens.toggled,
                         |conf| conf.opacity(1.).visibility(val::Visible),
@@ -520,14 +515,9 @@ impl ThemeImpl for Ant {
 
         let common_button = move |fg, bg, border| {
             css::Style::default()
-                .and_border(|conf| {
-                    conf.set_width(px(1.))
-                        .solid()
-                        .set_radius(px(4.))
-                        .set_color(border)
-                })
-                .and_background(|conf| conf.set_color(bg))
-                .and_text(|conf| conf.set_color(fg))
+                .and_border(|conf| conf.width(px(1.)).solid().radius(px(4.)).color(border))
+                .background(bg)
+                .text(fg)
                 .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
         };
         let button_normal = move |lens: &button::ButtonLens<'a>| {
@@ -577,14 +567,9 @@ impl ThemeImpl for Ant {
             };
 
             css::Style::default()
-                .and_text(|conf| conf.set_color(fg))
-                .and_border(|conf| {
-                    conf.set_width(px(0.))
-                        .solid()
-                        .set_radius(px(4.))
-                        .set_color(bg)
-                })
-                .and_background(|conf| conf.set_color(bg))
+                .text(fg)
+                .and_border(|conf| conf.width(px(0.)).solid().radius(px(4.)).color(bg))
+                .background(bg)
         };
         let button_dashed = move |lens: &button::ButtonLens<'a>| {
             // colors
@@ -596,17 +581,17 @@ impl ThemeImpl for Ant {
                 _ => (white, brand_500, brand_500),
             };
 
-            common_button(fg, bg, border_color).and_border(|conf| conf.dashed())
-            // css::Style::default()
-            //     .and_border(|conf| {
-            //         conf.set_width(px(1.))
-            //             .dashed()
-            //             .set_radius(px(4.))
-            //             .set_color(border_color)
-            //     })
-            //     .and_background(|conf| conf.set_color(bg))
-            //     .and_text(|conf| conf.set_color(fg))
-            //     .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
+            // common_button(fg, bg, border_color).and_border(|conf| conf.dashed())
+            css::Style::default()
+                .and_border(|conf| {
+                    conf.width(px(1.))
+                        .dashed()
+                        .radius(px(4.))
+                        .color(border_color)
+                })
+                .background(bg)
+                .text(fg)
+                .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
         };
 
         let styler = move |lens: &button::ButtonLens<'a>| {
@@ -624,20 +609,17 @@ impl ThemeImpl for Ant {
                     Some(button::Kind::Link) => button_link(lens),
                     Some(button::Kind::Dashed) => button_dashed(lens),
                 }
-                .and_padding(|conf| conf.set_x(px(15.)).set_y(px(0.)))
-                .and_size(|conf| conf.set_all_heights(px(32.)))
+                .and_padding(|conf| conf.x(px(15.)).y(px(0.)))
+                .and_size(|conf| conf.all_heights(px(32.)))
                 .and_transition(|conf| {
-                    conf.all(|val| {
-                        val.set_duration(sec(0.3))
-                            .cubic_bezier(0.645, 0.045, 0.355, 1.)
-                    })
+                    conf.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
                 })
                 .and_text(|conf| {
-                    conf.and_decoration(|d| d.set_line(val::None))
-                        .set_line_height(1.499)
-                        .set_white_space(val::Nowrap)
+                    conf.and_decoration(|d| d.line(val::None))
+                        .line_height(1.499)
+                        .white_space(val::Nowrap)
                 })
-                .and_font(|conf| conf.set_size(px(14.)).weight_400())
+                .and_font(|conf| conf.size(px(14.)).weight_400())
                 .cursor(cursor)
                 .add(St::Outline, val::None)
                 .add(St::UserSelect, val::None)
@@ -670,39 +652,35 @@ impl ThemeImpl for Ant {
                     conf.config_if(*lens.disabled, |conf| conf.opacity(0.4))
                         .cursor(cursor)
                         .and_position(|conf| conf.relative())
-                        .and_background(|conf| conf.set_color(bg_color))
+                        .background(bg_color)
                         .and_transition(|conf| {
                             conf.all(|val| {
-                                val.set_duration(sec(0.3))
-                                    .cubic_bezier(0.645, 0.045, 0.355, 1.)
+                                val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.)
                             })
                         })
                         .and_border(|conf| {
                             conf.transparent()
-                                .set_width(px(0.))
-                                .set_radius(px(height / 2.))
+                                .width(px(0.))
+                                .radius(px(height / 2.))
                                 .none()
                         })
                         .display(val::InlineBlock)
-                        .and_text(|conf| conf.and_decoration(|d| d.set_line(val::None)))
+                        .and_text(|conf| conf.and_decoration(|d| d.line(val::None)))
                         // .add(St::Outline, val::None)
                         .add(St::UserSelect, val::None)
                         .add(St::BoxSizing, val::BorderBox)
-                        .and_size(|conf| conf.set_all_heights(px(height)).set_all_widths(px(width)))
+                        .and_size(|conf| conf.all_heights(px(height)).all_widths(px(width)))
                 })
                 .and_button(|conf| {
                     conf.config_if(*lens.toggled, |conf| {
                         conf.add(St::Transform, format!("translateX({})", px(width / 2.)))
                     })
-                    .and_position(|conf| conf.absolute().set_top(px(top)).set_left(px(left)))
+                    .and_position(|conf| conf.absolute().top(px(top)).left(px(left)))
                     .and_transition(|conf| {
-                        conf.all(|val| {
-                            val.set_duration(sec(0.3))
-                                .cubic_bezier(0.645, 0.045, 0.355, 1.)
-                        })
+                        conf.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
                     })
-                    .and_background(|conf| conf.set_color(white))
-                    .and_border(|conf| conf.set_width(px(0.)).transparent().none().set_radius(0.5))
+                    .background(white)
+                    .and_border(|conf| conf.width(px(0.)).transparent().none().radius(0.5))
                     .add(St::BoxShadow, "0 2px 4px 0 rgba(0, 35, 11, 0.2)")
                     .and_size(|conf| conf.resize(px(btn_size), px(btn_size)))
                 })
@@ -742,7 +720,7 @@ impl ThemeImpl for Ant {
                 .and_checkbox(|conf| {
                     conf.and_transition(|conf| {
                         conf.all(|conf| {
-                            conf.set_duration(sec(0.3))
+                            conf.duration(sec(0.3))
                                 .cubic_bezier(0.645, 0.045, 0.355, 1.)
                         })
                     })
@@ -752,47 +730,38 @@ impl ThemeImpl for Ant {
                     .align_items(val::Center)
                     .add(St::WebkitAppearance, val::None)
                     .add(St::Appearance, val::None)
-                    .and_size(|conf| conf.set_all(px(16.)))
-                    .and_border(|conf| {
-                        conf.solid()
-                            .set_width(px(1.))
-                            .set_color(border)
-                            .set_radius(px(2.))
-                    })
-                    .and_background(|conf| conf.set_color(bg))
-                    .and_text(|conf| conf.set_color(fg))
+                    .and_size(|conf| conf.all(px(16.)))
+                    .and_border(|conf| conf.solid().width(px(1.)).color(border).radius(px(2.)))
+                    .background(bg)
+                    .text(fg)
                 })
                 .and_button(|conf| {
                     conf.config_if(*lens.toggled, |conf| {
                         conf.cursor(cursor)
                             .and_transition(|conf| {
                                 conf.all(|val| {
-                                    val.set_duration(sec(0.3))
-                                        .cubic_bezier(0.645, 0.045, 0.355, 1.)
+                                    val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.)
                                 })
                             })
                             .and_size(|conf| conf.resize(0.2, 0.55))
                             .and_border(|conf| {
-                                conf.and_bottom(|conf| conf.solid().set_width(px(2.)).set_color(fg))
-                                    .and_right(|conf| conf.solid().set_width(px(2.)).set_color(fg))
+                                conf.and_bottom(|conf| conf.solid().width(px(2.)).color(fg))
+                                    .and_right(|conf| conf.solid().width(px(2.)).color(fg))
                             })
-                            .and_margin(|conf| conf.set_bottom(px(2.)))
+                            .and_margin(|conf| conf.bottom(px(2.)))
                             .add(St::Transform, "rotate(45deg)")
                     })
                 })
                 .and_label(|conf| {
-                    conf.config_if(*lens.disabled, |conf| {
-                        conf.and_text(|conf| conf.set_color(disable))
-                    })
-                    .and_transition(|conf| {
-                        conf.all(|val| {
-                            val.set_duration(sec(0.3))
-                                .cubic_bezier(0.645, 0.045, 0.355, 1.)
+                    conf.config_if(*lens.disabled, |conf| conf.text(disable))
+                        .and_transition(|conf| {
+                            conf.all(|val| {
+                                val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.)
+                            })
                         })
-                    })
-                    .cursor(cursor)
-                    .display(val::Flex)
-                    .gap(px(4))
+                        .cursor(cursor)
+                        .display(val::Flex)
+                        .gap(px(4))
                 })
         };
         styler.into()
@@ -829,10 +798,7 @@ impl ThemeImpl for Ant {
             radio::Style::default()
                 .and_radio(|conf| {
                     conf.and_transition(|conf| {
-                        conf.all(|val| {
-                            val.set_duration(sec(0.3))
-                                .cubic_bezier(0.645, 0.045, 0.355, 1.)
-                        })
+                        conf.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
                     })
                     .cursor(cursor)
                     .display(val::Flex)
@@ -840,44 +806,33 @@ impl ThemeImpl for Ant {
                     .justify_content(val::Center)
                     .align_items(val::Center)
                     .add(St::WebkitAppearance, val::None)
-                    .and_text(|conf| conf.set_color(fg))
-                    .and_size(|conf| conf.set_all(px(16)))
-                    .and_border(|conf| {
-                        conf.solid()
-                            .set_width(px(1.))
-                            .set_color(border)
-                            .set_radius(0.5)
-                    })
-                    .and_background(|conf| conf.set_color(bg))
+                    .text(fg)
+                    .and_size(|conf| conf.all(px(16)))
+                    .and_border(|conf| conf.solid().width(px(1.)).color(border).radius(0.5))
+                    .background(bg)
                 })
                 .and_button(|conf| {
                     conf.config_if(*lens.toggled, |conf| {
                         conf.cursor(cursor)
                             .and_size(|conf| conf.resize(0.6, 0.6))
-                            .and_border(|conf| conf.none().set_radius(0.5))
-                            .and_background(|conf| conf.set_color(fg))
+                            .and_border(|conf| conf.none().radius(0.5))
+                            .background(fg)
                     })
                     .and_transition(|conf| {
-                        conf.all(|val| {
-                            val.set_duration(sec(0.3))
-                                .cubic_bezier(0.645, 0.045, 0.355, 1.)
-                        })
+                        conf.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
                     })
                 })
                 .and_label(|conf| {
-                    conf.config_if(*lens.disabled, |conf| {
-                        conf.and_text(|conf| conf.set_color(disable))
-                    })
-                    .and_transition(|conf| {
-                        conf.all(|val| {
-                            val.set_duration(sec(0.3))
-                                .cubic_bezier(0.645, 0.045, 0.355, 1.)
+                    conf.config_if(*lens.disabled, |conf| conf.text(disable))
+                        .and_transition(|conf| {
+                            conf.all(|val| {
+                                val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.)
+                            })
                         })
-                    })
-                    .cursor(cursor)
-                    .display(val::Flex)
-                    .align_items(val::Center)
-                    .gap(px(4.))
+                        .cursor(cursor)
+                        .display(val::Flex)
+                        .align_items(val::Center)
+                        .gap(px(4.))
                 })
         };
         styler.into()
@@ -918,41 +873,35 @@ impl ThemeImpl for Ant {
             entry::Style::default()
                 .and_container(|conf| {
                     conf.and_transition(|conf| {
-                        conf.all(|val| {
-                            val.set_duration(sec(0.3))
-                                .cubic_bezier(0.645, 0.045, 0.355, 1.)
-                        })
+                        conf.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
                     })
                     .display(val::Flex)
                     .align_items(val::Center)
                     .justify_content(val::Center)
-                    // .and_padding(|conf| conf.set_y(px(4.)).set_x(px(11.)))
+                    // .and_padding(|conf| conf.y(px(4.)).x(px(11.)))
                     // .gap(px(4.))
-                    .and_background(|conf| conf.set_color(bg))
+                    .background(bg)
                     .and_border(|conf| {
                         conf.solid()
-                            .set_width(px(container_border_width))
-                            .set_color(border)
-                            .set_radius(px(container_radius))
+                            .width(px(container_border_width))
+                            .color(border)
+                            .radius(px(container_radius))
                     })
                     .and_size(|conf| {
-                        conf.set_all_widths(em(container_width))
-                            .set_all_heights(em(container_height))
+                        conf.all_widths(em(container_width))
+                            .all_heights(em(container_height))
                     })
                     .cursor(cursor)
                 })
                 .and_input(|conf| {
                     conf.and_transition(|conf| {
-                        conf.all(|val| {
-                            val.set_duration(sec(0.3))
-                                .cubic_bezier(0.645, 0.045, 0.355, 1.)
-                        })
+                        conf.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
                     })
-                    .and_size(|conf| conf.set_width(em(input_width)).set_height(em(input_height)))
-                    .and_text(|conf| conf.set_color(fg))
-                    .and_font(|conf| conf.set_size(em(font_size)))
+                    .and_size(|conf| conf.width(em(input_width)).height(em(input_height)))
+                    .text(fg)
+                    .and_font(|conf| conf.size(em(font_size)))
                     .and_border(|conf| conf.none())
-                    .and_background(|conf| conf.transparent())
+                    .background(Color::Transparent)
                     .add(St::WebkitAppearance, val::None)
                     .cursor(cursor)
                 })
@@ -988,9 +937,8 @@ impl ThemeImpl for Ant {
         let border_width = 1.;
 
         // side border conf for btns
-        let border_conf = move |conf: css::border::Side| {
-            conf.solid().set_width(px(border_width)).set_color(gray_300)
-        };
+        let border_conf =
+            move |conf: css::border::Side| conf.solid().width(px(border_width)).color(gray_300);
         // centered flex conf
         let centered_flex = move |conf: css::Style| {
             conf.display(val::Flex)
@@ -1036,39 +984,35 @@ impl ThemeImpl for Ant {
                         .and_position(|conf| conf.relative())
                         .and_transition(|conf| {
                             conf.all(|val| {
-                                val.set_duration(sec(0.3))
-                                    .cubic_bezier(0.645, 0.045, 0.355, 1.)
+                                val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.)
                             })
                         })
-                        .and_background(|conf| conf.set_color(bg))
+                        .background(bg)
                         .and_border(|conf| {
                             conf.solid()
-                                .set_width(px(border_width))
-                                .set_color(border)
-                                .set_radius(px(radius))
+                                .width(px(border_width))
+                                .color(border)
+                                .radius(px(radius))
                         })
-                        .and_size(|conf| conf.set_all_widths(em(width)).set_all_heights(em(height)))
+                        .and_size(|conf| conf.all_widths(em(width)).all_heights(em(height)))
                         .cursor(cursor)
                 })
                 .and_input(|conf| {
                     conf.and_transition(|conf| {
-                        conf.all(|val| {
-                            val.set_duration(sec(0.3))
-                                .cubic_bezier(0.645, 0.045, 0.355, 1.)
-                        })
+                        conf.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
                     })
-                    .and_size(|conf| conf.set_width(em(input_width)).set_height(em(input_height)))
-                    .and_text(|conf| conf.set_color(fg))
-                    .and_font(|conf| conf.set_size(em(font_size)))
+                    .and_size(|conf| conf.width(em(input_width)).height(em(input_height)))
+                    .text(fg)
+                    .and_font(|conf| conf.size(em(font_size)))
                     .and_border(|conf| conf.none())
-                    .and_background(|conf| conf.transparent())
+                    .background(Color::Transparent)
                     .add(St::WebkitAppearance, val::None)
                     .cursor(cursor)
                 })
                 .and_increment_button(|conf| {
                     conf.and_label(|conf| {
                         conf.and_label(|conf| {
-                            conf.and_font(|conf| conf.set_size(em(btn_lbl_font_size)))
+                            conf.and_font(|conf| conf.size(em(btn_lbl_font_size)))
                         })
                     })
                     .and_button(|conf| {
@@ -1076,25 +1020,22 @@ impl ThemeImpl for Ant {
                             .opacity(btns_opacity)
                             .and_transition(|conf| {
                                 conf.all(|val| {
-                                    val.set_duration(sec(0.3))
-                                        .cubic_bezier(0.645, 0.045, 0.355, 1.)
+                                    val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.)
                                 })
                             })
-                            .and_text(|conf| conf.set_color(secondary_text))
-                            .and_background(|conf| conf.set_color(white))
+                            .text(secondary_text)
+                            .background(white)
                             .and_border(|conf| {
-                                conf.none().set_top_right(px(radius)).and_left(border_conf)
+                                conf.none().top_right(px(radius)).and_left(border_conf)
                             })
-                            .and_size(|conf| {
-                                conf.set_width(em(btn_width)).set_height(em(inc_btn_height))
-                            })
-                            .and_position(|conf| conf.absolute().set_top(px(0)).set_right(px(0)))
+                            .and_size(|conf| conf.width(em(btn_width)).height(em(inc_btn_height)))
+                            .and_position(|conf| conf.absolute().top(px(0)).right(px(0)))
                     })
                 })
                 .and_decrement_button(|conf| {
                     conf.and_label(|conf| {
                         conf.and_label(|conf| {
-                            conf.and_font(|conf| conf.set_size(em(btn_lbl_font_size)))
+                            conf.and_font(|conf| conf.size(em(btn_lbl_font_size)))
                         })
                     })
                     .and_button(|conf| {
@@ -1102,22 +1043,19 @@ impl ThemeImpl for Ant {
                             .opacity(btns_opacity)
                             .and_transition(|conf| {
                                 conf.all(|val| {
-                                    val.set_duration(sec(0.3))
-                                        .cubic_bezier(0.645, 0.045, 0.355, 1.)
+                                    val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.)
                                 })
                             })
-                            .and_text(|conf| conf.set_color(secondary_text))
-                            .and_background(|conf| conf.set_color(white))
+                            .text(secondary_text)
+                            .background(white)
                             .and_border(|conf| {
                                 conf.none()
-                                    .set_bottom_right(px(radius))
+                                    .bottom_right(px(radius))
                                     .and_top(border_conf)
                                     .and_left(border_conf)
                             })
-                            .and_size(|conf| {
-                                conf.set_width(em(btn_width)).set_height(em(dec_btn_height))
-                            })
-                            .and_position(|conf| conf.absolute().set_bottom(px(0)).set_right(px(0)))
+                            .and_size(|conf| conf.width(em(btn_width)).height(em(dec_btn_height)))
+                            .and_position(|conf| conf.absolute().bottom(px(0)).right(px(0)))
                     })
                 })
         };
@@ -1133,19 +1071,16 @@ impl ThemeImpl for Ant {
                 .and_dialog_background(|conf| {
                     conf.and_position(|conf| {
                         conf.fixed()
-                            .set_right(px(0))
-                            .set_top(px(0))
-                            .set_bottom(px(0))
-                            .set_left(px(0))
-                            .set_z_index(500)
+                            .right(px(0))
+                            .top(px(0))
+                            .bottom(px(0))
+                            .left(px(0))
+                            .z_index(500)
                     })
-                    .and_background(|conf| conf.set_color(Hsla::new(0.0, 0., 0., 0.5)))
+                    .background(Hsla::new(0.0, 0., 0., 0.5))
                     .and_size(|conf| conf.full())
                     .and_transition(|conf| {
-                        conf.all(|val| {
-                            val.set_duration(sec(0.3))
-                                .cubic_bezier(0.645, 0.045, 0.355, 1.)
-                        })
+                        conf.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
                     })
                     .config(|conf| {
                         use dialog::State::*;
@@ -1173,9 +1108,9 @@ impl ThemeImpl for Ant {
                     })
                 })
                 .and_dialog(|conf| {
-                    conf.and_background(|conf| conf.set_color(white))
-                        .and_text(|conf| conf.set_color(primary_text))
-                        .and_border(|conf| conf.set_radius(px(2)))
+                    conf.background(white)
+                        .text(primary_text)
+                        .and_border(|conf| conf.radius(px(2)))
                         .display(val::Flex)
                         .flex_direction(val::Column)
                         .align_content(val::Center)
@@ -1202,13 +1137,11 @@ impl ThemeImpl for Ant {
 
         let styler = move |lens: &header_bar::HeaderBarLens<'a>| {
             header_bar::Style::default()
-                .and_title(|conf| {
-                    conf.and_label(|conf| conf.and_text(|conf| conf.set_color(title)))
-                })
+                .and_title(|conf| conf.and_label(|conf| conf.text(title)))
                 .and_subtitle(|conf| {
                     conf.and_label(|conf| {
-                        conf.and_text(|conf| conf.set_color(secondary_text))
-                            .and_font(|conf| conf.set_size(em(subtitle_font_size)))
+                        conf.text(secondary_text)
+                            .and_font(|conf| conf.size(em(subtitle_font_size)))
                     })
                 })
                 .and_titles_container(|conf| {
@@ -1218,29 +1151,29 @@ impl ThemeImpl for Ant {
                         .align_items(val::Center)
                         .align_content(val::Center)
                         .flex_wrap(val::Nowrap)
-                        .and_padding(|conf| conf.set_x(em(title_container_padding)))
+                        .and_padding(|conf| conf.x(em(title_container_padding)))
                 })
                 .and_close_button(|conf| {
                     conf.and_button(|conf| {
-                        conf.and_size(|conf| conf.set_all(em(button_size)))
+                        conf.and_size(|conf| conf.all(em(button_size)))
                             .config(|conf| {
                                 if let Some(ref btn) = lens.close_button {
                                     if *btn.mouse_over {
-                                        conf.and_text(|conf| conf.set_color(primary_text))
+                                        conf.text(primary_text)
                                     } else {
-                                        conf.and_text(|conf| conf.set_color(secondary_text))
+                                        conf.text(secondary_text)
                                     }
                                 } else {
                                     conf
                                 }
                             })
                             .cursor(val::Pointer)
-                            .and_background(|conf| conf.transparent())
+                            .background(Color::Transparent)
                             .and_border(|conf| conf.none())
                             .add(St::Outline, val::None)
                             .add(St::UserSelect, val::None)
                             .add(St::BoxSizing, val::BorderBox)
-                            .and_font(|conf| conf.set_size(em(1.)))
+                            .and_font(|conf| conf.size(em(1.)))
                             .and_margin(|conf| conf.zero())
                             .and_padding(|conf| conf.zero())
                     })
@@ -1251,11 +1184,9 @@ impl ThemeImpl for Ant {
                         .align_items(val::Stretch)
                         .align_content(val::Stretch)
                         .flex_wrap(val::Nowrap)
-                        .and_size(|conf| conf.set_all_heights(em(height)))
+                        .and_size(|conf| conf.all_heights(em(height)))
                         .and_border(|conf| {
-                            conf.and_bottom(|conf| {
-                                conf.solid().set_width(px(1)).set_color(gray_600)
-                            })
+                            conf.and_bottom(|conf| conf.solid().width(px(1)).color(gray_600))
                         })
                 })
         };
@@ -1264,7 +1195,7 @@ impl ThemeImpl for Ant {
 
     fn label<'a>(&self) -> label::ThemeStyler<'a> {
         let styler = move |_: &label::LabelLens<'a>| {
-            label::Style::default().and_label(|conf| conf.and_font(|conf| conf.set_size(em(1.))))
+            label::Style::default().and_label(|conf| conf.and_font(|conf| conf.size(em(1.))))
         };
         styler.into()
     }
@@ -1286,15 +1217,15 @@ impl ThemeImpl for Ant {
         let styler = move |lens: &progress_bar::ProgressBarLens<'a>| {
             progress_bar::Style::default()
                 .and_progress_bar(|conf| {
-                    conf.and_border(|conf| conf.set_radius(em(radius)).none())
+                    conf.and_border(|conf| conf.radius(em(radius)).none())
                         .background(gray_300)
-                        .and_size(|conf| conf.set_all_heights(em(height)).set_width(width))
-                        .and_transition(|conf| conf.all(|val| val.set_duration(sec(0.3)).ease()))
+                        .and_size(|conf| conf.all_heights(em(height)).width(width))
+                        .and_transition(|conf| conf.all(|val| val.duration(sec(0.3)).ease()))
                         .and_position(|conf| conf.relative())
                         .add(St::Overflow, val::Hidden)
                 })
                 .and_indicator(|conf| {
-                    conf.and_border(|conf| conf.set_radius(em(radius)))
+                    conf.and_border(|conf| conf.radius(em(radius)))
                         .config(|conf| {
                             let color = lens.color.copied().unwrap_or_else(|| {
                                 match lens.state {
@@ -1308,14 +1239,13 @@ impl ThemeImpl for Ant {
                         })
                         .and_transition(|conf| {
                             conf.all(|val| {
-                                val.set_duration(sec(0.3))
-                                    .cubic_bezier(0.645, 0.045, 0.355, 1.)
+                                val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.)
                             })
                         })
                         .and_position(|conf| conf.absolute())
                         .and_size(|conf| {
                             let width = (lens.value - lens.min).abs() / (lens.max - lens.min);
-                            conf.set_width(width as f32).set_all_heights(em(height))
+                            conf.width(width as f32).all_heights(em(height))
                         })
                 })
         };

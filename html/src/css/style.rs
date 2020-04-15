@@ -20,7 +20,7 @@ pub use seed::prelude::St;
 ///             .add("visibility", |conf| conf.set_duration(ms(150.)).ease())
 ///     })
 ///     .and_position(|conf| conf.absolute())
-///     .and_background(|conf| conf.set_color(Color::White))
+///     .and_background(|conf| conf.color(Color::White))
 ///     .and_border(|conf| {
 ///         conf.none()
 ///             .set_width(px(0))
@@ -86,10 +86,10 @@ impl Style {
     /// let mut style = Style::default();
     /// style.config(|conf| {
     ///     match angle {
-    ///         1 => conf.and_text(|conf| conf.set_color(Color::Red)),
-    ///         2 => conf.and_text(|conf| conf.set_color(Color::Blue)),
-    ///         3 => conf.and_text(|conf| conf.set_color(Color::Green)),
-    ///         _ => conf.and_text(|conf| conf.set_color(Color::Black)),
+    ///         1 => conf.text(Color::Red),
+    ///         2 => conf.text(Color::Blue),
+    ///         3 => conf.text(Color::Green),
+    ///         _ => conf.text(Color::Black),
     ///     }
     /// });
     /// ```

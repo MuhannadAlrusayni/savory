@@ -15,14 +15,14 @@ use std::borrow::Cow;
 ///         conf
 ///             // transition for all properties
 ///             .all(|conf| {
-///                 conf.set_duration(sec(0.3))
+///                 conf.duration(sec(0.3))
 ///                     .cubic_bezier(0.645, 0.045, 0.355, 1.)
 ///             })
 ///             // or transition for specific properties (e.g. opacity only)
 ///             .add("opacity", |conf| {
-///                 conf.set_duration(ms(150.))
+///                 conf.duration(ms(150.))
 ///                     .ease()
-///                     .set_delay(sec(0.5))
+///                     .delay(sec(0.5))
 ///             })
 ///         });
 /// ```
@@ -76,9 +76,9 @@ impl Transition {
 
 #[derive(Rich, Clone, Debug, PartialEq, From)]
 pub struct TransitionValue {
-    #[rich(write)]
+    #[rich(write(rename = duration))]
     pub duration: Duration,
-    #[rich(value_fns = {
+    #[rich(write(rename = timing_function), write(option, rename = try_timing_function), value_fns = {
         ease = val::Ease,
         linear = val::Linear,
         ease_in = val::EaseIn,
@@ -90,7 +90,7 @@ pub struct TransitionValue {
         inherit = val::Inherit,
     })]
     pub timing_function: Option<TimingFunction>,
-    #[rich(write)]
+    #[rich(write(rename = delay), write(option, rename = try_delay))]
     pub delay: Option<Delay>,
 }
 
@@ -116,47 +116,32 @@ impl TransitionValue {
 
 #[derive(Clone, Debug, Copy, PartialEq, Display, From)]
 pub enum TimingFunction {
-    #[from]
     Ease(val::Ease),
-    #[from]
     Linear(val::Linear),
-    #[from]
     EaseIn(val::EaseIn),
-    #[from]
     EaseOut(val::EaseOut),
-    #[from]
     EaseInOut(val::EaseInOut),
-    #[from]
     StepStart(val::StepStart),
-    #[from]
     StepEnd(val::StepEnd),
     #[display(fmt = "steps({}, {})", _0, _1)]
     Steps(usize, StepsPos),
     #[display(fmt = "cubic-bezier({}, {}, {}, {})", _0, _1, _2, _3)]
     CubicBezier(f32, f32, f32, f32),
-    #[from]
     Initial(val::Initial),
-    #[from]
     Inherit(val::Inherit),
 }
 
 #[derive(Clone, Debug, Copy, PartialEq, Display, From)]
 pub enum StepsPos {
-    #[from]
     Start(val::Start),
-    #[from]
     End(val::End),
 }
 
 #[derive(Clone, Debug, Copy, PartialEq, Display, From)]
 pub enum Duration {
-    #[from]
     Initial(val::Initial),
-    #[from]
     Inherit(val::Inherit),
-    #[from]
     Ms(Ms),
-    #[from]
     Sec(Sec),
 }
 
