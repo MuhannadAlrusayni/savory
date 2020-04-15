@@ -1,4 +1,4 @@
-use crate::css::{color::Color, unit::*, values as val, St, StyleMap, ToStyleMap};
+use crate::css::{color::Color, unit::*, values as val, St, StyleValues, UpdateStyleValues};
 use derive_rich::Rich;
 use std::borrow::Cow;
 
@@ -9,83 +9,62 @@ use std::borrow::Cow;
 /// let mut style = Style::default();
 /// style
 ///     .and_text(|conf| {
-///         conf.set_line_height(1.7)
+///         conf.line_height(1.7)
 ///             // we can pass Rgb, Rgba, Hsl, Hsla
-///             .set_color(Rgb::new(0.5, 0.1, 0.1))
+///             .color(Rgb::new(0.5, 0.1, 0.1))
 ///             // or we can use HTML colors
-///             .set_color(Color::BlueViolet)
-///             .set_align(val::Center)
-///             .set_transform(val::Capitalize)
-///             .set_indent(em(2.))
+///             .color(Color::BlueViolet)
+///             .align(val::Center)
+///             .transform(val::Capitalize)
+///             .indent(em(2.))
 ///     });
 /// ```
 #[derive(Rich, Clone, Debug, PartialEq, Default)]
 pub struct Text {
-    #[rich(write)]
+    #[rich(write(rename = color), write(option, rename = try_color))]
     pub color: Option<Color>,
-    #[rich(write)]
+    #[rich(write(rename = direction), write(option, rename = try_direction))]
     pub direction: Option<Direction>,
-    #[rich(write)]
+    #[rich(write(rename = letter_spacing), write(option, rename = try_letter_spacing))]
     pub letter_spacing: Option<LetterSpacing>,
-    #[rich(write)]
+    #[rich(write(rename = word_spacing), write(option, rename = try_word_spacing))]
     pub word_spacing: Option<WordSpacing>,
-    #[rich(write)]
+    #[rich(write(rename = line_height), write(option, rename = try_line_height))]
     pub line_height: Option<LineHeight>,
-    #[rich(write)]
+    #[rich(write(rename = align), write(option, rename = try_align))]
     pub align: Option<TextAlign>,
-    #[rich(write)]
+    #[rich(write(rename = align_last), write(option, rename = try_align_last))]
     pub align_last: Option<TextAlignLast>,
-    #[rich(write)]
+    #[rich(write(rename = justify), write(option, rename = try_justify))]
     pub justify: Option<TextJustify>,
     // TODO
-    // #[rich(write)]
+    // #[rich(write(rename = text_shadow), write(option, rename = try_text_shadow))]
     // pub text_shadow: Option<TextShadow>,
-    #[rich(write)]
+    #[rich(write(rename = indent), write(option, rename = try_indent))]
     pub indent: Option<TextIndent>,
-    #[rich(write(style = compose))]
+    #[rich(write(rename = decoration), write(option, rename = try_decoration), write(style = compose))]
     pub decoration: Option<TextDecoration>,
-    #[rich(write)]
+    #[rich(write(rename = white_space), write(option, rename = try_white_space))]
     pub white_space: Option<WhiteSpace>,
-    #[rich(write)]
+    #[rich(write(rename = unicode_bidi), write(option, rename = try_unicode_bidi))]
     pub unicode_bidi: Option<UnicodeBidi>,
-    #[rich(write)]
+    #[rich(write(rename = transform), write(option, rename = try_transform))]
     pub transform: Option<TextTransform>,
-    #[rich(write)]
+    #[rich(write(rename = overflow), write(option, rename = try_overflow))]
     pub overflow: Option<TextOverflow>,
-    #[rich(write)]
+    #[rich(write(rename = vertical_align), write(option, rename = try_vertical_align))]
     pub vertical_align: Option<VerticalAlign>,
-    #[rich(write)]
+    #[rich(write(rename = writing_mode), write(option, rename = try_writing_mode))]
     pub writing_mode: Option<WritingMode>,
-    #[rich(write)]
+    #[rich(write(rename = word_wrap), write(option, rename = try_word_wrap))]
     pub word_wrap: Option<WordWrap>,
-    #[rich(write)]
+    #[rich(write(rename = word_break), write(option, rename = try_word_break))]
     pub word_break: Option<WordBreak>,
 }
 
-impl_add_and_add_assign!(Text {
-    color
-    direction
-    letter_spacing
-    word_spacing
-    line_height
-    align
-    align_last
-    justify
-    indent
-    decoration
-    white_space
-    unicode_bidi
-    transform
-    overflow { clone }
-    vertical_align
-    writing_mode
-    word_wrap
-    word_break
-});
-
-impl ToStyleMap for Text {
-    fn style_map(&self) -> StyleMap {
-        StyleMap::default()
+impl UpdateStyleValues for Text {
+    fn update_style_values(self, values: StyleValues) -> StyleValues {
+        values
             .try_add(St::Color, self.color)
             .try_add(St::Direction, self.direction)
             .try_add(St::LetterSpacing, self.letter_spacing)
@@ -103,27 +82,25 @@ impl ToStyleMap for Text {
     }
 }
 
+impl<T: Into<Color>> From<T> for Text {
+    fn from(source: T) -> Self {
+        Self::default().color(source.into())
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum Direction {
-    #[from]
     Ltr(val::Ltr),
-    #[from]
     Rtl(val::Rtl),
-    #[from]
     Initial(val::Initial),
-    #[from]
     Inherit(val::Inherit),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum Spacing {
-    #[from]
     Normal(val::Normal),
-    #[from]
     Length(Length),
-    #[from]
     Initial(val::Initial),
-    #[from]
     Inherit(val::Inherit),
 }
 
@@ -132,33 +109,21 @@ pub type WordSpacing = Spacing;
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum LineHeight {
-    #[from]
     Normal(val::Normal),
-    #[from]
     Number(f32),
-    #[from]
     Length(Length),
-    #[from]
     Percent(Percent),
-    #[from]
     Initial(val::Initial),
-    #[from]
     Inherit(val::Inherit),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum TextAlign {
-    #[from]
     Left(val::Left),
-    #[from]
     Right(val::Right),
-    #[from]
     Center(val::Center),
-    #[from]
     Justify(val::Justify),
-    #[from]
     Initial(val::Initial),
-    #[from]
     Inherit(val::Inherit),
 }
 
@@ -196,7 +161,7 @@ impl Default for TextDecoration {
 }
 
 impl TextDecoration {
-    pub fn set_line(mut self, value: impl Into<TextDecorationLine>) -> Self {
+    pub fn line(mut self, value: impl Into<TextDecorationLine>) -> Self {
         match self {
             Self::Decoration { ref mut line, .. } => *line = Some(value.into()),
             _ => {
@@ -210,7 +175,7 @@ impl TextDecoration {
         self
     }
 
-    pub fn set_color(mut self, value: impl Into<TextDecorationColor>) -> Self {
+    pub fn color(mut self, value: impl Into<TextDecorationColor>) -> Self {
         match self {
             Self::Decoration { ref mut color, .. } => *color = Some(value.into()),
             _ => {
@@ -224,7 +189,7 @@ impl TextDecoration {
         self
     }
 
-    pub fn set_style(mut self, value: impl Into<TextDecorationStyle>) -> Self {
+    pub fn style(mut self, value: impl Into<TextDecorationStyle>) -> Self {
         match self {
             Self::Decoration { ref mut style, .. } => *style = Some(value.into()),
             _ => {
@@ -243,228 +208,142 @@ impl TextDecoration {
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum TextDecorationLine {
-    #[from]
     None(val::None),
-    #[from]
     Underline(val::Underline),
-    #[from]
     Overline(val::Overline),
-    #[from]
     LineThrough(val::LineThrough),
-    #[from]
     Initial(val::Initial),
-    #[from]
     Inherit(val::Inherit),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum TextDecorationColor {
-    #[from]
     Color(Color),
-    #[from]
     Initial(val::Initial),
-    #[from]
     Inherit(val::Inherit),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum TextDecorationStyle {
-    #[from]
     Solid(val::Solid),
-    #[from]
     Double(val::Double),
-    #[from]
     Dotted(val::Dotted),
-    #[from]
     Dashed(val::Dashed),
-    #[from]
     Wavy(val::Wavy),
-    #[from]
     Initial(val::Initial),
-    #[from]
     Inherit(val::Inherit),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum TextIndent {
-    #[from]
     Length(Length),
-    #[from]
     Percent(Percent),
-    #[from]
     Initial(val::Initial),
-    #[from]
     Inherit(val::Inherit),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum TextTransform {
-    #[from]
     None(val::None),
-    #[from]
     Capitalize(val::Capitalize),
-    #[from]
     Uppercase(val::Uppercase),
-    #[from]
     Lowercase(val::Lowercase),
-    #[from]
     Initial(val::Initial),
-    #[from]
     Inherit(val::Inherit),
 }
 
 #[derive(Clone, Debug, PartialEq, Display, From)]
 pub enum TextOverflow {
-    #[from]
     Clip(val::Clip),
-    #[from]
     Ellipsis(val::Ellipsis),
-    #[from]
     String(Cow<'static, str>),
-    #[from]
     Initial(val::Initial),
-    #[from]
     Inherit(val::Inherit),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum UnicodeBidi {
-    #[from]
     Normal(val::Normal),
-    #[from]
     Embed(val::Embed),
-    #[from]
     BidiOverride(val::BidiOverride),
-    #[from]
     Isolate(val::Isolate),
-    #[from]
     IsolateOverride(val::IsolateOverride),
-    #[from]
     Plaintext(val::Plaintext),
-    #[from]
     Initial(val::Initial),
-    #[from]
     Inherit(val::Inherit),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum VerticalAlign {
-    #[from]
     Baseline(val::Baseline),
-    #[from]
     Sub(val::Sub),
-    #[from]
     Super(val::Super),
-    #[from]
     Top(val::Top),
-    #[from]
     TextTop(val::TextTop),
-    #[from]
     Middle(val::Middle),
-    #[from]
     Bottom(val::Bottom),
-    #[from]
     TextBottom(val::TextBottom),
-    #[from]
     Length(Length),
-    #[from]
     Percent(Percent),
-    #[from]
     Initial(val::Initial),
-    #[from]
     Inherit(val::Inherit),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum WhiteSpace {
-    #[from]
     Normal(val::Normal),
-    #[from]
     Nowrap(val::Nowrap),
-    #[from]
     Pre(val::Pre),
-    #[from]
     PreLine(val::PreLine),
-    #[from]
     PreWrap(val::PreWrap),
-    #[from]
     Initial(val::Initial),
-    #[from]
     Inherit(val::Inherit),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum TextAlignLast {
-    #[from]
     Auto(val::Auto),
-    #[from]
     Left(val::Left),
-    #[from]
     Right(val::Right),
-    #[from]
     Center(val::Center),
-    #[from]
     Justify(val::Justify),
-    #[from]
     Start(val::Start),
-    #[from]
     End(val::End),
-    #[from]
     Initial(val::Initial),
-    #[from]
     Inherit(val::Inherit),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum TextJustify {
-    #[from]
     Auto(val::Auto),
-    #[from]
     InterWord(val::InterWord),
-    #[from]
     InterCharacter(val::InterCharacter),
-    #[from]
     None(val::None),
-    #[from]
     Initial(val::Initial),
-    #[from]
     Inherit(val::Inherit),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum WordBreak {
-    #[from]
     Normal(val::Normal),
-    #[from]
     BreakAll(val::BreakAll),
-    #[from]
     KeepAll(val::KeepAll),
-    #[from]
     BreakWord(val::BreakWord),
-    #[from]
     Initial(val::Initial),
-    #[from]
     Inherit(val::Inherit),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum WordWrap {
-    #[from]
     Normal(val::Normal),
-    #[from]
     BreakWord(val::BreakWord),
-    #[from]
     Initial(val::Initial),
-    #[from]
     Inherit(val::Inherit),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum WritingMode {
-    #[from]
     HorizontalTb(val::HorizontalTb),
-    #[from]
     VerticalRl(val::VerticalRl),
-    #[from]
     VerticalLr(val::VerticalLr),
 }

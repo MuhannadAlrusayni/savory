@@ -1,4 +1,4 @@
-use super::{St, StyleMap, ToStyleMap};
+use super::{St, StyleValues, UpdateStyleValues};
 use palette::{
     rgb::{Rgb, Rgba},
     Hsl, Hsla,
@@ -361,17 +361,17 @@ pub enum Color {
     YellowGreen,
 }
 
-impl ToStyleMap for Color {
-    fn style_map(&self) -> StyleMap {
-        StyleMap::default().add(St::Color, self)
+impl UpdateStyleValues for Color {
+    fn update_style_values(self, values: StyleValues) -> StyleValues {
+        values.add(St::Color, self)
     }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, From)]
 pub struct Opacity(f32);
 
-impl ToStyleMap for Opacity {
-    fn style_map(&self) -> StyleMap {
-        StyleMap::default().add(St::Opacity, self.0)
+impl UpdateStyleValues for Opacity {
+    fn update_style_values(self, values: StyleValues) -> StyleValues {
+        values.add(St::Opacity, self.0)
     }
 }

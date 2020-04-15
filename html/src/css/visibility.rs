@@ -1,16 +1,12 @@
-use crate::css::{values as val, St, StyleMap, ToStyleMap};
+use crate::css::{values as val, St, StyleValues, UpdateStyleValues};
 
 #[derive(Clone, Debug, Copy, PartialEq, Eq, Display, From)]
+#[display(fmt = "visibility: {};")]
 pub enum Visibility {
-    #[from]
     Visible(val::Visible),
-    #[from]
     Hidden(val::Hidden),
-    #[from]
     Collapse(val::Collapse),
-    #[from]
     Initial(val::Initial),
-    #[from]
     Inherit(val::Inherit),
 }
 
@@ -24,8 +20,8 @@ impl From<bool> for Visibility {
     }
 }
 
-impl ToStyleMap for Visibility {
-    fn style_map(&self) -> StyleMap {
-        StyleMap::default().add(St::Visibility, self)
+impl UpdateStyleValues for Visibility {
+    fn update_style_values(self, values: StyleValues) -> StyleValues {
+        values.add(St::Visibility, self.to_string())
     }
 }

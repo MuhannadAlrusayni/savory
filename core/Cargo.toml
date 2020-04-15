@@ -8,9 +8,10 @@ readme = "../README.MD"
 keywords = ["web", "seed", "SPA", "wasm", "framework"]
 categories = ["gui", "wasm", "web-programming"]
 license = "MIT OR Apache-2.0"
-repository = "https://gitlab.com/MAlrusayni/savory"
+repository = "https://gitlab.com/MAlrusayni/savory/tree/master/core"
 homepage = "https://gitlab.com/MAlrusayni/savory"
-documentation = "https://docs.rs/savory"
+documentation = "https://docs.rs/savory_core"
+include = [ "src/**/*", "Cargo.toml", "README.MD" ]
 
 [badges]
 maintenance = { status = "actively-developed" }

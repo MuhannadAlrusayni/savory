@@ -1,4 +1,4 @@
-use crate::css::{unit::*, St, StyleMap, ToStyleMap};
+use crate::css::{unit::*, St, StyleValues, UpdateStyleValues};
 
 /// ```
 /// use savory::css::{Style, unit::{px, em}};
@@ -38,8 +38,8 @@ where
     }
 }
 
-impl ToStyleMap for Gap {
-    fn style_map(&self) -> StyleMap {
-        StyleMap::default().add(St::Gap, self)
+impl UpdateStyleValues for Gap {
+    fn update_style_values(self, values: StyleValues) -> StyleValues {
+        values.add(St::Gap, self)
     }
 }

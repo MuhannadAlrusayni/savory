@@ -1,42 +1,39 @@
 use crate::css::{
     unit::{self, *},
-    values as val, St, StyleMap, ToStyleMap,
+    values as val, St, StyleValues, UpdateStyleValues,
 };
 use derive_rich::Rich;
 
 /// ```
 /// use savory::css::{values as val, Style, unit::px};
 ///
-/// let mut style = Style::default();
-/// style
+/// Style::default()
 ///     .and_margin(|conf| {
-///         conf.set_x(val::Auto)
-///             .set_y(px(4))
+///         conf.x(val::Auto) // equal to conf.left(val::Auto).right(val::Auto)
+///             .y(px(4))
 ///     });
 /// ```
 #[derive(Rich, Clone, Debug, Copy, PartialEq, From, Default)]
 pub struct Margin {
-    #[rich(read, write)]
-    top: Option<Length>,
-    #[rich(read, write)]
-    right: Option<Length>,
-    #[rich(read, write)]
-    bottom: Option<Length>,
-    #[rich(read, write)]
-    left: Option<Length>,
+    #[rich(write(rename = top), write(option, rename = try_top))]
+    pub top: Option<Length>,
+    #[rich(write(rename = right), write(option, rename = try_right))]
+    pub right: Option<Length>,
+    #[rich(write(rename = bottom), write(option, rename = try_bottom))]
+    pub bottom: Option<Length>,
+    #[rich(write(rename = left), write(option, rename = try_left))]
+    pub left: Option<Length>,
 }
-
-impl_add_and_add_assign!(Margin { top right bottom left });
 
 impl From<Length> for Margin {
     fn from(source: Length) -> Self {
-        Self::default().set_all(source)
+        Self::default().all(source)
     }
 }
 
-impl ToStyleMap for Margin {
-    fn style_map(&self) -> StyleMap {
-        StyleMap::default()
+impl UpdateStyleValues for Margin {
+    fn update_style_values(self, values: StyleValues) -> StyleValues {
+        values
             .try_add(St::MarginTop, self.top)
             .try_add(St::MarginRight, self.right)
             .try_add(St::MarginBottom, self.bottom)
@@ -45,46 +42,43 @@ impl ToStyleMap for Margin {
 }
 
 impl Margin {
-    pub fn set_all(self, value: impl Into<Length>) -> Self {
+    pub fn all(self, value: impl Into<Length>) -> Self {
         let value = value.into();
-        self.set_right(value)
-            .set_top(value)
-            .set_left(value)
-            .set_bottom(value)
+        self.right(value).top(value).left(value).bottom(value)
     }
 
     pub fn zero(self) -> Self {
-        self.set_all(px(0.))
+        self.all(px(0.))
     }
 
-    pub fn set_x(self, value: impl Into<Length>) -> Self {
+    pub fn x(self, value: impl Into<Length>) -> Self {
         let value = value.into();
-        self.set_left(value).set_right(value)
+        self.left(value).right(value)
     }
 
-    pub fn set_y(self, value: impl Into<Length>) -> Self {
+    pub fn y(self, value: impl Into<Length>) -> Self {
         let value = value.into();
-        self.set_top(value).set_bottom(value)
+        self.top(value).bottom(value)
     }
 
-    pub fn set_horizontal(self, value: impl Into<Length>) -> Self {
-        self.set_y(value)
+    pub fn horizontal(self, value: impl Into<Length>) -> Self {
+        self.y(value)
     }
 
-    pub fn set_vertical(self, value: impl Into<Length>) -> Self {
-        self.set_x(value)
+    pub fn vertical(self, value: impl Into<Length>) -> Self {
+        self.x(value)
     }
 
     pub fn auto(self) -> Self {
-        self.set_all(val::Auto)
+        self.all(val::Auto)
     }
 
     pub fn full(self) -> Self {
-        self.set_all(1.)
+        self.all(1.)
     }
 
     pub fn half(self) -> Self {
-        self.set_all(0.5)
+        self.all(0.5)
     }
 }
 

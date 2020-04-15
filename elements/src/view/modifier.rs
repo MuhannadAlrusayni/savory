@@ -63,13 +63,13 @@ where
 
     fn view(&self) -> Self::Output {
         let style = css::Style::default()
-            .try_set_padding(self.padding)
-            .try_set_margin(self.margin)
-            .try_set_size(self.size)
-            .try_set_font(self.font.clone())
-            .try_set_border(self.border)
-            .try_set_opacity(self.opacity)
-            .try_set_position(self.position);
+            .try_padding(self.padding)
+            .try_margin(self.margin)
+            .try_size(self.size)
+            .try_font(self.font.clone())
+            .try_border(self.border)
+            .try_opacity(self.opacity)
+            .try_position(self.position);
 
         self.target.view().add(&style)
     }

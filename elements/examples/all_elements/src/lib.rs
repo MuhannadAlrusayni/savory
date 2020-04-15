@@ -37,7 +37,7 @@ impl AppElement for MyApp {
             Button::build(Msg::DialogChild)
                 .label("hmm")
                 .init(orders)
-                .and_margin(|conf| conf.set_y(px(15))),
+                .and_margin(|conf| conf.y(px(15))),
         )
         .title("Title for dialog")
         .subtitle("Some description here")
@@ -60,8 +60,8 @@ impl AppElement for MyApp {
             .max(25.)
             .value(15.)
             .init(orders)
-            .and_size(|conf| conf.set_min_width(px(40)))
-            .and_margin(|conf| conf.set_all(px(4)));
+            .and_size(|conf| conf.min_width(px(40)))
+            .and_margin(|conf| conf.all(px(4)));
 
         let mut pop_btn = Button::build(Msg::PopoverButton)
             .label("Popover button")
