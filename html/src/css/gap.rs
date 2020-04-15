@@ -11,7 +11,6 @@ use crate::css::{unit::*, St, StyleValues, UpdateStyleValues};
 ///      .set_gap((em(4.), em(8.)));
 /// ```
 #[derive(Clone, Debug, Copy, PartialEq, Display)]
-#[display(fmt = "gap: {};")]
 pub enum Gap {
     Value(LengthPercent),
     #[display(fmt = "{} {}", _0, _1)]

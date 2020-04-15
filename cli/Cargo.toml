@@ -1,6 +1,6 @@
 [package]
 name = "savory"
-description = "Library for building user interface"
+description = "CLI helper used to build elements for Savory"
 version = "0.0.1"
 authors = ["Muhannad Alrusayni <Muhannad.Alrusayni@gmail.com>"]
 edition = "2018"
@@ -8,7 +8,7 @@ readme = "../README.MD"
 keywords = ["savory", "cli", "application"]
 categories = ["command-line-interface"]
 license = "MIT OR Apache-2.0"
-repository = "https://gitlab.com/MAlrusayni/savory"
+repository = "https://gitlab.com/MAlrusayni/savory/tree/master/cli"
 homepage = "https://gitlab.com/MAlrusayni/savory"
 documentation = "https://docs.rs/savory"
 

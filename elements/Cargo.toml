@@ -8,8 +8,8 @@ readme = "../README.MD"
 keywords = ["savory", "seed", "element", "component", "SPA"]
 categories = ["gui", "wasm", "web-programming"]
 license = "MIT OR Apache-2.0"
-repository = "https://gitlab.com/MAlrusayni/savory/elements"
-homepage = "https://gitlab.com/MAlrusayni/savory/elements"
+repository = "https://gitlab.com/MAlrusayni/savory/tree/master/elements"
+homepage = "https://gitlab.com/MAlrusayni/savory"
 documentation = "https://docs.rs/savory_elements"
 
 [badges]

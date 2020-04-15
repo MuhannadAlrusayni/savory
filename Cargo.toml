@@ -2,10 +2,11 @@
 members = [
   # crates
   "core",
-  "cli",
-  "derive",
   "html",
   "elements",
+  # helper crates
+  "cli",
+  "derive",
   # examples
   "elements/examples/counter",
   "elements/examples/all_elements",

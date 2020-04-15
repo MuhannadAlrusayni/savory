@@ -1,15 +1,15 @@
 [package]
 name = "savory_html"
-description = "Plain HTML views for Savory"
+description = "Typed HTML for Savory"
 version = "0.3.0"
 authors = ["Muhannad Alrusayni <Muhannad.Alrusayni@gmail.com>"]
 edition = "2018"
 readme = "README.MD"
-keywords = ["savory", "seed", "views", "html", "web"]
+keywords = ["savory", "seed", "css", "html", "web"]
 categories = ["gui", "wasm", "web-programming"]
 license = "MIT OR Apache-2.0"
-repository = "https://gitlab.com/MAlrusayni/savory/html"
-homepage = "https://gitlab.com/MAlrusayni/savory/html"
+repository = "https://gitlab.com/MAlrusayni/savory/tree/master/html"
+homepage = "https://gitlab.com/MAlrusayni/savory"
 documentation = "https://docs.rs/savory_html"
 
 [badges]

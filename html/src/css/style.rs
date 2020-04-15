@@ -1,6 +1,5 @@
 use super::*;
 use crate::prelude::{El, UpdateEl};
-use derive_rich::Rich;
 use indexmap::IndexMap;
 use std::borrow::Cow;
 

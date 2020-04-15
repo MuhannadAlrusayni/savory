@@ -6,9 +6,9 @@ authors = ["Muhannad Alrusayni <Muhannad.Alrusayni@gmail.com>"]
 edition = "2018"
 readme = "../README.MD"
 license = "MIT OR Apache-2.0"
-repository = "https://gitlab.com/MAlrusayni/savory"
+repository = "https://gitlab.com/MAlrusayni/savory/tree/master/derive"
 homepage = "https://gitlab.com/MAlrusayni/savory"
-documentation = "https://docs.rs/savory"
+documentation = "https://docs.rs/savory_elements"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
