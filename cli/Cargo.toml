@@ -11,7 +11,7 @@ license = "MIT OR Apache-2.0"
 repository = "https://gitlab.com/MAlrusayni/savory/tree/master/cli"
 homepage = "https://gitlab.com/MAlrusayni/savory"
 documentation = "https://docs.rs/savory"
-include = [ "src/**/*", "Cargo.toml", "README" ]
+include = [ "src/**/*", "Cargo.toml", "README.MD" ]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
