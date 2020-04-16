@@ -136,6 +136,7 @@ construct_fn! {
     cm(Cm) -> Length,
     inch(In) -> Length,
     percent(Percent) -> Percent,
+    pct(Percent) -> Percent,
     // time fns
     ms(Ms) -> Ms,
     sec(Sec) -> Sec,
