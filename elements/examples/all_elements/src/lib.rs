@@ -113,8 +113,8 @@ impl View for MyApp {
             // .full_size()
             .column()
             .gap(px(4))
-            .add_items(vec![
-                &self.button,
+            .extend(vec![
+                &self.button as &dyn View<Output = Node<Msg>>,
                 &self.popover,
                 &self.checkbox,
                 &self.radio,
