@@ -225,20 +225,6 @@ where
     }
 }
 
-// impl<V, PMsg> ExtendBuilder<V> for Flexbox<PMsg>
-// where
-//     V: View<Output = Node<PMsg>>,
-// {
-//     fn extend<T>(mut self, iter: T) -> Self
-//     where
-//         T: IntoIterator<Item = V>,
-//     {
-//         self.items
-//             .extend(iter.into_iter().map(|content| Item::from(content)));
-//         self
-//     }
-// }
-
 impl<'a, PMsg> ExtendBuilder<&'a dyn View<Output = Node<PMsg>>> for Flexbox<PMsg> {
     fn extend<T>(mut self, iter: T) -> Self
     where

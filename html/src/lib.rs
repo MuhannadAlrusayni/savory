@@ -19,7 +19,3 @@ pub mod prelude {
     };
     pub use seed::prelude::{El, ElRef, Node, UpdateEl, UpdateElForIterator};
 }
-// pub use seed::prelude::{
-//     AfterMount, App, BeforeMount, El, ElRef, GetElement, MessageMapper, MountType, Node,
-//     Orders, RenderTimestampDelta, UpdateEl, UpdateElForIterator, Url, UrlHandling, View,
-// };

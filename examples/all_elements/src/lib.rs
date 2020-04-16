@@ -110,7 +110,6 @@ impl View for MyApp {
     fn view(&self) -> Self::Output {
         Flexbox::new()
             .center()
-            // .full_size()
             .column()
             .gap(px(4))
             .extend(vec![
