@@ -80,5 +80,6 @@ pub mod prelude {
             modifier::{IntoModifier, Modifier},
         },
     };
+    pub use derive_rich::Rich;
     pub use savory_derive::Element;
 }
