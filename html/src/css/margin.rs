@@ -31,6 +31,18 @@ impl From<Length> for Margin {
     }
 }
 
+impl From<unit::Length> for Margin {
+    fn from(source: unit::Length) -> Self {
+        Self::default().all(source)
+    }
+}
+
+impl From<Percent> for Margin {
+    fn from(source: Percent) -> Self {
+        Self::default().all(source)
+    }
+}
+
 impl UpdateStyleValues for Margin {
     fn update_style_values(self, values: StyleValues) -> StyleValues {
         values

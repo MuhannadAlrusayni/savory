@@ -31,6 +31,18 @@ impl From<Length> for Padding {
     }
 }
 
+impl From<unit::Length> for Padding {
+    fn from(source: unit::Length) -> Self {
+        Self::default().all(source)
+    }
+}
+
+impl From<Percent> for Padding {
+    fn from(source: Percent) -> Self {
+        Self::default().all(source)
+    }
+}
+
 impl UpdateStyleValues for Padding {
     fn update_style_values(self, values: StyleValues) -> StyleValues {
         values

@@ -9,17 +9,17 @@ use std::default::Default;
 
 #[derive(Rich, Element)]
 #[element(style(item), events(item))]
-pub struct Item<'a, PMsg> {
+pub struct Item<PMsg> {
     #[rich(write(style = compose))]
     pub events: Events<PMsg>,
     #[rich(write(style = compose))]
-    pub styler: Option<Styler<'a, PMsg>>,
+    pub styler: Option<Styler<PMsg>>,
     #[rich(write(rename = theme))]
     #[element(theme_lens)]
     pub theme: Theme,
 
     #[rich(write(style = compose))]
-    pub content: &'a dyn View<Output = Node<PMsg>>,
+    pub content: Node<PMsg>,
     #[rich(write(rename = order))]
     #[element(theme_lens)]
     pub order: Option<Order>,
@@ -47,7 +47,7 @@ pub struct Item<'a, PMsg> {
     pub flatten: bool,
 }
 
-impl<'a, PMsg> View for Item<'a, PMsg> {
+impl<PMsg> View for Item<PMsg> {
     type Output = Node<PMsg>;
 
     fn view(&self) -> Self::Output {
@@ -60,29 +60,35 @@ impl<'a, PMsg> View for Item<'a, PMsg> {
     }
 }
 
-impl<'a, PMsg> StyledView for Item<'a, PMsg> {
+impl<PMsg> StyledView for Item<PMsg> {
     type Style = Style;
 
     fn styled_view(&self, style: Style) -> Self::Output {
         if self.is_flatten() {
-            self.content.view()
+            self.content.clone()
         } else {
             html::div()
                 .set(att::class("flexbox-item"))
-                .add(self.content.view())
+                .add(self.content.clone())
         }
         .add(&self.events.item)
         .add(&style.item)
     }
 }
 
-impl<'a, PMsg> Item<'a, PMsg> {
-    pub fn new(content: &'a dyn View<Output = Node<PMsg>>) -> Self {
+impl<PMsg> Item<PMsg> {
+    pub fn group(self, group_id: impl Into<Order>) -> Self {
+        self.order(group_id)
+    }
+}
+
+impl<PMsg> From<Node<PMsg>> for Item<PMsg> {
+    fn from(node: Node<PMsg>) -> Self {
         Self {
             events: Events::default(),
             styler: None,
             theme: Theme::default(),
-            content: content,
+            content: node,
             order: None,
             grow: None,
             shrink: None,
@@ -91,11 +97,22 @@ impl<'a, PMsg> Item<'a, PMsg> {
             flatten: true,
         }
     }
+}
 
-    pub fn group(self, group_id: impl Into<Order>) -> Self {
-        self.order(group_id)
+impl<'a, PMsg> From<&'a dyn View<Output = Node<PMsg>>> for Item<PMsg> {
+    fn from(source: &'a dyn View<Output = Node<PMsg>>) -> Self {
+        Self::from(source.view())
     }
 }
 
-pub type Styler<'a, PMsg> = theme::Styler<Item<'a, PMsg>, Style>;
+impl<T, PMsg> From<&T> for Item<PMsg>
+where
+    T: View<Output = Node<PMsg>>,
+{
+    fn from(view: &T) -> Self {
+        Self::from(view.view())
+    }
+}
+
+pub type Styler<PMsg> = theme::Styler<Item<PMsg>, Style>;
 pub type ThemeStyler<'a> = theme::Styler<ItemLens<'a>, Style>;

@@ -12,17 +12,17 @@ use item::Item;
 
 #[derive(Element, Rich)]
 #[element(style(flexbox), events(flexbox))]
-pub struct Flexbox<'a, PMsg> {
+pub struct Flexbox<PMsg> {
     #[rich(write(style = compose))]
     pub events: Events<PMsg>,
     #[rich(write(style = compose))]
-    pub styler: Option<Styler<'a, PMsg>>,
+    pub styler: Option<Styler<PMsg>>,
     #[rich(write(rename = theme))]
     #[element(theme_lens)]
     pub theme: Theme,
 
     #[rich(write(style = compose), write(rename = items))]
-    pub items: Vec<Item<'a, PMsg>>,
+    pub items: Vec<Item<PMsg>>,
     #[rich(value_fns = {
         row = val::Row,
         reversed_row = val::RowReverse,
@@ -52,13 +52,13 @@ pub struct Flexbox<'a, PMsg> {
     pub gap: Option<Gap>,
 }
 
-impl<'a, PMsg> Default for Flexbox<'a, PMsg> {
+impl<PMsg> Default for Flexbox<PMsg> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<'a, PMsg> Flexbox<'a, PMsg> {
+impl<PMsg> Flexbox<PMsg> {
     pub fn new() -> Self {
         Self {
             events: Events::default(),
@@ -74,16 +74,16 @@ impl<'a, PMsg> Flexbox<'a, PMsg> {
         }
     }
 
-    pub fn item_with(content: &'a dyn View<Output = Node<PMsg>>) -> Item<'a, PMsg> {
-        Item::new(content)
+    pub fn item(item: impl Into<Item<PMsg>>) -> Item<PMsg> {
+        item.into()
     }
 
-    pub fn add(mut self, el: &'a dyn View<Output = Node<PMsg>>) -> Self {
-        self.items.push(Item::new(el));
+    pub fn add(mut self, item: impl Into<Item<PMsg>>) -> Self {
+        self.items.push(item.into());
         self
     }
 
-    pub fn try_add(self, item: Option<&'a dyn View<Output = Node<PMsg>>>) -> Self {
+    pub fn try_add(self, item: Option<impl Into<Item<PMsg>>>) -> Self {
         if let Some(item) = item {
             self.add(item)
         } else {
@@ -91,12 +91,12 @@ impl<'a, PMsg> Flexbox<'a, PMsg> {
         }
     }
 
-    pub fn add_item(mut self, item: impl Into<Item<'a, PMsg>>) -> Self {
+    pub fn add_item(mut self, item: impl Into<Item<PMsg>>) -> Self {
         self.items.push(item.into());
         self
     }
 
-    pub fn try_add_item(self, item: Option<impl Into<Item<'a, PMsg>>>) -> Self {
+    pub fn try_add_item(self, item: Option<impl Into<Item<PMsg>>>) -> Self {
         if let Some(item) = item {
             self.add_item(item)
         } else {
@@ -106,32 +106,23 @@ impl<'a, PMsg> Flexbox<'a, PMsg> {
 
     pub fn add_item_and(
         mut self,
-        content: &'a dyn View<Output = Node<PMsg>>,
-        config_item: impl FnOnce(Item<'a, PMsg>) -> Item<'a, PMsg> + 'static,
+        content: impl Into<Item<PMsg>>,
+        config_item: impl FnOnce(Item<PMsg>) -> Item<PMsg> + 'static,
     ) -> Self {
-        self.items.push(config_item(Item::new(content)));
+        self.items.push(config_item(content.into()));
         self
     }
 
     pub fn try_add_item_and(
         self,
-        node: Option<&'a dyn View<Output = Node<PMsg>>>,
-        config_item: impl FnOnce(Item<'a, PMsg>) -> Item<'a, PMsg> + 'static,
+        node: Option<impl Into<Item<PMsg>>>,
+        config_item: impl FnOnce(Item<PMsg>) -> Item<PMsg> + 'static,
     ) -> Self {
         if let Some(node) = node {
             self.add_item_and(node, config_item)
         } else {
             self
         }
-    }
-
-    pub fn add_items(mut self, items: Vec<&'a dyn View<Output = Node<PMsg>>>) -> Self {
-        let items = items
-            .into_iter()
-            .map(|item| Item::new(item))
-            .collect::<Vec<Item<'a, PMsg>>>();
-        self.items.extend(items);
-        self
     }
 
     pub fn normal(self) -> Self {
@@ -180,7 +171,7 @@ impl<'a, PMsg> Flexbox<'a, PMsg> {
     }
 }
 
-impl<'a, PMsg> View for Flexbox<'a, PMsg> {
+impl<PMsg> View for Flexbox<PMsg> {
     type Output = Node<PMsg>;
 
     fn view(&self) -> Self::Output {
@@ -193,7 +184,7 @@ impl<'a, PMsg> View for Flexbox<'a, PMsg> {
     }
 }
 
-impl<'a, PMsg> StyledView for Flexbox<'a, PMsg> {
+impl<PMsg> StyledView for Flexbox<PMsg> {
     type Style = Style;
 
     fn styled_view(&self, style: Style) -> Self::Output {
@@ -204,13 +195,60 @@ impl<'a, PMsg> StyledView for Flexbox<'a, PMsg> {
             .add(
                 self.items
                     .iter()
-                    // FIXME: find a way to generate items styles and call
-                    // styled_view() (if that make sense :D)
                     .map(|item| item.view())
                     .collect::<Vec<Node<PMsg>>>(),
             )
     }
 }
 
-pub type Styler<'a, PMsg> = theme::Styler<Flexbox<'a, PMsg>, Style>;
+impl<PMsg> ExtendBuilder<Item<PMsg>> for Flexbox<PMsg> {
+    fn extend<T>(mut self, iter: T) -> Self
+    where
+        T: IntoIterator<Item = Item<PMsg>>,
+    {
+        self.items.extend(iter);
+        self
+    }
+}
+
+impl<'a, V, PMsg> ExtendBuilder<&'a V> for Flexbox<PMsg>
+where
+    V: View<Output = Node<PMsg>>,
+{
+    fn extend<T>(mut self, iter: T) -> Self
+    where
+        T: IntoIterator<Item = &'a V>,
+    {
+        self.items
+            .extend(iter.into_iter().map(|content| Item::from(content)));
+        self
+    }
+}
+
+// impl<V, PMsg> ExtendBuilder<V> for Flexbox<PMsg>
+// where
+//     V: View<Output = Node<PMsg>>,
+// {
+//     fn extend<T>(mut self, iter: T) -> Self
+//     where
+//         T: IntoIterator<Item = V>,
+//     {
+//         self.items
+//             .extend(iter.into_iter().map(|content| Item::from(content)));
+//         self
+//     }
+// }
+
+impl<'a, PMsg> ExtendBuilder<&'a dyn View<Output = Node<PMsg>>> for Flexbox<PMsg> {
+    fn extend<T>(mut self, iter: T) -> Self
+    where
+        T: IntoIterator<Item = &'a dyn View<Output = Node<PMsg>>>,
+    {
+        self.items
+            .extend(iter.into_iter().map(|content| Item::from(content)));
+        self
+    }
+}
+
+pub type Styler<PMsg> = theme::Styler<Flexbox<PMsg>, Style>;
 pub type ThemeStyler<'a> = theme::Styler<FlexboxLens<'a>, Style>;

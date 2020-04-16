@@ -46,21 +46,9 @@ impl<PMsg> StyledView for Label<PMsg> {
     }
 }
 
-impl<PMsg> From<Cow<'static, str>> for Label<PMsg> {
-    fn from(source: Cow<'static, str>) -> Self {
-        Self::new(source)
-    }
-}
-
-impl<PMsg> From<String> for Label<PMsg> {
-    fn from(source: String) -> Self {
-        Self::new(source)
-    }
-}
-
-impl<PMsg> From<&'static str> for Label<PMsg> {
-    fn from(source: &'static str) -> Self {
-        Self::new(source)
+impl<T: ToString, PMsg> From<T> for Label<PMsg> {
+    fn from(source: T) -> Self {
+        Self::new(source.to_string())
     }
 }
 

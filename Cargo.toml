@@ -9,5 +9,6 @@ members = [
   "derive",
   # examples
   "elements/examples/counter",
+  "elements/examples/full_counter",
   "elements/examples/all_elements",
 ]

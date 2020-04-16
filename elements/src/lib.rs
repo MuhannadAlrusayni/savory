@@ -51,6 +51,7 @@ extern crate derive_more;
 
 pub mod element;
 pub mod theme;
+pub mod traits;
 pub mod view;
 
 pub use self::prelude::*;
@@ -70,6 +71,7 @@ pub mod prelude {
             switch::{self, Switch},
         },
         theme::{self, Theme, ThemeChanged, ThemeLens},
+        traits::ExtendBuilder,
         view::{
             flexbox::{self, Flexbox},
             header_bar::{self, HeaderBar},

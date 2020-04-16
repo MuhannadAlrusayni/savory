@@ -51,6 +51,18 @@ impl From<Length> for Size {
     }
 }
 
+impl From<unit::Length> for Size {
+    fn from(source: unit::Length) -> Self {
+        Self::default().all(source)
+    }
+}
+
+impl From<Percent> for Size {
+    fn from(source: Percent) -> Self {
+        Self::default().all(source)
+    }
+}
+
 impl Size {
     pub fn full(self) -> Self {
         self.width(1.0).height(1.0)
