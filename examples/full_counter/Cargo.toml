@@ -1,5 +1,5 @@
 [package]
-name = "counter"
+name = "full_counter"
 version = "0.1.0"
 authors = ["Muhannad Alrusayni <Muhannad.Alrusayni@gmail.com>"]
 edition = "2018"
@@ -11,6 +11,8 @@ publish = false
 crate-type = ["cdylib"]
 
 [dependencies]
-savory_core = { path = "../../../core" }
-savory_elements = { path = "../../" }
+savory_core = { path = "../../core" }
+savory_elements = { path = "../../elements" }
+savory_html = { path = "../../html" }
 wasm-bindgen = "0.2.55"
+derive_rich = "0.4.1"

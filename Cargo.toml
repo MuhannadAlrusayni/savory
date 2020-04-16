@@ -8,7 +8,7 @@ members = [
   "cli",
   "derive",
   # examples
-  "elements/examples/counter",
-  "elements/examples/full_counter",
-  "elements/examples/all_elements",
+  "examples/simple_counter",
+  "examples/full_counter",
+  "examples/all_elements",
 ]
