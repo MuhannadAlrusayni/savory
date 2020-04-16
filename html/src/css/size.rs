@@ -63,6 +63,12 @@ impl From<Percent> for Size {
     }
 }
 
+impl From<f32> for Size {
+    fn from(source: f32) -> Self {
+        Self::default().all(source)
+    }
+}
+
 impl Size {
     pub fn full(self) -> Self {
         self.width(1.0).height(1.0)
