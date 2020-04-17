@@ -189,7 +189,7 @@ impl<PMsg> StyledView for Flexbox<PMsg> {
 
     fn styled_view(&self, style: Style) -> Self::Output {
         html::div()
-            .set(att::class("flexbox"))
+            .class("flexbox")
             .set(&self.events.flexbox)
             .set(&style.flexbox)
             .add(

@@ -67,9 +67,7 @@ impl<PMsg> StyledView for Item<PMsg> {
         if self.is_flatten() {
             self.content.clone()
         } else {
-            html::div()
-                .set(att::class("flexbox-item"))
-                .add(self.content.clone())
+            html::div().class("flexbox-item").add(self.content.clone())
         }
         .add(&self.events.item)
         .add(&style.item)

@@ -112,14 +112,14 @@ impl<PMsg: 'static> StyledView for Switch<PMsg> {
 
     fn styled_view(&self, style: Style) -> Self::Output {
         let button = html::div()
-            .set(att::class("button"))
+            .class("button")
             .set(&style.button)
             .set(&self.local_events.button)
             .map_msg_with(&self.msg_mapper)
             .add(&self.events.button);
 
         html::button()
-            .set(att::class("switch"))
+            .class("switch")
             .set(att::disabled(self.disabled))
             .set(&style.switch)
             .set(&self.local_events.switch)

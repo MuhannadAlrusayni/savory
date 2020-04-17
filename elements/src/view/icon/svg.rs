@@ -51,7 +51,7 @@ impl<PMsg> StyledView for Svg<PMsg> {
 
     fn styled_view(&self, style: Self::Style) -> Self::Output {
         html::svg()
-            .set(att::class("svg-icon"))
+            .class("svg-icon")
             .try_set(self.view_box)
             .set(&style.svg_icon)
             .set(&self.events.svg_icon)

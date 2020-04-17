@@ -74,7 +74,7 @@ impl<PMsg: 'static> StyledView for HeaderBar<PMsg> {
         let subtitle = self.subtitle.as_ref().map(|s| s.styled_view(subtitle));
 
         let titles = html::div()
-            .set(att::class("titles-container"))
+            .class("titles-container")
             .set(&titles_container)
             .set(&self.events.titles_container)
             .try_add(title)
@@ -86,7 +86,7 @@ impl<PMsg: 'static> StyledView for HeaderBar<PMsg> {
             .map(|btn| btn.styled_view(close_button));
 
         html::div()
-            .set(att::class("header-bar"))
+            .class("header-bar")
             .set(&header_bar)
             .set(&self.events.header_bar)
             .try_add(close_button)

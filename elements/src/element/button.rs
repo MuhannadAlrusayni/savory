@@ -138,8 +138,8 @@ impl<PMsg: 'static> StyledView for Button<PMsg> {
             icon,
         } = style;
         html::button()
-            .add(att::class("button"))
-            .add(att::disabled(self.disabled))
+            .class("button")
+            .set(att::disabled(self.disabled))
             .set(&self.local_events.button)
             .set(&button)
             .try_add(self.icon.as_ref().map(|el| el.styled_view(icon)))

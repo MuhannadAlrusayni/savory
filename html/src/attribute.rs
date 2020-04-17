@@ -241,7 +241,8 @@ create_attributes! {
         cite,
     }
 
-    #[derive(Debug, Clone)]
+    #[derive(Debug, Clone, Display)]
+    #[display(fmt = "{}", "_0.join(\" \")")]
     Class(Vec<Cow<'static, str>>) {
         update_el: |class: Class| -> Option<String> {
             if class.0.is_empty() {
@@ -984,14 +985,6 @@ impl From<i32> for MinLength {
     }
 }
 
-impl Extend<Class> for Class {
-    fn extend<T: IntoIterator<Item = Class>>(&mut self, iter: T) {
-        for class in iter {
-            self.0.extend(class.0)
-        }
-    }
-}
-
 impl From<Id> for Headers {
     fn from(source: Id) -> Self {
         Headers(vec![source])
@@ -1001,6 +994,20 @@ impl From<Id> for Headers {
 impl From<Id> for For {
     fn from(source: Id) -> Self {
         For(vec![source])
+    }
+}
+
+impl From<Class> for Cow<'static, str> {
+    fn from(source: Class) -> Self {
+        source.0.join(" ").into()
+    }
+}
+
+impl Extend<Class> for Class {
+    fn extend<T: IntoIterator<Item = Class>>(&mut self, iter: T) {
+        for class in iter {
+            self.0.extend(class.0)
+        }
     }
 }
 

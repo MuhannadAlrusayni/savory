@@ -226,7 +226,7 @@ impl<PMsg: 'static> StyledView for SpinEntry<PMsg> {
 
         // spin_entry
         html::div()
-            .set(att::class("spin-entry"))
+            .class("spin-entry")
             .set(&style.spin_entry)
             .set(&self.local_events.spin_entry)
             .map_msg_with(&self.msg_mapper)

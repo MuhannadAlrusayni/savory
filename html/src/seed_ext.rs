@@ -5,7 +5,7 @@ use crate::{
     events::Events,
     prelude::*,
 };
-use seed::virtual_dom::{attrs::Attrs as SeedAttrs, style::Style as SeedStyle};
+use seed::virtual_dom::style::Style as SeedStyle;
 use std::borrow::Cow;
 
 pub trait AddForEl<T> {
@@ -54,29 +54,32 @@ impl<Msg> AddForEl<&Style> for Node<Msg> {
     }
 }
 
-impl<T: Into<Attribute>, Msg> AddForEl<T> for El<Msg> {
-    fn add(self, val: T) -> Self {
-        self.add_attribute(val.into())
-    }
-}
+// NOTE: Adding attribute need special handling for each attribute, thus we
+// cannot support this functionality yet
 
-impl<T: Into<Attribute>, Msg> AddForEl<T> for Node<Msg> {
-    fn add(self, val: T) -> Self {
-        self.and_element(|el| el.add(val))
-    }
-}
+// impl<T: Into<Attribute>, Msg> AddForEl<T> for El<Msg> {
+//     fn add(self, val: T) -> Self {
+//         self.add_attribute(val.into())
+//     }
+// }
 
-impl<Msg> AddForEl<Attributes> for El<Msg> {
-    fn add(self, val: Attributes) -> Self {
-        self.add_attributes(val)
-    }
-}
+// impl<T: Into<Attribute>, Msg> AddForEl<T> for Node<Msg> {
+//     fn add(self, val: T) -> Self {
+//         self.and_element(|el| el.add(val))
+//     }
+// }
 
-impl<Msg> AddForEl<Attributes> for Node<Msg> {
-    fn add(self, val: Attributes) -> Self {
-        self.and_element(|el| el.add(val))
-    }
-}
+// impl<Msg> AddForEl<Attributes> for El<Msg> {
+//     fn add(self, val: Attributes) -> Self {
+//         self.add_attributes(val)
+//     }
+// }
+
+// impl<Msg> AddForEl<Attributes> for Node<Msg> {
+//     fn add(self, val: Attributes) -> Self {
+//         self.and_element(|el| el.add(val))
+//     }
+// }
 
 impl<Msg> AddForEl<Node<Msg>> for El<Msg> {
     fn add(self, val: Node<Msg>) -> Self {
@@ -138,6 +141,19 @@ impl<Msg> AddForEl<Cow<'static, str>> for Node<Msg> {
     }
 }
 
+impl<Msg> AddForEl<att::Class> for El<Msg> {
+    fn add(mut self, val: att::Class) -> Self {
+        self.add_class(val);
+        self
+    }
+}
+
+impl<Msg> AddForEl<att::Class> for Node<Msg> {
+    fn add(self, val: att::Class) -> Self {
+        self.and_element(|el| el.add(val))
+    }
+}
+
 // impl TryAddForEl
 impl<Msg> TryAddForEl<Option<&Events<Msg>>> for El<Msg> {
     fn try_add(self, val: Option<&Events<Msg>>) -> Self {
@@ -163,17 +179,20 @@ impl<Msg> TryAddForEl<Option<&Style>> for Node<Msg> {
     }
 }
 
-impl<T: Into<Attribute>, Msg> TryAddForEl<Option<T>> for El<Msg> {
-    fn try_add(self, val: Option<T>) -> Self {
-        self.try_add_attribute(val.map(|val| val.into()))
-    }
-}
+// NOTE: Adding attribute need special handling for each attribute, thus we
+// cannot support this functionality yet
 
-impl<T: Into<Attribute>, Msg> TryAddForEl<Option<T>> for Node<Msg> {
-    fn try_add(self, val: Option<T>) -> Self {
-        self.and_element(|el| el.try_add(val))
-    }
-}
+// impl<T: Into<Attribute>, Msg> TryAddForEl<Option<T>> for El<Msg> {
+//     fn try_add(self, val: Option<T>) -> Self {
+//         self.try_add_attribute(val.map(|val| val.into()))
+//     }
+// }
+
+// impl<T: Into<Attribute>, Msg> TryAddForEl<Option<T>> for Node<Msg> {
+//     fn try_add(self, val: Option<T>) -> Self {
+//         self.and_element(|el| el.try_add(val))
+//     }
+// }
 
 impl<Msg> TryAddForEl<Option<Node<Msg>>> for El<Msg> {
     fn try_add(self, val: Option<Node<Msg>>) -> Self {
@@ -231,6 +250,22 @@ impl<Msg> TryAddForEl<Option<Cow<'static, str>>> for El<Msg> {
 
 impl<Msg> TryAddForEl<Option<Cow<'static, str>>> for Node<Msg> {
     fn try_add(self, val: Option<Cow<'static, str>>) -> Self {
+        self.and_element(|el| el.try_add(val))
+    }
+}
+
+impl<Msg> TryAddForEl<Option<att::Class>> for El<Msg> {
+    fn try_add(self, val: Option<att::Class>) -> Self {
+        if let Some(val) = val {
+            self.add(val)
+        } else {
+            self
+        }
+    }
+}
+
+impl<Msg> TryAddForEl<Option<att::Class>> for Node<Msg> {
+    fn try_add(self, val: Option<att::Class>) -> Self {
         self.and_element(|el| el.try_add(val))
     }
 }
@@ -448,20 +483,21 @@ pub trait ElExt<Msg> {
     fn try_set_events(self, val: Option<&Events<Msg>>) -> Self;
     fn and_events(self, conf: impl FnOnce(Events<Msg>) -> Events<Msg>) -> Self;
 
-    // NOTE: method name overlab with `El::add_style()` method
+    // NOTE: method name overlab with `El::add_style()`
     // fn add_style(self, style: Style) -> Self;
     fn try_add_style(self, val: Option<&Style>) -> Self;
     fn set_style(self, val: &Style) -> Self;
     fn try_set_style(self, val: Option<&Style>) -> Self;
     fn and_style(self, conf: impl FnOnce(Style) -> Style) -> Self;
 
-    // TODO: Remove this function since attributes can only be setted to Node
-    fn add_attribute(self, val: Attribute) -> Self;
-    fn try_add_attribute(self, val: Option<Attribute>) -> Self;
+    // NOTE: Adding attribute need special handling for each attribute, thus we
+    // cannot support this functionality yet
+    // fn add_attribute(self, val: Attribute) -> Self;
+    // fn try_add_attribute(self, val: Option<Attribute>) -> Self;
     fn set_attribute(self, val: Attribute) -> Self;
     fn try_set_attribute(self, val: Option<Attribute>) -> Self;
 
-    fn add_attributes(self, val: Attributes) -> Self;
+    // fn add_attributes(self, val: Attributes) -> Self;
     fn set_attributes(self, val: Attributes) -> Self;
     fn and_attributes(self, conf: impl FnOnce(Attributes) -> Attributes) -> Self;
 
@@ -469,6 +505,10 @@ pub trait ElExt<Msg> {
     fn try_add_children(self, children: Option<impl IntoIterator<Item = Node<Msg>>>) -> Self;
     fn set_children(self, children: impl IntoIterator<Item = Node<Msg>>) -> Self;
     fn try_set_children(self, children: Option<impl IntoIterator<Item = Node<Msg>>>) -> Self;
+
+    // NOTE: method name overlab with `El::add_class()`
+    // fn add_class(self, class: att::Class) -> Self;
+    fn class(self, class: impl Into<att::Class>) -> Self;
 
     fn el_ref<E: Clone>(self, reference: &ElRef<E>) -> Self;
 
@@ -545,19 +585,6 @@ impl<Msg> ElExt<Msg> for El<Msg> {
         self.set_style(&conf(Style::default()))
     }
 
-    fn add_attribute(mut self, val: Attribute) -> Self {
-        val.update_el(&mut self);
-        self
-    }
-
-    fn try_add_attribute(self, val: Option<Attribute>) -> Self {
-        if let Some(attr) = val {
-            self.add_attribute(attr)
-        } else {
-            self
-        }
-    }
-
     fn set_attribute(mut self, val: Attribute) -> Self {
         val.update_el(&mut self);
         self
@@ -571,18 +598,13 @@ impl<Msg> ElExt<Msg> for El<Msg> {
         }
     }
 
-    fn add_attributes(mut self, val: Attributes) -> Self {
+    fn set_attributes(mut self, val: Attributes) -> Self {
         val.update_el(&mut self);
         self
     }
 
-    fn set_attributes(mut self, val: Attributes) -> Self {
-        self.attrs = SeedAttrs::empty();
-        self.add_attributes(val)
-    }
-
     fn and_attributes(self, conf: impl FnOnce(Attributes) -> Attributes) -> Self {
-        self.add_attributes(conf(Attributes::default()))
+        self.set_attributes(conf(Attributes::default()))
     }
 
     fn add_children(mut self, children: impl IntoIterator<Item = Node<Msg>>) -> Self {
@@ -611,6 +633,10 @@ impl<Msg> ElExt<Msg> for El<Msg> {
         } else {
             self
         }
+    }
+
+    fn class(self, class: impl Into<att::Class>) -> Self {
+        self.set(class.into())
     }
 
     fn el_ref<E: Clone>(mut self, reference: &ElRef<E>) -> Self {
@@ -680,24 +706,12 @@ impl<Msg> ElExt<Msg> for Node<Msg> {
         self.and_element(|el| el.and_style(conf))
     }
 
-    fn add_attribute(self, val: Attribute) -> Self {
-        self.and_element(|el| el.add_attribute(val))
-    }
-
-    fn try_add_attribute(self, val: Option<Attribute>) -> Self {
-        self.and_element(|el| el.try_add_attribute(val))
-    }
-
     fn set_attribute(self, val: Attribute) -> Self {
         self.and_element(|el| el.set_attribute(val))
     }
 
     fn try_set_attribute(self, val: Option<Attribute>) -> Self {
         self.and_element(|el| el.try_set_attribute(val))
-    }
-
-    fn add_attributes(self, val: Attributes) -> Self {
-        self.and_element(|el| el.add_attributes(val))
     }
 
     fn set_attributes(self, val: Attributes) -> Self {
@@ -726,6 +740,10 @@ impl<Msg> ElExt<Msg> for Node<Msg> {
 
     fn el_ref<E: Clone>(self, reference: &ElRef<E>) -> Self {
         self.and_element(|el| el.el_ref(reference))
+    }
+
+    fn class(self, class: impl Into<att::Class>) -> Self {
+        self.and_element(|el| el.class(class))
     }
 
     fn config(self, conf: impl FnOnce(El<Msg>) -> El<Msg>) -> Self {
