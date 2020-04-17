@@ -72,19 +72,19 @@ impl<PMsg: 'static> View for Counter<PMsg> {
             .set(att::class("inc-btn"))
             .set(&style.inc_btn)
             .set(&self.local_events.inc_btn)
-            .add(html::text("Increment"));
+            .add("Increment");
 
         // decrement button node
         let dec_btn = html::button()
             .set(att::class("dec-btn"))
             .set(&style.dec_btn)
             .set(&self.local_events.dec_btn)
-            .add(html::text("Decrement"));
+            .add("Decrement");
 
         // contianer node
         html::div()
             .add(dec_btn)
-            .add(html::text(self.value.to_string()))
+            .add(self.value.to_string())
             .add(inc_btn)
             // map the output node to the parent node
             .map_msg_with(&self.msg_mapper)

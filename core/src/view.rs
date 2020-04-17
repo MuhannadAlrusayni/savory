@@ -32,8 +32,8 @@
 //!             .align_content(val::Center)
 //!             .align_items(val::Center);
 //!
-//!         let username = html::h3().add(html::text(format!("Username: {}", self.username)));
-//!         let email = html::h4().add(html::text(format!("Email: {}", self.email)));
+//!         let username = html::h3().add(format!("Username: {}", self.username));
+//!         let email = html::h4().add(format!("Email: {}", self.email));
 //!
 //!         html::div()
 //!             .set(&style)
@@ -63,8 +63,8 @@
 //!         .align_content(val::Center)
 //!         .align_items(val::Center);
 //!
-//!     let username = html::h3().add(html::text(format!("Username: {}", username)));
-//!     let email = html::h4().add(html::text(format!("Email: {}", email)));
+//!     let username = html::h3().add(format!("Username: {}", username));
+//!     let email = html::h4().add(format!("Email: {}", email));
 //!
 //!     html::div()
 //!         .set(&style)

@@ -159,7 +159,7 @@ impl<PMsg: 'static> StyledView for Checkbox<PMsg> {
                 .map_msg_with(&self.msg_mapper)
                 .add(&self.events.label)
                 .add(checkbox)
-                .add(html::text(lbl.clone()))
+                .add(lbl.clone())
                 .el_ref(&self.label_el_ref),
         }
     }

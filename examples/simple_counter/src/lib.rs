@@ -29,16 +29,16 @@ impl View for Counter {
 
     fn view(&self) -> Self::Output {
         let inc_btn = html::button()
-            .add(html::text("Increment"))
+            .add("Increment")
             .and_events(|events| events.click(|_| Msg::Increment));
 
         let dec_btn = html::button()
-            .add(html::text("Decrement"))
+            .add("Decrement")
             .and_events(|events| events.click(|_| Msg::Decrement));
 
         html::div()
             .add(inc_btn)
-            .add(html::text(self.0.to_string()))
+            .add(self.0.to_string())
             .add(dec_btn)
     }
 }

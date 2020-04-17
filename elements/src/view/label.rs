@@ -40,7 +40,7 @@ impl<PMsg> StyledView for Label<PMsg> {
     fn styled_view(&self, style: Style) -> Self::Output {
         html::span()
             .set(att::class("label"))
-            .add(html::text(self.text.clone()))
+            .add(self.text.clone())
             .set(&style.label)
             .set(&self.events.label)
     }
