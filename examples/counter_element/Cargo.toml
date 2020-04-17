@@ -1,5 +1,5 @@
 [package]
-name = "full_counter"
+name = "counter_element"
 version = "0.1.0"
 authors = ["Muhannad Alrusayni <Muhannad.Alrusayni@gmail.com>"]
 edition = "2018"
