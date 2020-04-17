@@ -133,9 +133,8 @@ impl Style {
     }
 
     /// this method convert this style to seed `Style`
-    pub fn to_seed_style(&self) -> Option<seed::virtual_dom::Style> {
+    pub fn into_seed_style(self) -> Option<seed::virtual_dom::Style> {
         self.values
-            .clone()
             .into_iter()
             .fold(Option::None, |mut style, (key, value)| {
                 style
@@ -214,7 +213,7 @@ impl Style {
 
 impl<Msg> UpdateEl<Msg> for Style {
     fn update_el(self, el: &mut El<Msg>) {
-        if let Some(style) = self.to_seed_style() {
+        if let Some(style) = self.into_seed_style() {
             style.update_el(el);
         }
     }

@@ -53,7 +53,7 @@ impl<PMsg> StyledView for Svg<PMsg> {
         html::svg()
             .class("svg-icon")
             .try_set(self.view_box)
-            .set(&style.svg_icon)
+            .set(style.svg_icon)
             .set(&self.events.svg_icon)
             .add(self.draw.clone())
     }

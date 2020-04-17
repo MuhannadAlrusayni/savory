@@ -75,7 +75,7 @@ impl<PMsg: 'static> StyledView for HeaderBar<PMsg> {
 
         let titles = html::div()
             .class("titles-container")
-            .set(&titles_container)
+            .set(titles_container)
             .set(&self.events.titles_container)
             .try_add(title)
             .try_add(subtitle);
@@ -87,7 +87,7 @@ impl<PMsg: 'static> StyledView for HeaderBar<PMsg> {
 
         html::div()
             .class("header-bar")
-            .set(&header_bar)
+            .set(header_bar)
             .set(&self.events.header_bar)
             .try_add(close_button)
             .add(titles)

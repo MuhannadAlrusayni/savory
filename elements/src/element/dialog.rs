@@ -158,7 +158,7 @@ where
     fn styled_view(&self, style: Style) -> Self::Output {
         let dialog = html::div()
             .class("dialog")
-            .set(&style.dialog)
+            .set(style.dialog)
             .set(&self.local_events.dialog)
             .map_msg_with(&self.msg_mapper)
             .add(self.header_bar.view().map_msg_with(&self.msg_mapper))
@@ -167,7 +167,7 @@ where
 
         html::div()
             .class("dialog-background")
-            .set(&style.dialog_background)
+            .set(style.dialog_background)
             .set(&self.local_events.dialog_background)
             .map_msg_with(&self.msg_mapper)
             .add(dialog)

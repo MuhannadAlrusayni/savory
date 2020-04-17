@@ -129,12 +129,18 @@ impl<PMsg: 'static> StyledView for Checkbox<PMsg> {
     type Style = Style;
 
     fn styled_view(&self, style: Style) -> Self::Output {
+        let Style {
+            checkbox,
+            button,
+            label,
+        } = style;
+
         let checkbox = html::input()
             .class("checbox")
             .set(att::disabled(self.disabled))
             .set(att::checked(self.toggled))
             .set(att::Type::Checkbox)
-            .set(&style.checkbox)
+            .set(checkbox)
             .set(&self.local_events.checkbox)
             .map_msg_with(&self.msg_mapper)
             .add(&self.events.checkbox)
@@ -143,7 +149,7 @@ impl<PMsg: 'static> StyledView for Checkbox<PMsg> {
             .config_if(self.is_toggled(), |conf| {
                 let button = html::div()
                     .class("button")
-                    .set(&style.button)
+                    .set(button)
                     .map_msg_with(&self.msg_mapper)
                     .add(&self.events.button);
                 conf.add(button)
@@ -153,7 +159,7 @@ impl<PMsg: 'static> StyledView for Checkbox<PMsg> {
             None => checkbox,
             Some(lbl) => html::label()
                 .class("label")
-                .set(&style.label)
+                .set(label)
                 .set(&self.local_events.label)
                 .map_msg_with(&self.msg_mapper)
                 .add(&self.events.label)

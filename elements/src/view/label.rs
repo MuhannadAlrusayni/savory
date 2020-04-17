@@ -41,7 +41,7 @@ impl<PMsg> StyledView for Label<PMsg> {
         html::span()
             .class("label")
             .add(self.text.clone())
-            .set(&style.label)
+            .set(style.label)
             .set(&self.events.label)
     }
 }

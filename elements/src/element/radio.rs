@@ -129,12 +129,18 @@ impl<PMsg: 'static> StyledView for Radio<PMsg> {
     type Style = Style;
 
     fn styled_view(&self, style: Style) -> Self::Output {
+        let Style {
+            radio,
+            button,
+            label,
+        } = style;
+
         let radio = html::input()
             .class("radio")
             .set(att::disabled(self.disabled))
             .set(att::checked(self.toggled))
             .set(att::Type::Radio)
-            .set(&style.radio)
+            .set(radio)
             .set(&self.local_events.radio)
             .map_msg_with(&self.msg_mapper)
             .add(&self.events.radio)
@@ -143,7 +149,7 @@ impl<PMsg: 'static> StyledView for Radio<PMsg> {
             .config_if(self.is_toggled(), |conf| {
                 let button = html::div()
                     .class("button")
-                    .set(&style.button)
+                    .set(button)
                     .map_msg_with(&self.msg_mapper)
                     .add(&self.events.button);
                 conf.add(button)
@@ -153,7 +159,7 @@ impl<PMsg: 'static> StyledView for Radio<PMsg> {
             None => radio,
             Some(lbl) => html::label()
                 .class("label")
-                .set(&style.label)
+                .set(label)
                 .set(&self.local_events.label)
                 .map_msg_with(&self.msg_mapper)
                 .add(&self.events.label)

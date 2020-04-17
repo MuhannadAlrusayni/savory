@@ -54,7 +54,7 @@ impl<PMsg> StyledView for Html<PMsg> {
         html::svg()
             .class("html-icon")
             .try_set(self.view_box)
-            .set(&style.html_icon)
+            .set(style.html_icon)
             .set(&self.events.html_icon)
             .add(html::raw(self.html.as_ref()))
     }

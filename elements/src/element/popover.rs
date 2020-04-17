@@ -107,13 +107,13 @@ where
     fn styled_view(&self, style: Style) -> Self::Output {
         let panel = html::div()
             .class("panel")
-            .set(&style.panel)
+            .set(style.panel)
             .set(&self.events.panel)
             .add(self.child.view());
 
         html::div()
             .class("popover")
-            .set(&style.popover)
+            .set(style.popover)
             .set(&self.events.popover)
             .add(self.target.view())
             .add(panel)

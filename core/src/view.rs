@@ -36,7 +36,7 @@
 //!         let email = html::h4().add(format!("Email: {}", self.email));
 //!
 //!         html::div()
-//!             .set(&style)
+//!             .set(style)
 //!             .add(username)
 //!             .add(email)
 //!     }
@@ -67,7 +67,7 @@
 //!     let email = html::h4().add(format!("Email: {}", email));
 //!
 //!     html::div()
-//!         .set(&style)
+//!         .set(style)
 //!         .add(username)
 //!         .add(email)
 //! }

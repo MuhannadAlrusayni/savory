@@ -37,19 +37,21 @@ impl<Msg> AddForEl<&Events<Msg>> for Node<Msg> {
     }
 }
 
-impl<Msg> AddForEl<&Style> for El<Msg> {
-    fn add(mut self, val: &Style) -> Self {
-        if let Some(style) = val.to_seed_style() {
-            for (key, val) in style.vals.into_iter() {
-                self.add_style(key, val);
-            }
-        }
+impl<Msg> AddForEl<Style> for El<Msg> {
+    fn add(mut self, val: Style) -> Self {
+        val.update_el(&mut self);
         self
+        // if let Some(style) = val.into_seed_style() {
+        //     for (key, val) in style.vals.into_iter() {
+        //         self.add_style(key, val);
+        //     }
+        // }
+        // self
     }
 }
 
-impl<Msg> AddForEl<&Style> for Node<Msg> {
-    fn add(self, val: &Style) -> Self {
+impl<Msg> AddForEl<Style> for Node<Msg> {
+    fn add(self, val: Style) -> Self {
         self.and_element(|el| el.add(val))
     }
 }
@@ -167,14 +169,14 @@ impl<Msg> TryAddForEl<Option<&Events<Msg>>> for Node<Msg> {
     }
 }
 
-impl<Msg> TryAddForEl<Option<&Style>> for El<Msg> {
-    fn try_add(self, val: Option<&Style>) -> Self {
+impl<Msg> TryAddForEl<Option<Style>> for El<Msg> {
+    fn try_add(self, val: Option<Style>) -> Self {
         self.try_add_style(val)
     }
 }
 
-impl<Msg> TryAddForEl<Option<&Style>> for Node<Msg> {
-    fn try_add(self, val: Option<&Style>) -> Self {
+impl<Msg> TryAddForEl<Option<Style>> for Node<Msg> {
+    fn try_add(self, val: Option<Style>) -> Self {
         self.and_element(|el| el.try_add(val))
     }
 }
@@ -283,14 +285,14 @@ impl<Msg> SetForEl<&Events<Msg>> for Node<Msg> {
     }
 }
 
-impl<Msg> SetForEl<&Style> for El<Msg> {
-    fn set(self, val: &Style) -> Self {
+impl<Msg> SetForEl<Style> for El<Msg> {
+    fn set(self, val: Style) -> Self {
         self.set_style(val)
     }
 }
 
-impl<Msg> SetForEl<&Style> for Node<Msg> {
-    fn set(self, val: &Style) -> Self {
+impl<Msg> SetForEl<Style> for Node<Msg> {
+    fn set(self, val: Style) -> Self {
         self.and_element(|el| el.set(val))
     }
 }
@@ -392,14 +394,14 @@ impl<Msg> TrySetForEl<Option<&Events<Msg>>> for Node<Msg> {
     }
 }
 
-impl<Msg> TrySetForEl<Option<&Style>> for El<Msg> {
-    fn try_set(self, val: Option<&Style>) -> Self {
+impl<Msg> TrySetForEl<Option<Style>> for El<Msg> {
+    fn try_set(self, val: Option<Style>) -> Self {
         self.try_set_style(val)
     }
 }
 
-impl<Msg> TrySetForEl<Option<&Style>> for Node<Msg> {
-    fn try_set(self, val: Option<&Style>) -> Self {
+impl<Msg> TrySetForEl<Option<Style>> for Node<Msg> {
+    fn try_set(self, val: Option<Style>) -> Self {
         self.and_element(|el| el.try_set(val))
     }
 }
@@ -485,9 +487,9 @@ pub trait ElExt<Msg> {
 
     // NOTE: method name overlab with `El::add_style()`
     // fn add_style(self, style: Style) -> Self;
-    fn try_add_style(self, val: Option<&Style>) -> Self;
-    fn set_style(self, val: &Style) -> Self;
-    fn try_set_style(self, val: Option<&Style>) -> Self;
+    fn try_add_style(self, val: Option<Style>) -> Self;
+    fn set_style(self, val: Style) -> Self;
+    fn try_set_style(self, val: Option<Style>) -> Self;
     fn and_style(self, conf: impl FnOnce(Style) -> Style) -> Self;
 
     // NOTE: Adding attribute need special handling for each attribute, thus we
@@ -556,7 +558,7 @@ impl<Msg> ElExt<Msg> for El<Msg> {
         self.set_events(&conf(Events::default()))
     }
 
-    fn try_add_style(self, val: Option<&Style>) -> Self {
+    fn try_add_style(self, val: Option<Style>) -> Self {
         if let Some(val) = val {
             self.add(val)
         } else {
@@ -564,8 +566,8 @@ impl<Msg> ElExt<Msg> for El<Msg> {
         }
     }
 
-    fn set_style(mut self, val: &Style) -> Self {
-        if let Some(style) = val.to_seed_style() {
+    fn set_style(mut self, val: Style) -> Self {
+        if let Some(style) = val.into_seed_style() {
             self.style = style;
         } else {
             self.style = SeedStyle::empty();
@@ -573,7 +575,7 @@ impl<Msg> ElExt<Msg> for El<Msg> {
         self
     }
 
-    fn try_set_style(self, val: Option<&Style>) -> Self {
+    fn try_set_style(self, val: Option<Style>) -> Self {
         if let Some(val) = val {
             self.set_style(val)
         } else {
@@ -582,7 +584,7 @@ impl<Msg> ElExt<Msg> for El<Msg> {
     }
 
     fn and_style(self, conf: impl FnOnce(Style) -> Style) -> Self {
-        self.set_style(&conf(Style::default()))
+        self.set_style(conf(Style::default()))
     }
 
     fn set_attribute(mut self, val: Attribute) -> Self {
@@ -690,15 +692,15 @@ impl<Msg> ElExt<Msg> for Node<Msg> {
         self.and_element(|el| el.and_events(conf))
     }
 
-    fn try_add_style(self, val: Option<&Style>) -> Self {
+    fn try_add_style(self, val: Option<Style>) -> Self {
         self.and_element(|el| el.try_add_style(val))
     }
 
-    fn set_style(self, val: &Style) -> Self {
+    fn set_style(self, val: Style) -> Self {
         self.and_element(|el| el.set_style(val))
     }
 
-    fn try_set_style(self, val: Option<&Style>) -> Self {
+    fn try_set_style(self, val: Option<Style>) -> Self {
         self.and_element(|el| el.try_set_style(val))
     }
 

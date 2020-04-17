@@ -57,7 +57,7 @@ impl<PMsg> StyledView for Url<PMsg> {
         html::img()
             .class("url-icon")
             .set(att::src(self.url.clone()))
-            .set(&style.url_icon)
+            .set(style.url_icon)
             .set(&self.events.url_icon)
     }
 }

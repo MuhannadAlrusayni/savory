@@ -210,7 +210,7 @@ impl<PMsg: 'static> StyledView for SpinEntry<PMsg> {
         let input = html::input()
             .el_ref(&self.el_ref)
             .set(&self.local_events.input)
-            .set(&style.input)
+            .set(style.input)
             .and_attributes(|conf| {
                 conf.set_class("input")
                     .set_input_mode(att::InputMode::Decimal)
@@ -227,7 +227,7 @@ impl<PMsg: 'static> StyledView for SpinEntry<PMsg> {
         // spin_entry
         html::div()
             .class("spin-entry")
-            .set(&style.spin_entry)
+            .set(style.spin_entry)
             .set(&self.local_events.spin_entry)
             .map_msg_with(&self.msg_mapper)
             .add(&self.events.spin_entry)

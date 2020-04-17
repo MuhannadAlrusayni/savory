@@ -134,7 +134,7 @@ impl<PMsg: 'static> StyledView for Entry<PMsg> {
     fn styled_view(&self, style: Style) -> Self::Output {
         let input = html::input()
             .set(&self.local_events.input)
-            .set(&style.input)
+            .set(style.input)
             .and_attributes(|conf| {
                 conf.set_class("input")
                     .set_disabled(self.disabled)
@@ -146,7 +146,7 @@ impl<PMsg: 'static> StyledView for Entry<PMsg> {
             .add(&self.events.input);
 
         html::div()
-            .set(&style.container)
+            .set(style.container)
             .set(&self.local_events.container)
             .map_msg_with(&self.msg_mapper)
             .add(&self.events.container)

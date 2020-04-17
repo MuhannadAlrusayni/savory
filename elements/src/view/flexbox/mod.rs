@@ -191,7 +191,7 @@ impl<PMsg> StyledView for Flexbox<PMsg> {
         html::div()
             .class("flexbox")
             .set(&self.events.flexbox)
-            .set(&style.flexbox)
+            .set(style.flexbox)
             .add(
                 self.items
                     .iter()

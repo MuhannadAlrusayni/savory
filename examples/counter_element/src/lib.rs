@@ -70,14 +70,14 @@ impl<PMsg: 'static> View for Counter<PMsg> {
         // increment button node
         let inc_btn = html::button()
             .class("inc-btn")
-            .set(&style.inc_btn)
+            .set(style.inc_btn)
             .set(&self.local_events.inc_btn)
             .add("Increment");
 
         // decrement button node
         let dec_btn = html::button()
             .class("dec-btn")
-            .set(&style.dec_btn)
+            .set(style.dec_btn)
             .set(&self.local_events.dec_btn)
             .add("Decrement");
 

@@ -141,7 +141,7 @@ impl<PMsg: 'static> StyledView for Button<PMsg> {
             .class("button")
             .set(att::disabled(self.disabled))
             .set(&self.local_events.button)
-            .set(&button)
+            .set(button)
             .try_add(self.icon.as_ref().map(|el| el.styled_view(icon)))
             .try_add(self.label.as_ref().map(|el| el.styled_view(label)))
             .map_msg_with(&self.msg_mapper)

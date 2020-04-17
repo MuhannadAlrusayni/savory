@@ -70,7 +70,7 @@ impl<PMsg> StyledView for Item<PMsg> {
             html::div().class("flexbox-item").add(self.content.clone())
         }
         .add(&self.events.item)
-        .add(&style.item)
+        .add(style.item)
     }
 }
 

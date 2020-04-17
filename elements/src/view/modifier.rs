@@ -71,7 +71,7 @@ where
             .try_opacity(self.opacity)
             .try_position(self.position);
 
-        self.target.view().add(&style)
+        self.target.view().add(style)
     }
 }
 

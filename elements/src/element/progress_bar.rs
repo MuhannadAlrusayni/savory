@@ -129,13 +129,13 @@ impl<PMsg: 'static> StyledView for ProgressBar<PMsg> {
     fn styled_view(&self, style: Style) -> Self::Output {
         let indicator = html::div()
             .class("indicator")
-            .set(&style.indicator)
+            .set(style.indicator)
             .map_msg_with(&self.msg_mapper)
             .add(&self.events.indicator);
 
         html::div()
             .class("progress-bar")
-            .set(&style.progress_bar)
+            .set(style.progress_bar)
             .map_msg_with(&self.msg_mapper)
             .add(&self.events.progress_bar)
             .add(indicator)
