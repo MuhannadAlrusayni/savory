@@ -6,6 +6,7 @@ use crate::{
     prelude::*,
 };
 use seed::virtual_dom::{attrs::Attrs as SeedAttrs, style::Style as SeedStyle};
+use std::borrow::Cow;
 
 pub trait AddForEl<T> {
     fn add(self, val: T) -> Self;
@@ -101,6 +102,42 @@ impl<Msg> AddForEl<Vec<Node<Msg>>> for Node<Msg> {
     }
 }
 
+impl<Msg> AddForEl<&'static str> for El<Msg> {
+    fn add(self, val: &'static str) -> Self {
+        self.add(html::text(val))
+    }
+}
+
+impl<Msg> AddForEl<&'static str> for Node<Msg> {
+    fn add(self, val: &'static str) -> Self {
+        self.and_element(|el| el.add(val))
+    }
+}
+
+impl<Msg> AddForEl<String> for El<Msg> {
+    fn add(self, val: String) -> Self {
+        self.add(html::text(val))
+    }
+}
+
+impl<Msg> AddForEl<String> for Node<Msg> {
+    fn add(self, val: String) -> Self {
+        self.and_element(|el| el.add(val))
+    }
+}
+
+impl<Msg> AddForEl<Cow<'static, str>> for El<Msg> {
+    fn add(self, val: Cow<'static, str>) -> Self {
+        self.add(html::text(val))
+    }
+}
+
+impl<Msg> AddForEl<Cow<'static, str>> for Node<Msg> {
+    fn add(self, val: Cow<'static, str>) -> Self {
+        self.and_element(|el| el.add(val))
+    }
+}
+
 // impl TryAddForEl
 impl<Msg> TryAddForEl<Option<&Events<Msg>>> for El<Msg> {
     fn try_add(self, val: Option<&Events<Msg>>) -> Self {
@@ -158,6 +195,42 @@ impl<Msg> TryAddForEl<Option<Vec<Node<Msg>>>> for El<Msg> {
 
 impl<Msg> TryAddForEl<Option<Vec<Node<Msg>>>> for Node<Msg> {
     fn try_add(self, val: Option<Vec<Node<Msg>>>) -> Self {
+        self.and_element(|el| el.try_add(val))
+    }
+}
+
+impl<Msg> TryAddForEl<Option<&'static str>> for El<Msg> {
+    fn try_add(self, val: Option<&'static str>) -> Self {
+        self.try_add(val.map(html::text))
+    }
+}
+
+impl<Msg> TryAddForEl<Option<&'static str>> for Node<Msg> {
+    fn try_add(self, val: Option<&'static str>) -> Self {
+        self.and_element(|el| el.try_add(val))
+    }
+}
+
+impl<Msg> TryAddForEl<Option<String>> for El<Msg> {
+    fn try_add(self, val: Option<String>) -> Self {
+        self.try_add(val.map(html::text))
+    }
+}
+
+impl<Msg> TryAddForEl<Option<String>> for Node<Msg> {
+    fn try_add(self, val: Option<String>) -> Self {
+        self.and_element(|el| el.try_add(val))
+    }
+}
+
+impl<Msg> TryAddForEl<Option<Cow<'static, str>>> for El<Msg> {
+    fn try_add(self, val: Option<Cow<'static, str>>) -> Self {
+        self.try_add(val.map(html::text))
+    }
+}
+
+impl<Msg> TryAddForEl<Option<Cow<'static, str>>> for Node<Msg> {
+    fn try_add(self, val: Option<Cow<'static, str>>) -> Self {
         self.and_element(|el| el.try_add(val))
     }
 }
@@ -235,6 +308,42 @@ impl<Msg> SetForEl<Vec<Node<Msg>>> for Node<Msg> {
     }
 }
 
+impl<Msg> SetForEl<&'static str> for El<Msg> {
+    fn set(self, val: &'static str) -> Self {
+        self.set(html::text(val))
+    }
+}
+
+impl<Msg> SetForEl<&'static str> for Node<Msg> {
+    fn set(self, val: &'static str) -> Self {
+        self.and_element(|el| el.set(val))
+    }
+}
+
+impl<Msg> SetForEl<String> for El<Msg> {
+    fn set(self, val: String) -> Self {
+        self.set(html::text(val))
+    }
+}
+
+impl<Msg> SetForEl<String> for Node<Msg> {
+    fn set(self, val: String) -> Self {
+        self.and_element(|el| el.set(val))
+    }
+}
+
+impl<Msg> SetForEl<Cow<'static, str>> for El<Msg> {
+    fn set(self, val: Cow<'static, str>) -> Self {
+        self.set(html::text(val))
+    }
+}
+
+impl<Msg> SetForEl<Cow<'static, str>> for Node<Msg> {
+    fn set(self, val: Cow<'static, str>) -> Self {
+        self.and_element(|el| el.set(val))
+    }
+}
+
 // impl TrySetForEl
 impl<Msg> TrySetForEl<Option<&Events<Msg>>> for El<Msg> {
     fn try_set(self, val: Option<&Events<Msg>>) -> Self {
@@ -292,6 +401,42 @@ impl<Msg> TrySetForEl<Option<Vec<Node<Msg>>>> for El<Msg> {
 
 impl<Msg> TrySetForEl<Option<Vec<Node<Msg>>>> for Node<Msg> {
     fn try_set(self, val: Option<Vec<Node<Msg>>>) -> Self {
+        self.and_element(|el| el.try_set(val))
+    }
+}
+
+impl<Msg> TrySetForEl<Option<&'static str>> for El<Msg> {
+    fn try_set(self, val: Option<&'static str>) -> Self {
+        self.try_set(val.map(html::text))
+    }
+}
+
+impl<Msg> TrySetForEl<Option<&'static str>> for Node<Msg> {
+    fn try_set(self, val: Option<&'static str>) -> Self {
+        self.and_element(|el| el.try_set(val))
+    }
+}
+
+impl<Msg> TrySetForEl<Option<String>> for El<Msg> {
+    fn try_set(self, val: Option<String>) -> Self {
+        self.try_set(val.map(html::text))
+    }
+}
+
+impl<Msg> TrySetForEl<Option<String>> for Node<Msg> {
+    fn try_set(self, val: Option<String>) -> Self {
+        self.and_element(|el| el.try_set(val))
+    }
+}
+
+impl<Msg> TrySetForEl<Option<Cow<'static, str>>> for El<Msg> {
+    fn try_set(self, val: Option<Cow<'static, str>>) -> Self {
+        self.try_set(val.map(html::text))
+    }
+}
+
+impl<Msg> TrySetForEl<Option<Cow<'static, str>>> for Node<Msg> {
+    fn try_set(self, val: Option<Cow<'static, str>>) -> Self {
         self.and_element(|el| el.try_set(val))
     }
 }
