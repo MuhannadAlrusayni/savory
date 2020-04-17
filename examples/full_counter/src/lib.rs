@@ -139,6 +139,6 @@ impl View for MyApp {
 
 #[wasm_bindgen(start)]
 pub fn view() {
-    // this will start the app and mount it on node that have `root` id
+    // mount and start the app at `app` element
     MyApp::start();
 }

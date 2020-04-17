@@ -45,6 +45,6 @@ impl View for Counter {
 
 #[wasm_bindgen(start)]
 pub fn view() {
-    // this will start the app and mount it on node that have `root` id
+    // mount and start the app at `app` element
     Counter::start();
 }

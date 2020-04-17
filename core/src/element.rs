@@ -117,7 +117,7 @@ where
     /// }
     /// ```
     fn start() -> seed::app::App<Self::Message, Self, Self::Output, GMsg> {
-        Self::start_at("root")
+        Self::start_at("app")
     }
 
     /// Start app element at specifec node that matchs the `id` passed
