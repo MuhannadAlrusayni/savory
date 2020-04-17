@@ -10,5 +10,6 @@ members = [
   # examples
   "examples/simple_counter",
   "examples/full_counter",
+  "examples/counter_using_elements",
   "examples/all_elements",
 ]

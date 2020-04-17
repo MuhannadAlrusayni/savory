@@ -1,49 +1,50 @@
 use savory_core::prelude::*;
-use savory_elements::prelude::*;
+use savory_html::prelude::*;
 use wasm_bindgen::prelude::*;
 
-pub struct MyApp {
-    spin_entry: SpinEntry<Msg>,
-}
+pub struct Counter(i32);
 
 pub enum Msg {
-    SpinEntry(spin_entry::Msg),
+    Increment,
+    Decrement,
 }
 
-impl AppElement for MyApp {
+impl AppElement for Counter {
     type Message = Msg;
 
-    fn init(_: Url, orders: &mut impl Orders<Msg>) -> Self {
-        let spin_entry = SpinEntry::build(Msg::SpinEntry)
-            .min(-40.)
-            .placeholder(44.)
-            .step(5.)
-            .max(40.)
-            .init(orders);
-
-        Self { spin_entry }
+    fn init(_: Url, _: &mut impl Orders<Msg>) -> Self {
+        Self(0)
     }
 
-    fn update(&mut self, msg: Msg, orders: &mut impl Orders<Msg>) {
+    fn update(&mut self, msg: Msg, _: &mut impl Orders<Msg>) {
         match msg {
-            Msg::SpinEntry(msg) => self.spin_entry.update(msg, orders),
-        };
+            Msg::Increment => self.0 += 1,
+            Msg::Decrement => self.0 -= 1,
+        }
     }
 }
 
-impl View for MyApp {
+impl View for Counter {
     type Output = Node<Msg>;
 
     fn view(&self) -> Self::Output {
-        Flexbox::new()
-            .center()
-            .add(&self.spin_entry)
-            .and_size(|conf| conf.full())
-            .view()
+        let inc_btn = html::button()
+            .add(html::text("Increment"))
+            .and_events(|events| events.click(|_| Msg::Increment));
+
+        let dec_btn = html::button()
+            .add(html::text("Decrement"))
+            .and_events(|events| events.click(|_| Msg::Decrement));
+
+        html::div()
+            .add(inc_btn)
+            .add(html::text(self.0.to_string()))
+            .add(dec_btn)
     }
 }
 
 #[wasm_bindgen(start)]
 pub fn view() {
-    MyApp::start();
+    // this will start the app and mount it on node that have `root` id
+    Counter::start();
 }

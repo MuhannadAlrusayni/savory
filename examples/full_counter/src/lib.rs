@@ -114,7 +114,11 @@ impl AppElement for MyApp {
 
     fn init(_: Url, orders: &mut impl Orders<AppMsg>) -> Self {
         Self {
-            counter_element: Counter::build(AppMsg::Counter).init(orders),
+            counter_element: Counter::build(AppMsg::Counter)
+                // give it starting value. 10 will be used as default value if
+                // we didn't pass value
+                .value(100)
+                .init(orders),
         }
     }
 

@@ -41,7 +41,7 @@ impl<Msg> UpdateEl<Msg> for Events<Msg> {
     }
 }
 
-macro_rules! mouse_events {
+macro_rules! events_functions {
     ( $( $event:ident: $ty:ty { $( $(#[$doc:meta])? $name:ident = $ev:expr $(,)? )* } $(,)? )* ) => {
         $(
             impl<Ms: 'static> Events<Ms> {
@@ -60,7 +60,7 @@ macro_rules! mouse_events {
     }
 }
 
-mouse_events! {
+events_functions! {
     ev: web_sys::Event {
         scroll = Ev::Scroll,
         after_print = Ev::AfterPrint,
