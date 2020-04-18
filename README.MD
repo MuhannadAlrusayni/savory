@@ -111,7 +111,7 @@ pub fn view() {
 ```
 
 Preview:
-docs-resources/simple-counter.webm
+![Screenshot](docs-resources/simple-counter.webm)
 
 [source code](https://gitlab.com/MAlrusayni/savory/-/tree/master/examples/simple_counter)
 
@@ -267,7 +267,7 @@ pub fn view() {
 ```
 
 Preview:
-docs-resources/counter-element.webm
+![Screenshot](docs-resources/counter-element.webm)
 
 [source code](https://gitlab.com/MAlrusayni/savory/-/tree/master/examples/counter_element)
 
@@ -336,7 +336,7 @@ pub fn view() {
 ```
 
 Preview:
-docs-resources/counter-using-savory-elements.webm
+![Screenshot](docs-resources/counter-using-savory-elements.webm)
 
 [source code](https://gitlab.com/MAlrusayni/savory/-/tree/master/examples/counter_using_savory_elements)
 
