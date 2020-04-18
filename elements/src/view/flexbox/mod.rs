@@ -78,6 +78,7 @@ impl<PMsg> Flexbox<PMsg> {
         item.into()
     }
 
+    #[allow(clippy::should_implement_trait)]
     pub fn add(mut self, item: impl Into<Item<PMsg>>) -> Self {
         self.items.push(item.into());
         self
@@ -211,7 +212,7 @@ impl<PMsg> ExtendBuilder<Item<PMsg>> for Flexbox<PMsg> {
     }
 }
 
-impl<'a, V, PMsg> ExtendBuilder<&'a V> for Flexbox<PMsg>
+impl<'a, V: 'a, PMsg> ExtendBuilder<&'a V> for Flexbox<PMsg>
 where
     V: View<Output = Node<PMsg>>,
 {
@@ -219,19 +220,17 @@ where
     where
         T: IntoIterator<Item = &'a V>,
     {
-        self.items
-            .extend(iter.into_iter().map(|content| Item::from(content)));
+        self.items.extend(iter.into_iter().map(Item::from));
         self
     }
 }
 
-impl<'a, PMsg> ExtendBuilder<&'a dyn View<Output = Node<PMsg>>> for Flexbox<PMsg> {
+impl<'a, PMsg: 'static> ExtendBuilder<&'a dyn View<Output = Node<PMsg>>> for Flexbox<PMsg> {
     fn extend<T>(mut self, iter: T) -> Self
     where
         T: IntoIterator<Item = &'a dyn View<Output = Node<PMsg>>>,
     {
-        self.items
-            .extend(iter.into_iter().map(|content| Item::from(content)));
+        self.items.extend(iter.into_iter().map(Item::from));
         self
     }
 }
