@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use seed::prelude::{cmds, CmdHandle};
 
-pub trait OrdersExt<Ms: 'static, GMs: 'static>: Orders<Ms, GMs> {
+pub trait OrdersExt<Ms: 'static>: Orders<Ms> {
     fn perform_cmd_after<MsU: 'static>(
         &mut self,
         ms: u32,
@@ -18,28 +18,12 @@ pub trait OrdersExt<Ms: 'static, GMs: 'static>: Orders<Ms, GMs> {
         self.perform_cmd_with_handle(cmds::timeout(ms, handler))
     }
 
-    fn perform_g_cmd_after(
-        &mut self,
-        ms: u32,
-        handler: impl FnOnce() -> GMs + Clone + 'static,
-    ) -> &mut Self {
-        self.perform_g_cmd(cmds::timeout(ms, handler))
-    }
-
-    fn perform_g_cmd_after_with_handle(
-        &mut self,
-        ms: u32,
-        handler: impl FnOnce() -> GMs + Clone + 'static,
-    ) -> CmdHandle {
-        self.perform_g_cmd_with_handle(cmds::timeout(ms, handler))
-    }
-
     fn proxy_with<ChildMs: 'static>(
         &mut self,
         map: &MsgMapper<ChildMs, Ms>,
-    ) -> seed::app::OrdersProxy<ChildMs, Self::AppMs, Self::Mdl, Self::INodes, GMs> {
+    ) -> seed::app::OrdersProxy<ChildMs, Self::AppMs, Self::Mdl, Self::INodes> {
         self.proxy(map.map_msg_once())
     }
 }
 
-impl<T, Ms: 'static, GMs: 'static> OrdersExt<Ms, GMs> for T where T: Orders<Ms, GMs> {}
+impl<T, Ms: 'static> OrdersExt<Ms> for T where T: Orders<Ms> {}

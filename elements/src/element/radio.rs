@@ -57,11 +57,11 @@ pub enum Msg {
     SetMouseOver(bool),
 }
 
-impl<PMsg: 'static, GMsg: 'static> Element<PMsg, GMsg> for Radio<PMsg> {
+impl<PMsg: 'static> Element<PMsg> for Radio<PMsg> {
     type Message = Msg;
     type Props = Props<PMsg>;
 
-    fn init(props: Self::Props, orders: &mut impl Orders<PMsg, GMsg>) -> Self {
+    fn init(props: Self::Props, orders: &mut impl Orders<PMsg>) -> Self {
         let mut orders = orders.proxy_with(&props.msg_mapper);
         orders.subscribe(|theme: ThemeChanged| Msg::SetTheme(theme.0));
 
@@ -94,7 +94,7 @@ impl<PMsg: 'static, GMsg: 'static> Element<PMsg, GMsg> for Radio<PMsg> {
         }
     }
 
-    fn update(&mut self, msg: Msg, _: &mut impl Orders<PMsg, GMsg>) {
+    fn update(&mut self, msg: Msg, _: &mut impl Orders<PMsg>) {
         match msg {
             Msg::SetTheme(val) => self.theme = val,
             Msg::SetLabel(val) => self.label = Some(val),
@@ -171,33 +171,29 @@ impl<PMsg: 'static> StyledView for Radio<PMsg> {
 }
 
 impl<PMsg: 'static> Props<PMsg> {
-    pub fn init<GMsg: 'static>(self, orders: &mut impl Orders<PMsg, GMsg>) -> Radio<PMsg> {
+    pub fn init(self, orders: &mut impl Orders<PMsg>) -> Radio<PMsg> {
         Radio::init(self, orders)
     }
 }
 
 impl<PMsg: 'static> Radio<PMsg> {
-    pub fn and_events<GMsg: 'static>(
+    pub fn and_events(
         &mut self,
         get_val: impl FnOnce(Events<PMsg>) -> Events<PMsg>,
-        _: &mut impl Orders<PMsg, GMsg>,
+        _: &mut impl Orders<PMsg>,
     ) {
         self.events = get_val(self.events.clone());
     }
 
-    pub fn try_set_styler<GMsg: 'static>(
+    pub fn try_set_styler(
         &mut self,
         val: Option<impl Into<Styler<PMsg>>>,
-        _: &mut impl Orders<PMsg, GMsg>,
+        _: &mut impl Orders<PMsg>,
     ) {
         self.styler = val.map(|s| s.into());
     }
 
-    pub fn set_styler<GMsg: 'static>(
-        &mut self,
-        val: impl Into<Styler<PMsg>>,
-        orders: &mut impl Orders<PMsg, GMsg>,
-    ) {
+    pub fn set_styler(&mut self, val: impl Into<Styler<PMsg>>, orders: &mut impl Orders<PMsg>) {
         self.try_set_styler(Some(val), orders);
     }
 }

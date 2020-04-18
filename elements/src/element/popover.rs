@@ -42,17 +42,17 @@ pub enum Msg {
     SetOffset(i8),
 }
 
-impl<PMsg, GMsg, C, T> Element<PMsg, GMsg> for Popover<PMsg, C, T>
+impl<PMsg, C, T> Element<PMsg> for Popover<PMsg, C, T>
 where
     PMsg: 'static,
-    GMsg: 'static,
+
     C: View<Output = Node<PMsg>>,
     T: View<Output = Node<PMsg>>,
 {
     type Message = Msg;
     type Props = Props<PMsg, C, T>;
 
-    fn init(props: Self::Props, orders: &mut impl Orders<PMsg, GMsg>) -> Self {
+    fn init(props: Self::Props, orders: &mut impl Orders<PMsg>) -> Self {
         let mut orders = orders.proxy_with(&props.msg_mapper);
         orders.subscribe(|theme: ThemeChanged| Msg::SetTheme(theme.0));
 
@@ -68,7 +68,7 @@ where
         }
     }
 
-    fn update(&mut self, msg: Msg, _: &mut impl Orders<PMsg, GMsg>) {
+    fn update(&mut self, msg: Msg, _: &mut impl Orders<PMsg>) {
         match msg {
             Msg::SetTheme(val) => self.theme = val,
             Msg::SetToggled(val) => self.toggled = val,
@@ -125,70 +125,62 @@ where
     C: View<Output = Node<PMsg>>,
     T: View<Output = Node<PMsg>>,
 {
-    pub fn init<GMsg: 'static>(self, orders: &mut impl Orders<PMsg, GMsg>) -> Popover<PMsg, C, T> {
+    pub fn init(self, orders: &mut impl Orders<PMsg>) -> Popover<PMsg, C, T> {
         Popover::init(self, orders)
     }
 }
 
 impl<PMsg: 'static, C, T> Popover<PMsg, C, T> {
-    pub fn and_events<GMsg: 'static>(
+    pub fn and_events(
         &mut self,
         get_val: impl FnOnce(Events<PMsg>) -> Events<PMsg>,
-        _: &mut impl Orders<PMsg, GMsg>,
+        _: &mut impl Orders<PMsg>,
     ) {
         self.events = get_val(self.events.clone());
     }
 
-    pub fn set_child<GMsg>(&mut self, child: C, _: &mut impl Orders<PMsg, GMsg>) -> C
+    pub fn set_child(&mut self, child: C, _: &mut impl Orders<PMsg>) -> C
     where
-        GMsg: 'static,
         PMsg: 'static,
         C: View<Output = Node<PMsg>>,
     {
         std::mem::replace(&mut self.child, child)
     }
 
-    pub fn set_target<GMsg>(&mut self, target: T, _: &mut impl Orders<PMsg, GMsg>) -> T
+    pub fn set_target(&mut self, target: T, _: &mut impl Orders<PMsg>) -> T
     where
-        GMsg: 'static,
         PMsg: 'static,
         T: View<Output = Node<PMsg>>,
     {
         std::mem::replace(&mut self.target, target)
     }
 
-    pub fn try_set_styler<GMsg: 'static>(
+    pub fn try_set_styler(
         &mut self,
         val: Option<impl Into<Styler<PMsg, C, T>>>,
-        _: &mut impl Orders<PMsg, GMsg>,
+        _: &mut impl Orders<PMsg>,
     ) {
         self.styler = val.map(|s| s.into());
     }
 
-    pub fn set_styler<GMsg: 'static>(
+    pub fn set_styler(
         &mut self,
         val: impl Into<Styler<PMsg, C, T>>,
-        orders: &mut impl Orders<PMsg, GMsg>,
+        orders: &mut impl Orders<PMsg>,
     ) {
         self.try_set_styler(Some(val), orders);
     }
 
-    pub fn update_child<GMsg: 'static>(
-        &mut self,
-        child_msg: C::Message,
-        orders: &mut impl Orders<PMsg, GMsg>,
-    ) where
-        C: Element<PMsg, GMsg>,
+    pub fn update_child(&mut self, child_msg: C::Message, orders: &mut impl Orders<PMsg>)
+    where
+        C: Element<PMsg>,
     {
         self.child.update(child_msg, orders)
     }
 
-    pub fn update_target<GMsg: 'static>(
-        &mut self,
-        child_msg: T::Message,
-        orders: &mut impl Orders<PMsg, GMsg>,
-    ) where
-        T: Element<PMsg, GMsg>,
+    pub fn update_target(&mut self, child_msg: T::Message, orders: &mut impl Orders<PMsg>)
+    where
+        T: Element<PMsg>,
     {
         self.target.update(child_msg, orders)
     }

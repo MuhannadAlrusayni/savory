@@ -36,21 +36,20 @@ impl<T> Modifier<T> {
     }
 }
 
-impl<T, PMsg, GMsg> Element<PMsg, GMsg> for Modifier<T>
+impl<T, PMsg> Element<PMsg> for Modifier<T>
 where
     PMsg: 'static,
-    GMsg: 'static,
-    T: Element<PMsg, GMsg, Output = Node<PMsg>>,
+    T: Element<PMsg, Output = Node<PMsg>>,
 {
     type Message = T::Message;
     type Props = T::Props;
 
-    fn init(props: Self::Props, orders: &mut impl Orders<PMsg, GMsg>) -> Self {
+    fn init(props: Self::Props, orders: &mut impl Orders<PMsg>) -> Self {
         let target = T::init(props, orders);
         Self::on(target)
     }
 
-    fn update(&mut self, msg: Self::Message, orders: &mut impl Orders<PMsg, GMsg>) {
+    fn update(&mut self, msg: Self::Message, orders: &mut impl Orders<PMsg>) {
         self.target.update(msg, orders)
     }
 }

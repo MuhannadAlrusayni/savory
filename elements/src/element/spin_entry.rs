@@ -89,11 +89,11 @@ pub enum Msg {
     DecrementButton(button::Msg),
 }
 
-impl<PMsg: 'static, GMsg: 'static> Element<PMsg, GMsg> for SpinEntry<PMsg> {
+impl<PMsg: 'static> Element<PMsg> for SpinEntry<PMsg> {
     type Message = Msg;
     type Props = Props<PMsg>;
 
-    fn init(props: Self::Props, orders: &mut impl Orders<PMsg, GMsg>) -> Self {
+    fn init(props: Self::Props, orders: &mut impl Orders<PMsg>) -> Self {
         let mut orders = orders.proxy_with(&props.msg_mapper);
         orders.subscribe(|theme: ThemeChanged| Msg::SetTheme(theme.0));
 
@@ -148,7 +148,7 @@ impl<PMsg: 'static, GMsg: 'static> Element<PMsg, GMsg> for SpinEntry<PMsg> {
         spin_entry
     }
 
-    fn update(&mut self, msg: Msg, orders: &mut impl Orders<PMsg, GMsg>) {
+    fn update(&mut self, msg: Msg, orders: &mut impl Orders<PMsg>) {
         let mut orders = orders.proxy_with(&self.msg_mapper);
 
         match msg {
@@ -236,37 +236,33 @@ impl<PMsg: 'static> StyledView for SpinEntry<PMsg> {
 }
 
 impl<PMsg: 'static> Props<PMsg> {
-    pub fn init<GMsg: 'static>(self, orders: &mut impl Orders<PMsg, GMsg>) -> SpinEntry<PMsg> {
+    pub fn init(self, orders: &mut impl Orders<PMsg>) -> SpinEntry<PMsg> {
         SpinEntry::init(self, orders)
     }
 }
 
 impl<PMsg: 'static> SpinEntry<PMsg> {
-    pub fn and_events<GMsg: 'static>(
+    pub fn and_events(
         &mut self,
         get_val: impl FnOnce(Events<PMsg>) -> Events<PMsg>,
-        _: &mut impl Orders<PMsg, GMsg>,
+        _: &mut impl Orders<PMsg>,
     ) {
         self.events = get_val(self.events.clone());
     }
 
-    pub fn try_set_styler<GMsg: 'static>(
+    pub fn try_set_styler(
         &mut self,
         val: Option<impl Into<Styler<PMsg>>>,
-        _: &mut impl Orders<PMsg, GMsg>,
+        _: &mut impl Orders<PMsg>,
     ) {
         self.styler = val.map(|s| s.into());
     }
 
-    pub fn set_styler<GMsg: 'static>(
-        &mut self,
-        val: impl Into<Styler<PMsg>>,
-        orders: &mut impl Orders<PMsg, GMsg>,
-    ) {
+    pub fn set_styler(&mut self, val: impl Into<Styler<PMsg>>, orders: &mut impl Orders<PMsg>) {
         self.try_set_styler(Some(val), orders)
     }
 
-    fn try_set_value<GMsg>(&mut self, val: Option<f64>, _: &mut impl Orders<Msg, GMsg>) {
+    fn try_set_value(&mut self, val: Option<f64>, _: &mut impl Orders<Msg>) {
         let val = match (val, self.min, self.max) {
             (Some(val), _, Some(max)) if val > max => Some(max),
             (Some(val), Some(min), _) if val < min => Some(min),
@@ -278,7 +274,7 @@ impl<PMsg: 'static> SpinEntry<PMsg> {
         }
     }
 
-    fn try_set_placeholder<GMsg>(&mut self, val: Option<f64>, _: &mut impl Orders<Msg, GMsg>) {
+    fn try_set_placeholder(&mut self, val: Option<f64>, _: &mut impl Orders<Msg>) {
         let val = match (val, self.min, self.max) {
             (Some(val), Some(min), Some(max)) if max >= val && val >= min => Some(val),
             (Some(val), _, Some(max)) if val > max => Some(max),
@@ -288,7 +284,7 @@ impl<PMsg: 'static> SpinEntry<PMsg> {
         self.placeholder = val;
     }
 
-    fn try_set_max<GMsg>(&mut self, val: Option<f64>, orders: &mut impl Orders<Msg, GMsg>) {
+    fn try_set_max(&mut self, val: Option<f64>, orders: &mut impl Orders<Msg>) {
         match (val, self.min) {
             (Some(val), Some(min)) if val < min => {
                 self.max = self.min;
@@ -302,7 +298,7 @@ impl<PMsg: 'static> SpinEntry<PMsg> {
         self.try_set_placeholder(self.placeholder, orders);
     }
 
-    fn try_set_min<GMsg>(&mut self, val: Option<f64>, orders: &mut impl Orders<Msg, GMsg>) {
+    fn try_set_min(&mut self, val: Option<f64>, orders: &mut impl Orders<Msg>) {
         match (val, self.max) {
             (Some(val), Some(max)) if val > max => {
                 self.min = self.max;
@@ -316,7 +312,7 @@ impl<PMsg: 'static> SpinEntry<PMsg> {
         self.try_set_placeholder(self.placeholder, orders);
     }
 
-    fn set_step<GMsg>(&mut self, val: f64, _: &mut impl Orders<Msg, GMsg>) {
+    fn set_step(&mut self, val: f64, _: &mut impl Orders<Msg>) {
         self.step = match (val, self.min, self.max) {
             (step, Some(min), Some(max)) if step.abs() > (min).abs() + (max).abs() => {
                 (min).abs() + (max).abs()
@@ -337,7 +333,7 @@ impl<PMsg: 'static> SpinEntry<PMsg> {
         }
     }
 
-    fn input<GMsg>(&mut self, orders: &mut impl Orders<Msg, GMsg>) {
+    fn input(&mut self, orders: &mut impl Orders<Msg>) {
         if let Some(input) = self.el_ref.get() {
             let value = input.value();
             // if value is empty then we set None to self.value

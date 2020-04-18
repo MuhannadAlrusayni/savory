@@ -15,7 +15,7 @@
 //! # TODO Helper types
 
 use crate::prelude::*;
-use seed::{app::UndefinedGMsg, prelude::IntoNodes};
+use seed::prelude::IntoNodes;
 
 /// Trait used to create element and handle element messages and update
 /// element state accordingly.
@@ -29,7 +29,7 @@ use seed::{app::UndefinedGMsg, prelude::IntoNodes};
 ///
 /// [Seed]: https://seed-rs.org
 /// [`Orders`]: crate::prelude::Orders
-pub trait Element<PMsg: 'static, GMsg = UndefinedGMsg>: View {
+pub trait Element<PMsg: 'static>: View {
     /// Element message
     type Message;
     /// Properties used to initialize this element
@@ -40,16 +40,16 @@ pub trait Element<PMsg: 'static, GMsg = UndefinedGMsg>: View {
     /// # Arguments
     /// - `props` properties used to create the element.
     /// - `orders` used to interacte with the runtime.
-    fn init(props: Self::Props, orders: &mut impl Orders<PMsg, GMsg>) -> Self;
+    fn init(props: Self::Props, orders: &mut impl Orders<PMsg>) -> Self;
 
     /// update method that recive `Self::Message` and update the model state accordingly.
-    fn update(&mut self, _: Self::Message, _: &mut impl Orders<PMsg, GMsg>);
+    fn update(&mut self, _: Self::Message, _: &mut impl Orders<PMsg>);
 }
 
 /// Similar to `Element` trait but for the root element (the app)
 ///
 /// The `init` function takes `Url` insted if `Props` as it's first argument.
-pub trait AppElement<GMsg = UndefinedGMsg>: View {
+pub trait AppElement: View {
     /// App message
     type Message: 'static;
 
@@ -59,20 +59,19 @@ pub trait AppElement<GMsg = UndefinedGMsg>: View {
     /// - `url` the requested url when the app was loaded
     /// - `orders` used to interacte with the runtime, such as subscribing to
     ///   messages, or sending messages ..etc.
-    fn init(url: Url, orders: &mut impl Orders<Self::Message, GMsg>) -> Self;
+    fn init(url: Url, orders: &mut impl Orders<Self::Message>) -> Self;
 
     /// update method that recive `Self::Message` and update the model state accordingly.
-    fn update(&mut self, _: Self::Message, _: &mut impl Orders<Self::Message, GMsg>);
+    fn update(&mut self, _: Self::Message, _: &mut impl Orders<Self::Message>);
 }
 
 /// Extension trait for `AppElement`
 ///
 /// This trait provides functions that mounts the app element on HTML node by
 /// integrating `AppElement` with `seed::app::App`
-pub trait AppElementExt<GMsg = UndefinedGMsg>: AppElement<GMsg>
+pub trait AppElementExt: AppElement
 where
     Self: Sized,
-    GMsg: 'static,
     Self::Output: IntoNodes<Self::Message> + 'static,
 {
     /// Start app element
@@ -116,12 +115,12 @@ where
     ///     MyApp::start();
     /// }
     /// ```
-    fn start() -> seed::app::App<Self::Message, Self, Self::Output, GMsg> {
+    fn start() -> seed::app::App<Self::Message, Self, Self::Output> {
         Self::start_at("app")
     }
 
     /// Start app element at specifec node that matchs the `id` passed
-    fn start_at(id: &str) -> seed::app::App<Self::Message, Self, Self::Output, GMsg> {
+    fn start_at(id: &str) -> seed::app::App<Self::Message, Self, Self::Output> {
         seed::app::App::start(
             id,
             |url, orders| Self::init(url, orders),
@@ -131,10 +130,9 @@ where
     }
 }
 
-impl<T, GMsg> AppElementExt<GMsg> for T
+impl<T> AppElementExt for T
 where
-    Self: AppElement<GMsg>,
-    GMsg: 'static,
+    Self: AppElement,
     Self::Output: IntoNodes<Self::Message> + 'static,
 {
 }

@@ -57,16 +57,15 @@ pub enum Msg {
     CloseButton(button::Msg),
 }
 
-impl<PMsg, GMsg, C> Element<PMsg, GMsg> for Dialog<PMsg, C>
+impl<PMsg, C> Element<PMsg> for Dialog<PMsg, C>
 where
     PMsg: 'static,
-    GMsg: 'static,
     C: View<Output = Node<PMsg>>,
 {
     type Message = Msg;
     type Props = Props<PMsg, C>;
 
-    fn init(props: Self::Props, orders: &mut impl Orders<PMsg, GMsg>) -> Self {
+    fn init(props: Self::Props, orders: &mut impl Orders<PMsg>) -> Self {
         let mut orders = orders.proxy_with(&props.msg_mapper);
         orders.subscribe(|theme: ThemeChanged| Msg::SetTheme(theme.0));
 
@@ -99,7 +98,7 @@ where
         }
     }
 
-    fn update(&mut self, msg: Msg, orders: &mut impl Orders<PMsg, GMsg>) {
+    fn update(&mut self, msg: Msg, orders: &mut impl Orders<PMsg>) {
         let mut orders = orders.proxy_with(&self.msg_mapper);
 
         match msg {
@@ -180,7 +179,7 @@ where
     PMsg: 'static,
     C: View<Output = Node<PMsg>>,
 {
-    pub fn init<GMsg: 'static>(self, orders: &mut impl Orders<PMsg, GMsg>) -> Dialog<PMsg, C> {
+    pub fn init(self, orders: &mut impl Orders<PMsg>) -> Dialog<PMsg, C> {
         Dialog::init(self, orders)
     }
 
@@ -196,41 +195,34 @@ where
 }
 
 impl<PMsg: 'static, C> Dialog<PMsg, C> {
-    pub fn and_events<GMsg: 'static>(
+    pub fn and_events(
         &mut self,
         get_val: impl FnOnce(Events<PMsg>) -> Events<PMsg>,
-        _: &mut impl Orders<PMsg, GMsg>,
+        _: &mut impl Orders<PMsg>,
     ) {
         self.events = get_val(self.events.clone());
     }
 
-    pub fn try_set_styler<GMsg: 'static>(
+    pub fn try_set_styler(
         &mut self,
         val: Option<impl Into<Styler<PMsg, C>>>,
-        _: &mut impl Orders<PMsg, GMsg>,
+        _: &mut impl Orders<PMsg>,
     ) {
         self.styler = val.map(|s| s.into());
     }
 
-    pub fn set_styler<GMsg: 'static>(
-        &mut self,
-        val: impl Into<Styler<PMsg, C>>,
-        orders: &mut impl Orders<PMsg, GMsg>,
-    ) {
+    pub fn set_styler(&mut self, val: impl Into<Styler<PMsg, C>>, orders: &mut impl Orders<PMsg>) {
         self.try_set_styler(Some(val), orders)
     }
 
-    pub fn update_child<GMsg: 'static>(
-        &mut self,
-        child_msg: C::Message,
-        orders: &mut impl Orders<PMsg, GMsg>,
-    ) where
-        C: Element<PMsg, GMsg>,
+    pub fn update_child(&mut self, child_msg: C::Message, orders: &mut impl Orders<PMsg>)
+    where
+        C: Element<PMsg>,
     {
         self.child.update(child_msg, orders)
     }
 
-    fn set_toggled<GMsg: 'static>(&mut self, val: bool, orders: &mut impl Orders<Msg, GMsg>) {
+    fn set_toggled(&mut self, val: bool, orders: &mut impl Orders<Msg>) {
         if val {
             // open
             match self.state {
@@ -256,7 +248,7 @@ impl<PMsg: 'static, C> Dialog<PMsg, C> {
         }
     }
 
-    fn toggle<GMsg: 'static>(&mut self, orders: &mut impl Orders<Msg, GMsg>) {
+    fn toggle(&mut self, orders: &mut impl Orders<Msg>) {
         match self.state {
             State::Opened | State::Opening => self.set_toggled(false, orders),
             State::Closed | State::Closing => self.set_toggled(true, orders),

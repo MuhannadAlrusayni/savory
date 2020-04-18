@@ -64,11 +64,11 @@ pub enum Msg {
     TrySetColor(Option<css::Color>),
 }
 
-impl<PMsg: 'static, GMsg: 'static> Element<PMsg, GMsg> for ProgressBar<PMsg> {
+impl<PMsg: 'static> Element<PMsg> for ProgressBar<PMsg> {
     type Message = Msg;
     type Props = Props<PMsg>;
 
-    fn init(props: Self::Props, orders: &mut impl Orders<PMsg, GMsg>) -> Self {
+    fn init(props: Self::Props, orders: &mut impl Orders<PMsg>) -> Self {
         let mut orders = orders.proxy_with(&props.msg_mapper);
         orders.subscribe(|theme: ThemeChanged| Msg::SetTheme(theme.0));
 
@@ -87,7 +87,7 @@ impl<PMsg: 'static, GMsg: 'static> Element<PMsg, GMsg> for ProgressBar<PMsg> {
         }
     }
 
-    fn update(&mut self, msg: Self::Message, orders: &mut impl Orders<PMsg, GMsg>) {
+    fn update(&mut self, msg: Self::Message, orders: &mut impl Orders<PMsg>) {
         let mut orders = orders.proxy_with(&self.msg_mapper);
 
         match msg {
@@ -143,7 +143,7 @@ impl<PMsg: 'static> StyledView for ProgressBar<PMsg> {
 }
 
 impl<PMsg: 'static> Props<PMsg> {
-    pub fn init<GMsg: 'static>(self, orders: &mut impl Orders<PMsg, GMsg>) -> ProgressBar<PMsg> {
+    pub fn init(self, orders: &mut impl Orders<PMsg>) -> ProgressBar<PMsg> {
         ProgressBar::init(self, orders)
     }
 
@@ -159,31 +159,27 @@ impl<PMsg: 'static> Props<PMsg> {
 }
 
 impl<PMsg: 'static> ProgressBar<PMsg> {
-    pub fn and_events<GMsg: 'static>(
+    pub fn and_events(
         &mut self,
         get_val: impl FnOnce(Events<PMsg>) -> Events<PMsg>,
-        _: &mut impl Orders<PMsg, GMsg>,
+        _: &mut impl Orders<PMsg>,
     ) {
         self.events = get_val(self.events.clone());
     }
 
-    pub fn try_set_styler<GMsg: 'static>(
+    pub fn try_set_styler(
         &mut self,
         val: Option<impl Into<Styler<PMsg>>>,
-        _: &mut impl Orders<PMsg, GMsg>,
+        _: &mut impl Orders<PMsg>,
     ) {
         self.styler = val.map(|s| s.into());
     }
 
-    pub fn set_styler<GMsg: 'static>(
-        &mut self,
-        val: impl Into<Styler<PMsg>>,
-        orders: &mut impl Orders<PMsg, GMsg>,
-    ) {
+    pub fn set_styler(&mut self, val: impl Into<Styler<PMsg>>, orders: &mut impl Orders<PMsg>) {
         self.try_set_styler(Some(val), orders)
     }
 
-    fn set_value<GMsg>(&mut self, val: f64, _: &mut impl Orders<Msg, GMsg>) {
+    fn set_value(&mut self, val: f64, _: &mut impl Orders<Msg>) {
         let min = self.min;
         let max = self.max;
         let value = self.value;
@@ -199,7 +195,7 @@ impl<PMsg: 'static> ProgressBar<PMsg> {
         }
     }
 
-    fn set_max<GMsg>(&mut self, val: f64, orders: &mut impl Orders<Msg, GMsg>) {
+    fn set_max(&mut self, val: f64, orders: &mut impl Orders<Msg>) {
         let min = self.min;
         let max = self.max;
 
@@ -217,7 +213,7 @@ impl<PMsg: 'static> ProgressBar<PMsg> {
         }
     }
 
-    fn set_min<GMsg>(&mut self, val: f64, orders: &mut impl Orders<Msg, GMsg>) {
+    fn set_min(&mut self, val: f64, orders: &mut impl Orders<Msg>) {
         let min = self.min;
         let max = self.max;
 
