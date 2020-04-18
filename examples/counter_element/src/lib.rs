@@ -1,13 +1,12 @@
-use derive_rich::Rich;
 use savory_core::prelude::*;
 use savory_elements::prelude::*;
 use savory_html::{
-    css::{unit::px, values as val, St},
+    css::{unit::px, values as val, Color, St},
     prelude::*,
 };
 use wasm_bindgen::prelude::*;
 
-#[derive(Rich, Element)]
+#[derive(Element)]
 #[element(style(inc_btn, dec_btn), events(inc_btn, dec_btn))]
 pub struct Counter<PMsg> {
     #[element(props(required))]
@@ -55,8 +54,8 @@ impl<PMsg: 'static> View for Counter<PMsg> {
         // sharde style for buttons
         let style_btns = |conf: css::Style| {
             conf.add(St::Appearance, val::None)
-                .background(css::Color::SlateBlue)
-                .text(css::Color::White)
+                .background(Color::SlateBlue)
+                .text(Color::White)
                 .and_border(|conf| conf.none().radius(px(4)))
                 .margin(px(4))
                 .padding(px(4))
