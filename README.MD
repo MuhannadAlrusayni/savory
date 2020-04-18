@@ -107,7 +107,7 @@ pub fn view() {
 ```
 
 Preview:
-![Screenshot](doc-resources/simple-counter.webm)
+![Screenshot](docs-resources/simple-counter.webm)
 
 [source code](https://gitlab.com/MAlrusayni/savory/-/tree/master/examples/simple_counter)
 
@@ -263,7 +263,7 @@ pub fn view() {
 ```
 
 Preview:
-![Screenshot](doc-resources/simple-counter.webm)
+![Screenshot](docs-resources/simple-counter.webm)
 
 [source code](https://gitlab.com/MAlrusayni/savory/-/tree/master/examples/counter_element)
 
@@ -332,7 +332,7 @@ pub fn view() {
 ```
 
 Preview:
-![Screenshot](doc-resources/counter-using-savory-elements.webm)
+![Screenshot](docs-resources/counter-using-savory-elements.webm)
 
 [source code](https://gitlab.com/MAlrusayni/savory/-/tree/master/examples/counter_using_savory_elements)
 
@@ -358,7 +358,7 @@ TODO
 
 # Screenshot
 
-![Screenshot](doc-resources/screenshot.png)
+![Screenshot](docs-resources/screenshot.png)
 
 # License
 
