@@ -41,6 +41,10 @@ Savory crates:
 - [`savory_elements`]: UI Elements based on Savory
 - [`savory_derive`]: Helper derives
 
+# Screenshot
+
+![Screenshot](docs-resources/screenshot.png)
+
 # Examples
 
 Here we will create the same counter app found in [Elm tutorial], then we will
@@ -107,7 +111,7 @@ pub fn view() {
 ```
 
 Preview:
-![Screenshot](docs-resources/simple-counter.webm)
+[Screenshot](docs-resources/simple-counter.webm)
 
 [source code](https://gitlab.com/MAlrusayni/savory/-/tree/master/examples/simple_counter)
 
@@ -263,7 +267,7 @@ pub fn view() {
 ```
 
 Preview:
-![Screenshot](docs-resources/simple-counter.webm)
+[Screenshot](docs-resources/counter-element.webm)
 
 [source code](https://gitlab.com/MAlrusayni/savory/-/tree/master/examples/counter_element)
 
@@ -276,8 +280,8 @@ the app.
 
 ## Counter using Savory Elements!
 
-Savory ships with collections of elements, and we will use them it to build
-counter app and see what features Savory elements gives us.
+Savory ships with collections of elements, and we will use them to build counter
+app and see what features Savory elements gives us.
 
 ``` rust
 use savory_core::prelude::*;
@@ -332,17 +336,17 @@ pub fn view() {
 ```
 
 Preview:
-![Screenshot](docs-resources/counter-using-savory-elements.webm)
+[Screenshot](docs-resources/counter-using-savory-elements.webm)
 
 [source code](https://gitlab.com/MAlrusayni/savory/-/tree/master/examples/counter_using_savory_elements)
 
 As you can see this example have less lines and more features, what a neat.
 
-It happens that Savory elements have SpinEntry which work just like counter, and
-we used it in our example as simple as that, so Savory tries to provides you the
-most needed elements so you don't need to build every thing from scratch, even
-if you want build your own element in some way, you can stil use Savory elements
-as build block in your own element.
+It happens that Savory elements have `SpinEntry` element, which work just like
+counter, and we used it in our example as simple as that, so Savory tries to
+provides you the most needed elements so you don't need to build every thing
+from scratch, even if you want build your own element in some way, you can still
+use Savory elements as building block in your own element.
 
 # Qucikstart
 
@@ -355,10 +359,6 @@ wasm-bindgen = "0.2.55"
 ```
 
 TODO
-
-# Screenshot
-
-![Screenshot](docs-resources/screenshot.png)
 
 # License
 
