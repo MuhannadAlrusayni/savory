@@ -55,7 +55,14 @@ impl Default for BoxShadow {
 impl UpdateStyleValues for BoxShadow {
     fn update_style_values(self, values: StyleValues) -> StyleValues {
         let to_string = |shadow: ShadowValue| {
-            let mut vals = vec![shadow.x.to_string(), shadow.y.to_string()];
+            let mut vals = vec![];
+
+            if shadow.inset {
+                vals.push("inset".to_string());
+            }
+
+            vals.push(shadow.x.to_string());
+            vals.push(shadow.y.to_string());
 
             match (shadow.blur, shadow.spread) {
                 (Some(blur), Some(spread)) => {
@@ -111,7 +118,7 @@ impl BoxShadow {
             Self::Multiple(shadows) => Self::One(conf(
                 shadows
                     .into_iter()
-                    .nth(0)
+                    .next()
                     .unwrap_or_else(ShadowValue::default),
             )),
             _ => Self::One(conf(ShadowValue::default())),
@@ -163,6 +170,7 @@ impl BoxShadow {
         self.shadow(|sh| sh.outset())
     }
 
+    #[allow(clippy::should_implement_trait)]
     pub fn add(mut self, get_val: impl FnOnce(ShadowValue) -> ShadowValue) -> Self {
         let val = get_val(ShadowValue::default());
         self = match self {
