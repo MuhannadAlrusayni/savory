@@ -1,7 +1,6 @@
 use crate::css::{values as val, St, StyleValues, UpdateStyleValues};
 
 #[derive(Clone, Debug, Copy, PartialEq, Eq, Display, From)]
-#[display(fmt = "visibility: {};")]
 pub enum Visibility {
     Visible(val::Visible),
     Hidden(val::Hidden),
