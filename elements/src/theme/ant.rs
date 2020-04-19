@@ -611,7 +611,8 @@ impl ThemeImpl for Ant {
                 .and_padding(|conf| conf.x(px(15.)).y(px(0.)))
                 .and_size(|conf| conf.all_heights(px(32.)))
                 .and_transition(|conf| {
-                    conf.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+                    conf.duration(sec(0.3))
+                        .cubic_bezier(0.645, 0.045, 0.355, 1.)
                 })
                 .and_text(|conf| {
                     conf.and_decoration(|d| d.line(val::None))
@@ -653,9 +654,8 @@ impl ThemeImpl for Ant {
                         .and_position(|conf| conf.relative())
                         .background(bg_color)
                         .and_transition(|conf| {
-                            conf.all(|val| {
-                                val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.)
-                            })
+                            conf.duration(sec(0.3))
+                                .cubic_bezier(0.645, 0.045, 0.355, 1.)
                         })
                         .and_border(|conf| {
                             conf.transparent()
@@ -676,7 +676,8 @@ impl ThemeImpl for Ant {
                     })
                     .and_position(|conf| conf.absolute().top(px(top)).left(px(left)))
                     .and_transition(|conf| {
-                        conf.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+                        conf.duration(sec(0.3))
+                            .cubic_bezier(0.645, 0.045, 0.355, 1.)
                     })
                     .background(white)
                     .and_border(|conf| conf.width(px(0.)).transparent().none().radius(0.5))
@@ -722,10 +723,8 @@ impl ThemeImpl for Ant {
             checkbox::Style::default()
                 .and_checkbox(|conf| {
                     conf.and_transition(|conf| {
-                        conf.all(|conf| {
-                            conf.duration(sec(0.3))
-                                .cubic_bezier(0.645, 0.045, 0.355, 1.)
-                        })
+                        conf.duration(sec(0.3))
+                            .cubic_bezier(0.645, 0.045, 0.355, 1.)
                     })
                     .cursor(cursor)
                     .display(val::Flex)
@@ -742,9 +741,8 @@ impl ThemeImpl for Ant {
                     conf.config_if(*lens.toggled, |conf| {
                         conf.cursor(cursor)
                             .and_transition(|conf| {
-                                conf.all(|val| {
-                                    val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.)
-                                })
+                                conf.duration(sec(0.3))
+                                    .cubic_bezier(0.645, 0.045, 0.355, 1.)
                             })
                             .and_size(|conf| conf.resize(0.2, 0.55))
                             .and_border(|conf| {
@@ -758,9 +756,8 @@ impl ThemeImpl for Ant {
                 .and_label(|conf| {
                     conf.config_if(*lens.disabled, |conf| conf.text(disable))
                         .and_transition(|conf| {
-                            conf.all(|val| {
-                                val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.)
-                            })
+                            conf.duration(sec(0.3))
+                                .cubic_bezier(0.645, 0.045, 0.355, 1.)
                         })
                         .cursor(cursor)
                         .display(val::Flex)
@@ -801,7 +798,8 @@ impl ThemeImpl for Ant {
             radio::Style::default()
                 .and_radio(|conf| {
                     conf.and_transition(|conf| {
-                        conf.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+                        conf.duration(sec(0.3))
+                            .cubic_bezier(0.645, 0.045, 0.355, 1.)
                     })
                     .cursor(cursor)
                     .display(val::Flex)
@@ -822,15 +820,15 @@ impl ThemeImpl for Ant {
                             .background(fg)
                     })
                     .and_transition(|conf| {
-                        conf.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+                        conf.duration(sec(0.3))
+                            .cubic_bezier(0.645, 0.045, 0.355, 1.)
                     })
                 })
                 .and_label(|conf| {
                     conf.config_if(*lens.disabled, |conf| conf.text(disable))
                         .and_transition(|conf| {
-                            conf.all(|val| {
-                                val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.)
-                            })
+                            conf.duration(sec(0.3))
+                                .cubic_bezier(0.645, 0.045, 0.355, 1.)
                         })
                         .cursor(cursor)
                         .display(val::Flex)
@@ -876,7 +874,8 @@ impl ThemeImpl for Ant {
             entry::Style::default()
                 .and_container(|conf| {
                     conf.and_transition(|conf| {
-                        conf.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+                        conf.duration(sec(0.3))
+                            .cubic_bezier(0.645, 0.045, 0.355, 1.)
                     })
                     .display(val::Flex)
                     .align_items(val::Center)
@@ -898,7 +897,8 @@ impl ThemeImpl for Ant {
                 })
                 .and_input(|conf| {
                     conf.and_transition(|conf| {
-                        conf.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+                        conf.duration(sec(0.3))
+                            .cubic_bezier(0.645, 0.045, 0.355, 1.)
                     })
                     .and_size(|conf| conf.width(em(input_width)).height(em(input_height)))
                     .text(fg)
@@ -986,9 +986,8 @@ impl ThemeImpl for Ant {
                     centered_flex(conf)
                         .and_position(|conf| conf.relative())
                         .and_transition(|conf| {
-                            conf.all(|val| {
-                                val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.)
-                            })
+                            conf.duration(sec(0.3))
+                                .cubic_bezier(0.645, 0.045, 0.355, 1.)
                         })
                         .background(bg)
                         .and_border(|conf| {
@@ -1002,7 +1001,8 @@ impl ThemeImpl for Ant {
                 })
                 .and_input(|conf| {
                     conf.and_transition(|conf| {
-                        conf.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+                        conf.duration(sec(0.3))
+                            .cubic_bezier(0.645, 0.045, 0.355, 1.)
                     })
                     .and_size(|conf| conf.width(em(input_width)).height(em(input_height)))
                     .text(fg)
@@ -1022,9 +1022,8 @@ impl ThemeImpl for Ant {
                         centered_flex(conf)
                             .opacity(btns_opacity)
                             .and_transition(|conf| {
-                                conf.all(|val| {
-                                    val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.)
-                                })
+                                conf.duration(sec(0.3))
+                                    .cubic_bezier(0.645, 0.045, 0.355, 1.)
                             })
                             .text(secondary_text)
                             .background(white)
@@ -1045,9 +1044,8 @@ impl ThemeImpl for Ant {
                         centered_flex(conf)
                             .opacity(btns_opacity)
                             .and_transition(|conf| {
-                                conf.all(|val| {
-                                    val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.)
-                                })
+                                conf.duration(sec(0.3))
+                                    .cubic_bezier(0.645, 0.045, 0.355, 1.)
                             })
                             .text(secondary_text)
                             .background(white)
@@ -1083,7 +1081,8 @@ impl ThemeImpl for Ant {
                     .background(Hsla::new(0.0, 0., 0., 0.5))
                     .and_size(|conf| conf.full())
                     .and_transition(|conf| {
-                        conf.all(|val| val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.))
+                        conf.duration(sec(0.3))
+                            .cubic_bezier(0.645, 0.045, 0.355, 1.)
                     })
                     .config(|conf| {
                         use dialog::State::*;
@@ -1223,7 +1222,7 @@ impl ThemeImpl for Ant {
                     conf.and_border(|conf| conf.radius(em(radius)).none())
                         .background(gray_300)
                         .and_size(|conf| conf.all_heights(em(height)).width(width))
-                        .and_transition(|conf| conf.all(|val| val.duration(sec(0.3)).ease()))
+                        .and_transition(|conf| conf.duration(sec(0.3)).ease())
                         .and_position(|conf| conf.relative())
                         .add(St::Overflow, val::Hidden)
                 })
@@ -1241,9 +1240,8 @@ impl ThemeImpl for Ant {
                             conf.background(color)
                         })
                         .and_transition(|conf| {
-                            conf.all(|val| {
-                                val.duration(sec(0.3)).cubic_bezier(0.645, 0.045, 0.355, 1.)
-                            })
+                            conf.duration(sec(0.3))
+                                .cubic_bezier(0.645, 0.045, 0.355, 1.)
                         })
                         .and_position(|conf| conf.absolute())
                         .and_size(|conf| {
