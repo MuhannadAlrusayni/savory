@@ -86,7 +86,7 @@ where
 
         Self {
             msg_mapper: props.msg_mapper,
-            local_events: local_events,
+            local_events,
             events: props.events,
             styler: props.styler,
             theme: props.theme,
