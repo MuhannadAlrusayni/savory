@@ -3,7 +3,7 @@ use derive_rich::Rich;
 use std::borrow::Cow;
 
 /// ```
-/// use savory_html::css::{values as val, Style, Color, unit::em};
+/// use savory_html::css::{values as val, Style, Color, unit::{em, px}};
 /// use palette::rgb::Rgb;
 ///
 /// Style::default()
@@ -16,6 +16,18 @@ use std::borrow::Cow;
 ///             .align(val::Center)
 ///             .transform(val::Capitalize)
 ///             .indent(em(2.))
+///             // for single text shadow
+///             .and_shadow(|conf| {
+///                 conf.x(px(3))
+///                     .y(px(4))
+///                     .color(Color::Blue)
+///                     .blur(px(2))
+///             })
+///             // for multiple text shadows
+///             .and_shadow(|conf| {
+///                 conf.add(|conf| conf.x(px(2))).y(px(-4))
+///                     .add(|conf| conf.x(px(9)))
+///             })
 ///     });
 /// ```
 #[derive(Rich, Clone, Debug, PartialEq, Default)]
@@ -36,9 +48,8 @@ pub struct Text {
     pub align_last: Option<TextAlignLast>,
     #[rich(write(rename = justify), write(option, rename = try_justify))]
     pub justify: Option<TextJustify>,
-    // TODO
-    // #[rich(write(rename = text_shadow), write(option, rename = try_text_shadow))]
-    // pub text_shadow: Option<TextShadow>,
+    #[rich(write(rename = shadow), write(option, rename = try_shadow), write(style = compose))]
+    pub shadow: Option<TextShadow>,
     #[rich(write(rename = indent), write(option, rename = try_indent))]
     pub indent: Option<TextIndent>,
     #[rich(write(rename = decoration), write(option, rename = try_decoration), write(style = compose))]
@@ -71,7 +82,7 @@ impl UpdateStyleValues for Text {
             .try_add(St::TextAlign, self.align)
             .try_add(St::TextDecoration, self.decoration.clone())
             .try_add(St::TextIndent, self.indent)
-            // .try_add(St::TextShadow, self.shadow)
+            .try_merge(self.shadow)
             .try_add(St::TextTransform, self.transform)
             .try_add(St::TextOverflow, self.overflow.clone())
             .try_add(St::UnicodeBidi, self.unicode_bidi)
@@ -84,6 +95,142 @@ impl UpdateStyleValues for Text {
 impl<T: Into<Color>> From<T> for Text {
     fn from(source: T) -> Self {
         Self::default().color(source.into())
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, From)]
+pub enum TextShadow {
+    One(Shadow),
+    Multiple(Vec<Shadow>),
+    Initial(val::Initial),
+    Inherit(val::Inherit),
+    None(val::None),
+    Unset(val::Unset),
+}
+
+impl UpdateStyleValues for TextShadow {
+    fn update_style_values(self, values: StyleValues) -> StyleValues {
+        let to_string = |shadow: Shadow| {
+            let mut vals = vec![];
+
+            vals.push(shadow.x.to_string());
+            vals.push(shadow.y.to_string());
+
+            if let Some(blur) = shadow.blur {
+                vals.push(blur.to_string());
+            }
+
+            if let Some(color) = shadow.color {
+                vals.push(color.to_string());
+            }
+
+            vals.join(" ")
+        };
+
+        let val = match self {
+            Self::Initial(val) => val.to_string(),
+            Self::Inherit(val) => val.to_string(),
+            Self::None(val) => val.to_string(),
+            Self::Unset(val) => val.to_string(),
+            Self::One(shadow) => to_string(shadow),
+            Self::Multiple(vec) => {
+                let val = vec
+                    .into_iter()
+                    .map(to_string)
+                    .collect::<Vec<_>>()
+                    .join(", ");
+                // if no shadow value added we return values without any updates
+                if val.is_empty() {
+                    return values;
+                }
+                val
+            }
+        };
+
+        values.add(St::TextShadow, val)
+    }
+}
+
+impl Default for TextShadow {
+    fn default() -> Self {
+        TextShadow::Multiple(vec![])
+    }
+}
+
+impl TextShadow {
+    fn shadow(mut self, conf: impl FnOnce(Shadow) -> Shadow) -> Self {
+        self = match self {
+            Self::One(shadow) => Self::One(conf(shadow)),
+            Self::Multiple(shadows) => Self::One(conf(
+                shadows.into_iter().next().unwrap_or_else(Shadow::default),
+            )),
+            _ => Self::One(conf(Shadow::default())),
+        };
+        self
+    }
+
+    pub fn new() -> Self {
+        TextShadow::default()
+    }
+
+    pub fn x(self, val: impl Into<Length>) -> Self {
+        self.shadow(|sh| sh.x(val))
+    }
+
+    pub fn y(self, val: impl Into<Length>) -> Self {
+        self.shadow(|sh| sh.y(val))
+    }
+
+    pub fn blur(self, val: impl Into<Length>) -> Self {
+        self.shadow(|sh| sh.blur(val))
+    }
+
+    pub fn try_blur(self, val: Option<impl Into<Length>>) -> Self {
+        self.shadow(|sh| sh.try_blur(val))
+    }
+
+    pub fn color(self, val: impl Into<Color>) -> Self {
+        self.shadow(|sh| sh.color(val))
+    }
+
+    pub fn try_color(self, val: Option<impl Into<Color>>) -> Self {
+        self.shadow(|sh| sh.try_color(val))
+    }
+
+    #[allow(clippy::should_implement_trait)]
+    pub fn add(mut self, get_val: impl FnOnce(Shadow) -> Shadow) -> Self {
+        let val = get_val(Shadow::default());
+        self = match self {
+            Self::Multiple(mut vec) => {
+                vec.push(val);
+                Self::Multiple(vec)
+            }
+            _ => Self::Multiple(vec![val]),
+        };
+        self
+    }
+}
+
+#[derive(Rich, Clone, Debug, PartialEq)]
+pub struct Shadow {
+    #[rich(write(rename = x))]
+    x: Length,
+    #[rich(write(rename = y))]
+    y: Length,
+    #[rich(write(rename = blur), write(option, rename = try_blur))]
+    blur: Option<Length>,
+    #[rich(write(rename = color), write(option, rename = try_color))]
+    color: Option<Color>,
+}
+
+impl Default for Shadow {
+    fn default() -> Self {
+        Self {
+            x: px(0),
+            y: px(0),
+            blur: None,
+            color: None,
+        }
     }
 }
 
