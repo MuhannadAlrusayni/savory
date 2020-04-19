@@ -469,7 +469,11 @@ impl ThemeImpl for Ant {
                     .and_position(|conf| conf.absolute())
                     .background(white)
                     .and_border(|conf| conf.color(border).none().width(px(0.)).radius(px(4.)))
-                    .add(St::BoxShadow, "0 2px 8px rgba(0, 35, 11, 0.15)")
+                    .and_box_shadow(|conf| {
+                        conf.y(px(2))
+                            .blur(px(8))
+                            .color(Hsla::new(138.9, 1.0, 0.69, 0.15))
+                    })
                     .and_padding(|conf| conf.x(px(4.)).y(px(2)))
                     .and_margin(|conf| conf.top(px(*lens.offset)))
                     .config_if_else(
@@ -518,7 +522,7 @@ impl ThemeImpl for Ant {
                 .and_border(|conf| conf.width(px(1.)).solid().radius(px(4.)).color(border))
                 .background(bg)
                 .text(fg)
-                .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
+                .and_box_shadow(|conf| conf.y(px(2)).color(Hsla::new(0.0, 0.0, 0.0, 0.015)))
         };
         let button_normal = move |lens: &button::ButtonLens<'a>| {
             // colors
@@ -591,7 +595,7 @@ impl ThemeImpl for Ant {
                 })
                 .background(bg)
                 .text(fg)
-                .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
+                .and_box_shadow(|conf| conf.y(px(2)).color(Hsla::new(0.0, 0.0, 0.0, 0.015)))
         };
 
         let styler = move |lens: &button::ButtonLens<'a>| {
@@ -681,7 +685,11 @@ impl ThemeImpl for Ant {
                     })
                     .background(white)
                     .and_border(|conf| conf.width(px(0.)).transparent().none().radius(0.5))
-                    .add(St::BoxShadow, "0 2px 4px 0 rgba(0, 35, 11, 0.2)")
+                    .and_box_shadow(|conf| {
+                        conf.y(px(2))
+                            .blur(px(4))
+                            .color(Hsla::new(138.9, 1.0, 0.069, 0.2))
+                    })
                     .and_size(|conf| conf.resize(px(btn_size), px(btn_size)))
                 })
         };
@@ -1116,7 +1124,7 @@ impl ThemeImpl for Ant {
                         .align_content(val::Center)
                         .align_items(val::Center)
                         .justify_content(val::Center)
-                        .add(St::BoxShadow, "0 2px 0 rgba(0, 0, 0, 0.015)")
+                        .and_box_shadow(|conf| conf.y(px(2)).color(Hsla::new(0.0, 0.0, 0.0, 0.015)))
                 })
         };
         styler.into()

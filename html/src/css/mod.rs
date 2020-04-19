@@ -5,6 +5,7 @@ pub mod style;
 pub mod background;
 pub mod border;
 pub mod box_align;
+pub mod box_shadow;
 pub mod color;
 pub mod cursor;
 pub mod display;
@@ -25,6 +26,7 @@ pub use self::{
     background::Background,
     border::Border,
     box_align::*,
+    box_shadow::BoxShadow,
     color::{Color, Opacity},
     cursor::Cursor,
     display::Display,

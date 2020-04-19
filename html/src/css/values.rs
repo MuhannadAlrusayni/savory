@@ -54,5 +54,5 @@ css_values! {
     (TextBottom, "text-bottom"), (Pre, "pre"), (PreLine, "pre-line"), (PreWrap, "pre-wrap"), (Justify, "justify"),
     (XXSmall, "xx-small"), (XSmall, "x-small"), (Small, "small"), (Large, "large"), (XLarge, "x-large"),
     (XXLarge, "xx-large"), (Smaller, "smaller"), (Larger, "larger"), (Italic, "italic"), (Oblique, "oblique"),
-    (SmallCaps, "small-caps"), (Bold, "bold"), (Bolder, "bolder"), (Lighter, "lighter"),
+    (SmallCaps, "small-caps"), (Bold, "bold"), (Bolder, "bolder"), (Lighter, "lighter"), (Unset, "unset")
 }

@@ -204,6 +204,7 @@ impl Style {
         Padding +and,
         Size +and,
         Transition +and,
+        BoxShadow +and,
         Position +and,
         Text +and,
         Font +and,
