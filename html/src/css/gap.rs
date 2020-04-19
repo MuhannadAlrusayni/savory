@@ -3,12 +3,12 @@ use crate::css::{unit::*, St, StyleValues, UpdateStyleValues};
 /// ```
 /// use savory_html::css::{Style, unit::{px, em}};
 ///
-/// let mut style = Style::default();
-/// style.gap(px(2))
-///      // this can take percent value too (.e.g 40%).
-///      .gap(0.4)
-///      // and can take row and column each with different value
-///      .gap((em(4.), em(8.)));
+/// Style::default()
+///     .gap(px(2))
+///     // this can take percent value too (.e.g 40%).
+///     .gap(0.4)
+///     // and can take row and column each with different value
+///     .gap((em(4.), em(8.)));
 /// ```
 #[derive(Clone, Debug, Copy, PartialEq, Display)]
 pub enum Gap {

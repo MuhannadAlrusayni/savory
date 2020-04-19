@@ -6,8 +6,7 @@ use std::borrow::Cow;
 /// use savory_html::css::{values as val, Style, Color, unit::em};
 /// use palette::rgb::Rgb;
 ///
-/// let mut style = Style::default();
-/// style
+/// Style::default()
 ///     .and_text(|conf| {
 ///         conf.line_height(1.7)
 ///             // we can pass Rgb, Rgba, Hsl, Hsla

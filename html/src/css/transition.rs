@@ -9,8 +9,7 @@ use std::borrow::Cow;
 /// ```
 /// use savory_html::css::{values as val, Style, unit::{sec, ms}};
 ///
-/// let mut style = Style::default();
-/// style
+/// Style::default()
 ///     .and_transition(|conf| {
 ///         conf
 ///             // transition for all properties

@@ -11,8 +11,7 @@ pub use seed::prelude::St;
 /// ```
 /// use savory_html::css::{Style, Color, unit::{ms, px}, St};
 ///
-/// let mut style = Style::default();
-/// style
+/// Style::default()
 ///     .and_transition(|conf| {
 ///         conf
 ///             .add("opacity", |conf| conf.duration(ms(150.)).ease())
@@ -83,15 +82,15 @@ impl Style {
     /// use savory_html::css::{Style, values as val, Color};
     ///
     /// let angle = 1;
-    /// let mut style = Style::default();
-    /// style.config(|conf| {
-    ///     match angle {
-    ///         1 => conf.text(Color::Red),
-    ///         2 => conf.text(Color::Blue),
-    ///         3 => conf.text(Color::Green),
-    ///         _ => conf.text(Color::Black),
-    ///     }
-    /// });
+    /// Style::default()
+    ///     .config(|conf| {
+    ///         match angle {
+    ///             1 => conf.text(Color::Red),
+    ///             2 => conf.text(Color::Blue),
+    ///             3 => conf.text(Color::Green),
+    ///             _ => conf.text(Color::Black),
+    ///         }
+    ///     });
     /// ```
     pub fn config(self, block: impl FnOnce(Self) -> Self) -> Self {
         block(self)
