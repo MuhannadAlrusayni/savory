@@ -46,6 +46,7 @@ pub fn display_hsla(hsla: &Hsla) -> String {
     )
 }
 
+// TODO: do we miss current-color variant ?
 #[derive(Clone, Copy, Debug, PartialEq, Display, From)]
 pub enum Color {
     #[from]
