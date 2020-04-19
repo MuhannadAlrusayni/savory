@@ -152,19 +152,14 @@ pub fn variant(base_color: impl Into<Hsl>) -> [Hsl; 10] {
 
     let get_hue = |hsv: &Hsv, i, light| {
         let hue = hsv.hue.to_positive_degrees();
-        let hue = if hue > 60. && hue <= 240. {
-            if light {
-                hue - hue_step * i
-            } else {
-                hue + hue_step * i
-            }
+
+        let in_range = hue > 60. && hue <= 240.;
+        let hue = if (in_range && light) || (!in_range && !light) {
+            hue - hue_step * i
         } else {
-            if light {
-                hue + hue_step * i
-            } else {
-                hue - hue_step * i
-            }
+            hue + hue_step * i
         };
+
         hue % 360.
     };
 
