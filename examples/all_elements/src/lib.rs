@@ -28,8 +28,9 @@ pub struct MyApp {
     popover: Popover<Msg, Modifier<ProgressBar<Msg>>, Button<Msg>>,
 }
 
-impl AppElement for MyApp {
+impl Element<Msg> for MyApp {
     type Message = Msg;
+    type Props = Url;
 
     fn init(_: Url, orders: &mut impl Orders<Msg>) -> Self {
         let dlg = Dialog::build(

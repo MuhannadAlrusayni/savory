@@ -8,8 +8,10 @@
 //!
 //! ## App Element
 //!
-//! App element is the root element that contains other elements, app element
-//! must implement `AppElement` and `View` traits.
+//! App element are normal elements but two main difference, the `Props` type is
+//! `Url` type, and the `PMsg` generic type have to be the same type as
+//! `Message` type, and this actully make sense becuase `PMsg` ment to hold the
+//! parent element message type and app elements doesn't have parent.
 //!
 //! # TODO Examples
 //! # TODO Helper types
@@ -46,31 +48,13 @@ pub trait Element<PMsg: 'static>: View {
     fn update(&mut self, _: Self::Message, _: &mut impl Orders<PMsg>);
 }
 
-/// Similar to `Element` trait but for the root element (the app)
-///
-/// The `init` function takes `Url` insted if `Props` as it's first argument.
-pub trait AppElement: View {
-    /// App message
-    type Message: 'static;
-
-    /// Create and initialize the app element
-    ///
-    /// # Arguments
-    /// - `url` the requested url when the app was loaded
-    /// - `orders` used to interacte with the runtime, such as subscribing to
-    ///   messages, or sending messages ..etc.
-    fn init(url: Url, orders: &mut impl Orders<Self::Message>) -> Self;
-
-    /// update method that recive `Self::Message` and update the model state accordingly.
-    fn update(&mut self, _: Self::Message, _: &mut impl Orders<Self::Message>);
-}
-
-/// Extension trait for `AppElement`
+/// Extension trait for `Element` when it's used on App element
 ///
 /// This trait provides functions that mounts the app element on HTML node by
-/// integrating `AppElement` with `seed::app::App`
-pub trait AppElementExt: AppElement
+/// integrating app element with `seed::app::App`
+pub trait AppElementExt<Msg>: Element<Msg, Props = Url, Message = Msg>
 where
+    Msg: 'static,
     Self: Sized,
     Self::Output: IntoNodes<Self::Message> + 'static,
 {
@@ -87,8 +71,9 @@ where
     ///     FooMessage,
     /// }
     ///
-    /// impl AppElement for MyApp {
+    /// impl Element<Msg> for MyApp {
     ///     type Message = Msg;
+    ///     type Props = Url;
     ///
     ///     fn init(url: Url, orders: &mut impl Orders<Msg>) -> Self {
     ///         // initialize the app goes here
@@ -119,7 +104,7 @@ where
         Self::start_at("app")
     }
 
-    /// Start app element at specifec node that matchs the `id` passed
+    /// Start app element at specifec element that matchs the `id` passed
     fn start_at(id: &str) -> seed::app::App<Self::Message, Self, Self::Output> {
         seed::app::App::start(
             id,
@@ -130,9 +115,10 @@ where
     }
 }
 
-impl<T> AppElementExt for T
+impl<Msg, T> AppElementExt<Msg> for T
 where
-    Self: AppElement,
+    Msg: 'static,
+    Self: Element<Msg, Props = Url, Message = Msg>,
     Self::Output: IntoNodes<Self::Message> + 'static,
 {
 }

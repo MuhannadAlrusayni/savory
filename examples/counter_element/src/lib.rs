@@ -107,9 +107,9 @@ pub struct MyApp {
     counter_element: Counter<AppMsg>,
 }
 
-// AppElement trait instead of Element
-impl AppElement for MyApp {
+impl Element<AppMsg> for MyApp {
     type Message = AppMsg;
+    type Props = Url;
 
     fn init(_: Url, orders: &mut impl Orders<AppMsg>) -> Self {
         Self {

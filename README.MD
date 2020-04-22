@@ -66,8 +66,9 @@ pub enum Msg {
     Decrement,
 }
 
-impl AppElement for Counter {
+impl Element<Msg> for Counter {
     type Message = Msg;
+    type Props = Url;
 
     // initialize the app in this function
     fn init(_: Url, _: &mut impl Orders<Msg>) -> Self {
@@ -230,9 +231,9 @@ pub struct MyApp {
     counter_element: Counter<AppMsg>,
 }
 
-// AppElement trait instead of Element
-impl AppElement for MyApp {
+impl Element<AppMsg> for MyApp {
     type Message = AppMsg;
+    type Props = Url;
 
     fn init(_: Url, orders: &mut impl Orders<AppMsg>) -> Self {
         Self {
@@ -296,8 +297,9 @@ pub enum Msg {
     SpinEntry(spin_entry::Msg),
 }
 
-impl AppElement for MyApp {
+impl Element<Msg> for MyApp {
     type Message = Msg;
+    type Props = Url;
 
     fn init(_: Url, orders: &mut impl Orders<Msg>) -> Self {
         let spin_entry = SpinEntry::build(Msg::SpinEntry)

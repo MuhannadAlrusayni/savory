@@ -68,8 +68,9 @@
 //!     Decrement,
 //! }
 //!
-//! impl AppElement for Counter {
+//! impl Element<Msg> for Counter {
 //!     type Message = Msg;
+//!     type Props = Url;
 //!
 //!     // initialize the app in this function
 //!     fn init(_: Url, _: &mut impl Orders<Msg>) -> Self {
@@ -129,7 +130,7 @@ pub mod view;
 /// savory prelude.
 pub mod prelude {
     pub use crate::{
-        element::{AppElement, AppElementExt, Element},
+        element::{AppElementExt, Element},
         msg_mapper::{MessageMapperExt, MsgMapper},
         orders_ext::OrdersExt,
         view::{StyledView, View},

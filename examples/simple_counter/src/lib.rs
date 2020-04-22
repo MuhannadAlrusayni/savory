@@ -11,8 +11,9 @@ pub enum Msg {
     Decrement,
 }
 
-impl AppElement for Counter {
+impl Element<Msg> for Counter {
     type Message = Msg;
+    type Props = Url;
 
     // initialize the app in this function
     fn init(_: Url, _: &mut impl Orders<Msg>) -> Self {
