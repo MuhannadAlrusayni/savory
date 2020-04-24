@@ -14,22 +14,22 @@ pub struct Item<PMsg> {
     pub events: Events<PMsg>,
     #[rich(write(style = compose))]
     pub styler: Option<Styler<PMsg>>,
-    #[rich(write(rename = theme))]
+    #[rich(write)]
     #[element(theme_lens)]
     pub theme: Theme,
 
     #[rich(write(style = compose))]
     pub content: Node<PMsg>,
-    #[rich(write(rename = order))]
+    #[rich(write)]
     #[element(theme_lens)]
     pub order: Option<Order>,
-    #[rich(write(rename = grow))]
+    #[rich(write)]
     #[element(theme_lens)]
     pub grow: Option<Grow>,
-    #[rich(write(rename = shrink))]
+    #[rich(write)]
     #[element(theme_lens)]
     pub shrink: Option<Shrink>,
-    #[rich(write(rename = basis))]
+    #[rich(write)]
     #[element(theme_lens)]
     pub basis: Option<Basis>,
     #[rich(value_fns = {

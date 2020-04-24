@@ -32,43 +32,43 @@ use std::borrow::Cow;
 /// ```
 #[derive(Rich, Clone, Debug, PartialEq, Default)]
 pub struct Text {
-    #[rich(write(rename = color), write(option, rename = try_color))]
+    #[rich(write, write(option))]
     pub color: Option<Color>,
-    #[rich(write(rename = direction), write(option, rename = try_direction))]
+    #[rich(write, write(option))]
     pub direction: Option<Direction>,
-    #[rich(write(rename = letter_spacing), write(option, rename = try_letter_spacing))]
+    #[rich(write, write(option))]
     pub letter_spacing: Option<LetterSpacing>,
-    #[rich(write(rename = word_spacing), write(option, rename = try_word_spacing))]
+    #[rich(write, write(option))]
     pub word_spacing: Option<WordSpacing>,
-    #[rich(write(rename = line_height), write(option, rename = try_line_height))]
+    #[rich(write, write(option))]
     pub line_height: Option<LineHeight>,
-    #[rich(write(rename = align), write(option, rename = try_align))]
+    #[rich(write, write(option))]
     pub align: Option<TextAlign>,
-    #[rich(write(rename = align_last), write(option, rename = try_align_last))]
+    #[rich(write, write(option))]
     pub align_last: Option<TextAlignLast>,
-    #[rich(write(rename = justify), write(option, rename = try_justify))]
+    #[rich(write, write(option))]
     pub justify: Option<TextJustify>,
-    #[rich(write(rename = shadow), write(option, rename = try_shadow), write(style = compose))]
+    #[rich(write, write(option), write(style = compose))]
     pub shadow: Option<TextShadow>,
-    #[rich(write(rename = indent), write(option, rename = try_indent))]
+    #[rich(write, write(option))]
     pub indent: Option<TextIndent>,
-    #[rich(write(rename = decoration), write(option, rename = try_decoration), write(style = compose))]
+    #[rich(write, write(option), write(style = compose))]
     pub decoration: Option<TextDecoration>,
-    #[rich(write(rename = white_space), write(option, rename = try_white_space))]
+    #[rich(write, write(option))]
     pub white_space: Option<WhiteSpace>,
-    #[rich(write(rename = unicode_bidi), write(option, rename = try_unicode_bidi))]
+    #[rich(write, write(option))]
     pub unicode_bidi: Option<UnicodeBidi>,
-    #[rich(write(rename = transform), write(option, rename = try_transform))]
+    #[rich(write, write(option))]
     pub transform: Option<TextTransform>,
-    #[rich(write(rename = overflow), write(option, rename = try_overflow))]
+    #[rich(write, write(option))]
     pub overflow: Option<TextOverflow>,
-    #[rich(write(rename = vertical_align), write(option, rename = try_vertical_align))]
+    #[rich(write, write(option))]
     pub vertical_align: Option<VerticalAlign>,
-    #[rich(write(rename = writing_mode), write(option, rename = try_writing_mode))]
+    #[rich(write, write(option))]
     pub writing_mode: Option<WritingMode>,
-    #[rich(write(rename = word_wrap), write(option, rename = try_word_wrap))]
+    #[rich(write, write(option))]
     pub word_wrap: Option<WordWrap>,
-    #[rich(write(rename = word_break), write(option, rename = try_word_break))]
+    #[rich(write, write(option))]
     pub word_break: Option<WordBreak>,
 }
 
@@ -213,13 +213,13 @@ impl TextShadow {
 
 #[derive(Rich, Clone, Debug, PartialEq)]
 pub struct Shadow {
-    #[rich(write(rename = x))]
+    #[rich(write)]
     x: Length,
-    #[rich(write(rename = y))]
+    #[rich(write)]
     y: Length,
-    #[rich(write(rename = blur), write(option, rename = try_blur))]
+    #[rich(write, write(option))]
     blur: Option<Length>,
-    #[rich(write(rename = color), write(option, rename = try_color))]
+    #[rich(write, write(option))]
     color: Option<Color>,
 }
 

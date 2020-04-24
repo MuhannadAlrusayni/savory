@@ -10,13 +10,13 @@ use std::borrow::Cow;
 pub struct Label<PMsg> {
     #[rich(write(style = compose))]
     pub events: Events<PMsg>,
-    #[rich(write(rename = styler))]
+    #[rich(write)]
     pub styler: Option<Styler<PMsg>>,
-    #[rich(write(rename = theme))]
+    #[rich(write)]
     #[element(theme_lens)]
     pub theme: Theme,
 
-    #[rich(write(rename = text))]
+    #[rich(write)]
     #[element(theme_lens)]
     pub text: Cow<'static, str>,
 }

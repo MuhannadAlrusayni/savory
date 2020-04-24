@@ -18,20 +18,20 @@ pub struct HeaderBar<PMsg> {
     // general element properties
     #[rich(write(style = compose))]
     pub events: Events<PMsg>,
-    #[rich(write(rename = styler))]
+    #[rich(write)]
     pub styler: Option<Styler<PMsg>>,
-    #[rich(write(rename = theme))]
+    #[rich(write)]
     #[element(theme_lens)]
     pub theme: Theme,
 
     // dialog element properties
-    #[rich(write(rename = title))]
+    #[rich(write)]
     #[element(theme_lens(nested))]
     pub title: Option<Label<PMsg>>,
-    #[rich(write(rename = subtitle))]
+    #[rich(write)]
     #[element(theme_lens(nested))]
     pub subtitle: Option<Label<PMsg>>,
-    #[rich(write(rename = close_button))]
+    #[rich(write)]
     #[element(theme_lens(nested))]
     pub close_button: Option<Button<PMsg>>,
     #[rich(read(rename = is_hidden), write(rename = hidden))]

@@ -173,7 +173,7 @@ impl Transition {
 
 #[derive(Rich, Clone, Debug, PartialEq, From)]
 pub struct TransitionValue {
-    #[rich(write(rename = duration))]
+    #[rich(write)]
     pub duration: Duration,
     #[rich(write(rename = timing_function), write(option, rename = try_timing_function), value_fns = {
         ease = val::Ease,
@@ -185,7 +185,7 @@ pub struct TransitionValue {
         step_end = val::StepEnd,
     })]
     pub timing_function: Option<TimingFunction>,
-    #[rich(write(rename = delay), write(option, rename = try_delay))]
+    #[rich(write, write(option))]
     pub delay: Option<Delay>,
 }
 

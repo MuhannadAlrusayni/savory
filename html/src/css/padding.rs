@@ -15,13 +15,13 @@ use derive_rich::Rich;
 /// ```
 #[derive(Rich, Clone, Debug, Copy, PartialEq, From, Default)]
 pub struct Padding {
-    #[rich(write(rename = top), write(option, rename = try_top))]
+    #[rich(write, write(option))]
     pub top: Option<Length>,
-    #[rich(write(rename = right), write(option, rename = try_right))]
+    #[rich(write, write(option))]
     pub right: Option<Length>,
-    #[rich(write(rename = bottom), write(option, rename = try_bottom))]
+    #[rich(write, write(option))]
     pub bottom: Option<Length>,
-    #[rich(write(rename = left), write(option, rename = try_left))]
+    #[rich(write, write(option))]
     pub left: Option<Length>,
 }
 

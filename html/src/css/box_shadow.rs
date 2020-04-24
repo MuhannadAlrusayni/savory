@@ -186,15 +186,15 @@ impl BoxShadow {
 
 #[derive(Rich, Clone, Debug, PartialEq)]
 pub struct ShadowValue {
-    #[rich(write(rename = x))]
+    #[rich(write)]
     x: Length,
-    #[rich(write(rename = y))]
+    #[rich(write)]
     y: Length,
-    #[rich(write(rename = blur), write(option, rename = try_blur))]
+    #[rich(write, write(option))]
     blur: Option<Length>,
-    #[rich(write(rename = spread), write(option, rename = try_spread))]
+    #[rich(write, write(option))]
     spread: Option<Length>,
-    #[rich(write(rename = color), write(option, rename = try_color))]
+    #[rich(write, write(option))]
     color: Option<Color>,
     #[rich(value_fns = { inset = true, outset = false })]
     inset: bool,

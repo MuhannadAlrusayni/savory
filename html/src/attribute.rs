@@ -83,7 +83,7 @@ macro_rules! create_attributes {
             pub custom_datas: Vec<Custom>,
             #[rich(write, write(option))]
             pub view_box: Option<ViewBox>,
-            #[rich(write(rename = set_type), write(option, rename = try_set_type))]
+            #[rich(write(rename = type_), write(option))]
             pub type_: Option<Type>,
             $(
                 $(

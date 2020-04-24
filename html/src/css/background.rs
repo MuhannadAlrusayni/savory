@@ -13,10 +13,10 @@ use derive_rich::Rich;
 /// ```
 #[derive(Rich, Clone, Debug, PartialEq, Default)]
 pub struct Background {
-    #[rich(write(rename = color))]
+    #[rich(write)]
     pub color: Option<Color>,
     // TODO: support multiple images
-    #[rich(write(rename = image), value_fns = { empty = val::None })]
+    #[rich(write, value_fns = { empty = val::None })]
     pub image: Option<Image>,
     #[rich(value_fns = {
         repeat_x = val::RepeatX,

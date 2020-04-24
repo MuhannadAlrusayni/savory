@@ -19,17 +19,17 @@ use derive_rich::Rich;
 /// ```
 #[derive(Rich, Copy, Clone, Debug, PartialEq, Default)]
 pub struct Size {
-    #[rich(write(rename = width), write(option, rename = try_width))]
+    #[rich(write, write(option))]
     pub width: Option<Length>,
-    #[rich(write(rename = min_width), write(option, rename = try_min_width))]
+    #[rich(write, write(option))]
     pub min_width: Option<Length>,
-    #[rich(write(rename = max_width), write(option, rename = try_max_width))]
+    #[rich(write, write(option))]
     pub max_width: Option<Length>,
-    #[rich(write(rename = height), write(option, rename = try_height))]
+    #[rich(write, write(option))]
     pub height: Option<Length>,
-    #[rich(write(rename = min_height), write(option, rename = try_min_height))]
+    #[rich(write, write(option))]
     pub min_height: Option<Length>,
-    #[rich(write(rename = max_height), write(option, rename = try_max_height))]
+    #[rich(write, write(option))]
     pub max_height: Option<Length>,
 }
 

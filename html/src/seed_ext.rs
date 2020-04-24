@@ -606,7 +606,8 @@ impl<Msg> ElExt<Msg> for El<Msg> {
     }
 
     fn and_attributes(self, conf: impl FnOnce(Attributes) -> Attributes) -> Self {
-        self.set_attributes(conf(Attributes::default()))
+        // todo!()
+        self.set_attributes(conf(Default::default()))
     }
 
     fn add_children(mut self, children: impl IntoIterator<Item = Node<Msg>>) -> Self {

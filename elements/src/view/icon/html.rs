@@ -15,10 +15,10 @@ pub struct Html<PMsg> {
     #[element(theme_lens)]
     pub theme: Theme,
 
-    #[rich(read(copy), write)]
+    #[rich(write)]
     #[element(theme_lens)]
     pub view_box: Option<att::ViewBox>,
-    #[rich(read, write)]
+    #[rich(write)]
     pub html: Cow<'static, str>,
 }
 

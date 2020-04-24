@@ -22,7 +22,7 @@ use std::borrow::Cow;
 /// ```
 #[derive(Rich, Clone, Debug, PartialEq, Default)]
 pub struct Font {
-    #[rich(write(rename = family), write(option, rename = try_family))]
+    #[rich(write, write(option))]
     pub family: Option<Family>,
     #[rich(write(rename = size), write(option, rename = try_size), value_fns = {
         medium = val::Medium,

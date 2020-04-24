@@ -4,19 +4,19 @@ use savory_html::prelude::*;
 
 #[derive(Rich)]
 pub struct Modifier<T> {
-    #[rich(write(rename = padding), write(style = compose))]
+    #[rich(write, write(style = compose))]
     pub padding: Option<css::Padding>,
-    #[rich(write(rename = margin), write(style = compose))]
+    #[rich(write, write(style = compose))]
     pub margin: Option<css::Margin>,
-    #[rich(write(rename = size), write(style = compose))]
+    #[rich(write, write(style = compose))]
     pub size: Option<css::Size>,
-    #[rich(write(rename = font), write(style = compose))]
+    #[rich(write, write(style = compose))]
     pub font: Option<css::Font>,
-    #[rich(write(rename = border), write(style = compose))]
+    #[rich(write, write(style = compose))]
     pub border: Option<css::Border>,
-    #[rich(write(rename = position), write(style = compose))]
+    #[rich(write, write(style = compose))]
     pub position: Option<css::Position>,
-    #[rich(write, write(rename = opacity))]
+    #[rich(write, write(option))]
     pub opacity: Option<css::Opacity>,
     pub target: T,
 }

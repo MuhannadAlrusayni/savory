@@ -8,16 +8,16 @@ use savory_html::prelude::*;
 pub struct Svg<PMsg> {
     #[rich(write(style = compose))]
     pub events: Events<PMsg>,
-    #[rich(write(rename = styler))]
+    #[rich(write)]
     pub styler: Option<Styler<PMsg>>,
-    #[rich(write(rename = theme))]
+    #[rich(write)]
     #[element(theme_lens)]
     pub theme: Theme,
 
-    #[rich(write(rename = view_box))]
+    #[rich(write)]
     #[element(theme_lens)]
     pub view_box: Option<att::ViewBox>,
-    #[rich(write(rename = draw))]
+    #[rich(write)]
     pub draw: Vec<Node<PMsg>>,
 }
 

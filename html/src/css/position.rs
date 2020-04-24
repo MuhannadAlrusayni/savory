@@ -21,17 +21,17 @@ pub struct Position {
         inherit = val::Inherit,
     })]
     pub position: Option<PositionType>,
-    #[rich(write(rename = left), write(option, rename = try_left))]
+    #[rich(write, write(option))]
     pub left: Option<PostionLength>,
-    #[rich(write(rename = top), write(option, rename = try_top))]
+    #[rich(write, write(option))]
     pub top: Option<PostionLength>,
-    #[rich(write(rename = right), write(option, rename = try_right))]
+    #[rich(write, write(option))]
     pub right: Option<PostionLength>,
-    #[rich(write(rename = bottom), write(option, rename = try_bottom))]
+    #[rich(write, write(option))]
     pub bottom: Option<PostionLength>,
-    #[rich(write(rename = z_index), write(option, rename = try_z_index))]
+    #[rich(write, write(option))]
     pub z_index: Option<i32>,
-    #[rich(write(rename = clip), write(option, rename = try_clip))]
+    #[rich(write, write(option))]
     pub clip: Option<Clip>,
 }
 

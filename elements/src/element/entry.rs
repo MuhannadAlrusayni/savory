@@ -136,11 +136,11 @@ impl<PMsg: 'static> StyledView for Entry<PMsg> {
             .set(&self.local_events.input)
             .set(style.input)
             .and_attributes(|conf| {
-                conf.set_class("input")
-                    .set_disabled(self.disabled)
-                    .try_set_value(self.text.clone())
-                    .try_set_max_length(self.max_length)
-                    .try_set_placeholder(self.placeholder.clone())
+                conf.class("input")
+                    .disabled(self.disabled)
+                    .try_value(self.text.clone())
+                    .try_max_length(self.max_length)
+                    .try_placeholder(self.placeholder.clone())
             })
             .map_msg_with(&self.msg_mapper)
             .add(&self.events.input);
