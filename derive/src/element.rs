@@ -251,7 +251,6 @@ impl Element {
         let mut new_fill = vec![];
         let mut pass_new_args = vec![];
         let mut struct_fields = vec![];
-        let mut struct_fns = vec![];
         for field in props_fields.iter() {
             if let Some(props) = field.props.clone().map(|val| val.unwrap_or_default()) {
                 let ty = &field.ty;
@@ -263,32 +262,26 @@ impl Element {
                     pass_new_args.push(quote! { #field, });
                     match ty.get_option_ty() {
                         Some(ty) => {
-                            struct_fields.push(quote! { pub #field: Option<#ty>, });
+                            struct_fields.push(quote! {
+                                #[rcih(write, write(option), write(option, style = compose))]
+                                pub #field: Option<#ty>,
+                            });
                             new_args.push(quote! { #field: impl Into<#ty>, });
                             new_fill.push(quote! { #field: Some(#field.into()), });
-                            struct_fns.push(quote! {
-                                pub fn #field(mut self, val: impl Into<#ty>) -> Self {
-                                    self.#field = Some(val.into());
-                                    self
-                                }
-                            })
                         }
                         None => {
-                            struct_fields.push(quote! { pub #field: #ty, });
+                            struct_fields.push(quote! {
+                                #[rich(write)]
+                                pub #field: #ty,
+                            });
                             new_args.push(quote! { #field: impl Into<#ty>, });
                             new_fill.push(quote! { #field: #field.into(), });
-                            struct_fns.push(quote! {
-                                pub fn #field(mut self, val: impl Into<#ty>) -> Self {
-                                    self.#field = val.into();
-                                    self
-                                }
-                            })
                         }
                     }
                 } else {
                     let ty = ty.get_option_ty().unwrap_or(ty);
                     if let Some(expr) = props.default {
-                        let expr = match expr {
+                        let def_expr = match expr.as_ref() {
                             Override::Inherit => quote! { ::std::default::Default::default() },
                             Override::Explicit(expr_str) => {
                                 let expr = parse_str::<syn::Expr>(&expr_str)
@@ -296,30 +289,27 @@ impl Element {
                                 quote! { (#expr).into() }
                             }
                         };
-                        struct_fields.push(quote! { pub #field: #ty, });
-                        new_fill.push(quote! { #field: #expr, });
-                        struct_fns.push(quote! {
-                            pub fn #field(mut self, val: impl Into<#ty>) -> Self {
-                                self.#field = val.into();
-                                self
-                            }
-                        })
+                        let write_compose_def = if !expr.is_explicit() {
+                            quote! { , write(style = compose) }
+                        } else {
+                            quote! {}
+                        };
+                        struct_fields.push(quote! {
+                            #[rich(write #write_compose_def)]
+                            pub #field: #ty,
+                        });
+                        new_fill.push(quote! { #field: #def_expr, });
                     } else {
-                        struct_fields.push(quote! { pub #field: Option<#ty>, });
+                        struct_fields.push(quote! {
+                            #[rich(write, write(option), write(option, style = compose))]
+                            pub #field: Option<#ty>,
+                        });
                         new_fill.push(quote! { #field: None, });
-                        struct_fns.push(quote! {
-                            pub fn #field(mut self, val: impl Into<#ty>) -> Self {
-                                self.#field = Some(val.into());
-                                self
-                            }
-                        })
                     }
                 }
             }
         }
 
-        // let mut needed_gen: syn::punctuated::Punctuated<syn::GenericParam, syn::Token![,]> =
-        //     Default::default();
         let mut needed_gen = self
             .generics
             .params
@@ -378,6 +368,7 @@ impl Element {
                 }
             }
 
+            #[derive(Rich)]
             pub struct Props #gen_params {
                 #( #struct_fields )*
             }
@@ -388,8 +379,6 @@ impl Element {
                         #( #new_fill )*
                     }
                 }
-
-                #( #struct_fns )*
             }
         }
     }
