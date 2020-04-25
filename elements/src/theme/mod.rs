@@ -92,6 +92,18 @@ where
     }
 }
 
+impl<E, S> From<Rc<dyn Fn(&E) -> S>> for Styler<E, S> {
+    fn from(val: Rc<dyn Fn(&E) -> S>) -> Self {
+        Self(val)
+    }
+}
+
+impl<E, S> From<Rc<Styler<E, S>>> for Styler<E, S> {
+    fn from(val: Rc<Styler<E, S>>) -> Self {
+        Self(Rc::clone(&val.0))
+    }
+}
+
 impl<E, S> Deref for Styler<E, S> {
     type Target = dyn Fn(&E) -> S;
 
@@ -103,5 +115,11 @@ impl<E, S> Deref for Styler<E, S> {
 impl<E, S> Clone for Styler<E, S> {
     fn clone(&self) -> Self {
         Styler(Rc::clone(&self.0))
+    }
+}
+
+impl<E, S: Default> Default for Styler<E, S> {
+    fn default() -> Self {
+        Self(Rc::new(|_| S::default()))
     }
 }
