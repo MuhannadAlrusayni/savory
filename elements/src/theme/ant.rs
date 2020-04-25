@@ -981,7 +981,7 @@ impl ThemeImpl for Ant {
                 0.0
             };
 
-            spin_entry::Style::default()
+            spin_entry::style()
                 .and_spin_entry(|conf| {
                     centered_flex(conf)
                         .and_position(|conf| conf.relative())
