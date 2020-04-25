@@ -61,100 +61,6 @@ pub enum Msg {
     Color(Option<css::Color>),
 }
 
-impl Msg {
-    pub fn events_store<PMsg: 'static>(val: EventsStore<PMsg>) -> Self {
-        Msg::EventsStore(Rc::new(val))
-    }
-
-    pub fn update_events_store<PMsg: 'static>(
-        val: impl Fn(EventsStore<Events<PMsg>>) -> EventsStore<Events<PMsg>> + 'static,
-    ) -> Self {
-        Msg::UpdateEventsStore(Rc::new(val))
-    }
-
-    pub fn styler<PMsg: 'static>(val: Styler<PMsg>) -> Self {
-        Msg::Styler(Rc::new(Some(val)))
-    }
-
-    pub fn update_styler<PMsg: 'static>(
-        val: impl Fn(Styler<PMsg>) -> Styler<PMsg> + 'static,
-    ) -> Self {
-        Msg::UpdateStyler(Rc::new(val))
-    }
-
-    pub fn try_styler<PMsg: 'static>(val: Option<Styler<PMsg>>) -> Self {
-        Msg::Styler(Rc::new(val))
-    }
-
-    pub fn theme(val: Theme) -> Self {
-        Msg::Theme(val)
-    }
-
-    pub fn shape(val: Shape) -> Self {
-        Msg::Shape(val)
-    }
-
-    pub fn horizontal_line() -> Self {
-        Msg::Shape(Shape::HLine)
-    }
-
-    pub fn hline() -> Self {
-        Msg::horizontal_line()
-    }
-
-    pub fn vertical_line() -> Self {
-        Msg::shape(Shape::VLine)
-    }
-
-    pub fn vline() -> Self {
-        Msg::vertical_line()
-    }
-
-    pub fn circle() -> Self {
-        Msg::shape(Shape::Circle)
-    }
-
-    pub fn state(val: State) -> Self {
-        Msg::State(val)
-    }
-
-    pub fn normal() -> Self {
-        Msg::state(State::Normal)
-    }
-
-    pub fn success() -> Self {
-        Msg::state(State::Success)
-    }
-
-    pub fn failure() -> Self {
-        Msg::state(State::Failure)
-    }
-
-    pub fn increment(val: f64) -> Self {
-        Msg::Increment(val)
-    }
-
-    pub fn decrement(val: f64) -> Self {
-        Msg::Decrement(val)
-    }
-
-    pub fn max(val: f64) -> Self {
-        Msg::Max(val)
-    }
-
-    pub fn min(val: f64) -> Self {
-        Msg::Min(val)
-    }
-
-    pub fn try_color(val: Option<css::Color>) -> Self {
-        Msg::Color(val)
-    }
-
-    pub fn color(val: css::Color) -> Self {
-        Self::try_color(Some(val))
-    }
-}
-
 impl<PMsg: 'static> Element<PMsg> for ProgressBar<PMsg> {
     type Message = Msg;
     type Props = Props<PMsg>;
@@ -198,10 +104,7 @@ impl<PMsg: 'static> Element<PMsg> for ProgressBar<PMsg> {
             }
             Msg::UpdateStyler(val) => {
                 if let Ok(val) = val.downcast::<Box<dyn Fn(Styler<PMsg>) -> Styler<PMsg>>>() {
-                    self.styler = Some(val(self
-                        .styler
-                        .clone()
-                        .unwrap_or_else(|| Styler::default())));
+                    self.styler = Some(val(self.styler.clone().unwrap_or_else(Styler::default)));
                 }
             }
             Msg::Theme(val) => self.theme = val,
@@ -344,3 +247,97 @@ pub fn style() -> Style {
 
 pub type Styler<PMsg> = theme::Styler<ProgressBar<PMsg>, Style>;
 pub type ThemeStyler<'a> = theme::Styler<ProgressBarLens<'a>, Style>;
+
+impl Msg {
+    pub fn events_store<PMsg: 'static>(val: EventsStore<PMsg>) -> Self {
+        Msg::EventsStore(Rc::new(val))
+    }
+
+    pub fn update_events_store<PMsg: 'static>(
+        val: impl Fn(EventsStore<Events<PMsg>>) -> EventsStore<Events<PMsg>> + 'static,
+    ) -> Self {
+        Msg::UpdateEventsStore(Rc::new(val))
+    }
+
+    pub fn styler<PMsg: 'static>(val: Styler<PMsg>) -> Self {
+        Msg::try_styler(Some(val))
+    }
+
+    pub fn update_styler<PMsg: 'static>(
+        val: impl Fn(Styler<PMsg>) -> Styler<PMsg> + 'static,
+    ) -> Self {
+        Msg::UpdateStyler(Rc::new(val))
+    }
+
+    pub fn try_styler<PMsg: 'static>(val: Option<Styler<PMsg>>) -> Self {
+        Msg::Styler(Rc::new(val))
+    }
+
+    pub fn theme(val: Theme) -> Self {
+        Msg::Theme(val)
+    }
+
+    pub fn shape(val: Shape) -> Self {
+        Msg::Shape(val)
+    }
+
+    pub fn horizontal_line() -> Self {
+        Msg::Shape(Shape::HLine)
+    }
+
+    pub fn hline() -> Self {
+        Msg::horizontal_line()
+    }
+
+    pub fn vertical_line() -> Self {
+        Msg::shape(Shape::VLine)
+    }
+
+    pub fn vline() -> Self {
+        Msg::vertical_line()
+    }
+
+    pub fn circle() -> Self {
+        Msg::shape(Shape::Circle)
+    }
+
+    pub fn state(val: State) -> Self {
+        Msg::State(val)
+    }
+
+    pub fn normal() -> Self {
+        Msg::state(State::Normal)
+    }
+
+    pub fn success() -> Self {
+        Msg::state(State::Success)
+    }
+
+    pub fn failure() -> Self {
+        Msg::state(State::Failure)
+    }
+
+    pub fn increment(val: f64) -> Self {
+        Msg::Increment(val)
+    }
+
+    pub fn decrement(val: f64) -> Self {
+        Msg::Decrement(val)
+    }
+
+    pub fn max(val: f64) -> Self {
+        Msg::Max(val)
+    }
+
+    pub fn min(val: f64) -> Self {
+        Msg::Min(val)
+    }
+
+    pub fn try_color(val: Option<css::Color>) -> Self {
+        Msg::Color(val)
+    }
+
+    pub fn color(val: css::Color) -> Self {
+        Self::try_color(Some(val))
+    }
+}

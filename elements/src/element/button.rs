@@ -65,88 +65,6 @@ pub enum Msg {
     MouseOver(bool),
 }
 
-impl Msg {
-    pub fn events_store<PMsg: 'static>(val: EventsStore<PMsg>) -> Self {
-        Msg::EventsStore(Rc::new(val))
-    }
-
-    pub fn update_events_store<PMsg: 'static>(
-        val: impl Fn(EventsStore<Events<PMsg>>) -> EventsStore<Events<PMsg>> + 'static,
-    ) -> Self {
-        Msg::UpdateEventsStore(Rc::new(val))
-    }
-
-    pub fn styler<PMsg: 'static>(val: Styler<PMsg>) -> Self {
-        Msg::Styler(Rc::new(Some(val)))
-    }
-
-    pub fn update_styler<PMsg: 'static>(
-        val: impl Fn(Styler<PMsg>) -> Styler<PMsg> + 'static,
-    ) -> Self {
-        Msg::UpdateStyler(Rc::new(val))
-    }
-
-    pub fn try_styler<PMsg: 'static>(val: Option<Styler<PMsg>>) -> Self {
-        Msg::Styler(Rc::new(val))
-    }
-
-    pub fn theme(val: Theme) -> Self {
-        Msg::Theme(val)
-    }
-
-    pub fn label(val: Label<Msg>) -> Self {
-        Self::try_label(Some(val))
-    }
-
-    pub fn try_label(val: Option<Label<Msg>>) -> Self {
-        Msg::Label(val)
-    }
-
-    pub fn icon(val: Icon<Msg>) -> Self {
-        Self::try_icon(Some(val))
-    }
-
-    pub fn try_icon(val: Option<Icon<Msg>>) -> Self {
-        Msg::Icon(val)
-    }
-
-    pub fn kind(val: Kind) -> Self {
-        Self::try_kind(Some(val))
-    }
-
-    pub fn try_kind(val: Option<Kind>) -> Self {
-        Msg::Kind(val)
-    }
-
-    pub fn ghost(val: bool) -> Self {
-        Msg::Ghost(val)
-    }
-
-    pub fn ghost_on() -> Self {
-        Self::ghost(true)
-    }
-
-    pub fn ghost_off() -> Self {
-        Self::ghost(false)
-    }
-
-    pub fn disabled(val: bool) -> Self {
-        Msg::Disabled(val)
-    }
-
-    pub fn disable() -> Self {
-        Self::disabled(true)
-    }
-
-    pub fn focus(val: bool) -> Self {
-        Msg::Focus(val)
-    }
-
-    pub fn mouse_over(val: bool) -> Self {
-        Msg::MouseOver(val)
-    }
-}
-
 impl<PMsg: 'static> Element<PMsg> for Button<PMsg> {
     type Message = Msg;
     type Props = Props<PMsg>;
@@ -155,20 +73,20 @@ impl<PMsg: 'static> Element<PMsg> for Button<PMsg> {
         let mut orders = orders.proxy_with(&props.msg_mapper);
         orders.subscribe(|theme: ThemeChanged| Msg::theme(theme.0));
 
-        let local_events = EventsStore::new(|| {
+        let local_events = || {
             Events::default().and_button(|conf| {
                 conf.focus(|_| Msg::focus(true))
                     .blur(|_| Msg::focus(false))
                     .mouse_enter(|_| Msg::mouse_over(true))
                     .mouse_leave(|_| Msg::mouse_over(false))
             })
-        });
+        };
 
         Button {
             theme: props.theme,
             styler: props.styler,
             msg_mapper: props.msg_mapper,
-            local_events,
+            local_events: local_events.into(),
             events: props.events,
             label: props.label,
             icon: props.icon,
@@ -199,10 +117,7 @@ impl<PMsg: 'static> Element<PMsg> for Button<PMsg> {
             }
             Msg::UpdateStyler(val) => {
                 if let Ok(val) = val.downcast::<Box<dyn Fn(Styler<PMsg>) -> Styler<PMsg>>>() {
-                    self.styler = Some(val(self
-                        .styler
-                        .clone()
-                        .unwrap_or_else(|| Styler::default())));
+                    self.styler = Some(val(self.styler.clone().unwrap_or_else(Styler::default)));
                 }
             }
             Msg::Theme(val) => self.theme = val,
@@ -276,3 +191,85 @@ pub fn style() -> Style {
 
 pub type Styler<PMsg> = theme::Styler<Button<PMsg>, Style>;
 pub type ThemeStyler<'a> = theme::Styler<ButtonLens<'a>, Style>;
+
+impl Msg {
+    pub fn events_store<PMsg: 'static>(val: EventsStore<PMsg>) -> Self {
+        Msg::EventsStore(Rc::new(val))
+    }
+
+    pub fn update_events_store<PMsg: 'static>(
+        val: impl Fn(EventsStore<Events<PMsg>>) -> EventsStore<Events<PMsg>> + 'static,
+    ) -> Self {
+        Msg::UpdateEventsStore(Rc::new(val))
+    }
+
+    pub fn styler<PMsg: 'static>(val: Styler<PMsg>) -> Self {
+        Msg::try_styler(Some(val))
+    }
+
+    pub fn update_styler<PMsg: 'static>(
+        val: impl Fn(Styler<PMsg>) -> Styler<PMsg> + 'static,
+    ) -> Self {
+        Msg::UpdateStyler(Rc::new(val))
+    }
+
+    pub fn try_styler<PMsg: 'static>(val: Option<Styler<PMsg>>) -> Self {
+        Msg::Styler(Rc::new(val))
+    }
+
+    pub fn theme(val: Theme) -> Self {
+        Msg::Theme(val)
+    }
+
+    pub fn label(val: Label<Msg>) -> Self {
+        Self::try_label(Some(val))
+    }
+
+    pub fn try_label(val: Option<Label<Msg>>) -> Self {
+        Msg::Label(val)
+    }
+
+    pub fn icon(val: Icon<Msg>) -> Self {
+        Self::try_icon(Some(val))
+    }
+
+    pub fn try_icon(val: Option<Icon<Msg>>) -> Self {
+        Msg::Icon(val)
+    }
+
+    pub fn kind(val: Kind) -> Self {
+        Self::try_kind(Some(val))
+    }
+
+    pub fn try_kind(val: Option<Kind>) -> Self {
+        Msg::Kind(val)
+    }
+
+    pub fn ghost(val: bool) -> Self {
+        Msg::Ghost(val)
+    }
+
+    pub fn ghost_on() -> Self {
+        Self::ghost(true)
+    }
+
+    pub fn ghost_off() -> Self {
+        Self::ghost(false)
+    }
+
+    pub fn disabled(val: bool) -> Self {
+        Msg::Disabled(val)
+    }
+
+    pub fn disable() -> Self {
+        Self::disabled(true)
+    }
+
+    pub fn focus(val: bool) -> Self {
+        Msg::Focus(val)
+    }
+
+    pub fn mouse_over(val: bool) -> Self {
+        Msg::MouseOver(val)
+    }
+}
