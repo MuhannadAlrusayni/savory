@@ -1217,7 +1217,7 @@ impl ThemeImpl for Ant {
         let width = 1.;
 
         let styler = move |lens: &progress_bar::ProgressBarLens<'a>| {
-            progress_bar::Style::default()
+            progress_bar::style()
                 .and_progress_bar(|conf| {
                     conf.and_border(|conf| conf.radius(em(radius)).none())
                         .background(gray_300)

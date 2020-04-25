@@ -49,7 +49,7 @@ impl Element<Msg> for MyApp {
             .events(|| {
                 button::events().and_button(|conf| {
                     conf.click(|_| Msg::Dialog(dialog::Msg::Open))
-                        .click(|_| Msg::ProgressBar(progress_bar::Msg::Increment(2.0)))
+                        .click(|_| Msg::ProgressBar(progress_bar::Msg::increment(2.0)))
                 })
             })
             .init(orders);
