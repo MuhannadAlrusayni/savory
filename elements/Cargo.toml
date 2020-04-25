@@ -21,7 +21,7 @@ savory_core = { path = "../core" }
 savory_html = { path = "../html" }
 savory_derive = { path = "../derive" }
 
-derive_rich = { git = "https://gitlab.com/MAlrusayni/derive_rich", version = "0.4.1" }
+derive_rich = { git = "https://gitlab.com/MAlrusayni/derive_rich", version = "0.4.3" }
 derive_more = "0.99.2"
 palette = "0.4.1"
 seed = { git = "https://github.com/David-OConnor/seed", version = "0.6.0" }
