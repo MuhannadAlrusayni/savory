@@ -720,7 +720,7 @@ impl ThemeImpl for Ant {
                 val::Initial.into()
             };
 
-            checkbox::Style::default()
+            checkbox::style()
                 .and_checkbox(|conf| {
                     conf.and_transition(|conf| {
                         conf.duration(sec(0.3))
