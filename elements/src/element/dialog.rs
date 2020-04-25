@@ -80,7 +80,7 @@ where
             Button::build(Msg::CloseButton)
                 // FIXME: use icon insted of label
                 .label("X")
-                .events(|| button::Events::default().and_button(|conf| conf.click(|_| Msg::Close)))
+                .events(|| button::events().and_button(|conf| conf.click(|_| Msg::Close)))
                 .init(&mut orders),
         );
 

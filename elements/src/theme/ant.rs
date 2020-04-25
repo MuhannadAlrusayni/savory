@@ -600,7 +600,7 @@ impl ThemeImpl for Ant {
                 val::Initial.into()
             };
 
-            button::Style::default().and_button(|_| {
+            button::style().and_button(|_| {
                 match lens.kind {
                     Some(button::Kind::Normal) | None => button_normal(lens),
                     Some(button::Kind::Suggestion) => button_suggestion(lens),

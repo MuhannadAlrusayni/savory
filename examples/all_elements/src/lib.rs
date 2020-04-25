@@ -47,7 +47,7 @@ impl Element<Msg> for MyApp {
         let button = Button::build(Msg::Button)
             .label("Click Here")
             .events(|| {
-                button::Events::default().and_button(|conf| {
+                button::events().and_button(|conf| {
                     conf.click(|_| Msg::Dialog(dialog::Msg::Open))
                         .click(|_| Msg::ProgressBar(progress_bar::Msg::Increment(2.0)))
                 })
@@ -66,7 +66,7 @@ impl Element<Msg> for MyApp {
         let pop_btn = Button::build(Msg::PopoverButton)
             .label("Popover button")
             .events(|| {
-                button::Events::default()
+                button::events()
                     .and_button(|conf| conf.click(|_| Msg::Popover(popover::Msg::Toggle)))
             })
             .init(orders);
