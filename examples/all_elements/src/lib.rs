@@ -44,16 +44,15 @@ impl Element<Msg> for MyApp {
         .subtitle("Some description here")
         .init(orders);
 
-        let mut button = Button::build(Msg::Button).label("Click Here").init(orders);
-        button.and_events(
-            |conf| {
-                conf.and_button(|conf| {
+        let button = Button::build(Msg::Button)
+            .label("Click Here")
+            .events(|| {
+                button::Events::default().and_button(|conf| {
                     conf.click(|_| Msg::Dialog(dialog::Msg::Open))
-                        .click(|_| Msg::ProgressBar(progress_bar::Msg::Increment(2.)))
+                        .click(|_| Msg::ProgressBar(progress_bar::Msg::Increment(2.0)))
                 })
-            },
-            orders,
-        );
+            })
+            .init(orders);
 
         let progress = ProgressBar::build(Msg::ProgressBar)
             .failure()
@@ -64,13 +63,13 @@ impl Element<Msg> for MyApp {
             .and_size(|conf| conf.min_width(px(40)))
             .and_margin(|conf| conf.all(px(4)));
 
-        let mut pop_btn = Button::build(Msg::PopoverButton)
+        let pop_btn = Button::build(Msg::PopoverButton)
             .label("Popover button")
+            .events(|| {
+                button::Events::default()
+                    .and_button(|conf| conf.click(|_| Msg::Popover(popover::Msg::Toggle)))
+            })
             .init(orders);
-        pop_btn.and_events(
-            |conf| conf.and_button(|conf| conf.click(|_| Msg::Popover(popover::Msg::Toggle))),
-            orders,
-        );
 
         Self {
             button,

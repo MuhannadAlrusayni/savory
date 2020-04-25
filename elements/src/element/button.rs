@@ -2,6 +2,7 @@ use crate::{icon::IconLens, label::LabelLens, prelude::*};
 use derive_rich::Rich;
 use savory_core::prelude::*;
 use savory_html::prelude::*;
+use std::{any::Any, rc::Rc};
 
 #[derive(Rich, Element)]
 #[element(style(button, label(label::Style), icon(icon::Style)), events(button))]
@@ -10,10 +11,10 @@ pub struct Button<PMsg> {
     #[element(props(required))]
     msg_mapper: MsgMapper<Msg, PMsg>,
     #[rich(read)]
-    local_events: Events<Msg>,
+    local_events: EventsStore<Events<Msg>>,
     #[rich(read)]
     #[element(props(default))]
-    events: Events<PMsg>,
+    events: EventsStore<Events<PMsg>>,
     #[rich(read)]
     #[element(props)]
     styler: Option<Styler<PMsg>>,
@@ -46,6 +47,16 @@ pub struct Button<PMsg> {
 }
 
 pub enum Msg {
+    // EventsStore<Events<PMsg>>
+    SetEventsStore(Rc<dyn Any>),
+    // Box<dyn Fn(EventsStore<Events<PMsg>>) -> EventsStore<Events<PMsg>>>
+    AndEventsStore(Rc<dyn Any>),
+    // Styler<PMsg>
+    SetStyler(Rc<dyn Any>),
+    // Option<Styler>
+    TrySetStyler(Rc<dyn Any>),
+    // Box<dyn Fn(Styler<PMsg>) -> Styler<PMsg>>
+    AndStyler(Rc<dyn Any>),
     SetTheme(Theme),
     SetLabel(Label<Msg>),
     TrySetLabel(Option<Label<Msg>>),
@@ -71,11 +82,13 @@ impl<PMsg: 'static> Element<PMsg> for Button<PMsg> {
         let mut orders = orders.proxy_with(&props.msg_mapper);
         orders.subscribe(|theme: ThemeChanged| Msg::SetTheme(theme.0));
 
-        let local_events = Events::default().and_button(|conf| {
-            conf.focus(|_| Msg::SetFocus(true))
-                .blur(|_| Msg::SetFocus(false))
-                .mouse_enter(|_| Msg::SetMouseOver(true))
-                .mouse_leave(|_| Msg::SetMouseOver(false))
+        let local_events = EventsStore::new(|| {
+            Events::default().and_button(|conf| {
+                conf.focus(|_| Msg::SetFocus(true))
+                    .blur(|_| Msg::SetFocus(false))
+                    .mouse_enter(|_| Msg::SetMouseOver(true))
+                    .mouse_leave(|_| Msg::SetMouseOver(false))
+            })
         });
 
         Button {
@@ -96,6 +109,34 @@ impl<PMsg: 'static> Element<PMsg> for Button<PMsg> {
 
     fn update(&mut self, msg: Msg, _: &mut impl Orders<PMsg>) {
         match msg {
+            Msg::SetEventsStore(val) => {
+                if let Ok(val) = val.downcast::<EventsStore<Events<PMsg>>>() {
+                    self.events = val.into();
+                }
+            }
+            Msg::AndEventsStore(val) => {
+                if let Ok(val) = val.downcast::<Box<dyn Fn(EventsStore<Events<PMsg>>) -> EventsStore<Events<PMsg>>>>() {
+                    self.events = val(self.events.clone());
+                }
+            }
+            Msg::SetStyler(val) => {
+                if let Ok(val) = val.downcast::<Styler<PMsg>>() {
+                    self.styler = Some(val.into());
+                }
+            }
+            Msg::TrySetStyler(val) => {
+                if let Ok(val) = val.downcast::<Option<Styler<PMsg>>>() {
+                    self.styler = val.as_ref().clone();
+                }
+            }
+            Msg::AndStyler(val) => {
+                if let Ok(val) = val.downcast::<Box<dyn Fn(Styler<PMsg>) -> Styler<PMsg>>>() {
+                    self.styler = Some(val(self
+                        .styler
+                        .clone()
+                        .unwrap_or_else(|| Styler::default())));
+                }
+            }
             Msg::SetTheme(val) => self.theme = val,
             Msg::SetLabel(val) => self.label = Some(val),
             Msg::TrySetLabel(val) => self.label = val,
@@ -140,40 +181,18 @@ impl<PMsg: 'static> StyledView for Button<PMsg> {
         html::button()
             .class("button")
             .set(att::disabled(self.disabled))
-            .set(&self.local_events.button)
+            .set(&self.local_events.get().button)
             .set(button)
             .try_add(self.icon.as_ref().map(|el| el.styled_view(icon)))
             .try_add(self.label.as_ref().map(|el| el.styled_view(label)))
             .map_msg_with(&self.msg_mapper)
-            .add(&self.events.button)
+            .add(&self.events.get().button)
     }
 }
 
 impl<PMsg: 'static> Props<PMsg> {
     pub fn init(self, orders: &mut impl Orders<PMsg>) -> Button<PMsg> {
         Button::init(self, orders)
-    }
-}
-
-impl<PMsg: 'static> Button<PMsg> {
-    pub fn and_events(
-        &mut self,
-        get_val: impl FnOnce(Events<PMsg>) -> Events<PMsg>,
-        _: &mut impl Orders<PMsg>,
-    ) {
-        self.events = get_val(self.events.clone());
-    }
-
-    pub fn try_set_styler(
-        &mut self,
-        val: Option<impl Into<Styler<PMsg>>>,
-        _: &mut impl Orders<PMsg>,
-    ) {
-        self.styler = val.map(|s| s.into());
-    }
-
-    pub fn set_styler(&mut self, val: impl Into<Styler<PMsg>>, orders: &mut impl Orders<PMsg>) {
-        self.try_set_styler(Some(val), orders);
     }
 }
 

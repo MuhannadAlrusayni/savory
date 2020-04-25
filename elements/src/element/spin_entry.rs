@@ -110,12 +110,12 @@ impl<PMsg: 'static> Element<PMsg> for SpinEntry<PMsg> {
 
         let increment_button = Button::build(Msg::IncrementButton)
             .label("+")
-            .events(button::Events::default().and_button(|conf| conf.click(|_| Msg::Increment)))
+            .events(|| button::Events::default().and_button(|conf| conf.click(|_| Msg::Increment)))
             .init(&mut orders);
 
         let decrement_button = Button::build(Msg::DecrementButton)
             .label("-")
-            .events(button::Events::default().and_button(|conf| conf.click(|_| Msg::Decrement)))
+            .events(|| button::Events::default().and_button(|conf| conf.click(|_| Msg::Decrement)))
             .init(&mut orders);
 
         let mut spin_entry = Self {
