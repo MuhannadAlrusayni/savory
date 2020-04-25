@@ -55,11 +55,7 @@ pub enum Msg {
     Label(Option<Cow<'static, str>>),
     Toggled(bool),
     Toggle,
-    // ToggleOn,
-    // ToggleOff,
     Disabled(bool),
-    // Disable,
-    // Enable,
     Focus(bool),
     MouseOver(bool),
 }
