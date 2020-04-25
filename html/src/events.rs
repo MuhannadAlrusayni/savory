@@ -2,7 +2,10 @@
 
 use crate::prelude::{El, UpdateEl};
 use seed::prelude::{ev, keyboard_ev, mouse_ev, pointer_ev, Ev, EventHandler, MessageMapper};
-use std::any::{Any, TypeId};
+use std::{
+    any::{Any, TypeId},
+    rc::Rc,
+};
 use wasm_bindgen::JsCast;
 
 pub struct Events<Msg> {
@@ -190,4 +193,59 @@ event_creator! {
     input_ev(web_sys::InputEvent),
     /// create `EventHandler` with `web_sys::UiEvent`
     ui_ev(web_sys::UiEvent),
+}
+
+/// Type used to generate events when get called, this type hold function that
+/// return events.
+pub struct EventsStore<Ev>(Rc<dyn Fn() -> Ev>);
+
+impl<Ev> EventsStore<Ev> {
+    pub fn new(f: impl Fn() -> Ev + 'static) -> Self {
+        Self(Rc::new(f))
+    }
+
+    pub fn get(&self) -> Ev {
+        self.0()
+    }
+}
+
+impl<Ev> From<Rc<EventsStore<Ev>>> for EventsStore<Ev> {
+    fn from(val: Rc<EventsStore<Ev>>) -> Self {
+        Self(Rc::clone(&val.0))
+    }
+}
+
+impl<Ev> From<Rc<dyn Fn() -> Ev>> for EventsStore<Ev> {
+    fn from(val: Rc<dyn Fn() -> Ev>) -> Self {
+        Self(val)
+    }
+}
+
+impl<Ev, T> From<T> for EventsStore<Ev>
+where
+    T: Fn() -> Ev + 'static,
+{
+    fn from(val: T) -> Self {
+        Self(Rc::new(val))
+    }
+}
+
+impl<Ev> std::ops::Deref for EventsStore<Ev> {
+    type Target = dyn Fn() -> Ev;
+
+    fn deref(&self) -> &Self::Target {
+        self.0.deref()
+    }
+}
+
+impl<Ev> Clone for EventsStore<Ev> {
+    fn clone(&self) -> Self {
+        Self(Rc::clone(&self.0))
+    }
+}
+
+impl<Ev: Default> Default for EventsStore<Ev> {
+    fn default() -> Self {
+        Self(Rc::new(|| Ev::default()))
+    }
 }

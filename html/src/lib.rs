@@ -14,7 +14,9 @@ extern crate derive_more;
 
 pub mod prelude {
     pub use crate::{
-        attribute as att, css, html,
+        attribute as att, css,
+        events::EventsStore,
+        html,
         seed_ext::{AddForEl, ElExt, ElRefExt, NodeExt, SetForEl, TryAddForEl, TrySetForEl},
     };
     pub use seed::prelude::{El, ElRef, Node, UpdateEl, UpdateElForIterator};
