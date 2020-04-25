@@ -97,9 +97,9 @@ impl Element<Msg> for MyApp {
             Msg::SpinEntry(msg) => self.spin_entry.update(msg, orders),
             Msg::Dialog(msg) => self.dialog.update(msg, orders),
             Msg::DialogChild(msg) => self.dialog.update_child(msg, orders),
-            Msg::ProgressBar(msg) => self.popover.update_child(msg, orders),
+            Msg::ProgressBar(msg) => self.popover.child.update(msg, orders),
             Msg::Popover(msg) => self.popover.update(msg, orders),
-            Msg::PopoverButton(msg) => self.popover.update_target(msg, orders),
+            Msg::PopoverButton(msg) => self.popover.target.update(msg, orders),
         }
     }
 }

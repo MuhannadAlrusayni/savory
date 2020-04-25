@@ -452,7 +452,7 @@ impl ThemeImpl for Ant {
         let border = self.border(false);
         let white = self.white();
         let styler = move |lens: &popover::PopoverLens<'a>| {
-            popover::Style::default()
+            popover::style()
                 .and_popover(|conf| conf.and_position(|conf| conf.relative()))
                 .and_panel(|conf| {
                     conf.and_transition(|conf| {

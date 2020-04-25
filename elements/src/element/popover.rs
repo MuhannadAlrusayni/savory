@@ -2,6 +2,7 @@ use crate::prelude::*;
 use derive_rich::Rich;
 use savory_core::prelude::*;
 use savory_html::prelude::*;
+use std::{any::Any, rc::Rc};
 
 // TODO: add placement property
 #[derive(Clone, Rich, Element)]
@@ -11,7 +12,7 @@ pub struct Popover<PMsg, C, T> {
     msg_mapper: MsgMapper<Msg, PMsg>,
     #[rich(read)]
     #[element(props(default))]
-    events: Events<PMsg>,
+    events: EventsStore<Events<PMsg>>,
     #[rich(read)]
     #[element(props)]
     styler: Option<Styler<PMsg, C, T>>,
@@ -19,12 +20,10 @@ pub struct Popover<PMsg, C, T> {
     #[element(theme_lens, props(default))]
     theme: Theme,
 
-    #[rich(read)]
     #[element(props(required))]
-    child: C,
-    #[rich(read)]
+    pub child: C,
     #[element(props(required))]
-    target: T,
+    pub target: T,
     #[rich(read(copy, rename = is_toggled))]
     #[element(theme_lens, props(default = "false"))]
     toggled: bool,
@@ -34,27 +33,32 @@ pub struct Popover<PMsg, C, T> {
 }
 
 pub enum Msg {
-    SetTheme(Theme),
-    SetToggled(bool),
+    // EventsStore<Events<PMsg>>
+    EventsStore(Rc<dyn Any>),
+    // Box<dyn Fn(EventsStore<Events<PMsg>>) -> EventsStore<Events<PMsg>>>
+    UpdateEventsStore(Rc<dyn Any>),
+    // Option<Styler<PMsg>>
+    Styler(Rc<dyn Any>),
+    // Box<dyn Fn(Styler<PMsg>) -> Styler<PMsg>>
+    UpdateStyler(Rc<dyn Any>),
+    Theme(Theme),
+    Toggled(bool),
     Toggle,
-    Open,
-    Close,
-    SetOffset(i8),
+    Offset(i8),
 }
 
 impl<PMsg, C, T> Element<PMsg> for Popover<PMsg, C, T>
 where
     PMsg: 'static,
-
-    C: View<Output = Node<PMsg>>,
-    T: View<Output = Node<PMsg>>,
+    C: View<Output = Node<PMsg>> + 'static,
+    T: View<Output = Node<PMsg>> + 'static,
 {
     type Message = Msg;
     type Props = Props<PMsg, C, T>;
 
     fn init(props: Self::Props, orders: &mut impl Orders<PMsg>) -> Self {
         let mut orders = orders.proxy_with(&props.msg_mapper);
-        orders.subscribe(|theme: ThemeChanged| Msg::SetTheme(theme.0));
+        orders.subscribe(|theme: ThemeChanged| Msg::theme(theme.0));
 
         Self {
             msg_mapper: props.msg_mapper,
@@ -70,12 +74,32 @@ where
 
     fn update(&mut self, msg: Msg, _: &mut impl Orders<PMsg>) {
         match msg {
-            Msg::SetTheme(val) => self.theme = val,
-            Msg::SetToggled(val) => self.toggled = val,
+            Msg::EventsStore(val) => {
+                if let Ok(val) = val.downcast::<EventsStore<Events<PMsg>>>() {
+                    self.events = val.into();
+                }
+            }
+            Msg::UpdateEventsStore(val) => {
+                if let Ok(val) = val.downcast::<Box<dyn Fn(EventsStore<Events<PMsg>>) -> EventsStore<Events<PMsg>>>>() {
+                    self.events = val(self.events.clone());
+                }
+            }
+            Msg::Styler(val) => {
+                if let Ok(val) = val.downcast::<Option<Styler<PMsg, C, T>>>() {
+                    self.styler = val.as_ref().clone();
+                }
+            }
+            Msg::UpdateStyler(val) => {
+                if let Ok(val) =
+                    val.downcast::<Box<dyn Fn(Styler<PMsg, C, T>) -> Styler<PMsg, C, T>>>()
+                {
+                    self.styler = Some(val(self.styler.clone().unwrap_or_else(Styler::default)));
+                }
+            }
+            Msg::Theme(val) => self.theme = val,
+            Msg::Toggled(val) => self.toggled = val,
             Msg::Toggle => self.toggled = !self.toggled,
-            Msg::Open => self.toggled = true,
-            Msg::Close => self.toggled = false,
-            Msg::SetOffset(val) => self.offset = val,
+            Msg::Offset(val) => self.offset = val,
         }
     }
 }
@@ -105,16 +129,18 @@ where
     type Style = Style;
 
     fn styled_view(&self, style: Style) -> Self::Output {
+        let events = self.events.get();
+
         let panel = html::div()
             .class("panel")
             .set(style.panel)
-            .set(&self.events.panel)
+            .set(&events.panel)
             .add(self.child.view());
 
         html::div()
             .class("popover")
             .set(style.popover)
-            .set(&self.events.popover)
+            .set(&events.popover)
             .add(self.target.view())
             .add(panel)
     }
@@ -122,69 +148,73 @@ where
 
 impl<PMsg: 'static, C, T> Props<PMsg, C, T>
 where
-    C: View<Output = Node<PMsg>>,
-    T: View<Output = Node<PMsg>>,
+    C: View<Output = Node<PMsg>> + 'static,
+    T: View<Output = Node<PMsg>> + 'static,
 {
     pub fn init(self, orders: &mut impl Orders<PMsg>) -> Popover<PMsg, C, T> {
         Popover::init(self, orders)
     }
 }
 
-impl<PMsg: 'static, C, T> Popover<PMsg, C, T> {
-    pub fn and_events(
-        &mut self,
-        get_val: impl FnOnce(Events<PMsg>) -> Events<PMsg>,
-        _: &mut impl Orders<PMsg>,
-    ) {
-        self.events = get_val(self.events.clone());
-    }
+pub fn events<PMsg>() -> Events<PMsg> {
+    Events::default()
+}
 
-    pub fn set_child(&mut self, child: C, _: &mut impl Orders<PMsg>) -> C
-    where
-        PMsg: 'static,
-        C: View<Output = Node<PMsg>>,
-    {
-        std::mem::replace(&mut self.child, child)
-    }
-
-    pub fn set_target(&mut self, target: T, _: &mut impl Orders<PMsg>) -> T
-    where
-        PMsg: 'static,
-        T: View<Output = Node<PMsg>>,
-    {
-        std::mem::replace(&mut self.target, target)
-    }
-
-    pub fn try_set_styler(
-        &mut self,
-        val: Option<impl Into<Styler<PMsg, C, T>>>,
-        _: &mut impl Orders<PMsg>,
-    ) {
-        self.styler = val.map(|s| s.into());
-    }
-
-    pub fn set_styler(
-        &mut self,
-        val: impl Into<Styler<PMsg, C, T>>,
-        orders: &mut impl Orders<PMsg>,
-    ) {
-        self.try_set_styler(Some(val), orders);
-    }
-
-    pub fn update_child(&mut self, child_msg: C::Message, orders: &mut impl Orders<PMsg>)
-    where
-        C: Element<PMsg>,
-    {
-        self.child.update(child_msg, orders)
-    }
-
-    pub fn update_target(&mut self, child_msg: T::Message, orders: &mut impl Orders<PMsg>)
-    where
-        T: Element<PMsg>,
-    {
-        self.target.update(child_msg, orders)
-    }
+pub fn style() -> Style {
+    Style::default()
 }
 
 pub type Styler<PMsg, C, T> = theme::Styler<Popover<PMsg, C, T>, Style>;
 pub type ThemeStyler<'a> = theme::Styler<PopoverLens<'a>, Style>;
+
+impl Msg {
+    pub fn events_store<PMsg: 'static>(val: EventsStore<PMsg>) -> Self {
+        Msg::EventsStore(Rc::new(val))
+    }
+
+    pub fn update_events_store<PMsg: 'static>(
+        val: impl Fn(EventsStore<Events<PMsg>>) -> EventsStore<Events<PMsg>> + 'static,
+    ) -> Self {
+        Msg::UpdateEventsStore(Rc::new(val))
+    }
+
+    pub fn styler<PMsg: 'static, C: 'static, T: 'static>(val: Styler<PMsg, C, T>) -> Self {
+        Msg::try_styler(Some(val))
+    }
+
+    pub fn update_styler<PMsg: 'static, C: 'static, T: 'static>(
+        val: impl Fn(Styler<PMsg, C, T>) -> Styler<PMsg, C, T> + 'static,
+    ) -> Self {
+        Msg::UpdateStyler(Rc::new(val))
+    }
+
+    pub fn try_styler<PMsg: 'static, C: 'static, T: 'static>(
+        val: Option<Styler<PMsg, C, T>>,
+    ) -> Self {
+        Msg::Styler(Rc::new(val))
+    }
+
+    pub fn theme(val: Theme) -> Self {
+        Msg::Theme(val)
+    }
+
+    pub fn toggled(val: bool) -> Self {
+        Msg::Toggled(val)
+    }
+
+    pub fn open() -> Self {
+        Msg::toggled(true)
+    }
+
+    pub fn close() -> Self {
+        Msg::toggled(false)
+    }
+
+    pub fn toggle() -> Self {
+        Msg::Toggle
+    }
+
+    pub fn offset(val: i8) -> Self {
+        Msg::Offset(val)
+    }
+}
