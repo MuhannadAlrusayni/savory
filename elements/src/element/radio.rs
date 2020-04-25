@@ -2,7 +2,7 @@ use crate::prelude::*;
 use derive_rich::Rich;
 use savory_core::prelude::*;
 use savory_html::prelude::*;
-use std::borrow::Cow;
+use std::{any::Any, borrow::Cow, rc::Rc};
 
 #[derive(Rich, Element)]
 #[element(style(radio, button, label), events(radio, button, label))]
@@ -13,10 +13,10 @@ pub struct Radio<PMsg> {
     #[element(props(required))]
     msg_mapper: MsgMapper<Msg, PMsg>,
     #[rich(read)]
-    local_events: Events<Msg>,
+    local_events: EventsStore<Events<Msg>>,
     #[rich(read)]
     #[element(props(default))]
-    events: Events<PMsg>,
+    events: EventsStore<Events<PMsg>>,
     #[rich(read)]
     #[element(props)]
     styler: Option<Styler<PMsg>>,
@@ -43,18 +43,21 @@ pub struct Radio<PMsg> {
 }
 
 pub enum Msg {
-    SetTheme(Theme),
-    SetLabel(Cow<'static, str>),
-    TrySetLabel(Option<Cow<'static, str>>),
-    SetToggled(bool),
+    // EventsStore<Events<PMsg>>
+    EventsStore(Rc<dyn Any>),
+    // Box<dyn Fn(EventsStore<Events<PMsg>>) -> EventsStore<Events<PMsg>>>
+    UpdateEventsStore(Rc<dyn Any>),
+    // Option<Styler<PMsg>>
+    Styler(Rc<dyn Any>),
+    // Box<dyn Fn(Styler<PMsg>) -> Styler<PMsg>>
+    UpdateStyler(Rc<dyn Any>),
+    Theme(Theme),
+    Label(Option<Cow<'static, str>>),
+    Toggled(bool),
     Toggle,
-    ToggleOn,
-    ToggleOff,
-    SetDisabled(bool),
-    Disable,
-    Enable,
-    SetFocus(bool),
-    SetMouseOver(bool),
+    Disabled(bool),
+    Focus(bool),
+    MouseOver(bool),
 }
 
 impl<PMsg: 'static> Element<PMsg> for Radio<PMsg> {
@@ -63,20 +66,22 @@ impl<PMsg: 'static> Element<PMsg> for Radio<PMsg> {
 
     fn init(props: Self::Props, orders: &mut impl Orders<PMsg>) -> Self {
         let mut orders = orders.proxy_with(&props.msg_mapper);
-        orders.subscribe(|theme: ThemeChanged| Msg::SetTheme(theme.0));
+        orders.subscribe(|theme: ThemeChanged| Msg::theme(theme.0));
 
-        let local_events = Events::default()
-            .and_radio(|conf| {
-                conf.focus(|_| Msg::SetFocus(true))
-                    .blur(|_| Msg::SetFocus(false))
-                    .mouse_enter(|_| Msg::SetMouseOver(true))
-                    .mouse_leave(|_| Msg::SetMouseOver(false))
-                    .click(|_| Msg::Toggle)
-            })
-            .and_label(|conf| {
-                conf.mouse_enter(|_| Msg::SetMouseOver(true))
-                    .mouse_leave(|_| Msg::SetMouseOver(false))
-            });
+        let local_events = || {
+            Events::default()
+                .and_radio(|conf| {
+                    conf.focus(|_| Msg::focus(true))
+                        .blur(|_| Msg::focus(false))
+                        .mouse_enter(|_| Msg::mouse_over(true))
+                        .mouse_leave(|_| Msg::mouse_over(false))
+                        .click(|_| Msg::toggle())
+                })
+                .and_label(|conf| {
+                    conf.mouse_enter(|_| Msg::mouse_over(true))
+                        .mouse_leave(|_| Msg::mouse_over(false))
+                })
+        };
 
         Self {
             input_el_ref: ElRef::default(),
@@ -84,7 +89,7 @@ impl<PMsg: 'static> Element<PMsg> for Radio<PMsg> {
             theme: props.theme,
             styler: props.styler,
             msg_mapper: props.msg_mapper,
-            local_events,
+            local_events: local_events.into(),
             events: props.events,
             label: props.label,
             disabled: props.disabled,
@@ -96,18 +101,33 @@ impl<PMsg: 'static> Element<PMsg> for Radio<PMsg> {
 
     fn update(&mut self, msg: Msg, _: &mut impl Orders<PMsg>) {
         match msg {
-            Msg::SetTheme(val) => self.theme = val,
-            Msg::SetLabel(val) => self.label = Some(val),
-            Msg::TrySetLabel(val) => self.label = val,
-            Msg::SetToggled(val) => self.toggled = val,
+            Msg::EventsStore(val) => {
+                if let Ok(val) = val.downcast::<EventsStore<Events<PMsg>>>() {
+                    self.events = val.into();
+                }
+            }
+            Msg::UpdateEventsStore(val) => {
+                if let Ok(val) = val.downcast::<Box<dyn Fn(EventsStore<Events<PMsg>>) -> EventsStore<Events<PMsg>>>>() {
+                    self.events = val(self.events.clone());
+                }
+            }
+            Msg::Styler(val) => {
+                if let Ok(val) = val.downcast::<Option<Styler<PMsg>>>() {
+                    self.styler = val.as_ref().clone();
+                }
+            }
+            Msg::UpdateStyler(val) => {
+                if let Ok(val) = val.downcast::<Box<dyn Fn(Styler<PMsg>) -> Styler<PMsg>>>() {
+                    self.styler = Some(val(self.styler.clone().unwrap_or_else(Styler::default)));
+                }
+            }
+            Msg::Theme(val) => self.theme = val,
+            Msg::Label(val) => self.label = val,
+            Msg::Toggled(val) => self.toggled = val,
             Msg::Toggle => self.toggled = !self.toggled,
-            Msg::ToggleOn => self.toggled = true,
-            Msg::ToggleOff => self.toggled = false,
-            Msg::SetDisabled(val) => self.disabled = val,
-            Msg::Disable => self.disabled = true,
-            Msg::Enable => self.disabled = false,
-            Msg::SetFocus(val) => self.focused = val,
-            Msg::SetMouseOver(val) => self.mouse_over = val,
+            Msg::Disabled(val) => self.disabled = val,
+            Msg::Focus(val) => self.focused = val,
+            Msg::MouseOver(val) => self.mouse_over = val,
         }
     }
 }
@@ -134,6 +154,8 @@ impl<PMsg: 'static> StyledView for Radio<PMsg> {
             button,
             label,
         } = style;
+        let events = self.events.get();
+        let local_events = self.local_events.get();
 
         let radio = html::input()
             .class("radio")
@@ -141,9 +163,9 @@ impl<PMsg: 'static> StyledView for Radio<PMsg> {
             .set(att::checked(self.toggled))
             .set(att::Type::Radio)
             .set(radio)
-            .set(&self.local_events.radio)
+            .set(&local_events.radio)
             .map_msg_with(&self.msg_mapper)
-            .add(&self.events.radio)
+            .add(&events.radio)
             .el_ref(&self.input_el_ref)
             // add button if the radio is toggled
             .config_if(self.is_toggled(), |conf| {
@@ -151,7 +173,7 @@ impl<PMsg: 'static> StyledView for Radio<PMsg> {
                     .class("button")
                     .set(button)
                     .map_msg_with(&self.msg_mapper)
-                    .add(&self.events.button);
+                    .add(&events.button);
                 conf.add(button)
             });
 
@@ -160,9 +182,9 @@ impl<PMsg: 'static> StyledView for Radio<PMsg> {
             Some(lbl) => html::label()
                 .class("label")
                 .set(label)
-                .set(&self.local_events.label)
+                .set(&local_events.label)
                 .map_msg_with(&self.msg_mapper)
-                .add(&self.events.label)
+                .add(&events.label)
                 .add(radio)
                 .add(lbl.clone())
                 .el_ref(&self.label_el_ref),
@@ -176,27 +198,83 @@ impl<PMsg: 'static> Props<PMsg> {
     }
 }
 
-impl<PMsg: 'static> Radio<PMsg> {
-    pub fn and_events(
-        &mut self,
-        get_val: impl FnOnce(Events<PMsg>) -> Events<PMsg>,
-        _: &mut impl Orders<PMsg>,
-    ) {
-        self.events = get_val(self.events.clone());
-    }
+pub fn events<PMsg>() -> Events<PMsg> {
+    Events::default()
+}
 
-    pub fn try_set_styler(
-        &mut self,
-        val: Option<impl Into<Styler<PMsg>>>,
-        _: &mut impl Orders<PMsg>,
-    ) {
-        self.styler = val.map(|s| s.into());
-    }
-
-    pub fn set_styler(&mut self, val: impl Into<Styler<PMsg>>, orders: &mut impl Orders<PMsg>) {
-        self.try_set_styler(Some(val), orders);
-    }
+pub fn style() -> Style {
+    Style::default()
 }
 
 pub type Styler<PMsg> = theme::Styler<Radio<PMsg>, Style>;
 pub type ThemeStyler<'a> = theme::Styler<RadioLens<'a>, Style>;
+
+impl Msg {
+    pub fn events_store<PMsg: 'static>(val: EventsStore<PMsg>) -> Self {
+        Msg::EventsStore(Rc::new(val))
+    }
+
+    pub fn update_events_store<PMsg: 'static>(
+        val: impl Fn(EventsStore<Events<PMsg>>) -> EventsStore<Events<PMsg>> + 'static,
+    ) -> Self {
+        Msg::UpdateEventsStore(Rc::new(val))
+    }
+
+    pub fn styler<PMsg: 'static>(val: Styler<PMsg>) -> Self {
+        Msg::try_styler(Some(val))
+    }
+
+    pub fn update_styler<PMsg: 'static>(
+        val: impl Fn(Styler<PMsg>) -> Styler<PMsg> + 'static,
+    ) -> Self {
+        Msg::UpdateStyler(Rc::new(val))
+    }
+
+    pub fn try_styler<PMsg: 'static>(val: Option<Styler<PMsg>>) -> Self {
+        Msg::Styler(Rc::new(val))
+    }
+
+    pub fn theme(val: Theme) -> Self {
+        Msg::Theme(val)
+    }
+
+    pub fn label(val: Cow<'static, str>) -> Self {
+        Msg::try_label(Some(val))
+    }
+
+    pub fn try_label(val: Option<Cow<'static, str>>) -> Self {
+        Msg::Label(val)
+    }
+
+    pub fn toggled(val: bool) -> Self {
+        Msg::Toggled(val)
+    }
+
+    pub fn toggle_ond() -> Self {
+        Msg::toggled(true)
+    }
+
+    pub fn toggle_off() -> Self {
+        Msg::toggled(false)
+    }
+
+    pub fn toggle() -> Self {
+        Msg::Toggle
+    }
+
+    pub fn disabled(val: bool) -> Self {
+        Msg::Disabled(val)
+    }
+
+    pub fn disable() -> Self {
+        Self::disabled(true)
+    }
+
+    pub fn focus(val: bool) -> Self {
+        Msg::Focus(val)
+    }
+
+    pub fn mouse_over(val: bool) -> Self {
+        Msg::MouseOver(val)
+    }
+}

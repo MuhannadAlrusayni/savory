@@ -795,7 +795,7 @@ impl ThemeImpl for Ant {
                 val::Initial.into()
             };
 
-            radio::Style::default()
+            radio::style()
                 .and_radio(|conf| {
                     conf.and_transition(|conf| {
                         conf.duration(sec(0.3))
