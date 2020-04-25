@@ -606,7 +606,6 @@ impl<Msg> ElExt<Msg> for El<Msg> {
     }
 
     fn and_attributes(self, conf: impl FnOnce(Attributes) -> Attributes) -> Self {
-        // todo!()
         self.set_attributes(conf(Default::default()))
     }
 
