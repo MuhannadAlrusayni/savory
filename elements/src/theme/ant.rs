@@ -646,7 +646,7 @@ impl ThemeImpl for Ant {
                 val::Initial.into()
             };
 
-            switch::Style::default()
+            switch::style()
                 .and_switch(|conf| {
                     let bg_color = if *lens.toggled { brand_500 } else { gray_500 };
                     conf.config_if(*lens.disabled, |conf| conf.opacity(0.4))
