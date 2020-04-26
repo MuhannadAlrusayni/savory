@@ -1068,7 +1068,7 @@ impl ThemeImpl for Ant {
         let white = self.white();
 
         let styler = move |lens: &dialog::DialogLens<'a>| {
-            dialog::Style::default()
+            dialog::style()
                 .and_dialog_background(|conf| {
                     conf.and_position(|conf| {
                         conf.fixed()

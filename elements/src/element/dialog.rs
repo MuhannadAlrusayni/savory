@@ -2,6 +2,7 @@ use crate::{header_bar::HeaderBarLens, prelude::*};
 use derive_rich::Rich;
 use savory_core::prelude::*;
 use savory_html::prelude::*;
+use std::{any::Any, rc::Rc};
 
 #[derive(Rich, Element)]
 #[element(style(dialog, dialog_background), events(dialog, dialog_background))]
@@ -10,10 +11,10 @@ pub struct Dialog<PMsg, C> {
     #[element(props(required))]
     msg_mapper: MsgMapper<Msg, PMsg>,
     #[rich(read)]
-    local_events: Events<Msg>,
+    local_events: EventsStore<Events<Msg>>,
     #[rich(read)]
     #[element(props(default))]
-    events: Events<PMsg>,
+    events: EventsStore<Events<PMsg>>,
     #[rich(read)]
     #[element(props)]
     styler: Option<Styler<PMsg, C>>,
@@ -25,9 +26,8 @@ pub struct Dialog<PMsg, C> {
     #[rich(read)]
     #[element(theme_lens(nested), props(default))]
     header_bar: HeaderBar<Msg>,
-    #[rich(read)]
     #[element(props(required))]
-    child: C,
+    pub child: C,
     #[rich(read(copy, rename = is_disabled))]
     #[element(theme_lens, props(default))]
     disabled: bool,
@@ -39,54 +39,56 @@ pub struct Dialog<PMsg, C> {
 }
 
 pub enum Msg {
-    SetTheme(Theme),
-    SetHeaderBar(HeaderBar<Msg>),
-    SetHeaderBarHidden(bool),
-    HideHeaderBar,
-    ShowHeaderBar,
-    SetTitle(Label<Msg>),
-    TrySetTitle(Option<Label<Msg>>),
-    SetSubtitle(Label<Msg>),
-    TrySetSubtitle(Option<Label<Msg>>),
-    SetMouseOnDialog(bool),
-    ClickedOutside,
-    SetToggled(bool),
+    // EventsStore<Events<PMsg>>
+    EventsStore(Rc<dyn Any>),
+    // Box<dyn Fn(EventsStore<Events<PMsg>>) -> EventsStore<Events<PMsg>>>
+    UpdateEventsStore(Rc<dyn Any>),
+    // Option<Styler<PMsg, C>>
+    Styler(Rc<dyn Any>),
+    // Box<dyn Fn(Styler<PMsg, C>) -> Styler<PMsg, C>>
+    UpdateStyler(Rc<dyn Any>),
+    Theme(Theme),
+    Title(Option<Label<Msg>>),
+    Subtitle(Option<Label<Msg>>),
+    MouseOnDialog(bool),
+    ClickedOutSide,
+    Toggled(bool),
     Toggle,
-    Open,
-    Close,
     CloseButton(button::Msg),
 }
 
 impl<PMsg, C> Element<PMsg> for Dialog<PMsg, C>
 where
     PMsg: 'static,
-    C: View<Output = Node<PMsg>>,
+    C: View<Output = Node<PMsg>> + 'static,
 {
     type Message = Msg;
     type Props = Props<PMsg, C>;
 
     fn init(props: Self::Props, orders: &mut impl Orders<PMsg>) -> Self {
         let mut orders = orders.proxy_with(&props.msg_mapper);
-        orders.subscribe(|theme: ThemeChanged| Msg::SetTheme(theme.0));
+        orders.subscribe(|theme: ThemeChanged| Msg::theme(theme.0));
 
-        let local_events = Events::default()
-            .and_dialog_background(|conf| conf.click(|_| Msg::ClickedOutside))
-            .and_dialog(|conf| {
-                conf.mouse_enter(|_| Msg::SetMouseOnDialog(true))
-                    .mouse_leave(|_| Msg::SetMouseOnDialog(false))
-            });
+        let local_events = || {
+            events()
+                .and_dialog_background(|conf| conf.click(|_| Msg::clicked_out_side()))
+                .and_dialog(|conf| {
+                    conf.mouse_enter(|_| Msg::mouse_on_dialog(true))
+                        .mouse_leave(|_| Msg::mouse_on_dialog(false))
+                })
+        };
 
         let header_bar = props.header_bar.close_button(
-            Button::build(Msg::CloseButton)
+            Button::build(Msg::close_button)
                 // FIXME: use icon insted of label
                 .label("X")
-                .events(|| button::events().and_button(|conf| conf.click(|_| Msg::Close)))
+                .events(|| button::events().and_button(|conf| conf.click(|_| Msg::close())))
                 .init(&mut orders),
         );
 
         Self {
             msg_mapper: props.msg_mapper,
-            local_events,
+            local_events: local_events.into(),
             events: props.events,
             styler: props.styler,
             theme: props.theme,
@@ -102,25 +104,37 @@ where
         let mut orders = orders.proxy_with(&self.msg_mapper);
 
         match msg {
-            Msg::SetTheme(val) => self.theme = val,
-            Msg::SetHeaderBar(val) => self.header_bar = val,
-            Msg::SetHeaderBarHidden(val) => self.header_bar.hidden = val,
-            Msg::HideHeaderBar => self.header_bar.hidden = true,
-            Msg::ShowHeaderBar => self.header_bar.hidden = false,
-            Msg::SetTitle(val) => self.header_bar.title = Some(val),
-            Msg::TrySetTitle(val) => self.header_bar.title = val,
-            Msg::SetSubtitle(val) => self.header_bar.subtitle = Some(val),
-            Msg::TrySetSubtitle(val) => self.header_bar.subtitle = val,
-            Msg::SetMouseOnDialog(val) => self.mouse_on_dialog = val,
-            Msg::ClickedOutside => {
+            Msg::EventsStore(val) => {
+                if let Ok(val) = val.downcast::<EventsStore<Events<PMsg>>>() {
+                    self.events = val.into();
+                }
+            }
+            Msg::UpdateEventsStore(val) => {
+                if let Ok(val) = val.downcast::<Box<dyn Fn(EventsStore<Events<PMsg>>) -> EventsStore<Events<PMsg>>>>() {
+                    self.events = val(self.events.clone());
+                }
+            }
+            Msg::Styler(val) => {
+                if let Ok(val) = val.downcast::<Option<Styler<PMsg, C>>>() {
+                    self.styler = val.as_ref().clone();
+                }
+            }
+            Msg::UpdateStyler(val) => {
+                if let Ok(val) = val.downcast::<Box<dyn Fn(Styler<PMsg, C>) -> Styler<PMsg, C>>>() {
+                    self.styler = Some(val(self.styler.clone().unwrap_or_else(Styler::default)));
+                }
+            }
+            Msg::Theme(val) => self.theme = val,
+            Msg::Title(val) => self.header_bar.title = val,
+            Msg::Subtitle(val) => self.header_bar.subtitle = val,
+            Msg::MouseOnDialog(val) => self.mouse_on_dialog = val,
+            Msg::ClickedOutSide => {
                 if !self.mouse_on_dialog {
                     self.set_toggled(false, &mut orders);
                 }
             }
-            Msg::SetToggled(val) => self.set_toggled(val, &mut orders),
+            Msg::Toggled(val) => self.set_toggled(val, &mut orders),
             Msg::Toggle => self.toggle(&mut orders),
-            Msg::Open => self.set_toggled(true, &mut orders),
-            Msg::Close => self.set_toggled(false, &mut orders),
             Msg::CloseButton(msg) => {
                 if let Some(ref mut btn) = self.header_bar.close_button {
                     btn.update(msg, &mut orders)
@@ -155,29 +169,32 @@ where
     type Style = Style;
 
     fn styled_view(&self, style: Style) -> Self::Output {
+        let local_events = self.local_events.get();
+        let events = self.events.get();
+
         let dialog = html::div()
             .class("dialog")
             .set(style.dialog)
-            .set(&self.local_events.dialog)
+            .set(&local_events.dialog)
             .map_msg_with(&self.msg_mapper)
             .add(self.header_bar.view().map_msg_with(&self.msg_mapper))
             .add(self.child.view())
-            .add(&self.events.dialog);
+            .add(&events.dialog);
 
         html::div()
             .class("dialog-background")
             .set(style.dialog_background)
-            .set(&self.local_events.dialog_background)
+            .set(&local_events.dialog_background)
             .map_msg_with(&self.msg_mapper)
             .add(dialog)
-            .add(&self.events.dialog_background)
+            .add(&events.dialog_background)
     }
 }
 
 impl<PMsg, C> Props<PMsg, C>
 where
     PMsg: 'static,
-    C: View<Output = Node<PMsg>>,
+    C: View<Output = Node<PMsg>> + 'static,
 {
     pub fn init(self, orders: &mut impl Orders<PMsg>) -> Dialog<PMsg, C> {
         Dialog::init(self, orders)
@@ -195,33 +212,6 @@ where
 }
 
 impl<PMsg: 'static, C> Dialog<PMsg, C> {
-    pub fn and_events(
-        &mut self,
-        get_val: impl FnOnce(Events<PMsg>) -> Events<PMsg>,
-        _: &mut impl Orders<PMsg>,
-    ) {
-        self.events = get_val(self.events.clone());
-    }
-
-    pub fn try_set_styler(
-        &mut self,
-        val: Option<impl Into<Styler<PMsg, C>>>,
-        _: &mut impl Orders<PMsg>,
-    ) {
-        self.styler = val.map(|s| s.into());
-    }
-
-    pub fn set_styler(&mut self, val: impl Into<Styler<PMsg, C>>, orders: &mut impl Orders<PMsg>) {
-        self.try_set_styler(Some(val), orders)
-    }
-
-    pub fn update_child(&mut self, child_msg: C::Message, orders: &mut impl Orders<PMsg>)
-    where
-        C: Element<PMsg>,
-    {
-        self.child.update(child_msg, orders)
-    }
-
     fn set_toggled(&mut self, val: bool, orders: &mut impl Orders<Msg>) {
         if val {
             // open
@@ -229,7 +219,7 @@ impl<PMsg: 'static, C> Dialog<PMsg, C> {
                 State::Opened => {}
                 State::Closed | State::Closing => {
                     self.state = State::Opening;
-                    orders.after_next_render(|_| Msg::Open);
+                    orders.after_next_render(|_| Msg::open());
                 }
                 State::Opening => self.state = State::Opened,
             }
@@ -239,7 +229,7 @@ impl<PMsg: 'static, C> Dialog<PMsg, C> {
                 State::Closed => {}
                 State::Opened | State::Opening => {
                     self.state = State::Closing;
-                    orders.perform_cmd_after(400, || Msg::Close);
+                    orders.perform_cmd_after(400, || Msg::close());
                 }
                 State::Closing => {
                     self.state = State::Closed;
@@ -256,6 +246,14 @@ impl<PMsg: 'static, C> Dialog<PMsg, C> {
     }
 }
 
+pub fn events<PMsg>() -> Events<PMsg> {
+    Events::default()
+}
+
+pub fn style() -> Style {
+    Style::default()
+}
+
 #[derive(Debug, Clone, Copy)]
 pub enum State {
     Closing,
@@ -266,3 +264,77 @@ pub enum State {
 
 pub type Styler<PMsg, C> = theme::Styler<Dialog<PMsg, C>, Style>;
 pub type ThemeStyler<'a> = theme::Styler<DialogLens<'a>, Style>;
+
+impl Msg {
+    pub fn events_store<PMsg: 'static>(val: EventsStore<PMsg>) -> Self {
+        Msg::EventsStore(Rc::new(val))
+    }
+
+    pub fn update_events_store<PMsg: 'static>(
+        val: impl Fn(EventsStore<Events<PMsg>>) -> EventsStore<Events<PMsg>> + 'static,
+    ) -> Self {
+        Msg::UpdateEventsStore(Rc::new(val))
+    }
+
+    pub fn styler<PMsg: 'static, C: 'static>(val: Styler<PMsg, C>) -> Self {
+        Msg::try_styler(Some(val))
+    }
+
+    pub fn update_styler<PMsg: 'static, C: 'static>(
+        val: impl Fn(Styler<PMsg, C>) -> Styler<PMsg, C> + 'static,
+    ) -> Self {
+        Msg::UpdateStyler(Rc::new(val))
+    }
+
+    pub fn try_styler<PMsg: 'static, C: 'static>(val: Option<Styler<PMsg, C>>) -> Self {
+        Msg::Styler(Rc::new(val))
+    }
+
+    pub fn theme(val: Theme) -> Self {
+        Msg::Theme(val)
+    }
+
+    pub fn toggled(val: bool) -> Self {
+        Msg::Toggled(val)
+    }
+
+    pub fn open() -> Self {
+        Msg::toggled(true)
+    }
+
+    pub fn close() -> Self {
+        Msg::toggled(false)
+    }
+
+    pub fn toggle() -> Self {
+        Msg::Toggle
+    }
+
+    pub fn try_title(val: Option<impl Into<Label<Msg>>>) -> Self {
+        Msg::Title(val.map(|val| val.into()))
+    }
+
+    pub fn title(val: impl Into<Label<Msg>>) -> Self {
+        Msg::try_title(Some(val))
+    }
+
+    pub fn try_subtitle(val: Option<impl Into<Label<Msg>>>) -> Self {
+        Msg::Subtitle(val.map(|val| val.into()))
+    }
+
+    pub fn subtitle(val: impl Into<Label<Msg>>) -> Self {
+        Msg::try_subtitle(Some(val))
+    }
+
+    pub fn mouse_on_dialog(val: bool) -> Self {
+        Msg::MouseOnDialog(val)
+    }
+
+    pub fn clicked_out_side() -> Self {
+        Msg::ClickedOutSide
+    }
+
+    pub fn close_button(val: button::Msg) -> Self {
+        Msg::CloseButton(val)
+    }
+}

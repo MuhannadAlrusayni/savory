@@ -48,7 +48,7 @@ impl Element<Msg> for MyApp {
             .label("Click Here")
             .events(|| {
                 button::events().and_button(|conf| {
-                    conf.click(|_| Msg::Dialog(dialog::Msg::Open))
+                    conf.click(|_| Msg::Dialog(dialog::Msg::open()))
                         .click(|_| Msg::ProgressBar(progress_bar::Msg::increment(2.0)))
                 })
             })
@@ -96,7 +96,7 @@ impl Element<Msg> for MyApp {
             Msg::Entry(msg) => self.entry.update(msg, orders),
             Msg::SpinEntry(msg) => self.spin_entry.update(msg, orders),
             Msg::Dialog(msg) => self.dialog.update(msg, orders),
-            Msg::DialogChild(msg) => self.dialog.update_child(msg, orders),
+            Msg::DialogChild(msg) => self.dialog.child.update(msg, orders),
             Msg::ProgressBar(msg) => self.popover.child.update(msg, orders),
             Msg::Popover(msg) => self.popover.update(msg, orders),
             Msg::PopoverButton(msg) => self.popover.target.update(msg, orders),
