@@ -137,7 +137,7 @@ impl<PMsg: 'static> StyledView for ProgressBar<PMsg> {
     type Style = Style;
 
     fn styled_view(&self, style: Style) -> Self::Output {
-        let events = self.events()();
+        let events = self.events.get();
         let indicator = html::div()
             .class("indicator")
             .set(style.indicator)

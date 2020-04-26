@@ -230,14 +230,6 @@ where
     }
 }
 
-impl<Ev> std::ops::Deref for EventsStore<Ev> {
-    type Target = dyn Fn() -> Ev;
-
-    fn deref(&self) -> &Self::Target {
-        self.0.deref()
-    }
-}
-
 impl<Ev> Clone for EventsStore<Ev> {
     fn clone(&self) -> Self {
         Self(Rc::clone(&self.0))
