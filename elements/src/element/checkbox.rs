@@ -139,8 +139,8 @@ impl<PMsg: 'static> View for Checkbox<PMsg> {
         self.styled_view(
             self.styler
                 .as_ref()
-                .map(|styler| styler(self))
-                .unwrap_or_else(|| self.theme.checkbox()(&self.theme_lens())),
+                .map(|styler| styler.get(self))
+                .unwrap_or_else(|| self.theme.checkbox().get(&self.theme_lens())),
         )
     }
 }

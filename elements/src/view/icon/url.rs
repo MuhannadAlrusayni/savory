@@ -44,8 +44,8 @@ impl<PMsg> View for Url<PMsg> {
         self.styled_view(
             self.styler
                 .as_ref()
-                .map(|styler| styler(&self))
-                .unwrap_or_else(|| self.theme.url_icon()(&self.theme_lens())),
+                .map(|styler| styler.get(self))
+                .unwrap_or_else(|| self.theme.url_icon().get(&self.theme_lens())),
         )
     }
 }

@@ -155,8 +155,8 @@ where
         self.styled_view(
             self.styler
                 .as_ref()
-                .map(|styler| styler(self))
-                .unwrap_or_else(|| self.theme.dialog()(&self.theme_lens())),
+                .map(|styler| styler.get(self))
+                .unwrap_or_else(|| self.theme.dialog().get(&self.theme_lens())),
         )
     }
 }

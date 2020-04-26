@@ -54,8 +54,8 @@ impl<PMsg> View for Item<PMsg> {
         self.styled_view(
             self.styler
                 .as_ref()
-                .map(|styler| styler(self))
-                .unwrap_or_else(|| self.theme.flexbox_item()(&self.theme_lens())),
+                .map(|styler| styler.get(self))
+                .unwrap_or_else(|| self.theme.flexbox_item().get(&self.theme_lens())),
         )
     }
 }

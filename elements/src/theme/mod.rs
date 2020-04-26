@@ -81,6 +81,10 @@ impl<E, S> Styler<E, S> {
     pub fn new(styler: impl Fn(&E) -> S + 'static) -> Self {
         Styler(Rc::new(styler))
     }
+
+    pub fn get(&self, e: &E) -> S {
+        self.0(e)
+    }
 }
 
 impl<E, S, T> From<T> for Styler<E, S>
@@ -101,14 +105,6 @@ impl<E, S> From<Rc<dyn Fn(&E) -> S>> for Styler<E, S> {
 impl<E, S> From<Rc<Styler<E, S>>> for Styler<E, S> {
     fn from(val: Rc<Styler<E, S>>) -> Self {
         Self(Rc::clone(&val.0))
-    }
-}
-
-impl<E, S> Deref for Styler<E, S> {
-    type Target = dyn Fn(&E) -> S;
-
-    fn deref(&self) -> &Self::Target {
-        self.0.deref()
     }
 }
 

@@ -207,8 +207,8 @@ impl<PMsg: 'static> View for SpinEntry<PMsg> {
         self.styled_view(
             self.styler
                 .as_ref()
-                .map(|styler| styler(self))
-                .unwrap_or_else(|| self.theme.spin_entry()(&self.theme_lens())),
+                .map(|styler| styler.get(self))
+                .unwrap_or_else(|| self.theme.spin_entry().get(&self.theme_lens())),
         )
     }
 }

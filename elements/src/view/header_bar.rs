@@ -52,8 +52,8 @@ impl<PMsg: 'static> View for HeaderBar<PMsg> {
         self.styled_view(
             self.styler
                 .as_ref()
-                .map(|styler| styler(&self))
-                .unwrap_or_else(|| self.theme.header_bar()(&self.theme_lens())),
+                .map(|styler| styler.get(self))
+                .unwrap_or_else(|| self.theme.header_bar().get(&self.theme_lens())),
         )
     }
 }
