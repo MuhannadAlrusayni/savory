@@ -2,7 +2,7 @@ use crate::prelude::*;
 use derive_rich::Rich;
 use savory_core::prelude::*;
 use savory_html::prelude::*;
-use std::borrow::Cow;
+use std::{any::Any, borrow::Cow, rc::Rc};
 
 #[derive(Rich, Element)]
 #[element(style(input, container), events(input, container))]
@@ -12,10 +12,10 @@ pub struct Entry<PMsg> {
     #[element(props(required))]
     msg_mapper: MsgMapper<Msg, PMsg>,
     #[rich(read)]
-    local_events: Events<Msg>,
+    local_events: EventsStore<Events<Msg>>,
     #[rich(read)]
     #[element(props(default))]
-    events: Events<PMsg>,
+    events: EventsStore<Events<PMsg>>,
     #[rich(read)]
     #[element(props)]
     styler: Option<Styler<PMsg>>,
@@ -45,19 +45,22 @@ pub struct Entry<PMsg> {
 }
 
 pub enum Msg {
-    SetTheme(Theme),
-    SetText(Cow<'static, str>),
-    TrySetText(Option<Cow<'static, str>>),
-    SetMaxLength(att::MaxLength),
-    TrySetMaxLength(Option<att::MaxLength>),
-    SetPlaceholder(Cow<'static, str>),
-    TrySetPlaceholder(Option<Cow<'static, str>>),
-    SetDisabled(bool),
-    Disable,
-    Enable,
-    SetFocus(bool),
-    SetMouseOver(bool),
-    UpdateTextFromView,
+    // EventsStore<Events<PMsg>>
+    EventsStore(Rc<dyn Any>),
+    // Box<dyn Fn(EventsStore<Events<PMsg>>) -> EventsStore<Events<PMsg>>>
+    UpdateEventsStore(Rc<dyn Any>),
+    // Option<Styler<PMsg>>
+    Styler(Rc<dyn Any>),
+    // Box<dyn Fn(Styler<PMsg>) -> Styler<PMsg>>
+    UpdateStyler(Rc<dyn Any>),
+    Theme(Theme),
+    Text(Option<Cow<'static, str>>),
+    MaxLength(Option<att::MaxLength>),
+    Placeholder(Option<Cow<'static, str>>),
+    Disabled(bool),
+    Focus(bool),
+    MouseOver(bool),
+    ResyncText,
 }
 
 impl<PMsg: 'static> Element<PMsg> for Entry<PMsg> {
@@ -66,20 +69,22 @@ impl<PMsg: 'static> Element<PMsg> for Entry<PMsg> {
 
     fn init(props: Self::Props, orders: &mut impl Orders<PMsg>) -> Self {
         let mut orders = orders.proxy_with(&props.msg_mapper);
-        orders.subscribe(|theme: ThemeChanged| Msg::SetTheme(theme.0));
+        orders.subscribe(|theme: ThemeChanged| Msg::theme(theme.0));
 
-        let local_events = Events::default().and_input(|conf| {
-            conf.focus(|_| Msg::SetFocus(true))
-                .blur(|_| Msg::SetFocus(false))
-                .mouse_enter(|_| Msg::SetMouseOver(true))
-                .mouse_leave(|_| Msg::SetMouseOver(false))
-                .input(|_| Msg::UpdateTextFromView)
-        });
+        let local_events = || {
+            Events::default().and_input(|conf| {
+                conf.focus(|_| Msg::focus(true))
+                    .blur(|_| Msg::focus(false))
+                    .mouse_enter(|_| Msg::mouse_over(true))
+                    .mouse_leave(|_| Msg::mouse_over(false))
+                    .input(|_| Msg::resync_text())
+            })
+        };
 
         Self {
             el_ref: ElRef::default(),
             msg_mapper: props.msg_mapper,
-            local_events,
+            local_events: local_events.into(),
             events: props.events,
             styler: props.styler,
             theme: props.theme,
@@ -94,19 +99,34 @@ impl<PMsg: 'static> Element<PMsg> for Entry<PMsg> {
 
     fn update(&mut self, msg: Msg, _: &mut impl Orders<PMsg>) {
         match msg {
-            Msg::SetTheme(val) => self.theme = val,
-            Msg::SetText(val) => self.text = Some(val),
-            Msg::TrySetText(val) => self.text = val,
-            Msg::SetMaxLength(val) => self.max_length = Some(val),
-            Msg::TrySetMaxLength(val) => self.max_length = val,
-            Msg::SetPlaceholder(val) => self.placeholder = Some(val),
-            Msg::TrySetPlaceholder(val) => self.placeholder = val,
-            Msg::SetDisabled(val) => self.disabled = val,
-            Msg::Disable => self.disabled = true,
-            Msg::Enable => self.disabled = false,
-            Msg::SetFocus(val) => self.focused = val,
-            Msg::SetMouseOver(val) => self.mouse_over = val,
-            Msg::UpdateTextFromView => {
+            Msg::EventsStore(val) => {
+                if let Ok(val) = val.downcast::<EventsStore<Events<PMsg>>>() {
+                    self.events = val.into();
+                }
+            }
+            Msg::UpdateEventsStore(val) => {
+                if let Ok(val) = val.downcast::<Box<dyn Fn(EventsStore<Events<PMsg>>) -> EventsStore<Events<PMsg>>>>() {
+                    self.events = val(self.events.clone());
+                }
+            }
+            Msg::Styler(val) => {
+                if let Ok(val) = val.downcast::<Option<Styler<PMsg>>>() {
+                    self.styler = val.as_ref().clone();
+                }
+            }
+            Msg::UpdateStyler(val) => {
+                if let Ok(val) = val.downcast::<Box<dyn Fn(Styler<PMsg>) -> Styler<PMsg>>>() {
+                    self.styler = Some(val(self.styler.clone().unwrap_or_else(Styler::default)));
+                }
+            }
+            Msg::Theme(val) => self.theme = val,
+            Msg::Text(val) => self.text = val,
+            Msg::MaxLength(val) => self.max_length = val,
+            Msg::Placeholder(val) => self.placeholder = val,
+            Msg::Disabled(val) => self.disabled = val,
+            Msg::Focus(val) => self.focused = val,
+            Msg::MouseOver(val) => self.mouse_over = val,
+            Msg::ResyncText => {
                 if let Some(input) = self.el_ref.get() {
                     self.text = Some(input.value().into());
                 }
@@ -132,8 +152,11 @@ impl<PMsg: 'static> StyledView for Entry<PMsg> {
     type Style = Style;
 
     fn styled_view(&self, style: Style) -> Self::Output {
+        let local_events = self.local_events.get();
+        let events = self.events.get();
+
         let input = html::input()
-            .set(&self.local_events.input)
+            .set(&local_events.input)
             .set(style.input)
             .and_attributes(|conf| {
                 conf.class("input")
@@ -143,13 +166,13 @@ impl<PMsg: 'static> StyledView for Entry<PMsg> {
                     .try_placeholder(self.placeholder.clone())
             })
             .map_msg_with(&self.msg_mapper)
-            .add(&self.events.input);
+            .add(&events.input);
 
         html::div()
             .set(style.container)
-            .set(&self.local_events.container)
+            .set(&local_events.container)
             .map_msg_with(&self.msg_mapper)
-            .add(&self.events.container)
+            .add(&events.container)
             .add(input)
     }
 }
@@ -160,27 +183,87 @@ impl<PMsg: 'static> Props<PMsg> {
     }
 }
 
-impl<PMsg: 'static> Entry<PMsg> {
-    pub fn and_events(
-        &mut self,
-        get_val: impl FnOnce(Events<PMsg>) -> Events<PMsg>,
-        _: &mut impl Orders<PMsg>,
-    ) {
-        self.events = get_val(self.events.clone());
-    }
+pub fn events<PMsg>() -> Events<PMsg> {
+    Events::default()
+}
 
-    pub fn try_set_styler(
-        &mut self,
-        val: Option<impl Into<Styler<PMsg>>>,
-        _: &mut impl Orders<PMsg>,
-    ) {
-        self.styler = val.map(|s| s.into());
-    }
-
-    pub fn set_styler(&mut self, val: impl Into<Styler<PMsg>>, orders: &mut impl Orders<PMsg>) {
-        self.try_set_styler(Some(val), orders)
-    }
+pub fn style() -> Style {
+    Style::default()
 }
 
 pub type Styler<PMsg> = theme::Styler<Entry<PMsg>, Style>;
 pub type ThemeStyler<'a> = theme::Styler<EntryLens<'a>, Style>;
+
+impl Msg {
+    pub fn events_store<PMsg: 'static>(val: EventsStore<PMsg>) -> Self {
+        Msg::EventsStore(Rc::new(val))
+    }
+
+    pub fn update_events_store<PMsg: 'static>(
+        val: impl Fn(EventsStore<Events<PMsg>>) -> EventsStore<Events<PMsg>> + 'static,
+    ) -> Self {
+        Msg::UpdateEventsStore(Rc::new(val))
+    }
+
+    pub fn styler<PMsg: 'static>(val: Styler<PMsg>) -> Self {
+        Msg::try_styler(Some(val))
+    }
+
+    pub fn update_styler<PMsg: 'static>(
+        val: impl Fn(Styler<PMsg>) -> Styler<PMsg> + 'static,
+    ) -> Self {
+        Msg::UpdateStyler(Rc::new(val))
+    }
+
+    pub fn try_styler<PMsg: 'static>(val: Option<Styler<PMsg>>) -> Self {
+        Msg::Styler(Rc::new(val))
+    }
+
+    pub fn theme(val: Theme) -> Self {
+        Msg::Theme(val)
+    }
+
+    pub fn try_text(val: Option<Cow<'static, str>>) -> Self {
+        Msg::Text(val)
+    }
+
+    pub fn text(val: Cow<'static, str>) -> Self {
+        Msg::try_text(Some(val))
+    }
+
+    pub fn try_max_length(val: Option<impl Into<att::MaxLength>>) -> Self {
+        Msg::MaxLength(val.map(|val| val.into()))
+    }
+
+    pub fn max_length(val: impl Into<att::MaxLength>) -> Self {
+        Msg::try_max_length(Some(val))
+    }
+
+    pub fn try_placeholder(val: Option<Cow<'static, str>>) -> Self {
+        Msg::Placeholder(val)
+    }
+
+    pub fn placeholder(val: Cow<'static, str>) -> Self {
+        Msg::try_placeholder(Some(val))
+    }
+
+    pub fn disabled(val: bool) -> Self {
+        Msg::Disabled(val)
+    }
+
+    pub fn disable() -> Self {
+        Self::disabled(true)
+    }
+
+    pub fn focus(val: bool) -> Self {
+        Msg::Focus(val)
+    }
+
+    pub fn mouse_over(val: bool) -> Self {
+        Msg::MouseOver(val)
+    }
+
+    fn resync_text() -> Self {
+        Msg::ResyncText
+    }
+}

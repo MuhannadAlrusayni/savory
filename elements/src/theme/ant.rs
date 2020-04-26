@@ -871,7 +871,7 @@ impl ThemeImpl for Ant {
                 val::Initial.into()
             };
 
-            entry::Style::default()
+            entry::style()
                 .and_container(|conf| {
                     conf.and_transition(|conf| {
                         conf.duration(sec(0.3))
