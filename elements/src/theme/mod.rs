@@ -73,8 +73,11 @@ pub trait ThemeLens<'a> {
     fn theme_lens(&'a self) -> Self::Lens;
 }
 
-/// Type the hold function that takes ThemeLens::Lens and return Style, this
-/// function is used every time when elemet/view get viewed
+/// Type that hold function which takes `&E` and return `Style`, this function
+/// is used every time when elemet/view get viewed.
+///
+/// Usally `&E` is reference to type `<Element as ThemeLens>::Lens` or element
+/// type.
 pub struct Styler<E, S>(Rc<dyn Fn(&E) -> S>);
 
 impl<E, S> Styler<E, S> {
