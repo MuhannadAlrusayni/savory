@@ -442,10 +442,6 @@ impl Msg {
         Msg::Min(val)
     }
 
-    pub fn disabled(val: bool) -> Self {
-        Msg::Disabled(val)
-    }
-
     pub fn step(val: f64) -> Self {
         Msg::Step(val)
     }
@@ -456,6 +452,10 @@ impl Msg {
 
     pub fn try_placeholder(val: Option<f64>) -> Self {
         Msg::Placeholder(val)
+    }
+
+    pub fn disabled(val: bool) -> Self {
+        Msg::Disabled(val)
     }
 
     pub fn disable() -> Self {
