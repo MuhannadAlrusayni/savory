@@ -39,7 +39,7 @@ impl<T> Modifier<T> {
 impl<T, PMsg> Element<PMsg> for Modifier<T>
 where
     PMsg: 'static,
-    T: Element<PMsg, Output = Node<PMsg>>,
+    T: Element<PMsg>,
 {
     type Message = T::Message;
     type Props = T::Props;

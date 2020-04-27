@@ -31,7 +31,7 @@ use seed::prelude::IntoNodes;
 ///
 /// [Seed]: https://seed-rs.org
 /// [`Orders`]: crate::prelude::Orders
-pub trait Element<PMsg: 'static>: View {
+pub trait Element<PMsg: 'static> {
     /// Element message
     type Message;
     /// Properties used to initialize this element
@@ -55,7 +55,7 @@ pub trait Element<PMsg: 'static>: View {
 pub trait AppElementExt<Msg>: Element<Msg, Props = Url, Message = Msg>
 where
     Msg: 'static,
-    Self: Sized,
+    Self: Sized + View,
     Self::Output: IntoNodes<Self::Message> + 'static,
 {
     /// Start app element
@@ -118,7 +118,7 @@ where
 impl<Msg, T> AppElementExt<Msg> for T
 where
     Msg: 'static,
-    Self: Element<Msg, Props = Url, Message = Msg>,
+    Self: Element<Msg, Props = Url, Message = Msg> + View,
     Self::Output: IntoNodes<Self::Message> + 'static,
 {
 }

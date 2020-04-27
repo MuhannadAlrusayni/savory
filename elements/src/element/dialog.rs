@@ -60,7 +60,7 @@ pub enum Msg {
 impl<PMsg, C> Element<PMsg> for Dialog<PMsg, C>
 where
     PMsg: 'static,
-    C: View<Output = Node<PMsg>> + 'static,
+    C: 'static,
 {
     type Message = Msg;
     type Props = Props<PMsg, C>;

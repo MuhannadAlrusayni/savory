@@ -50,8 +50,8 @@ pub enum Msg {
 impl<PMsg, C, T> Element<PMsg> for Popover<PMsg, C, T>
 where
     PMsg: 'static,
-    C: View<Output = Node<PMsg>> + 'static,
-    T: View<Output = Node<PMsg>> + 'static,
+    C: 'static,
+    T: 'static,
 {
     type Message = Msg;
     type Props = Props<PMsg, C, T>;
