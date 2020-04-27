@@ -34,8 +34,8 @@ pub struct Dialog<PMsg, C> {
     #[rich(read(copy, rename = is_mouse_on_widget))]
     #[element(theme_lens)]
     mouse_on_dialog: bool,
-    #[element(theme_lens, props(default = "State::Closed"))]
-    state: State,
+    #[element(theme_lens)]
+    toggle: Toggle<Msg>,
 }
 
 pub enum Msg {
@@ -52,8 +52,7 @@ pub enum Msg {
     Subtitle(Option<Label<Msg>>),
     MouseOnDialog(bool),
     ClickedOutSide,
-    Toggled(bool),
-    Toggle,
+    Toggle(toggle::Msg),
     CloseButton(button::Msg),
 }
 
@@ -95,8 +94,8 @@ where
             header_bar,
             child: props.child,
             disabled: props.disabled,
-            state: props.state,
             mouse_on_dialog: false,
+            toggle: Toggle::build(Msg::Toggle).closing(400).init(&mut orders),
         }
     }
 
@@ -130,11 +129,11 @@ where
             Msg::MouseOnDialog(val) => self.mouse_on_dialog = val,
             Msg::ClickedOutSide => {
                 if !self.mouse_on_dialog {
-                    self.set_toggled(false, &mut orders);
+                    self.toggle.toggled(false, &mut orders);
+                    // self.set_toggled(false, &mut orders);
                 }
             }
-            Msg::Toggled(val) => self.set_toggled(val, &mut orders),
-            Msg::Toggle => self.toggle(&mut orders),
+            Msg::Toggle(msg) => self.toggle.update(msg, &mut orders),
             Msg::CloseButton(msg) => {
                 if let Some(ref mut btn) = self.header_bar.close_button {
                     btn.update(msg, &mut orders)
@@ -211,41 +210,6 @@ where
     }
 }
 
-impl<PMsg: 'static, C> Dialog<PMsg, C> {
-    fn set_toggled(&mut self, val: bool, orders: &mut impl Orders<Msg>) {
-        if val {
-            // open
-            match self.state {
-                State::Opened => {}
-                State::Closed | State::Closing => {
-                    self.state = State::Opening;
-                    orders.after_next_render(|_| Msg::open());
-                }
-                State::Opening => self.state = State::Opened,
-            }
-        } else {
-            // close
-            match self.state {
-                State::Closed => {}
-                State::Opened | State::Opening => {
-                    self.state = State::Closing;
-                    orders.perform_cmd_after(400, || Msg::close());
-                }
-                State::Closing => {
-                    self.state = State::Closed;
-                }
-            }
-        }
-    }
-
-    fn toggle(&mut self, orders: &mut impl Orders<Msg>) {
-        match self.state {
-            State::Opened | State::Opening => self.set_toggled(false, orders),
-            State::Closed | State::Closing => self.set_toggled(true, orders),
-        }
-    }
-}
-
 pub fn events<PMsg>() -> Events<PMsg> {
     Events::default()
 }
@@ -295,7 +259,7 @@ impl Msg {
     }
 
     pub fn toggled(val: bool) -> Self {
-        Msg::Toggled(val)
+        Msg::Toggle(toggle::Msg::Toggled(val))
     }
 
     pub fn open() -> Self {
@@ -307,7 +271,7 @@ impl Msg {
     }
 
     pub fn toggle() -> Self {
-        Msg::Toggle
+        Msg::Toggle(toggle::Msg::Toggle)
     }
 
     pub fn try_title(val: Option<impl Into<Label<Msg>>>) -> Self {

@@ -1085,8 +1085,8 @@ impl ThemeImpl for Ant {
                             .cubic_bezier(0.645, 0.045, 0.355, 1.)
                     })
                     .config(|conf| {
-                        use dialog::State::*;
-                        match lens.state {
+                        use toggle::State::*;
+                        match lens.toggle.state() {
                             Closed => conf.display(val::None),
                             Opening => conf
                                 .display(val::Flex)
