@@ -53,6 +53,8 @@ struct Props {
     default: Option<Override<String>>,
     #[darling(default)]
     required: util::Flag,
+    #[darling(default)]
+    nested: util::Flag,
 }
 
 uses_type_params!(Field, ty);
@@ -255,32 +257,31 @@ impl Element {
             if let Some(props) = field.props.clone().map(|val| val.unwrap_or_default()) {
                 let ty = &field.ty;
                 let field = &field.ident;
+
+                let nested_props_or_type = |ty| {
+                    if props.nested.is_some() {
+                        quote! { <#ty as HasProps>::Props }
+                    } else {
+                        quote! { #ty }
+                    }
+                };
+
+                let ty = ty.get_option_ty().unwrap_or(ty);
+                let ty = nested_props_or_type(ty);
                 if props.required.is_some() {
                     if props.default.is_some() {
                         panic!("`default` attribute cannot be used with `required` attribute")
                     }
+
                     pass_new_args.push(quote! { #field, });
-                    match ty.get_option_ty() {
-                        Some(ty) => {
-                            struct_fields.push(quote! {
-                                #[rcih(write, write(option), write(option, style = compose))]
-                                pub #field: Option<#ty>,
-                            });
-                            new_args.push(quote! { #field: impl Into<#ty>, });
-                            new_fill.push(quote! { #field: Some(#field.into()), });
-                        }
-                        None => {
-                            struct_fields.push(quote! {
-                                #[rich(write)]
-                                pub #field: #ty,
-                            });
-                            new_args.push(quote! { #field: impl Into<#ty>, });
-                            new_fill.push(quote! { #field: #field.into(), });
-                        }
-                    }
+                    struct_fields.push(quote! {
+                        #[rich(write, write(style = compose))]
+                        pub #field: #ty,
+                    });
+                    new_args.push(quote! { #field: impl Into<#ty>, });
+                    new_fill.push(quote! { #field: #field.into(), });
                 } else {
-                    let ty = ty.get_option_ty().unwrap_or(ty);
-                    if let Some(expr) = props.default {
+                    if let Some(ref expr) = props.default {
                         let def_expr = match expr.as_ref() {
                             Override::Inherit => quote! { ::std::default::Default::default() },
                             Override::Explicit(expr_str) => {
@@ -289,13 +290,8 @@ impl Element {
                                 quote! { (#expr).into() }
                             }
                         };
-                        let write_compose_def = if !expr.is_explicit() {
-                            quote! { , write(style = compose) }
-                        } else {
-                            quote! {}
-                        };
                         struct_fields.push(quote! {
-                            #[rich(write #write_compose_def)]
+                            #[rich(write, write(style = compose))]
                             pub #field: #ty,
                         });
                         new_fill.push(quote! { #field: #def_expr, });
@@ -362,6 +358,10 @@ impl Element {
         let element_name = &self.ident;
 
         quote! {
+            impl #ty_impl HasProps for #element_name #ty_gen #where_clause {
+                type Props = Props #gen_params;
+            }
+
             impl #ty_impl #element_name #ty_gen #where_clause {
                 pub fn build(#( #new_args )*) -> Props #gen_params {
                     Props::new(#( #pass_new_args )*)

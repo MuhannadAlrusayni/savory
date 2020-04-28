@@ -60,10 +60,10 @@ pub struct SpinEntry<PMsg> {
 
     // children elements
     #[rich(read)]
-    #[element(theme_lens(nested))]
+    #[element(theme_lens(nested), props(nested, default = "inc_btn_props()"))]
     increment_button: Button<Msg>,
     #[rich(read)]
-    #[element(theme_lens(nested))]
+    #[element(theme_lens(nested), props(nested, default = "dec_btn_props()"))]
     decrement_button: Button<Msg>,
 }
 
@@ -94,7 +94,6 @@ pub enum Msg {
 
 impl<PMsg: 'static> Element<PMsg> for SpinEntry<PMsg> {
     type Message = Msg;
-    type Props = Props<PMsg>;
 
     fn init(props: Self::Props, orders: &mut impl Orders<PMsg>) -> Self {
         let mut orders = orders.proxy_with(&props.msg_mapper);
@@ -112,16 +111,6 @@ impl<PMsg: 'static> Element<PMsg> for SpinEntry<PMsg> {
                         .mouse_leave(|_| Msg::mouse_over(false))
                 })
         };
-
-        let increment_button = Button::build(Msg::increment_button)
-            .label("+")
-            .events(|| button::events().and_button(|conf| conf.click(|_| Msg::increment())))
-            .init(&mut orders);
-
-        let decrement_button = Button::build(Msg::decrement_button)
-            .label("-")
-            .events(|| button::events().and_button(|conf| conf.click(|_| Msg::decrement())))
-            .init(&mut orders);
 
         let mut spin_entry = Self {
             el_ref: ElRef::default(),
@@ -142,8 +131,8 @@ impl<PMsg: 'static> Element<PMsg> for SpinEntry<PMsg> {
             disabled: props.disabled,
             focused: false,
             mouse_over: false,
-            increment_button,
-            decrement_button,
+            increment_button: props.increment_button.init(&mut orders),
+            decrement_button: props.decrement_button.init(&mut orders),
         };
 
         // Fix invalid values
@@ -376,6 +365,18 @@ impl<PMsg: 'static> SpinEntry<PMsg> {
             };
         }
     }
+}
+
+fn inc_btn_props() -> button::Props<Msg> {
+    Button::build(Msg::increment_button)
+        .label("+")
+        .events(|| button::events().and_button(|conf| conf.click(|_| Msg::increment())))
+}
+
+fn dec_btn_props() -> button::Props<Msg> {
+    Button::build(Msg::decrement_button)
+        .label("-")
+        .events(|| button::events().and_button(|conf| conf.click(|_| Msg::decrement())))
 }
 
 pub fn events<PMsg>() -> Events<PMsg> {

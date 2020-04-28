@@ -9,9 +9,20 @@ pub struct Toggle<PMsg> {
     #[rich(read(copy))]
     state: State,
     #[element(props(default = "Action::AfterNextRender"))]
-    closing: Action,
+    close_after: Action,
     #[element(props(default = "Action::AfterNextRender"))]
-    opening: Action,
+    open_after: Action,
+}
+
+impl<PMsg> Clone for Toggle<PMsg> {
+    fn clone(&self) -> Self {
+        Self {
+            msg_mapper: self.msg_mapper.clone(),
+            state: self.state.clone(),
+            close_after: self.close_after.clone(),
+            open_after: self.open_after.clone(),
+        }
+    }
 }
 
 #[derive(Clone, Copy, From)]
@@ -28,14 +39,13 @@ pub enum Msg {
 
 impl<PMsg: 'static> Element<PMsg> for Toggle<PMsg> {
     type Message = Msg;
-    type Props = Props<PMsg>;
 
     fn init(props: Self::Props, _: &mut impl Orders<PMsg>) -> Self {
         Self {
             msg_mapper: props.msg_mapper,
             state: props.state,
-            closing: props.closing,
-            opening: props.opening,
+            close_after: props.close_after,
+            open_after: props.open_after,
         }
     }
 
@@ -47,7 +57,7 @@ impl<PMsg: 'static> Element<PMsg> for Toggle<PMsg> {
                 State::Opened => {}
                 State::Closed | State::Closing => {
                     self.state = State::Opening;
-                    match self.opening {
+                    match self.open_after {
                         Action::AfterMs(ms) => orders.perform_cmd_after(ms, || Msg::Toggled(true)),
                         Action::AfterNextRender => orders.after_next_render(|_| Msg::Toggled(true)),
                     };
@@ -58,7 +68,7 @@ impl<PMsg: 'static> Element<PMsg> for Toggle<PMsg> {
                 State::Closed => {}
                 State::Opened | State::Opening => {
                     self.state = State::Closing;
-                    match self.closing {
+                    match self.close_after {
                         Action::AfterMs(ms) => orders.perform_cmd_after(ms, || Msg::Toggled(false)),
                         Action::AfterNextRender => {
                             orders.after_next_render(|_| Msg::Toggled(false))
@@ -88,6 +98,16 @@ pub enum State {
 impl<PMsg: 'static> Props<PMsg> {
     pub fn init(self, orders: &mut impl Orders<PMsg>) -> Toggle<PMsg> {
         Toggle::init(self, orders)
+    }
+
+    pub fn opened(mut self) -> Self {
+        self.state = State::Opened;
+        self
+    }
+
+    pub fn closed(mut self) -> Self {
+        self.state = State::Closed;
+        self
     }
 }
 

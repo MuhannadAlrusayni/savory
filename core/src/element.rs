@@ -31,11 +31,9 @@ use seed::prelude::IntoNodes;
 ///
 /// [Seed]: https://seed-rs.org
 /// [`Orders`]: crate::prelude::Orders
-pub trait Element<PMsg: 'static> {
+pub trait Element<PMsg: 'static>: HasProps {
     /// Element message
     type Message;
-    /// Properties used to initialize this element
-    type Props;
 
     /// Create and initialize the element
     ///
@@ -46,6 +44,13 @@ pub trait Element<PMsg: 'static> {
 
     /// update method that recive `Self::Message` and update the model state accordingly.
     fn update(&mut self, _: Self::Message, _: &mut impl Orders<PMsg>);
+}
+
+/// Trait used to assign uniqe `Props` type for each Element, this deriven using
+/// the `Element` derive macro.
+pub trait HasProps {
+    /// Properties used to initialize this element
+    type Props;
 }
 
 /// Extension trait for `Element` when it's used on App element
@@ -71,9 +76,12 @@ where
     ///     FooMessage,
     /// }
     ///
+    /// impl HasProps for MyApp {
+    ///     type Props = Url;
+    /// }
+    ///
     /// impl Element<Msg> for MyApp {
     ///     type Message = Msg;
-    ///     type Props = Url;
     ///
     ///     fn init(url: Url, orders: &mut impl Orders<Msg>) -> Self {
     ///         // initialize the app goes here

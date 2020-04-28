@@ -24,9 +24,11 @@ pub struct Popover<PMsg, C, T> {
     pub child: C,
     #[element(props(required))]
     pub target: T,
-    #[rich(read(copy, rename = is_toggled))]
-    #[element(theme_lens, props(default = "false"))]
-    toggled: bool,
+    #[element(
+        theme_lens,
+        props(nested, default = "Toggle::build(Msg::Toggle).close_after(400)")
+    )]
+    toggle: Toggle<Msg>,
     #[rich(read(copy))]
     #[element(theme_lens, props(default = "0"))]
     offset: i8,
@@ -42,8 +44,7 @@ pub enum Msg {
     // Box<dyn Fn(Styler<PMsg>) -> Styler<PMsg>>
     UpdateStyler(Rc<dyn Any>),
     Theme(Theme),
-    Toggled(bool),
-    Toggle,
+    Toggle(toggle::Msg),
     Offset(i8),
 }
 
@@ -54,7 +55,6 @@ where
     T: 'static,
 {
     type Message = Msg;
-    type Props = Props<PMsg, C, T>;
 
     fn init(props: Self::Props, orders: &mut impl Orders<PMsg>) -> Self {
         let mut orders = orders.proxy_with(&props.msg_mapper);
@@ -67,12 +67,14 @@ where
             theme: props.theme,
             child: props.child,
             target: props.target,
-            toggled: props.toggled,
+            toggle: props.toggle.init(&mut orders),
             offset: props.offset,
         }
     }
 
-    fn update(&mut self, msg: Msg, _: &mut impl Orders<PMsg>) {
+    fn update(&mut self, msg: Msg, orders: &mut impl Orders<PMsg>) {
+        let mut orders = orders.proxy_with(&self.msg_mapper);
+
         match msg {
             Msg::EventsStore(val) => {
                 if let Ok(val) = val.downcast::<EventsStore<Events<PMsg>>>() {
@@ -97,9 +99,8 @@ where
                 }
             }
             Msg::Theme(val) => self.theme = val,
-            Msg::Toggled(val) => self.toggled = val,
-            Msg::Toggle => self.toggled = !self.toggled,
             Msg::Offset(val) => self.offset = val,
+            Msg::Toggle(msg) => self.toggle.update(msg, &mut orders),
         }
     }
 }
@@ -141,8 +142,14 @@ where
             .class("popover")
             .set(style.popover)
             .set(&events.popover)
-            .add(self.target.view())
+            .add(self.target.view().add(att::class("popover-target")))
             .add(panel)
+    }
+}
+
+impl<PMsg, C, T> Popover<PMsg, C, T> {
+    pub fn is_toggled(&self) -> bool {
+        self.toggle.is_toggled()
     }
 }
 
@@ -199,7 +206,7 @@ impl Msg {
     }
 
     pub fn toggled(val: bool) -> Self {
-        Msg::Toggled(val)
+        Msg::Toggle(toggle::Msg::Toggled(val))
     }
 
     pub fn open() -> Self {
@@ -211,7 +218,7 @@ impl Msg {
     }
 
     pub fn toggle() -> Self {
-        Msg::Toggle
+        Msg::Toggle(toggle::Msg::Toggle)
     }
 
     pub fn offset(val: i8) -> Self {

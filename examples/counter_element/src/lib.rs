@@ -23,7 +23,6 @@ pub enum Msg {
 
 impl<PMsg: 'static> Element<PMsg> for Counter<PMsg> {
     type Message = Msg;
-    type Props = Props<PMsg>;
 
     fn init(props: Self::Props, _: &mut impl Orders<PMsg>) -> Self {
         let local_events = Events::default()
@@ -107,9 +106,12 @@ pub struct MyApp {
     counter_element: Counter<AppMsg>,
 }
 
+impl HasProps for MyApp {
+    type Props = Url;
+}
+
 impl Element<AppMsg> for MyApp {
     type Message = AppMsg;
-    type Props = Url;
 
     fn init(_: Url, orders: &mut impl Orders<AppMsg>) -> Self {
         Self {

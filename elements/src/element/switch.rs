@@ -56,7 +56,6 @@ pub enum Msg {
 
 impl<PMsg: 'static> Element<PMsg> for Switch<PMsg> {
     type Message = Msg;
-    type Props = Props<PMsg>;
 
     fn init(props: Self::Props, orders: &mut impl Orders<PMsg>) -> Self {
         let mut orders = orders.proxy_with(&props.msg_mapper);

@@ -34,7 +34,10 @@ pub struct Dialog<PMsg, C> {
     #[rich(read(copy, rename = is_mouse_on_widget))]
     #[element(theme_lens)]
     mouse_on_dialog: bool,
-    #[element(theme_lens)]
+    #[element(
+        theme_lens,
+        props(nested, default = "Toggle::build(Msg::Toggle).close_after(400)")
+    )]
     toggle: Toggle<Msg>,
 }
 
@@ -62,10 +65,9 @@ where
     C: 'static,
 {
     type Message = Msg;
-    type Props = Props<PMsg, C>;
 
-    fn init(props: Self::Props, orders: &mut impl Orders<PMsg>) -> Self {
-        let mut orders = orders.proxy_with(&props.msg_mapper);
+    fn init(props: Self::Props, porders: &mut impl Orders<PMsg>) -> Self {
+        let mut orders = porders.proxy_with(&props.msg_mapper);
         orders.subscribe(|theme: ThemeChanged| Msg::theme(theme.0));
 
         let local_events = || {
@@ -95,7 +97,7 @@ where
             child: props.child,
             disabled: props.disabled,
             mouse_on_dialog: false,
-            toggle: Toggle::build(Msg::Toggle).closing(400).init(&mut orders),
+            toggle: props.toggle.init(&mut orders),
         }
     }
 

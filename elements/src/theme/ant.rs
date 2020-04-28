@@ -471,11 +471,15 @@ impl ThemeImpl for Ant {
                     })
                     .and_padding(|conf| conf.x(px(4.)).y(px(2)))
                     .and_margin(|conf| conf.top(px(*lens.offset)))
-                    .config_if_else(
-                        *lens.toggled,
-                        |conf| conf.opacity(1.).visibility(val::Visible),
-                        |conf| conf.visibility(val::Hidden).opacity(0.),
-                    )
+                    .config(|conf| {
+                        use toggle::State::*;
+                        match lens.toggle.state() {
+                            Closed => conf.display(val::None),
+                            Opening => conf.opacity(0.0),
+                            Opened => conf.opacity(1.0),
+                            Closing => conf.opacity(0.0),
+                        }
+                    })
                 })
         };
         styler.into()

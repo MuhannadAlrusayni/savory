@@ -28,9 +28,12 @@ pub struct MyApp {
     popover: Popover<Msg, Modifier<ProgressBar<Msg>>, Button<Msg>>,
 }
 
+impl HasProps for MyApp {
+    type Props = Url;
+}
+
 impl Element<Msg> for MyApp {
     type Message = Msg;
-    type Props = Url;
 
     fn init(_: Url, orders: &mut impl Orders<Msg>) -> Self {
         let dlg = Dialog::build(
@@ -42,6 +45,7 @@ impl Element<Msg> for MyApp {
         )
         .title("Title for dialog")
         .subtitle("Some description here")
+        .and_toggle(|conf| conf.opened())
         .init(orders);
 
         let button = Button::build(Msg::Button)
@@ -67,7 +71,7 @@ impl Element<Msg> for MyApp {
             .label("Popover button")
             .events(|| {
                 button::events()
-                    .and_button(|conf| conf.click(|_| Msg::Popover(popover::Msg::Toggle)))
+                    .and_button(|conf| conf.click(|_| Msg::Popover(popover::Msg::toggle())))
             })
             .init(orders);
 

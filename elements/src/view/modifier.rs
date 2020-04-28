@@ -36,13 +36,16 @@ impl<T> Modifier<T> {
     }
 }
 
+impl<T: HasProps> HasProps for Modifier<T> {
+    type Props = T::Props;
+}
+
 impl<T, PMsg> Element<PMsg> for Modifier<T>
 where
     PMsg: 'static,
     T: Element<PMsg>,
 {
     type Message = T::Message;
-    type Props = T::Props;
 
     fn init(props: Self::Props, orders: &mut impl Orders<PMsg>) -> Self {
         let target = T::init(props, orders);
