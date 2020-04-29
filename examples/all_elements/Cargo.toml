@@ -1,5 +1,5 @@
 [package]
-name = "all_elements"
+name = "all-elements"
 version = "0.1.0"
 authors = ["Muhannad Alrusayni <Muhannad.Alrusayni@gmail.com>"]
 edition = "2018"
@@ -11,7 +11,7 @@ publish = false
 crate-type = ["cdylib"]
 
 [dependencies]
-savory_core = { path = "../../core" }
-savory_elements = { path = "../../elements" }
-savory_html = { path = "../../html" }
+savory-core = { path = "../../core" }
+savory-elements = { path = "../../elements" }
+savory-html = { path = "../../html" }
 wasm-bindgen = "0.2.55"

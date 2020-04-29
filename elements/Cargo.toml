@@ -1,5 +1,5 @@
 [package]
-name = "savory_elements"
+name = "savory-elements"
 description = "UI Elements built using Savory"
 version = "0.4.0"
 authors = ["Muhannad Alrusayni <Muhannad.Alrusayni@gmail.com>"]
@@ -10,16 +10,16 @@ categories = ["gui", "wasm", "web-programming"]
 license = "MIT OR Apache-2.0"
 repository = "https://gitlab.com/MAlrusayni/savory/tree/master/elements"
 homepage = "https://gitlab.com/MAlrusayni/savory"
-documentation = "https://docs.rs/savory_elements"
+documentation = "https://docs.rs/savory-elements"
 include = [ "src/**/*", "Cargo.toml", "README.MD" ]
 
 [badges]
 maintenance = { status = "actively-developed" }
 
 [dependencies]
-savory_core = { path = "../core" }
-savory_html = { path = "../html" }
-savory_derive = { path = "../derive" }
+savory-core = { path = "../core" }
+savory-html = { path = "../html" }
+savory-derive = { path = "../derive" }
 
 derive_rich = { git = "https://gitlab.com/MAlrusayni/derive_rich", version = "0.4.3" }
 derive_more = "0.99.2"

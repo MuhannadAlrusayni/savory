@@ -1,5 +1,5 @@
 [package]
-name = "savory_html"
+name = "savory-html"
 description = "Typed HTML for Savory"
 version = "0.4.0"
 authors = ["Muhannad Alrusayni <Muhannad.Alrusayni@gmail.com>"]
@@ -10,14 +10,14 @@ categories = ["gui", "wasm", "web-programming"]
 license = "MIT OR Apache-2.0"
 repository = "https://gitlab.com/MAlrusayni/savory/tree/master/html"
 homepage = "https://gitlab.com/MAlrusayni/savory"
-documentation = "https://docs.rs/savory_html"
+documentation = "https://docs.rs/savory-html"
 include = [ "src/**/*", "Cargo.toml", "README.MD" ]
 
 [badges]
 maintenance = { status = "actively-developed" }
 
 [dependencies]
-savory_core = { path = "../core" }
+savory-core = { path = "../core" }
 
 seed = { git = "https://github.com/David-OConnor/seed", version = "0.6.0" }
 derive_rich = { git = "https://gitlab.com/MAlrusayni/derive_rich", version = "0.4.3" }

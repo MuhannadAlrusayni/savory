@@ -1,9 +1,9 @@
 # Savory
 **Rust / Wasm frontend library for building user interfaces.**
 
-[![master docs](https://img.shields.io/badge/docs-master-blue.svg)](https://malrusayni.gitlab.io/savory/savory_core/)
+[![master docs](https://img.shields.io/badge/docs-master-blue.svg)](https://malrusayni.gitlab.io/savory/savory-core/)
 &middot;
-[![crate info](https://img.shields.io/crates/v/savory.svg)](https://crates.io/crates/savory_core)
+[![crate info](https://img.shields.io/crates/v/savory.svg)](https://crates.io/crates/savory-core)
 &middot;
 [![pipeline](https://gitlab.com/MAlrusayni/savory/badges/master/pipeline.svg)](https://gitlab.com/MAlrusayni/savory/pipelines)
 &middot;
@@ -13,7 +13,7 @@
 
 Savory is library for building user interface based on [Seed]
 
-[Documentation](https://malrusayni.gitlab.io/savory/savory_core/)
+[Documentation](https://malrusayni.gitlab.io/savory/savory-core/)
 
 # Features
 
@@ -33,13 +33,6 @@ Savory is library for building user interface based on [Seed]
   `Orders` fun.
 
 Savory tries to make writing UI elements fun and boilerplate free.
-
-Savory crates:
-- `savory`: savory CLI
-- [`savory_core`]: Library for building user interface
-- [`savory_html`]: Typed HTML for Savory
-- [`savory_elements`]: UI Elements based on Savory
-- [`savory_derive`]: Helper derives
 
 # Screenshot
 
@@ -362,13 +355,21 @@ use Savory elements as building block in your own element.
 
 first thing first, add savory crates into your `Cargo.toml` file:
 ``` toml
-savory_core = { git = "https://gitlab.com/MAlrusayni/savory/tree/master/core" }
-savory_elements = { git = "https://gitlab.com/MAlrusayni/savory/tree/master/elements" }
-savory_html = { git = "https://gitlab.com/MAlrusayni/savory/tree/master/html" }
+savory-core = { git = "https://gitlab.com/MAlrusayni/savory/tree/master/core" }
+savory-elements = { git = "https://gitlab.com/MAlrusayni/savory/tree/master/elements" }
+savory-html = { git = "https://gitlab.com/MAlrusayni/savory/tree/master/html" }
 wasm-bindgen = "0.2.55"
 ```
 
 TODO
+
+# Ecosystem
+
+- `savory` - savory CLI
+- [`savory-core`] - Library for building user interface
+- [`savory-html`] - Typed HTML for Savory
+- [`savory-elements`] - UI Elements based on Savory
+- [`savory-derive`] - Helper derives
 
 # License
 
@@ -382,7 +383,7 @@ dual licensed as above, without any additional terms or conditions.
 
 [Seed]: https://seed-rs.org/
 [Elm tutorial]: https://guide.elm-lang.org/
-[`savory_core`]: https://gitlab.com/MAlrusayni/savory/tree/master/core
-[`savory_html`]: https://gitlab.com/MAlrusayni/savory/tree/master/html
-[`savory_elements`]: https://gitlab.com/MAlrusayni/savory/tree/master/elements
-[`savory_derive`]: https://gitlab.com/MAlrusayni/savory/tree/master
+[`savory-core`]: https://gitlab.com/MAlrusayni/savory/tree/master/core
+[`savory-html`]: https://gitlab.com/MAlrusayni/savory/tree/master/html
+[`savory-elements`]: https://gitlab.com/MAlrusayni/savory/tree/master/elements
+[`savory-derive`]: https://gitlab.com/MAlrusayni/savory/tree/master

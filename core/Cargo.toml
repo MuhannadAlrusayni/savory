@@ -1,5 +1,5 @@
 [package]
-name = "savory_core"
+name = "savory-core"
 description = "Library for building user interface"
 version = "0.4.0"
 authors = ["Muhannad Alrusayni <Muhannad.Alrusayni@gmail.com>"]
@@ -10,7 +10,7 @@ categories = ["gui", "wasm", "web-programming"]
 license = "MIT OR Apache-2.0"
 repository = "https://gitlab.com/MAlrusayni/savory/tree/master/core"
 homepage = "https://gitlab.com/MAlrusayni/savory"
-documentation = "https://docs.rs/savory_core"
+documentation = "https://docs.rs/savory-core"
 include = [ "src/**/*", "Cargo.toml", "README.MD" ]
 
 [badges]
@@ -22,5 +22,5 @@ maintenance = { status = "actively-developed" }
 seed = { git = "https://github.com/David-OConnor/seed", version = "0.6.0" }
 
 [dev-dependencies]
-savory_html = { path = "../html" }
+savory-html = { path = "../html" }
 wasm-bindgen = "0.2.55"

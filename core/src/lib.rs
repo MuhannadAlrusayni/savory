@@ -1,8 +1,8 @@
 //! Savory is library for building user interface.
 //!
-//! [![master docs](https://img.shields.io/badge/docs-master-blue.svg)](https://malrusayni.gitlab.io/savory/savory_core/)
+//! [![master docs](https://img.shields.io/badge/docs-master-blue.svg)](https://malrusayni.gitlab.io/savory/savory-core/)
 //! &middot;
-//! [![crate info](https://img.shields.io/crates/v/savory.svg)](https://crates.io/crates/savory_core)
+//! [![crate info](https://img.shields.io/crates/v/savory.svg)](https://crates.io/crates/savory-core)
 //! &middot;
 //! [![pipeline](https://gitlab.com/MAlrusayni/savory/badges/master/pipeline.svg)](https://gitlab.com/MAlrusayni/savory/pipelines)
 //! &middot;
@@ -32,10 +32,10 @@
 //!
 //! Savory crates:
 //! - `savory`: savory CLI
-//! - [`savory_core`]: Library for building user interface (this crate)
-//! - [`savory_html`]: Typed HTML for Savory
-//! - [`savory_elements`]: UI Elements based on Savory
-//! - [`savory_derive`]: Helper derives
+//! - [`savory-core`]: Library for building user interface (this crate)
+//! - [`savory-html`]: Typed HTML for Savory
+//! - [`savory-elements`]: UI Elements based on Savory
+//! - [`savory-derive`]: Helper derives
 //!
 //! # Core Concept
 //!
@@ -118,10 +118,10 @@
 //!
 //! [`View`]: crate::prelude::View
 //! [`Element`]: crate::prelude::Element
-//! [`savory_core`]: https://gitlab.com/MAlrusayni/savory/tree/master/core
-//! [`savory_html`]: https://gitlab.com/MAlrusayni/savory/tree/master/html
-//! [`savory_elements`]: https://gitlab.com/MAlrusayni/savory/tree/master/elements
-//! [`savory_derive`]: https://gitlab.com/MAlrusayni/savory/tree/master
+//! [`savory-core`]: https://gitlab.com/MAlrusayni/savory/tree/master/core
+//! [`savory-html`]: https://gitlab.com/MAlrusayni/savory/tree/master/html
+//! [`savory-elements`]: https://gitlab.com/MAlrusayni/savory/tree/master/elements
+//! [`savory-derive`]: https://gitlab.com/MAlrusayni/savory/tree/master
 
 #![forbid(unsafe_code)]
 
