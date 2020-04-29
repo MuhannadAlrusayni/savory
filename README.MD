@@ -66,9 +66,12 @@ pub enum Msg {
     Decrement,
 }
 
+impl HasConfig for Counter {
+    type Config = Url;
+}
+
 impl Element<Msg> for Counter {
     type Message = Msg;
-    type Config = Url;
 
     // initialize the app in this function
     fn init(_: Url, _: &mut impl Orders<Msg>) -> Self {
@@ -147,7 +150,6 @@ pub enum Msg {
 
 impl<PMsg: 'static> Element<PMsg> for Counter<PMsg> {
     type Message = Msg;
-    type Config = Config<PMsg>;
 
     fn init(config: Self::Config, _: &mut impl Orders<PMsg>) -> Self {
         let local_events = Events::default()
@@ -231,9 +233,12 @@ pub struct MyApp {
     counter_element: Counter<AppMsg>,
 }
 
+impl HasConfig for MyApp {
+    type Config = Url;
+}
+
 impl Element<AppMsg> for MyApp {
     type Message = AppMsg;
-    type Config = Url;
 
     fn init(_: Url, orders: &mut impl Orders<AppMsg>) -> Self {
         Self {
@@ -297,9 +302,12 @@ pub enum Msg {
     SpinEntry(spin_entry::Msg),
 }
 
+impl HasConfig for MyApp {
+    type Config = Url;
+}
+
 impl Element<Msg> for MyApp {
     type Message = Msg;
-    type Config = Url;
 
     fn init(_: Url, orders: &mut impl Orders<Msg>) -> Self {
         let spin_entry = SpinEntry::config(Msg::SpinEntry)
