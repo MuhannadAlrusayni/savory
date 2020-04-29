@@ -46,8 +46,8 @@ pub trait Element<PMsg: 'static>: HasConfig {
     fn update(&mut self, _: Self::Message, _: &mut impl Orders<PMsg>);
 }
 
-/// Trait used to assign `Config` type for an Element, this deriven using
-/// the `Element` derive macro.
+/// Trait used to assign `Config` type for an Element, this is deriven using the
+/// `Element` derive macro.
 pub trait HasConfig {
     /// Properties used to initialize this element
     type Config;
