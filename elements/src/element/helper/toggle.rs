@@ -3,14 +3,14 @@ use savory_core::prelude::*;
 
 #[derive(Rich, Element)]
 pub struct Toggle<PMsg> {
-    #[element(props(required))]
+    #[element(config(required))]
     msg_mapper: MsgMapper<Msg, PMsg>,
-    #[element(props(default = "State::Closed"))]
+    #[element(config(default = "State::Closed"))]
     #[rich(read(copy))]
     state: State,
-    #[element(props(default = "Action::AfterNextRender"))]
+    #[element(config(default = "Action::AfterNextRender"))]
     close_after: Action,
-    #[element(props(default = "Action::AfterNextRender"))]
+    #[element(config(default = "Action::AfterNextRender"))]
     open_after: Action,
 }
 
@@ -40,12 +40,12 @@ pub enum Msg {
 impl<PMsg: 'static> Element<PMsg> for Toggle<PMsg> {
     type Message = Msg;
 
-    fn init(props: Self::Props, _: &mut impl Orders<PMsg>) -> Self {
+    fn init(config: Self::Config, _: &mut impl Orders<PMsg>) -> Self {
         Self {
-            msg_mapper: props.msg_mapper,
-            state: props.state,
-            close_after: props.close_after,
-            open_after: props.open_after,
+            msg_mapper: config.msg_mapper,
+            state: config.state,
+            close_after: config.close_after,
+            open_after: config.open_after,
         }
     }
 
@@ -95,7 +95,7 @@ pub enum State {
     Closing,
 }
 
-impl<PMsg: 'static> Props<PMsg> {
+impl<PMsg: 'static> Config<PMsg> {
     pub fn init(self, orders: &mut impl Orders<PMsg>) -> Toggle<PMsg> {
         Toggle::init(self, orders)
     }

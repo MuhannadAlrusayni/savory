@@ -8,29 +8,29 @@ use std::{any::Any, rc::Rc};
 #[derive(Clone, Rich, Element)]
 #[element(style(panel, popover), events(panel, popover))]
 pub struct Popover<PMsg, C, T> {
-    #[element(props(required))]
+    #[element(config(required))]
     msg_mapper: MsgMapper<Msg, PMsg>,
     #[rich(read)]
-    #[element(props(default))]
+    #[element(config(default))]
     events: EventsStore<Events<PMsg>>,
     #[rich(read)]
-    #[element(props)]
+    #[element(config)]
     styler: Option<Styler<PMsg, C, T>>,
     #[rich(read)]
-    #[element(theme_lens, props(default))]
+    #[element(theme_lens, config(default))]
     theme: Theme,
 
-    #[element(props(required))]
+    #[element(config(required))]
     pub child: C,
-    #[element(props(required))]
+    #[element(config(required))]
     pub target: T,
     #[element(
         theme_lens,
-        props(nested, default = "Toggle::build(Msg::Toggle).close_after(400)")
+        config(nested, default = "Toggle::config(Msg::Toggle).close_after(400)")
     )]
     toggle: Toggle<Msg>,
     #[rich(read(copy))]
-    #[element(theme_lens, props(default = "0"))]
+    #[element(theme_lens, config(default = "0"))]
     offset: i8,
 }
 
@@ -56,19 +56,19 @@ where
 {
     type Message = Msg;
 
-    fn init(props: Self::Props, orders: &mut impl Orders<PMsg>) -> Self {
-        let mut orders = orders.proxy_with(&props.msg_mapper);
+    fn init(config: Self::Config, orders: &mut impl Orders<PMsg>) -> Self {
+        let mut orders = orders.proxy_with(&config.msg_mapper);
         orders.subscribe(|theme: ThemeChanged| Msg::theme(theme.0));
 
         Self {
-            msg_mapper: props.msg_mapper,
-            events: props.events,
-            styler: props.styler,
-            theme: props.theme,
-            child: props.child,
-            target: props.target,
-            toggle: props.toggle.init(&mut orders),
-            offset: props.offset,
+            msg_mapper: config.msg_mapper,
+            events: config.events,
+            styler: config.styler,
+            theme: config.theme,
+            child: config.child,
+            target: config.target,
+            toggle: config.toggle.init(&mut orders),
+            offset: config.offset,
         }
     }
 
@@ -153,7 +153,7 @@ impl<PMsg, C, T> Popover<PMsg, C, T> {
     }
 }
 
-impl<PMsg: 'static, C, T> Props<PMsg, C, T>
+impl<PMsg: 'static, C, T> Config<PMsg, C, T>
 where
     C: View<Output = Node<PMsg>> + 'static,
     T: View<Output = Node<PMsg>> + 'static,

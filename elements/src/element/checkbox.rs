@@ -10,29 +10,29 @@ pub struct Checkbox<PMsg> {
     // general element properties
     input_el_ref: ElRef<web_sys::HtmlInputElement>,
     label_el_ref: ElRef<web_sys::HtmlLabelElement>,
-    #[element(props(required))]
+    #[element(config(required))]
     msg_mapper: MsgMapper<Msg, PMsg>,
     #[rich(read)]
     local_events: EventsStore<Events<Msg>>,
     #[rich(read)]
-    #[element(props(default))]
+    #[element(config(default))]
     events: EventsStore<Events<PMsg>>,
     #[rich(read)]
-    #[element(props)]
+    #[element(config)]
     styler: Option<Styler<PMsg>>,
     #[rich(read)]
-    #[element(theme_lens, props(default))]
+    #[element(theme_lens, config(default))]
     theme: Theme,
 
     // checkbox element properties
     #[rich(read(copy, rename = is_toggled))]
-    #[element(theme_lens, props(default))]
+    #[element(theme_lens, config(default))]
     toggled: bool,
     #[rich(read)]
-    #[element(theme_lens, props)]
+    #[element(theme_lens, config)]
     label: Option<Cow<'static, str>>,
     #[rich(read(copy, rename = is_disabled))]
-    #[element(theme_lens, props(default))]
+    #[element(theme_lens, config(default))]
     disabled: bool,
     #[rich(read(copy, rename = is_focused))]
     #[element(theme_lens)]
@@ -63,8 +63,8 @@ pub enum Msg {
 impl<PMsg: 'static> Element<PMsg> for Checkbox<PMsg> {
     type Message = Msg;
 
-    fn init(props: Self::Props, orders: &mut impl Orders<PMsg>) -> Self {
-        let mut orders = orders.proxy_with(&props.msg_mapper);
+    fn init(config: Self::Config, orders: &mut impl Orders<PMsg>) -> Self {
+        let mut orders = orders.proxy_with(&config.msg_mapper);
         orders.subscribe(|theme: ThemeChanged| Msg::theme(theme.0));
 
         let local_events = || {
@@ -85,14 +85,14 @@ impl<PMsg: 'static> Element<PMsg> for Checkbox<PMsg> {
         Self {
             input_el_ref: ElRef::default(),
             label_el_ref: ElRef::default(),
-            theme: props.theme,
-            msg_mapper: props.msg_mapper,
+            theme: config.theme,
+            msg_mapper: config.msg_mapper,
             local_events: local_events.into(),
-            events: props.events,
-            label: props.label,
-            styler: props.styler,
-            disabled: props.disabled,
-            toggled: props.toggled,
+            events: config.events,
+            label: config.label,
+            styler: config.styler,
+            disabled: config.disabled,
+            toggled: config.toggled,
             focused: false,
             mouse_over: false,
         }
@@ -191,7 +191,7 @@ impl<PMsg: 'static> StyledView for Checkbox<PMsg> {
     }
 }
 
-impl<PMsg: 'static> Props<PMsg> {
+impl<PMsg: 'static> Config<PMsg> {
     pub fn init(self, orders: &mut impl Orders<PMsg>) -> Checkbox<PMsg> {
         Checkbox::init(self, orders)
     }

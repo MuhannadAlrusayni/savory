@@ -68,8 +68,8 @@
 //!     Decrement,
 //! }
 //!
-//! impl HasProps for Counter {
-//!     type Props = Url;
+//! impl HasConfig for Counter {
+//!     type Config = Url;
 //! }
 //!
 //! impl Element<Msg> for Counter {
@@ -133,7 +133,7 @@ pub mod view;
 /// savory prelude.
 pub mod prelude {
     pub use crate::{
-        element::{AppElementExt, Element, HasProps},
+        element::{AppElementExt, Element, HasConfig},
         msg_mapper::{MessageMapperExt, MsgMapper},
         orders_ext::OrdersExt,
         view::{StyledView, View},

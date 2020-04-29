@@ -8,35 +8,35 @@ use std::{any::Any, rc::Rc};
 #[element(style(dialog, dialog_background), events(dialog, dialog_background))]
 pub struct Dialog<PMsg, C> {
     // general element properties
-    #[element(props(required))]
+    #[element(config(required))]
     msg_mapper: MsgMapper<Msg, PMsg>,
     #[rich(read)]
     local_events: EventsStore<Events<Msg>>,
     #[rich(read)]
-    #[element(props(default))]
+    #[element(config(default))]
     events: EventsStore<Events<PMsg>>,
     #[rich(read)]
-    #[element(props)]
+    #[element(config)]
     styler: Option<Styler<PMsg, C>>,
     #[rich(read)]
-    #[element(theme_lens, props(default))]
+    #[element(theme_lens, config(default))]
     theme: Theme,
 
     // dialog element properties
     #[rich(read)]
-    #[element(theme_lens(nested), props(default))]
+    #[element(theme_lens(nested), config(default))]
     header_bar: HeaderBar<Msg>,
-    #[element(props(required))]
+    #[element(config(required))]
     pub child: C,
     #[rich(read(copy, rename = is_disabled))]
-    #[element(theme_lens, props(default))]
+    #[element(theme_lens, config(default))]
     disabled: bool,
     #[rich(read(copy, rename = is_mouse_on_widget))]
     #[element(theme_lens)]
     mouse_on_dialog: bool,
     #[element(
         theme_lens,
-        props(nested, default = "Toggle::build(Msg::Toggle).close_after(400)")
+        config(nested, default = "Toggle::config(Msg::Toggle).close_after(400)")
     )]
     toggle: Toggle<Msg>,
 }
@@ -66,8 +66,8 @@ where
 {
     type Message = Msg;
 
-    fn init(props: Self::Props, porders: &mut impl Orders<PMsg>) -> Self {
-        let mut orders = porders.proxy_with(&props.msg_mapper);
+    fn init(config: Self::Config, porders: &mut impl Orders<PMsg>) -> Self {
+        let mut orders = porders.proxy_with(&config.msg_mapper);
         orders.subscribe(|theme: ThemeChanged| Msg::theme(theme.0));
 
         let local_events = || {
@@ -79,8 +79,8 @@ where
                 })
         };
 
-        let header_bar = props.header_bar.close_button(
-            Button::build(Msg::close_button)
+        let header_bar = config.header_bar.close_button(
+            Button::config(Msg::close_button)
                 // FIXME: use icon insted of label
                 .label("X")
                 .events(|| button::events().and_button(|conf| conf.click(|_| Msg::close())))
@@ -88,16 +88,16 @@ where
         );
 
         Self {
-            msg_mapper: props.msg_mapper,
+            msg_mapper: config.msg_mapper,
             local_events: local_events.into(),
-            events: props.events,
-            styler: props.styler,
-            theme: props.theme,
+            events: config.events,
+            styler: config.styler,
+            theme: config.theme,
             header_bar,
-            child: props.child,
-            disabled: props.disabled,
+            child: config.child,
+            disabled: config.disabled,
             mouse_on_dialog: false,
-            toggle: props.toggle.init(&mut orders),
+            toggle: config.toggle.init(&mut orders),
         }
     }
 
@@ -192,7 +192,7 @@ where
     }
 }
 
-impl<PMsg, C> Props<PMsg, C>
+impl<PMsg, C> Config<PMsg, C>
 where
     PMsg: 'static,
     C: View<Output = Node<PMsg>> + 'static,

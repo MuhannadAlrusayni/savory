@@ -28,17 +28,17 @@ pub struct MyApp {
     popover: Popover<Msg, Modifier<ProgressBar<Msg>>, Button<Msg>>,
 }
 
-impl HasProps for MyApp {
-    type Props = Url;
+impl HasConfig for MyApp {
+    type Config = Url;
 }
 
 impl Element<Msg> for MyApp {
     type Message = Msg;
 
     fn init(_: Url, orders: &mut impl Orders<Msg>) -> Self {
-        let dlg = Dialog::build(
+        let dlg = Dialog::config(
             Msg::Dialog,
-            Button::build(Msg::DialogChild)
+            Button::config(Msg::DialogChild)
                 .label("hmm")
                 .init(orders)
                 .and_margin(|conf| conf.y(px(15))),
@@ -48,7 +48,7 @@ impl Element<Msg> for MyApp {
         .and_toggle(|conf| conf.opened())
         .init(orders);
 
-        let button = Button::build(Msg::Button)
+        let button = Button::config(Msg::Button)
             .label("Click Here")
             .events(|| {
                 button::events().and_button(|conf| {
@@ -58,7 +58,7 @@ impl Element<Msg> for MyApp {
             })
             .init(orders);
 
-        let progress = ProgressBar::build(Msg::ProgressBar)
+        let progress = ProgressBar::config(Msg::ProgressBar)
             .failure()
             .min(10.)
             .max(25.)
@@ -67,7 +67,7 @@ impl Element<Msg> for MyApp {
             .and_size(|conf| conf.min_width(px(40)))
             .and_margin(|conf| conf.all(px(4)));
 
-        let pop_btn = Button::build(Msg::PopoverButton)
+        let pop_btn = Button::config(Msg::PopoverButton)
             .label("Popover button")
             .events(|| {
                 button::events()
@@ -77,17 +77,17 @@ impl Element<Msg> for MyApp {
 
         Self {
             button,
-            checkbox: Checkbox::build(Msg::Checkbox)
+            checkbox: Checkbox::config(Msg::Checkbox)
                 .label("Checkbox element")
                 .init(orders),
-            radio: Radio::build(Msg::Radio).label("Radio element").init(orders),
-            switch: Switch::build(Msg::Switch).init(orders),
-            entry: Entry::build(Msg::Entry)
+            radio: Radio::config(Msg::Radio).label("Radio element").init(orders),
+            switch: Switch::config(Msg::Switch).init(orders),
+            entry: Entry::config(Msg::Entry)
                 .placeholder("Ali Yousef")
                 .init(orders),
-            spin_entry: SpinEntry::build(Msg::SpinEntry).init(orders),
+            spin_entry: SpinEntry::config(Msg::SpinEntry).init(orders),
             dialog: dlg,
-            popover: Popover::build(Msg::Popover, progress, pop_btn).init(orders),
+            popover: Popover::config(Msg::Popover, progress, pop_btn).init(orders),
         }
     }
 

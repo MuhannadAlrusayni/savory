@@ -8,26 +8,26 @@ use std::{any::Any, rc::Rc};
 #[element(style(button, switch), events(button, switch))]
 pub struct Switch<PMsg> {
     // general element properties
-    #[element(props(required))]
+    #[element(config(required))]
     msg_mapper: MsgMapper<Msg, PMsg>,
     #[rich(read)]
     local_events: EventsStore<Events<Msg>>,
     #[rich(read)]
-    #[element(props(default))]
+    #[element(config(default))]
     events: EventsStore<Events<PMsg>>,
     #[rich(read)]
-    #[element(props)]
+    #[element(config)]
     styler: Option<Styler<PMsg>>,
     #[rich(read)]
-    #[element(theme_lens, props(default))]
+    #[element(theme_lens, config(default))]
     theme: Theme,
 
     // switch element properties
     #[rich(read(copy, rename = is_toggled))]
-    #[element(theme_lens, props(default = "false"))]
+    #[element(theme_lens, config(default = "false"))]
     toggled: bool,
     #[rich(read(copy, rename = is_disabled))]
-    #[element(theme_lens, props(default = "false"))]
+    #[element(theme_lens, config(default = "false"))]
     disabled: bool,
     #[rich(read(copy, rename = is_focused))]
     #[element(theme_lens)]
@@ -57,8 +57,8 @@ pub enum Msg {
 impl<PMsg: 'static> Element<PMsg> for Switch<PMsg> {
     type Message = Msg;
 
-    fn init(props: Self::Props, orders: &mut impl Orders<PMsg>) -> Self {
-        let mut orders = orders.proxy_with(&props.msg_mapper);
+    fn init(config: Self::Config, orders: &mut impl Orders<PMsg>) -> Self {
+        let mut orders = orders.proxy_with(&config.msg_mapper);
         orders.subscribe(|theme: ThemeChanged| Msg::theme(theme.0));
 
         let local_events = || {
@@ -72,13 +72,13 @@ impl<PMsg: 'static> Element<PMsg> for Switch<PMsg> {
         };
 
         Self {
-            theme: props.theme,
-            msg_mapper: props.msg_mapper,
+            theme: config.theme,
+            msg_mapper: config.msg_mapper,
             local_events: local_events.into(),
-            events: props.events,
-            styler: props.styler,
-            disabled: props.disabled,
-            toggled: props.toggled,
+            events: config.events,
+            styler: config.styler,
+            disabled: config.disabled,
+            toggled: config.toggled,
             focused: false,
             mouse_over: false,
         }
@@ -154,7 +154,7 @@ impl<PMsg: 'static> StyledView for Switch<PMsg> {
     }
 }
 
-impl<PMsg: 'static> Props<PMsg> {
+impl<PMsg: 'static> Config<PMsg> {
     pub fn init(self, orders: &mut impl Orders<PMsg>) -> Switch<PMsg> {
         Switch::init(self, orders)
     }

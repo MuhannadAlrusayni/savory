@@ -30,7 +30,7 @@ struct Field {
     #[darling(default)]
     theme_lens: Option<Override<Lens>>,
     #[darling(default)]
-    props: Option<Override<Props>>,
+    config: Option<Override<Config>>,
 }
 
 #[derive(Debug, Default, Clone)]
@@ -48,7 +48,7 @@ struct Lens {
 }
 
 #[derive(FromMeta, Debug, Default, Clone)]
-struct Props {
+struct Config {
     #[darling(default)]
     default: Option<Override<String>>,
     #[darling(default)]
@@ -63,13 +63,13 @@ uses_lifetimes!(Field, ty);
 impl ToTokens for Element {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let lens_impl = self.get_lens_impl();
-        let props_impl = self.get_props_impl();
+        let config_impl = self.get_config_impl();
         let style_impl = self.get_style_impl();
         let events_impl = self.get_events_impl();
 
         tokens.extend(quote! {
             #lens_impl
-            #props_impl
+            #config_impl
             #style_impl
             #events_impl
         })
@@ -229,7 +229,7 @@ impl Element {
             }
         }
     }
-    fn get_props_impl(&self) -> TokenStream {
+    fn get_config_impl(&self) -> TokenStream {
         let lifetimes = self.generics.declared_lifetimes();
         let params = self.generics.declared_type_params();
 
@@ -240,12 +240,12 @@ impl Element {
             .expect("`Element` doesn't work with enum yet")
             .fields;
 
-        let props_fields = fields
+        let config_fields = fields
             .iter()
-            .filter(|item| item.props.is_some())
+            .filter(|item| item.config.is_some())
             .collect::<Vec<&&Field>>();
 
-        if props_fields.is_empty() {
+        if config_fields.is_empty() {
             return quote! {};
         }
 
@@ -253,23 +253,23 @@ impl Element {
         let mut new_fill = vec![];
         let mut pass_new_args = vec![];
         let mut struct_fields = vec![];
-        for field in props_fields.iter() {
-            if let Some(props) = field.props.clone().map(|val| val.unwrap_or_default()) {
+        for field in config_fields.iter() {
+            if let Some(config) = field.config.clone().map(|val| val.unwrap_or_default()) {
                 let ty = &field.ty;
                 let field = &field.ident;
 
-                let nested_props_or_type = |ty| {
-                    if props.nested.is_some() {
-                        quote! { <#ty as HasProps>::Props }
+                let nested_config_or_type = |ty| {
+                    if config.nested.is_some() {
+                        quote! { <#ty as HasConfig>::Config }
                     } else {
                         quote! { #ty }
                     }
                 };
 
                 let ty = ty.get_option_ty().unwrap_or(ty);
-                let ty = nested_props_or_type(ty);
-                if props.required.is_some() {
-                    if props.default.is_some() {
+                let ty = nested_config_or_type(ty);
+                if config.required.is_some() {
+                    if config.default.is_some() {
                         panic!("`default` attribute cannot be used with `required` attribute")
                     }
 
@@ -281,7 +281,7 @@ impl Element {
                     new_args.push(quote! { #field: impl Into<#ty>, });
                     new_fill.push(quote! { #field: #field.into(), });
                 } else {
-                    if let Some(ref expr) = props.default {
+                    if let Some(ref expr) = config.default {
                         let def_expr = match expr.as_ref() {
                             Override::Inherit => quote! { ::std::default::Default::default() },
                             Override::Explicit(expr_str) => {
@@ -314,7 +314,7 @@ impl Element {
             .map(|param| (param, false))
             .collect::<Vec<_>>();
 
-        for lifetime in props_fields
+        for lifetime in config_fields
             .clone()
             .into_iter()
             .cloned()
@@ -328,7 +328,7 @@ impl Element {
                 }
             }
         }
-        for param in props_fields
+        for param in config_fields
             .clone()
             .into_iter()
             .cloned()
@@ -358,22 +358,22 @@ impl Element {
         let element_name = &self.ident;
 
         quote! {
-            impl #ty_impl HasProps for #element_name #ty_gen #where_clause {
-                type Props = Props #gen_params;
+            impl #ty_impl HasConfig for #element_name #ty_gen #where_clause {
+                type Config = Config #gen_params;
             }
 
             impl #ty_impl #element_name #ty_gen #where_clause {
-                pub fn build(#( #new_args )*) -> Props #gen_params {
-                    Props::new(#( #pass_new_args )*)
+                pub fn config(#( #new_args )*) -> Config #gen_params {
+                    Config::new(#( #pass_new_args )*)
                 }
             }
 
             #[derive(Rich)]
-            pub struct Props #gen_params {
+            pub struct Config #gen_params {
                 #( #struct_fields )*
             }
 
-            impl #gen_params Props #gen_params {
+            impl #gen_params Config #gen_params {
                 pub fn new(#( #new_args )*) -> Self {
                     Self {
                         #( #new_fill )*

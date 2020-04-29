@@ -8,7 +8,7 @@
 //!
 //! ## App Element
 //!
-//! App element are normal elements but two main difference, the `Props` type is
+//! App element are normal elements but two main difference, the `Config` type is
 //! `Url` type, and the `PMsg` generic type have to be the same type as
 //! `Message` type, and this actully make sense becuase `PMsg` ment to hold the
 //! parent element message type and app elements doesn't have parent.
@@ -31,33 +31,33 @@ use seed::prelude::IntoNodes;
 ///
 /// [Seed]: https://seed-rs.org
 /// [`Orders`]: crate::prelude::Orders
-pub trait Element<PMsg: 'static>: HasProps {
+pub trait Element<PMsg: 'static>: HasConfig {
     /// Element message
     type Message;
 
     /// Create and initialize the element
     ///
     /// # Arguments
-    /// - `props` properties used to create the element.
+    /// - `config` properties used to create the element.
     /// - `orders` used to interacte with the runtime.
-    fn init(props: Self::Props, orders: &mut impl Orders<PMsg>) -> Self;
+    fn init(config: Self::Config, orders: &mut impl Orders<PMsg>) -> Self;
 
     /// update method that recive `Self::Message` and update the model state accordingly.
     fn update(&mut self, _: Self::Message, _: &mut impl Orders<PMsg>);
 }
 
-/// Trait used to assign uniqe `Props` type for each Element, this deriven using
+/// Trait used to assign `Config` type for an Element, this deriven using
 /// the `Element` derive macro.
-pub trait HasProps {
+pub trait HasConfig {
     /// Properties used to initialize this element
-    type Props;
+    type Config;
 }
 
 /// Extension trait for `Element` when it's used on App element
 ///
 /// This trait provides functions that mounts the app element on HTML node by
 /// integrating app element with `seed::app::App`
-pub trait AppElementExt<Msg>: Element<Msg, Props = Url, Message = Msg>
+pub trait AppElementExt<Msg>: Element<Msg, Config = Url, Message = Msg>
 where
     Msg: 'static,
     Self: Sized + View,
@@ -76,8 +76,8 @@ where
     ///     FooMessage,
     /// }
     ///
-    /// impl HasProps for MyApp {
-    ///     type Props = Url;
+    /// impl HasConfig for MyApp {
+    ///     type Config = Url;
     /// }
     ///
     /// impl Element<Msg> for MyApp {
@@ -126,7 +126,7 @@ where
 impl<Msg, T> AppElementExt<Msg> for T
 where
     Msg: 'static,
-    Self: Element<Msg, Props = Url, Message = Msg> + View,
+    Self: Element<Msg, Config = Url, Message = Msg> + View,
     Self::Output: IntoNodes<Self::Message> + 'static,
 {
 }

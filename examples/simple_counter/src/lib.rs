@@ -11,8 +11,8 @@ pub enum Msg {
     Decrement,
 }
 
-impl HasProps for Counter {
-    type Props = Url;
+impl HasConfig for Counter {
+    type Config = Url;
 }
 
 impl Element<Msg> for Counter {

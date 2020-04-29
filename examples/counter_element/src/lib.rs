@@ -9,10 +9,10 @@ use wasm_bindgen::prelude::*;
 #[derive(Element)]
 #[element(style(inc_btn, dec_btn), events(inc_btn, dec_btn))]
 pub struct Counter<PMsg> {
-    #[element(props(required))]
+    #[element(config(required))]
     msg_mapper: MsgMapper<Msg, PMsg>,
     local_events: Events<Msg>,
-    #[element(props(default = "10"))]
+    #[element(config(default = "10"))]
     value: i32,
 }
 
@@ -24,7 +24,7 @@ pub enum Msg {
 impl<PMsg: 'static> Element<PMsg> for Counter<PMsg> {
     type Message = Msg;
 
-    fn init(props: Self::Props, _: &mut impl Orders<PMsg>) -> Self {
+    fn init(config: Self::Config, _: &mut impl Orders<PMsg>) -> Self {
         let local_events = Events::default()
             // increment button events
             .and_inc_btn(|conf| conf.click(|_| Msg::Increment))
@@ -32,9 +32,9 @@ impl<PMsg: 'static> Element<PMsg> for Counter<PMsg> {
             .and_dec_btn(|conf| conf.click(|_| Msg::Decrement));
 
         Self {
-            msg_mapper: props.msg_mapper,
+            msg_mapper: config.msg_mapper,
             local_events,
-            value: props.value,
+            value: config.value,
         }
     }
 
@@ -89,8 +89,8 @@ impl<PMsg: 'static> View for Counter<PMsg> {
     }
 }
 
-// convenient way to convert Props into Counter
-impl<PMsg: 'static> Props<PMsg> {
+// convenient way to convert Config into Counter
+impl<PMsg: 'static> Config<PMsg> {
     pub fn init(self, orders: &mut impl Orders<PMsg>) -> Counter<PMsg> {
         Counter::init(self, orders)
     }
@@ -106,8 +106,8 @@ pub struct MyApp {
     counter_element: Counter<AppMsg>,
 }
 
-impl HasProps for MyApp {
-    type Props = Url;
+impl HasConfig for MyApp {
+    type Config = Url;
 }
 
 impl Element<AppMsg> for MyApp {
@@ -115,7 +115,7 @@ impl Element<AppMsg> for MyApp {
 
     fn init(_: Url, orders: &mut impl Orders<AppMsg>) -> Self {
         Self {
-            counter_element: Counter::build(AppMsg::Counter)
+            counter_element: Counter::config(AppMsg::Counter)
                 // give it starting value. 10 will be used as default value if
                 // we didn't pass value
                 .value(100)

@@ -17,39 +17,39 @@ use std::{any::Any, rc::Rc};
 )]
 pub struct SpinEntry<PMsg> {
     el_ref: ElRef<web_sys::HtmlInputElement>,
-    #[element(props(required))]
+    #[element(config(required))]
     msg_mapper: MsgMapper<Msg, PMsg>,
     #[rich(read)]
     local_events: EventsStore<Events<Msg>>,
     #[rich(read)]
-    #[element(props(default))]
+    #[element(config(default))]
     events: EventsStore<Events<PMsg>>,
     #[rich(read)]
-    #[element(props)]
+    #[element(config)]
     styler: Option<Styler<PMsg>>,
     #[rich(read)]
-    #[element(theme_lens, props(default))]
+    #[element(theme_lens, config(default))]
     theme: Theme,
 
     #[rich(read(copy))]
-    #[element(props)]
+    #[element(config)]
     value: Option<f64>,
     // this value is an internal API, and shouldn't get exposed
     vis_value: String,
     #[rich(read(copy))]
-    #[element(props)]
+    #[element(config)]
     max: Option<f64>,
     #[rich(read(copy))]
-    #[element(props)]
+    #[element(config)]
     min: Option<f64>,
     #[rich(read(copy))]
-    #[element(props(default = "1.0"))]
+    #[element(config(default = "1.0"))]
     step: f64,
     #[rich(read(copy))]
-    #[element(props)]
+    #[element(config)]
     placeholder: Option<f64>,
     #[rich(read(copy, rename = is_disabled))]
-    #[element(theme_lens, props(default))]
+    #[element(theme_lens, config(default))]
     disabled: bool,
     #[rich(read(copy, rename = is_focused))]
     #[element(theme_lens)]
@@ -60,10 +60,10 @@ pub struct SpinEntry<PMsg> {
 
     // children elements
     #[rich(read)]
-    #[element(theme_lens(nested), props(nested, default = "inc_btn_props()"))]
+    #[element(theme_lens(nested), config(nested, default = "inc_btn_config()"))]
     increment_button: Button<Msg>,
     #[rich(read)]
-    #[element(theme_lens(nested), props(nested, default = "dec_btn_props()"))]
+    #[element(theme_lens(nested), config(nested, default = "dec_btn_config()"))]
     decrement_button: Button<Msg>,
 }
 
@@ -95,8 +95,8 @@ pub enum Msg {
 impl<PMsg: 'static> Element<PMsg> for SpinEntry<PMsg> {
     type Message = Msg;
 
-    fn init(props: Self::Props, orders: &mut impl Orders<PMsg>) -> Self {
-        let mut orders = orders.proxy_with(&props.msg_mapper);
+    fn init(config: Self::Config, orders: &mut impl Orders<PMsg>) -> Self {
+        let mut orders = orders.proxy_with(&config.msg_mapper);
         orders.subscribe(|theme: ThemeChanged| Msg::Theme(theme.0));
 
         let local_events = || {
@@ -114,32 +114,32 @@ impl<PMsg: 'static> Element<PMsg> for SpinEntry<PMsg> {
 
         let mut spin_entry = Self {
             el_ref: ElRef::default(),
-            msg_mapper: props.msg_mapper,
+            msg_mapper: config.msg_mapper,
             local_events: local_events.into(),
-            events: props.events,
-            styler: props.styler,
-            theme: props.theme,
-            value: props.value,
-            vis_value: props
+            events: config.events,
+            styler: config.styler,
+            theme: config.theme,
+            value: config.value,
+            vis_value: config
                 .value
                 .map(|v| v.to_string())
                 .unwrap_or_else(Default::default),
-            max: props.max,
-            min: props.min,
-            step: props.step,
-            placeholder: props.placeholder,
-            disabled: props.disabled,
+            max: config.max,
+            min: config.min,
+            step: config.step,
+            placeholder: config.placeholder,
+            disabled: config.disabled,
             focused: false,
             mouse_over: false,
-            increment_button: props.increment_button.init(&mut orders),
-            decrement_button: props.decrement_button.init(&mut orders),
+            increment_button: config.increment_button.init(&mut orders),
+            decrement_button: config.decrement_button.init(&mut orders),
         };
 
         // Fix invalid values
-        spin_entry.try_set_max(props.max, &mut orders);
-        spin_entry.try_set_min(props.min, &mut orders);
-        spin_entry.try_set_value(props.value, &mut orders);
-        spin_entry.try_set_placeholder(props.placeholder, &mut orders);
+        spin_entry.try_set_max(config.max, &mut orders);
+        spin_entry.try_set_min(config.min, &mut orders);
+        spin_entry.try_set_value(config.value, &mut orders);
+        spin_entry.try_set_placeholder(config.placeholder, &mut orders);
         spin_entry
     }
 
@@ -247,7 +247,7 @@ impl<PMsg: 'static> StyledView for SpinEntry<PMsg> {
     }
 }
 
-impl<PMsg: 'static> Props<PMsg> {
+impl<PMsg: 'static> Config<PMsg> {
     pub fn init(self, orders: &mut impl Orders<PMsg>) -> SpinEntry<PMsg> {
         SpinEntry::init(self, orders)
     }
@@ -367,14 +367,14 @@ impl<PMsg: 'static> SpinEntry<PMsg> {
     }
 }
 
-fn inc_btn_props() -> button::Props<Msg> {
-    Button::build(Msg::increment_button)
+fn inc_btn_config() -> button::Config<Msg> {
+    Button::config(Msg::increment_button)
         .label("+")
         .events(|| button::events().and_button(|conf| conf.click(|_| Msg::increment())))
 }
 
-fn dec_btn_props() -> button::Props<Msg> {
-    Button::build(Msg::decrement_button)
+fn dec_btn_config() -> button::Config<Msg> {
+    Button::config(Msg::decrement_button)
         .label("-")
         .events(|| button::events().and_button(|conf| conf.click(|_| Msg::decrement())))
 }

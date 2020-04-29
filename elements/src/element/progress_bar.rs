@@ -8,36 +8,36 @@ use std::{any::Any, rc::Rc};
 #[element(style(indicator, progress_bar), events(indicator, progress_bar))]
 pub struct ProgressBar<PMsg> {
     // general element properties
-    #[element(props(required))]
+    #[element(config(required))]
     msg_mapper: MsgMapper<Msg, PMsg>,
     #[rich(read)]
-    #[element(props(default))]
+    #[element(config(default))]
     events: EventsStore<Events<PMsg>>,
     #[rich(read)]
-    #[element(props)]
+    #[element(config)]
     styler: Option<Styler<PMsg>>,
     #[rich(read)]
-    #[element(theme_lens, props(default))]
+    #[element(theme_lens, config(default))]
     theme: Theme,
 
     // ProgressBar element properties
     #[rich(read(copy))]
-    #[element(theme_lens, props(default = "Shape::HLine"))]
+    #[element(theme_lens, config(default = "Shape::HLine"))]
     shape: Shape,
     #[rich(read(copy))]
-    #[element(theme_lens, props(default = "State::Normal"))]
+    #[element(theme_lens, config(default = "State::Normal"))]
     state: State,
     #[rich(read(copy))]
-    #[element(theme_lens, props(default = "0.0"))]
+    #[element(theme_lens, config(default = "0.0"))]
     value: f64,
     #[rich(read(copy))]
-    #[element(theme_lens, props(default = "100.0"))]
+    #[element(theme_lens, config(default = "100.0"))]
     max: f64,
     #[rich(read(copy))]
-    #[element(theme_lens, props(default = "0.0"))]
+    #[element(theme_lens, config(default = "0.0"))]
     min: f64,
     #[rich(read(copy))]
-    #[element(theme_lens, props)]
+    #[element(theme_lens, config)]
     color: Option<css::Color>,
 }
 
@@ -64,21 +64,21 @@ pub enum Msg {
 impl<PMsg: 'static> Element<PMsg> for ProgressBar<PMsg> {
     type Message = Msg;
 
-    fn init(props: Self::Props, orders: &mut impl Orders<PMsg>) -> Self {
-        let mut orders = orders.proxy_with(&props.msg_mapper);
+    fn init(config: Self::Config, orders: &mut impl Orders<PMsg>) -> Self {
+        let mut orders = orders.proxy_with(&config.msg_mapper);
         orders.subscribe(|theme: ThemeChanged| Msg::theme(theme.0));
 
         Self {
-            msg_mapper: props.msg_mapper,
-            events: props.events,
-            styler: props.styler,
-            theme: props.theme,
-            shape: props.shape,
-            state: props.state,
-            value: props.value,
-            max: props.max,
-            min: props.min,
-            color: props.color,
+            msg_mapper: config.msg_mapper,
+            events: config.events,
+            styler: config.styler,
+            theme: config.theme,
+            shape: config.shape,
+            state: config.state,
+            value: config.value,
+            max: config.max,
+            min: config.min,
+            color: config.color,
         }
     }
 
@@ -152,7 +152,7 @@ impl<PMsg: 'static> StyledView for ProgressBar<PMsg> {
     }
 }
 
-impl<PMsg: 'static> Props<PMsg> {
+impl<PMsg: 'static> Config<PMsg> {
     pub fn init(self, orders: &mut impl Orders<PMsg>) -> ProgressBar<PMsg> {
         ProgressBar::init(self, orders)
     }

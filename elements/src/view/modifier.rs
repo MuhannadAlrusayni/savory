@@ -36,8 +36,8 @@ impl<T> Modifier<T> {
     }
 }
 
-impl<T: HasProps> HasProps for Modifier<T> {
-    type Props = T::Props;
+impl<T: HasConfig> HasConfig for Modifier<T> {
+    type Config = T::Config;
 }
 
 impl<T, PMsg> Element<PMsg> for Modifier<T>
@@ -47,8 +47,8 @@ where
 {
     type Message = T::Message;
 
-    fn init(props: Self::Props, orders: &mut impl Orders<PMsg>) -> Self {
-        let target = T::init(props, orders);
+    fn init(config: Self::Config, orders: &mut impl Orders<PMsg>) -> Self {
+        let target = T::init(config, orders);
         Self::on(target)
     }
 

@@ -10,15 +10,15 @@ pub enum Msg {
     SpinEntry(spin_entry::Msg),
 }
 
-impl HasProps for MyApp {
-    type Props = Url;
+impl HasConfig for MyApp {
+    type Config = Url;
 }
 
 impl Element<Msg> for MyApp {
     type Message = Msg;
 
     fn init(_: Url, orders: &mut impl Orders<Msg>) -> Self {
-        let spin_entry = SpinEntry::build(Msg::SpinEntry)
+        let spin_entry = SpinEntry::config(Msg::SpinEntry)
             .min(-40.)
             .placeholder(44.)
             .step(5.)

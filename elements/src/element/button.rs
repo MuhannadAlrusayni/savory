@@ -8,35 +8,35 @@ use std::{any::Any, rc::Rc};
 #[element(style(button, label(label::Style), icon(icon::Style)), events(button))]
 pub struct Button<PMsg> {
     // general element properties
-    #[element(props(required))]
+    #[element(config(required))]
     msg_mapper: MsgMapper<Msg, PMsg>,
     #[rich(read)]
     local_events: EventsStore<Events<Msg>>,
     #[rich(read)]
-    #[element(props(default))]
+    #[element(config(default))]
     events: EventsStore<Events<PMsg>>,
     #[rich(read)]
-    #[element(props)]
+    #[element(config)]
     styler: Option<Styler<PMsg>>,
     #[rich(read)]
-    #[element(theme_lens, props(default))]
+    #[element(theme_lens, config(default))]
     theme: Theme,
 
     // button element properties
     #[rich(read)]
-    #[element(theme_lens(nested), props)]
+    #[element(theme_lens(nested), config)]
     label: Option<Label<Msg>>,
     #[rich(read)]
-    #[element(theme_lens(nested), props)]
+    #[element(theme_lens(nested), config)]
     icon: Option<Icon<Msg>>,
     #[rich(read(copy))]
-    #[element(theme_lens, props)]
+    #[element(theme_lens, config)]
     kind: Option<Kind>,
     #[rich(read(copy))]
-    #[element(theme_lens, props(default = "false"))]
+    #[element(theme_lens, config(default = "false"))]
     ghost: bool,
     #[rich(read(copy, rename = is_disabled))]
-    #[element(theme_lens, props(default = "false"))]
+    #[element(theme_lens, config(default = "false"))]
     disabled: bool,
     #[rich(read(copy, rename = is_focused))]
     #[element(theme_lens)]
@@ -68,8 +68,8 @@ pub enum Msg {
 impl<PMsg: 'static> Element<PMsg> for Button<PMsg> {
     type Message = Msg;
 
-    fn init(props: Self::Props, orders: &mut impl Orders<PMsg>) -> Self {
-        let mut orders = orders.proxy_with(&props.msg_mapper);
+    fn init(config: Self::Config, orders: &mut impl Orders<PMsg>) -> Self {
+        let mut orders = orders.proxy_with(&config.msg_mapper);
         orders.subscribe(|theme: ThemeChanged| Msg::theme(theme.0));
 
         let local_events = || {
@@ -82,16 +82,16 @@ impl<PMsg: 'static> Element<PMsg> for Button<PMsg> {
         };
 
         Button {
-            theme: props.theme,
-            styler: props.styler,
-            msg_mapper: props.msg_mapper,
+            theme: config.theme,
+            styler: config.styler,
+            msg_mapper: config.msg_mapper,
             local_events: local_events.into(),
-            events: props.events,
-            label: props.label,
-            icon: props.icon,
-            kind: props.kind,
-            ghost: props.ghost,
-            disabled: props.disabled,
+            events: config.events,
+            label: config.label,
+            icon: config.icon,
+            kind: config.kind,
+            ghost: config.ghost,
+            disabled: config.disabled,
             focused: false,
             mouse_over: false,
         }
@@ -165,7 +165,7 @@ impl<PMsg: 'static> StyledView for Button<PMsg> {
     }
 }
 
-impl<PMsg: 'static> Props<PMsg> {
+impl<PMsg: 'static> Config<PMsg> {
     pub fn init(self, orders: &mut impl Orders<PMsg>) -> Button<PMsg> {
         Button::init(self, orders)
     }

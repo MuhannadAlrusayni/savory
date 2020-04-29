@@ -68,7 +68,7 @@ pub enum Msg {
 
 impl Element<Msg> for Counter {
     type Message = Msg;
-    type Props = Url;
+    type Config = Url;
 
     // initialize the app in this function
     fn init(_: Url, _: &mut impl Orders<Msg>) -> Self {
@@ -133,10 +133,10 @@ use wasm_bindgen::prelude::*;
 #[derive(Element)]
 #[element(style(inc_btn, dec_btn), events(inc_btn, dec_btn))]
 pub struct Counter<PMsg> {
-    #[element(props(required))]
+    #[element(config(required))]
     msg_mapper: MsgMapper<Msg, PMsg>,
     local_events: Events<Msg>,
-    #[element(props(default = "10"))]
+    #[element(config(default = "10"))]
     value: i32,
 }
 
@@ -147,9 +147,9 @@ pub enum Msg {
 
 impl<PMsg: 'static> Element<PMsg> for Counter<PMsg> {
     type Message = Msg;
-    type Props = Props<PMsg>;
+    type Config = Config<PMsg>;
 
-    fn init(props: Self::Props, _: &mut impl Orders<PMsg>) -> Self {
+    fn init(config: Self::Config, _: &mut impl Orders<PMsg>) -> Self {
         let local_events = Events::default()
             // increment button events
             .and_inc_btn(|conf| conf.click(|_| Msg::Increment))
@@ -157,9 +157,9 @@ impl<PMsg: 'static> Element<PMsg> for Counter<PMsg> {
             .and_dec_btn(|conf| conf.click(|_| Msg::Decrement));
 
         Self {
-            msg_mapper: props.msg_mapper,
+            msg_mapper: config.msg_mapper,
             local_events,
-            value: props.value,
+            value: config.value,
         }
     }
 
@@ -214,8 +214,8 @@ impl<PMsg: 'static> View for Counter<PMsg> {
     }
 }
 
-// convenient way to convert Props into Counter
-impl<PMsg: 'static> Props<PMsg> {
+// convenient way to convert Config into Counter
+impl<PMsg: 'static> Config<PMsg> {
     pub fn init(self, orders: &mut impl Orders<PMsg>) -> Counter<PMsg> {
         Counter::init(self, orders)
     }
@@ -233,11 +233,11 @@ pub struct MyApp {
 
 impl Element<AppMsg> for MyApp {
     type Message = AppMsg;
-    type Props = Url;
+    type Config = Url;
 
     fn init(_: Url, orders: &mut impl Orders<AppMsg>) -> Self {
         Self {
-            counter_element: Counter::build(AppMsg::Counter)
+            counter_element: Counter::config(AppMsg::Counter)
                 // give it starting value. 10 will be used as default value if
                 // we didn't pass value
                 .value(100)
@@ -299,10 +299,10 @@ pub enum Msg {
 
 impl Element<Msg> for MyApp {
     type Message = Msg;
-    type Props = Url;
+    type Config = Url;
 
     fn init(_: Url, orders: &mut impl Orders<Msg>) -> Self {
-        let spin_entry = SpinEntry::build(Msg::SpinEntry)
+        let spin_entry = SpinEntry::config(Msg::SpinEntry)
             .min(-40.)
             .placeholder(44.)
             .step(5.)
