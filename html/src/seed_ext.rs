@@ -512,6 +512,9 @@ pub trait ElExt<Msg> {
     // fn add_class(self, class: att::Class) -> Self;
     fn class(self, class: impl Into<att::Class>) -> Self;
 
+    fn try_id(self, id: Option<impl Into<att::Id>>) -> Self;
+    fn id(self, id: impl Into<att::Id>) -> Self;
+
     fn el_ref<E: Clone>(self, reference: &ElRef<E>) -> Self;
 
     fn config(self, conf: impl FnOnce(El<Msg>) -> El<Msg>) -> Self;
@@ -641,6 +644,18 @@ impl<Msg> ElExt<Msg> for El<Msg> {
         self.set(class.into())
     }
 
+    fn try_id(self, id: Option<impl Into<att::Id>>) -> Self {
+        if let Some(id) = id {
+            self.id(id)
+        } else {
+            self
+        }
+    }
+
+    fn id(self, id: impl Into<att::Id>) -> Self {
+        self.set(id.into())
+    }
+
     fn el_ref<E: Clone>(mut self, reference: &ElRef<E>) -> Self {
         self.refs.push(reference.clone().shared_node_ws);
         self
@@ -746,6 +761,14 @@ impl<Msg> ElExt<Msg> for Node<Msg> {
 
     fn class(self, class: impl Into<att::Class>) -> Self {
         self.and_element(|el| el.class(class))
+    }
+
+    fn try_id(self, id: Option<impl Into<att::Id>>) -> Self {
+        self.and_element(|el| el.try_id(id))
+    }
+
+    fn id(self, id: impl Into<att::Id>) -> Self {
+        self.and_element(|el| el.id(id))
     }
 
     fn config(self, conf: impl FnOnce(El<Msg>) -> El<Msg>) -> Self {

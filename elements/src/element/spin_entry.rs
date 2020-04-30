@@ -16,6 +16,9 @@ use std::{any::Any, rc::Rc};
     events(input, spin_entry)
 )]
 pub struct SpinEntry<PMsg> {
+    #[rich(read)]
+    #[element(config)]
+    id: Id,
     el_ref: ElRef<web_sys::HtmlInputElement>,
     #[element(config(required))]
     msg_mapper: MsgMapper<Msg, PMsg>,
@@ -113,6 +116,7 @@ impl<PMsg: 'static> Element<PMsg> for SpinEntry<PMsg> {
         };
 
         let mut spin_entry = Self {
+            id: config.id.unwrap_or_else(Id::generate),
             el_ref: ElRef::default(),
             msg_mapper: config.msg_mapper,
             local_events: local_events.into(),
@@ -238,6 +242,7 @@ impl<PMsg: 'static> StyledView for SpinEntry<PMsg> {
 
         // spin_entry
         html::div()
+            .id(self.id.clone())
             .class("spin-entry")
             .set(style.spin_entry)
             .set(&local_events.spin_entry)

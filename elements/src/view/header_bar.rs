@@ -16,6 +16,8 @@ use savory_html::prelude::*;
 )]
 pub struct HeaderBar<PMsg> {
     // general element properties
+    #[rich(write)]
+    pub id: Option<Id>,
     #[rich(write(style = compose))]
     pub events: Events<PMsg>,
     #[rich(write)]
@@ -86,6 +88,7 @@ impl<PMsg: 'static> StyledView for HeaderBar<PMsg> {
             .map(|btn| btn.styled_view(close_button));
 
         html::div()
+            .try_id(self.id.clone())
             .class("header-bar")
             .set(header_bar)
             .set(&self.events.header_bar)
@@ -97,6 +100,7 @@ impl<PMsg: 'static> StyledView for HeaderBar<PMsg> {
 impl<PMsg> HeaderBar<PMsg> {
     pub fn new() -> Self {
         Self {
+            id: None,
             events: Events::default(),
             styler: None,
             theme: Theme::default(),

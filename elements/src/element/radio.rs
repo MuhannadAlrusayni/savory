@@ -8,6 +8,9 @@ use std::{any::Any, borrow::Cow, rc::Rc};
 #[element(style(radio, button, label), events(radio, button, label))]
 pub struct Radio<PMsg> {
     // general element properties
+    #[rich(read)]
+    #[element(config)]
+    id: Id,
     input_el_ref: ElRef<web_sys::HtmlInputElement>,
     label_el_ref: ElRef<web_sys::HtmlLabelElement>,
     #[element(config(required))]
@@ -83,6 +86,7 @@ impl<PMsg: 'static> Element<PMsg> for Radio<PMsg> {
         };
 
         Self {
+            id: config.id.unwrap_or_else(Id::generate),
             input_el_ref: ElRef::default(),
             label_el_ref: ElRef::default(),
             theme: config.theme,
@@ -177,8 +181,9 @@ impl<PMsg: 'static> StyledView for Radio<PMsg> {
             });
 
         match self.label.as_ref() {
-            None => radio,
+            None => radio.id(self.id.clone()),
             Some(lbl) => html::label()
+                .id(self.id.clone())
                 .class("label")
                 .set(label)
                 .set(&local_events.label)

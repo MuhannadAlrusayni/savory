@@ -10,6 +10,8 @@ use std::default::Default;
 #[derive(Rich, Element)]
 #[element(style(item), events(item))]
 pub struct Item<PMsg> {
+    #[rich(write)]
+    pub id: Option<Id>,
     #[rich(write(style = compose))]
     pub events: Events<PMsg>,
     #[rich(write(style = compose))]
@@ -67,7 +69,10 @@ impl<PMsg> StyledView for Item<PMsg> {
         if self.is_flatten() {
             self.content.clone()
         } else {
-            html::div().class("flexbox-item").add(self.content.clone())
+            html::div()
+                .try_id(self.id.clone())
+                .class("flexbox-item")
+                .add(self.content.clone())
         }
         .add(&self.events.item)
         .add(style.item)
@@ -83,6 +88,7 @@ impl<PMsg> Item<PMsg> {
 impl<PMsg> From<Node<PMsg>> for Item<PMsg> {
     fn from(node: Node<PMsg>) -> Self {
         Self {
+            id: None,
             events: Events::default(),
             styler: None,
             theme: Theme::default(),

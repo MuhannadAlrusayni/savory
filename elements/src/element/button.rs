@@ -8,6 +8,9 @@ use std::{any::Any, rc::Rc};
 #[element(style(button, label(label::Style), icon(icon::Style)), events(button))]
 pub struct Button<PMsg> {
     // general element properties
+    #[rich(read)]
+    #[element(config)]
+    id: Id,
     #[element(config(required))]
     msg_mapper: MsgMapper<Msg, PMsg>,
     #[rich(read)]
@@ -82,6 +85,7 @@ impl<PMsg: 'static> Element<PMsg> for Button<PMsg> {
         };
 
         Button {
+            id: config.id.unwrap_or_else(Id::generate),
             theme: config.theme,
             styler: config.styler,
             msg_mapper: config.msg_mapper,
@@ -155,6 +159,7 @@ impl<PMsg: 'static> StyledView for Button<PMsg> {
         } = style;
         html::button()
             .class("button")
+            .id(self.id.clone())
             .set(att::disabled(self.disabled))
             .set(&self.local_events.get().button)
             .set(button)

@@ -7,6 +7,8 @@ use std::borrow::Cow;
 #[derive(Clone, Element, Rich)]
 #[element(style(html_icon), events(html_icon))]
 pub struct Html<PMsg> {
+    #[rich(write)]
+    pub id: Option<Id>,
     #[rich(write(style = compose))]
     pub events: Events<PMsg>,
     #[rich(write(style = compose))]
@@ -25,6 +27,7 @@ pub struct Html<PMsg> {
 impl<PMsg> Html<PMsg> {
     pub fn new(html: impl Into<Cow<'static, str>>) -> Self {
         Self {
+            id: None,
             events: Events::default(),
             styler: None,
             theme: Theme::default(),
@@ -52,6 +55,7 @@ impl<PMsg> StyledView for Html<PMsg> {
 
     fn styled_view(&self, style: Self::Style) -> Self::Output {
         html::svg()
+            .try_id(self.id.clone())
             .class("html-icon")
             .try_set(self.view_box)
             .set(style.html_icon)

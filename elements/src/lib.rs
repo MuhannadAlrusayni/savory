@@ -50,6 +50,7 @@
 extern crate derive_more;
 
 pub mod element;
+pub mod id;
 pub mod theme;
 pub mod traits;
 pub mod view;
@@ -71,6 +72,7 @@ pub mod prelude {
             spin_entry::{self, SpinEntry},
             switch::{self, Switch},
         },
+        id::Id,
         theme::{self, Theme, ThemeChanged, ThemeLens},
         traits::ExtendBuilder,
         view::{

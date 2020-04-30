@@ -8,6 +8,9 @@ use std::{any::Any, rc::Rc};
 #[element(style(button, switch), events(button, switch))]
 pub struct Switch<PMsg> {
     // general element properties
+    #[rich(read)]
+    #[element(config)]
+    id: Id,
     #[element(config(required))]
     msg_mapper: MsgMapper<Msg, PMsg>,
     #[rich(read)]
@@ -72,6 +75,7 @@ impl<PMsg: 'static> Element<PMsg> for Switch<PMsg> {
         };
 
         Self {
+            id: config.id.unwrap_or_else(Id::generate),
             theme: config.theme,
             msg_mapper: config.msg_mapper,
             local_events: local_events.into(),
@@ -144,6 +148,7 @@ impl<PMsg: 'static> StyledView for Switch<PMsg> {
             .add(&events.button);
 
         html::button()
+            .id(self.id.clone())
             .class("switch")
             .set(att::disabled(self.disabled))
             .set(style.switch)

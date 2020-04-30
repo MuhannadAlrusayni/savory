@@ -7,6 +7,8 @@ use std::borrow::Cow;
 #[derive(Rich, Element, Clone)]
 #[element(style(url_icon), events(url_icon))]
 pub struct Url<PMsg> {
+    #[rich(write)]
+    pub id: Option<Id>,
     #[rich(write(style = compose))]
     pub events: Events<PMsg>,
     #[rich(write(style = compose))]
@@ -29,6 +31,7 @@ impl<PMsg, T: ToString> From<T> for Url<PMsg> {
 impl<PMsg> Url<PMsg> {
     pub fn new(url: impl Into<Cow<'static, str>>) -> Self {
         Self {
+            id: None,
             events: Events::default(),
             styler: None,
             theme: Theme::default(),
@@ -55,6 +58,7 @@ impl<PMsg> StyledView for Url<PMsg> {
 
     fn styled_view(&self, style: Self::Style) -> Self::Output {
         html::img()
+            .try_id(self.id.clone())
             .class("url-icon")
             .set(att::src(self.url.clone()))
             .set(style.url_icon)

@@ -8,6 +8,9 @@ use std::{any::Any, borrow::Cow, rc::Rc};
 #[element(style(input, container), events(input, container))]
 pub struct Entry<PMsg> {
     // general element properties
+    #[rich(read)]
+    #[element(config)]
+    id: Id,
     el_ref: ElRef<web_sys::HtmlInputElement>,
     #[element(config(required))]
     msg_mapper: MsgMapper<Msg, PMsg>,
@@ -81,6 +84,7 @@ impl<PMsg: 'static> Element<PMsg> for Entry<PMsg> {
         };
 
         Self {
+            id: config.id.unwrap_or_else(Id::generate),
             el_ref: ElRef::default(),
             msg_mapper: config.msg_mapper,
             local_events: local_events.into(),
@@ -168,6 +172,7 @@ impl<PMsg: 'static> StyledView for Entry<PMsg> {
             .add(&events.input);
 
         html::div()
+            .id(self.id.clone())
             .set(style.container)
             .set(&local_events.container)
             .map_msg_with(&self.msg_mapper)

@@ -8,6 +8,9 @@ use std::{any::Any, rc::Rc};
 #[element(style(indicator, progress_bar), events(indicator, progress_bar))]
 pub struct ProgressBar<PMsg> {
     // general element properties
+    #[rich(read)]
+    #[element(config)]
+    id: Id,
     #[element(config(required))]
     msg_mapper: MsgMapper<Msg, PMsg>,
     #[rich(read)]
@@ -69,6 +72,7 @@ impl<PMsg: 'static> Element<PMsg> for ProgressBar<PMsg> {
         orders.subscribe(|theme: ThemeChanged| Msg::theme(theme.0));
 
         Self {
+            id: config.id.unwrap_or_else(Id::generate),
             msg_mapper: config.msg_mapper,
             events: config.events,
             styler: config.styler,
@@ -144,6 +148,7 @@ impl<PMsg: 'static> StyledView for ProgressBar<PMsg> {
             .add(&events.indicator);
 
         html::div()
+            .id(self.id.clone())
             .class("progress-bar")
             .set(style.progress_bar)
             .map_msg_with(&self.msg_mapper)

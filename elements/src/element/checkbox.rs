@@ -8,6 +8,9 @@ use std::{any::Any, borrow::Cow, rc::Rc};
 #[element(style(checkbox, button, label), events(checkbox, button, label))]
 pub struct Checkbox<PMsg> {
     // general element properties
+    #[rich(read)]
+    #[element(config)]
+    id: Id,
     input_el_ref: ElRef<web_sys::HtmlInputElement>,
     label_el_ref: ElRef<web_sys::HtmlLabelElement>,
     #[element(config(required))]
@@ -83,6 +86,7 @@ impl<PMsg: 'static> Element<PMsg> for Checkbox<PMsg> {
         };
 
         Self {
+            id: config.id.unwrap_or_else(Id::generate),
             input_el_ref: ElRef::default(),
             label_el_ref: ElRef::default(),
             theme: config.theme,
@@ -147,6 +151,7 @@ impl<PMsg: 'static> View for Checkbox<PMsg> {
 impl<PMsg: 'static> StyledView for Checkbox<PMsg> {
     type Style = Style;
 
+    // TODO: use container block and assign the element id for it
     fn styled_view(&self, style: Style) -> Self::Output {
         let Style {
             checkbox,
@@ -177,8 +182,9 @@ impl<PMsg: 'static> StyledView for Checkbox<PMsg> {
             });
 
         match self.label.as_ref() {
-            None => checkbox,
+            None => checkbox.id(self.id.clone()),
             Some(lbl) => html::label()
+                .id(self.id.clone())
                 .class("label")
                 .set(label)
                 .set(&local_events.label)

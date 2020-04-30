@@ -8,6 +8,9 @@ use std::{any::Any, rc::Rc};
 #[derive(Clone, Rich, Element)]
 #[element(style(panel, popover), events(panel, popover))]
 pub struct Popover<PMsg, C, T> {
+    #[rich(read)]
+    #[element(config)]
+    id: Id,
     #[element(config(required))]
     msg_mapper: MsgMapper<Msg, PMsg>,
     #[rich(read)]
@@ -61,6 +64,7 @@ where
         orders.subscribe(|theme: ThemeChanged| Msg::theme(theme.0));
 
         Self {
+            id: config.id.unwrap_or_else(Id::generate),
             msg_mapper: config.msg_mapper,
             events: config.events,
             styler: config.styler,
@@ -139,6 +143,7 @@ where
             .add(self.child.view());
 
         html::div()
+            .id(self.id.clone())
             .class("popover")
             .set(style.popover)
             .set(&events.popover)

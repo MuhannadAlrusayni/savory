@@ -8,6 +8,8 @@ use std::borrow::Cow;
 #[derive(Rich, Clone, Element)]
 #[element(style(label), events(label))]
 pub struct Label<PMsg> {
+    #[rich(write)]
+    pub id: Option<Id>,
     #[rich(write(style = compose))]
     pub events: Events<PMsg>,
     #[rich(write)]
@@ -39,6 +41,7 @@ impl<PMsg> StyledView for Label<PMsg> {
 
     fn styled_view(&self, style: Style) -> Self::Output {
         html::span()
+            .try_id(self.id.clone())
             .class("label")
             .add(self.text.clone())
             .set(style.label)
@@ -55,6 +58,7 @@ impl<T: ToString, PMsg> From<T> for Label<PMsg> {
 impl<PMsg> Label<PMsg> {
     pub fn new(text: impl Into<Cow<'static, str>>) -> Self {
         Self {
+            id: None,
             events: Events::default(),
             styler: None,
             theme: Theme::default(),

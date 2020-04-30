@@ -6,6 +6,8 @@ use savory_html::prelude::*;
 #[derive(Clone, Element, Rich)]
 #[element(style(svg_icon), events(svg_icon))]
 pub struct Svg<PMsg> {
+    #[rich(write)]
+    pub id: Option<Id>,
     #[rich(write(style = compose))]
     pub events: Events<PMsg>,
     #[rich(write)]
@@ -24,6 +26,7 @@ pub struct Svg<PMsg> {
 impl<PMsg> Svg<PMsg> {
     pub fn new(draw: impl IntoIterator<Item = Node<PMsg>>) -> Self {
         Self {
+            id: None,
             events: Events::default(),
             styler: None,
             theme: Theme::default(),
@@ -51,6 +54,7 @@ impl<PMsg> StyledView for Svg<PMsg> {
 
     fn styled_view(&self, style: Self::Style) -> Self::Output {
         html::svg()
+            .try_id(self.id.clone())
             .class("svg-icon")
             .try_set(self.view_box)
             .set(style.svg_icon)

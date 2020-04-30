@@ -13,6 +13,8 @@ use item::Item;
 #[derive(Element, Rich)]
 #[element(style(flexbox), events(flexbox))]
 pub struct Flexbox<PMsg> {
+    #[rich(write)]
+    pub id: Option<Id>,
     #[rich(write(style = compose))]
     pub events: Events<PMsg>,
     #[rich(write(style = compose))]
@@ -61,6 +63,7 @@ impl<PMsg> Default for Flexbox<PMsg> {
 impl<PMsg> Flexbox<PMsg> {
     pub fn new() -> Self {
         Self {
+            id: None,
             events: Events::default(),
             styler: None,
             theme: Theme::default(),
@@ -190,6 +193,7 @@ impl<PMsg> StyledView for Flexbox<PMsg> {
 
     fn styled_view(&self, style: Style) -> Self::Output {
         html::div()
+            .try_id(self.id.clone())
             .class("flexbox")
             .set(&self.events.flexbox)
             .set(style.flexbox)

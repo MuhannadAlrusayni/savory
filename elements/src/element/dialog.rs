@@ -8,6 +8,9 @@ use std::{any::Any, rc::Rc};
 #[element(style(dialog, dialog_background), events(dialog, dialog_background))]
 pub struct Dialog<PMsg, C> {
     // general element properties
+    #[rich(read)]
+    #[element(config)]
+    id: Id,
     #[element(config(required))]
     msg_mapper: MsgMapper<Msg, PMsg>,
     #[rich(read)]
@@ -88,6 +91,7 @@ where
         );
 
         Self {
+            id: config.id.unwrap_or_else(Id::generate),
             msg_mapper: config.msg_mapper,
             local_events: local_events.into(),
             events: config.events,
@@ -183,6 +187,7 @@ where
             .add(&events.dialog);
 
         html::div()
+            .id(self.id.clone())
             .class("dialog-background")
             .set(style.dialog_background)
             .set(&local_events.dialog_background)
