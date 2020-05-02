@@ -1,7 +1,7 @@
 # Savory
 **Rust / Wasm frontend library for building user interfaces.**
 
-[![master docs](https://img.shields.io/badge/docs-master-blue.svg)](https://malrusayni.gitlab.io/savory/savory-core/)
+[![master docs](https://img.shields.io/badge/docs-master-blue.svg)](https://malrusayni.gitlab.io/savory/savory_core/)
 &middot;
 [![crate info](https://img.shields.io/crates/v/savory.svg)](https://crates.io/crates/savory-core)
 &middot;
@@ -13,7 +13,7 @@
 
 Savory is library for building user interface based on [Seed]
 
-[Documentation](https://malrusayni.gitlab.io/savory/savory-core/)
+[Documentation](https://malrusayni.gitlab.io/savory/savory_core/)
 
 # Features
 
