@@ -99,14 +99,3 @@ pub trait View {
     /// view method that returns Seed `Node`
     fn view(&self) -> Self::Output;
 }
-
-/// Trait that makes the view resuable by accepting `Self::Style`
-///
-/// Reusable view should implement this trait.
-pub trait StyledView: View {
-    /// Stye accepted by `styled_view` method
-    type Style;
-
-    /// view with the passed styled
-    fn styled_view(&self, style: Self::Style) -> Self::Output;
-}

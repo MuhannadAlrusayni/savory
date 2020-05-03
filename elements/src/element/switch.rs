@@ -20,7 +20,7 @@ pub struct Switch<PMsg> {
     events: EventsStore<Events<PMsg>>,
     #[rich(read)]
     #[element(config)]
-    styler: Option<Styler<PMsg>>,
+    styler: Option<<Switch<PMsg> as Stylable>::Styler>,
     #[rich(read)]
     #[element(theme_lens, config(default))]
     theme: Theme,
@@ -101,12 +101,12 @@ impl<PMsg: 'static> Element<PMsg> for Switch<PMsg> {
                 }
             }
             Msg::Styler(val) => {
-                if let Ok(val) = val.downcast::<Option<Styler<PMsg>>>() {
+                if let Ok(val) = val.downcast::<Option<<Self as Stylable>::Styler>>() {
                     self.styler = val.as_ref().clone();
                 }
             }
             Msg::UpdateStyler(val) => {
-                if let Ok(val) = val.downcast::<Box<dyn Fn(Styler<PMsg>) -> Styler<PMsg>>>() {
+                if let Ok(val) = val.downcast::<Box<dyn Fn(<Self as Stylable>::Styler) -> <Self as Stylable>::Styler>>() {
                     self.styler = Some(val(self.styler.clone().unwrap_or_else(Styler::default)));
                 }
             }
@@ -120,22 +120,32 @@ impl<PMsg: 'static> Element<PMsg> for Switch<PMsg> {
     }
 }
 
+impl<PMsg> Stylable for Switch<PMsg> {
+    type Style = Style;
+    type Styler = Styler<Self, Style>;
+
+    fn styler(&self) -> Self::Styler {
+        self.styler
+            .clone()
+            .unwrap_or_else(|| (|s: &Self| s.theme.switch().get(&s.theme_lens())).into())
+    }
+
+    fn style(&self) -> Self::Style {
+        self.styler().get(self)
+    }
+}
+
 impl<PMsg: 'static> View for Switch<PMsg> {
     type Output = Node<PMsg>;
 
     fn view(&self) -> Self::Output {
-        self.styled_view(
-            self.styler
-                .as_ref()
-                .map(|styler| styler.get(self))
-                .unwrap_or_else(|| self.theme.switch().get(&self.theme_lens())),
-        )
+        self.styled_view(self.style())
     }
 }
 
-impl<PMsg: 'static> StyledView for Switch<PMsg> {
-    type Style = Style;
+pub type ThemeStyler<'a> = Styler<SwitchLens<'a>, Style>;
 
+impl<PMsg: 'static> StyledView for Switch<PMsg> {
     fn styled_view(&self, style: Style) -> Self::Output {
         let events = self.events.get();
         let local_events = self.local_events.get();
@@ -173,9 +183,6 @@ pub fn style() -> Style {
     Style::default()
 }
 
-pub type Styler<PMsg> = theme::Styler<Switch<PMsg>, Style>;
-pub type ThemeStyler<'a> = theme::Styler<SwitchLens<'a>, Style>;
-
 impl Msg {
     pub fn events_store<PMsg: 'static>(val: EventsStore<PMsg>) -> Self {
         Msg::EventsStore(Rc::new(val))
@@ -187,17 +194,17 @@ impl Msg {
         Msg::UpdateEventsStore(Rc::new(val))
     }
 
-    pub fn styler<PMsg: 'static>(val: Styler<PMsg>) -> Self {
+    pub fn styler<PMsg: 'static>(val: <Switch<PMsg> as Stylable>::Styler) -> Self {
         Msg::try_styler(Some(val))
     }
 
     pub fn update_styler<PMsg: 'static>(
-        val: impl Fn(Styler<PMsg>) -> Styler<PMsg> + 'static,
+        val: impl Fn(<Switch<PMsg> as Stylable>::Styler) -> <Switch<PMsg> as Stylable>::Styler + 'static,
     ) -> Self {
         Msg::UpdateStyler(Rc::new(val))
     }
 
-    pub fn try_styler<PMsg: 'static>(val: Option<Styler<PMsg>>) -> Self {
+    pub fn try_styler<PMsg: 'static>(val: Option<<Switch<PMsg> as Stylable>::Styler>) -> Self {
         Msg::Styler(Rc::new(val))
     }
 

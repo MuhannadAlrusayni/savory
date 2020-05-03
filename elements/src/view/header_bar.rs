@@ -21,7 +21,7 @@ pub struct HeaderBar<PMsg> {
     #[rich(write(style = compose))]
     pub events: Events<PMsg>,
     #[rich(write)]
-    pub styler: Option<Styler<PMsg>>,
+    pub styler: Option<Styler<Self, Style>>,
     #[rich(write)]
     #[element(theme_lens)]
     pub theme: Theme,
@@ -47,22 +47,30 @@ impl<PMsg> Default for HeaderBar<PMsg> {
     }
 }
 
+impl<PMsg> Stylable for HeaderBar<PMsg> {
+    type Style = Style;
+    type Styler = Styler<Self, Style>;
+
+    fn styler(&self) -> Self::Styler {
+        self.styler
+            .clone()
+            .unwrap_or_else(|| (|s: &Self| s.theme.header_bar().get(&s.theme_lens())).into())
+    }
+
+    fn style(&self) -> Self::Style {
+        self.styler().get(self)
+    }
+}
+
 impl<PMsg: 'static> View for HeaderBar<PMsg> {
     type Output = Node<PMsg>;
 
     fn view(&self) -> Self::Output {
-        self.styled_view(
-            self.styler
-                .as_ref()
-                .map(|styler| styler.get(self))
-                .unwrap_or_else(|| self.theme.header_bar().get(&self.theme_lens())),
-        )
+        self.styled_view(self.style())
     }
 }
 
 impl<PMsg: 'static> StyledView for HeaderBar<PMsg> {
-    type Style = Style;
-
     fn styled_view(&self, style: Style) -> Self::Output {
         let Style {
             header_bar,
@@ -112,5 +120,4 @@ impl<PMsg> HeaderBar<PMsg> {
     }
 }
 
-pub type Styler<PMsg> = theme::Styler<HeaderBar<PMsg>, Style>;
-pub type ThemeStyler<'a> = theme::Styler<HeaderBarLens<'a>, Style>;
+pub type ThemeStyler<'a> = Styler<HeaderBarLens<'a>, Style>;

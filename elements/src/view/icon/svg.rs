@@ -11,7 +11,7 @@ pub struct Svg<PMsg> {
     #[rich(write(style = compose))]
     pub events: Events<PMsg>,
     #[rich(write)]
-    pub styler: Option<Styler<PMsg>>,
+    pub styler: Option<Styler<Self, Style>>,
     #[rich(write)]
     #[element(theme_lens)]
     pub theme: Theme,
@@ -36,22 +36,30 @@ impl<PMsg> Svg<PMsg> {
     }
 }
 
+impl<PMsg> Stylable for Svg<PMsg> {
+    type Style = Style;
+    type Styler = Styler<Self, Style>;
+
+    fn styler(&self) -> Self::Styler {
+        self.styler
+            .clone()
+            .unwrap_or_else(|| (|s: &Self| s.theme.svg_icon().get(&s.theme_lens())).into())
+    }
+
+    fn style(&self) -> Self::Style {
+        self.styler().get(self)
+    }
+}
+
 impl<PMsg> View for Svg<PMsg> {
     type Output = Node<PMsg>;
 
     fn view(&self) -> Self::Output {
-        self.styled_view(
-            self.styler
-                .as_ref()
-                .map(|styler| styler.get(self))
-                .unwrap_or_else(|| self.theme.svg_icon().get(&self.theme_lens())),
-        )
+        self.styled_view(self.style())
     }
 }
 
 impl<PMsg> StyledView for Svg<PMsg> {
-    type Style = Style;
-
     fn styled_view(&self, style: Self::Style) -> Self::Output {
         html::svg()
             .try_id(self.id.clone())
@@ -63,5 +71,4 @@ impl<PMsg> StyledView for Svg<PMsg> {
     }
 }
 
-pub type Styler<PMsg> = theme::Styler<Svg<PMsg>, Style>;
-pub type ThemeStyler<'a> = theme::Styler<SvgLens<'a>, Style>;
+pub type ThemeStyler<'a> = Styler<SvgLens<'a>, Style>;

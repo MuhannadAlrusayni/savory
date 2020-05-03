@@ -18,7 +18,7 @@ pub struct Popover<PMsg, C, T> {
     events: EventsStore<Events<PMsg>>,
     #[rich(read)]
     #[element(config)]
-    styler: Option<Styler<PMsg, C, T>>,
+    styler: Option<<Popover<PMsg, C, T> as Stylable>::Styler>,
     #[rich(read)]
     #[element(theme_lens, config(default))]
     theme: Theme,
@@ -91,13 +91,13 @@ where
                 }
             }
             Msg::Styler(val) => {
-                if let Ok(val) = val.downcast::<Option<Styler<PMsg, C, T>>>() {
+                if let Ok(val) = val.downcast::<Option<<Self as Stylable>::Styler>>() {
                     self.styler = val.as_ref().clone();
                 }
             }
             Msg::UpdateStyler(val) => {
                 if let Ok(val) =
-                    val.downcast::<Box<dyn Fn(Styler<PMsg, C, T>) -> Styler<PMsg, C, T>>>()
+                    val.downcast::<Box<dyn Fn(<Self as Stylable>::Styler) -> <Self as Stylable>::Styler>>()
                 {
                     self.styler = Some(val(self.styler.clone().unwrap_or_else(Styler::default)));
                 }
@@ -109,6 +109,21 @@ where
     }
 }
 
+impl<PMsg, C, T> Stylable for Popover<PMsg, C, T> {
+    type Style = Style;
+    type Styler = Styler<Self, Style>;
+
+    fn styler(&self) -> Self::Styler {
+        self.styler
+            .clone()
+            .unwrap_or_else(|| (|s: &Self| s.theme.popover().get(&s.theme_lens())).into())
+    }
+
+    fn style(&self) -> Self::Style {
+        self.styler().get(self)
+    }
+}
+
 impl<PMsg, C, T> View for Popover<PMsg, C, T>
 where
     C: View<Output = Node<PMsg>>,
@@ -117,22 +132,17 @@ where
     type Output = Node<PMsg>;
 
     fn view(&self) -> Self::Output {
-        self.styled_view(
-            self.styler
-                .as_ref()
-                .map(|styler| styler.get(self))
-                .unwrap_or_else(|| self.theme.popover().get(&self.theme_lens())),
-        )
+        self.styled_view(self.style())
     }
 }
+
+pub type ThemeStyler<'a> = Styler<PopoverLens<'a>, Style>;
 
 impl<PMsg, C, T> StyledView for Popover<PMsg, C, T>
 where
     C: View<Output = Node<PMsg>>,
     T: View<Output = Node<PMsg>>,
 {
-    type Style = Style;
-
     fn styled_view(&self, style: Style) -> Self::Output {
         let events = self.events.get();
 
@@ -176,9 +186,6 @@ pub fn style() -> Style {
     Style::default()
 }
 
-pub type Styler<PMsg, C, T> = theme::Styler<Popover<PMsg, C, T>, Style>;
-pub type ThemeStyler<'a> = theme::Styler<PopoverLens<'a>, Style>;
-
 impl Msg {
     pub fn events_store<PMsg: 'static>(val: EventsStore<PMsg>) -> Self {
         Msg::EventsStore(Rc::new(val))
@@ -190,18 +197,23 @@ impl Msg {
         Msg::UpdateEventsStore(Rc::new(val))
     }
 
-    pub fn styler<PMsg: 'static, C: 'static, T: 'static>(val: Styler<PMsg, C, T>) -> Self {
+    pub fn styler<PMsg: 'static, C: 'static, T: 'static>(
+        val: <Popover<PMsg, C, T> as Stylable>::Styler,
+    ) -> Self {
         Msg::try_styler(Some(val))
     }
 
     pub fn update_styler<PMsg: 'static, C: 'static, T: 'static>(
-        val: impl Fn(Styler<PMsg, C, T>) -> Styler<PMsg, C, T> + 'static,
+        val: impl Fn(
+                <Popover<PMsg, C, T> as Stylable>::Styler,
+            ) -> <Popover<PMsg, C, T> as Stylable>::Styler
+            + 'static,
     ) -> Self {
         Msg::UpdateStyler(Rc::new(val))
     }
 
     pub fn try_styler<PMsg: 'static, C: 'static, T: 'static>(
-        val: Option<Styler<PMsg, C, T>>,
+        val: Option<<Popover<PMsg, C, T> as Stylable>::Styler>,
     ) -> Self {
         Msg::Styler(Rc::new(val))
     }

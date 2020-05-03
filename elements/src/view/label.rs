@@ -13,7 +13,7 @@ pub struct Label<PMsg> {
     #[rich(write(style = compose))]
     pub events: Events<PMsg>,
     #[rich(write)]
-    pub styler: Option<Styler<PMsg>>,
+    pub styler: Option<Styler<Self, Style>>,
     #[rich(write)]
     #[element(theme_lens)]
     pub theme: Theme,
@@ -23,22 +23,32 @@ pub struct Label<PMsg> {
     pub text: Cow<'static, str>,
 }
 
+impl<PMsg> Stylable for Label<PMsg> {
+    type Style = Style;
+    type Styler = Styler<Self, Style>;
+
+    fn styler(&self) -> Self::Styler {
+        self.styler
+            .clone()
+            .unwrap_or_else(|| (|s: &Self| s.theme.label().get(&s.theme_lens())).into())
+    }
+
+    fn style(&self) -> Self::Style {
+        self.styler().get(self)
+    }
+}
+
 impl<PMsg> View for Label<PMsg> {
     type Output = Node<PMsg>;
 
     fn view(&self) -> Self::Output {
-        self.styled_view(
-            self.styler
-                .as_ref()
-                .map(|styler| styler.get(self))
-                .unwrap_or_else(|| self.theme.label().get(&self.theme_lens())),
-        )
+        self.styled_view(self.style())
     }
 }
 
-impl<PMsg> StyledView for Label<PMsg> {
-    type Style = Style;
+pub type ThemeStyler<'a> = Styler<LabelLens<'a>, Style>;
 
+impl<PMsg> StyledView for Label<PMsg> {
     fn styled_view(&self, style: Style) -> Self::Output {
         html::span()
             .try_id(self.id.clone())
@@ -66,6 +76,3 @@ impl<PMsg> Label<PMsg> {
         }
     }
 }
-
-pub type Styler<PMsg> = theme::Styler<Label<PMsg>, Style>;
-pub type ThemeStyler<'a> = theme::Styler<LabelLens<'a>, Style>;

@@ -12,7 +12,7 @@ pub struct Html<PMsg> {
     #[rich(write(style = compose))]
     pub events: Events<PMsg>,
     #[rich(write(style = compose))]
-    pub styler: Option<Styler<PMsg>>,
+    pub styler: Option<Styler<Self, Style>>,
     #[rich(write(style = compose))]
     #[element(theme_lens)]
     pub theme: Theme,
@@ -37,22 +37,30 @@ impl<PMsg> Html<PMsg> {
     }
 }
 
+impl<PMsg> Stylable for Html<PMsg> {
+    type Style = Style;
+    type Styler = Styler<Self, Style>;
+
+    fn styler(&self) -> Self::Styler {
+        self.styler
+            .clone()
+            .unwrap_or_else(|| (|s: &Self| s.theme.html_icon().get(&s.theme_lens())).into())
+    }
+
+    fn style(&self) -> Self::Style {
+        self.styler().get(self)
+    }
+}
+
 impl<PMsg> View for Html<PMsg> {
     type Output = Node<PMsg>;
 
     fn view(&self) -> Self::Output {
-        self.styled_view(
-            self.styler
-                .as_ref()
-                .map(|styler| styler.get(self))
-                .unwrap_or_else(|| self.theme.html_icon().get(&self.theme_lens())),
-        )
+        self.styled_view(self.style())
     }
 }
 
 impl<PMsg> StyledView for Html<PMsg> {
-    type Style = Style;
-
     fn styled_view(&self, style: Self::Style) -> Self::Output {
         html::svg()
             .try_id(self.id.clone())
@@ -64,5 +72,4 @@ impl<PMsg> StyledView for Html<PMsg> {
     }
 }
 
-pub type Styler<PMsg> = theme::Styler<Html<PMsg>, Style>;
-pub type ThemeStyler<'a> = theme::Styler<HtmlLens<'a>, Style>;
+pub type ThemeStyler<'a> = Styler<HtmlLens<'a>, Style>;

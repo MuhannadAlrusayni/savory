@@ -15,7 +15,7 @@ pub struct Item<PMsg> {
     #[rich(write(style = compose))]
     pub events: Events<PMsg>,
     #[rich(write(style = compose))]
-    pub styler: Option<Styler<PMsg>>,
+    pub styler: Option<Styler<Self, Style>>,
     #[rich(write)]
     #[element(theme_lens)]
     pub theme: Theme,
@@ -49,22 +49,30 @@ pub struct Item<PMsg> {
     pub flatten: bool,
 }
 
+impl<PMsg> Stylable for Item<PMsg> {
+    type Style = Style;
+    type Styler = Styler<Self, Style>;
+
+    fn styler(&self) -> Self::Styler {
+        self.styler
+            .clone()
+            .unwrap_or_else(|| (|s: &Self| s.theme.flexbox_item().get(&s.theme_lens())).into())
+    }
+
+    fn style(&self) -> Self::Style {
+        self.styler().get(self)
+    }
+}
+
 impl<PMsg> View for Item<PMsg> {
     type Output = Node<PMsg>;
 
     fn view(&self) -> Self::Output {
-        self.styled_view(
-            self.styler
-                .as_ref()
-                .map(|styler| styler.get(self))
-                .unwrap_or_else(|| self.theme.flexbox_item().get(&self.theme_lens())),
-        )
+        self.styled_view(self.style())
     }
 }
 
 impl<PMsg> StyledView for Item<PMsg> {
-    type Style = Style;
-
     fn styled_view(&self, style: Style) -> Self::Output {
         if self.is_flatten() {
             self.content.clone()
@@ -118,5 +126,4 @@ where
     }
 }
 
-pub type Styler<PMsg> = theme::Styler<Item<PMsg>, Style>;
-pub type ThemeStyler<'a> = theme::Styler<ItemLens<'a>, Style>;
+pub type ThemeStyler<'a> = Styler<ItemLens<'a>, Style>;

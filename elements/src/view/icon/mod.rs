@@ -2,6 +2,7 @@ pub mod html;
 pub mod svg;
 pub mod url;
 
+use crate::prelude::*;
 use savory_core::prelude::*;
 use std::borrow::Cow;
 
@@ -63,9 +64,24 @@ impl<PMsg> View for Icon<PMsg> {
     }
 }
 
-impl<PMsg> StyledView for Icon<PMsg> {
+impl<PMsg> Stylable for Icon<PMsg> {
     type Style = Style;
+    type Styler = Styler<Self, Style>;
 
+    fn styler(&self) -> Self::Styler {
+        Styler::from(|icon: &Self| match icon {
+            Icon::Svg(icon) => Style::from(icon.style()),
+            Icon::Html(icon) => Style::from(icon.style()),
+            Icon::Url(icon) => Style::from(icon.style()),
+        })
+    }
+
+    fn style(&self) -> Self::Style {
+        self.styler().get(self)
+    }
+}
+
+impl<PMsg> StyledView for Icon<PMsg> {
     fn styled_view(&self, style: Self::Style) -> Self::Output {
         match self {
             Self::Svg(icon) => {

@@ -18,7 +18,7 @@ pub struct Flexbox<PMsg> {
     #[rich(write(style = compose))]
     pub events: Events<PMsg>,
     #[rich(write(style = compose))]
-    pub styler: Option<Styler<PMsg>>,
+    pub styler: Option<Styler<Self, Style>>,
     #[rich(write(rename = theme))]
     #[element(theme_lens)]
     pub theme: Theme,
@@ -175,22 +175,30 @@ impl<PMsg> Flexbox<PMsg> {
     }
 }
 
+impl<PMsg> Stylable for Flexbox<PMsg> {
+    type Style = Style;
+    type Styler = Styler<Self, Style>;
+
+    fn styler(&self) -> Self::Styler {
+        self.styler
+            .clone()
+            .unwrap_or_else(|| (|s: &Self| s.theme.flexbox().get(&s.theme_lens())).into())
+    }
+
+    fn style(&self) -> Self::Style {
+        self.styler().get(self)
+    }
+}
+
 impl<PMsg> View for Flexbox<PMsg> {
     type Output = Node<PMsg>;
 
     fn view(&self) -> Self::Output {
-        self.styled_view(
-            self.styler
-                .as_ref()
-                .map(|styler| styler.get(self))
-                .unwrap_or_else(|| self.theme.flexbox().get(&self.theme_lens())),
-        )
+        self.styled_view(self.style())
     }
 }
 
 impl<PMsg> StyledView for Flexbox<PMsg> {
-    type Style = Style;
-
     fn styled_view(&self, style: Style) -> Self::Output {
         html::div()
             .try_id(self.id.clone())
@@ -239,5 +247,4 @@ impl<'a, PMsg: 'static> ExtendBuilder<&'a dyn View<Output = Node<PMsg>>> for Fle
     }
 }
 
-pub type Styler<PMsg> = theme::Styler<Flexbox<PMsg>, Style>;
-pub type ThemeStyler<'a> = theme::Styler<FlexboxLens<'a>, Style>;
+pub type ThemeStyler<'a> = Styler<FlexboxLens<'a>, Style>;

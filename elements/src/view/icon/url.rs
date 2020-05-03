@@ -12,7 +12,7 @@ pub struct Url<PMsg> {
     #[rich(write(style = compose))]
     pub events: Events<PMsg>,
     #[rich(write(style = compose))]
-    pub styler: Option<Styler<PMsg>>,
+    pub styler: Option<Styler<Self, Style>>,
     #[rich(write(style = compose))]
     #[element(theme_lens)]
     pub theme: Theme,
@@ -40,22 +40,30 @@ impl<PMsg> Url<PMsg> {
     }
 }
 
+impl<PMsg> Stylable for Url<PMsg> {
+    type Style = Style;
+    type Styler = Styler<Self, Style>;
+
+    fn styler(&self) -> Self::Styler {
+        self.styler
+            .clone()
+            .unwrap_or_else(|| (|s: &Self| s.theme.url_icon().get(&s.theme_lens())).into())
+    }
+
+    fn style(&self) -> Self::Style {
+        self.styler().get(self)
+    }
+}
+
 impl<PMsg> View for Url<PMsg> {
     type Output = Node<PMsg>;
 
     fn view(&self) -> Self::Output {
-        self.styled_view(
-            self.styler
-                .as_ref()
-                .map(|styler| styler.get(self))
-                .unwrap_or_else(|| self.theme.url_icon().get(&self.theme_lens())),
-        )
+        self.styled_view(self.style())
     }
 }
 
 impl<PMsg> StyledView for Url<PMsg> {
-    type Style = Style;
-
     fn styled_view(&self, style: Self::Style) -> Self::Output {
         html::img()
             .try_id(self.id.clone())
@@ -66,5 +74,4 @@ impl<PMsg> StyledView for Url<PMsg> {
     }
 }
 
-pub type Styler<PMsg> = theme::Styler<Url<PMsg>, Style>;
-pub type ThemeStyler<'a> = theme::Styler<UrlLens<'a>, Style>;
+pub type ThemeStyler<'a> = Styler<UrlLens<'a>, Style>;

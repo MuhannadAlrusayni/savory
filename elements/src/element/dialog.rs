@@ -20,7 +20,7 @@ pub struct Dialog<PMsg, C> {
     events: EventsStore<Events<PMsg>>,
     #[rich(read)]
     #[element(config)]
-    styler: Option<Styler<PMsg, C>>,
+    styler: Option<<Dialog<PMsg, C> as Stylable>::Styler>,
     #[rich(read)]
     #[element(theme_lens, config(default))]
     theme: Theme,
@@ -49,9 +49,9 @@ pub enum Msg {
     EventsStore(Rc<dyn Any>),
     // Box<dyn Fn(EventsStore<Events<PMsg>>) -> EventsStore<Events<PMsg>>>
     UpdateEventsStore(Rc<dyn Any>),
-    // Option<Styler<PMsg, C>>
+    // Option<<Self as Stylable>::Styler>
     Styler(Rc<dyn Any>),
-    // Box<dyn Fn(Styler<PMsg, C>) -> Styler<PMsg, C>>
+    // Box<dyn Fn(<Self as Stylable>::Styler) -> <Self as Stylable>::Styler>
     UpdateStyler(Rc<dyn Any>),
     Theme(Theme),
     Title(Option<Label<Msg>>),
@@ -120,12 +120,12 @@ where
                 }
             }
             Msg::Styler(val) => {
-                if let Ok(val) = val.downcast::<Option<Styler<PMsg, C>>>() {
+                if let Ok(val) = val.downcast::<Option<<Self as Stylable>::Styler>>() {
                     self.styler = val.as_ref().clone();
                 }
             }
             Msg::UpdateStyler(val) => {
-                if let Ok(val) = val.downcast::<Box<dyn Fn(Styler<PMsg, C>) -> Styler<PMsg, C>>>() {
+                if let Ok(val) = val.downcast::<Box<dyn Fn(<Self as Stylable>::Styler) -> <Self as Stylable>::Styler>>() {
                     self.styler = Some(val(self.styler.clone().unwrap_or_else(Styler::default)));
                 }
             }
@@ -149,6 +149,21 @@ where
     }
 }
 
+impl<PMsg, C> Stylable for Dialog<PMsg, C> {
+    type Style = Style;
+    type Styler = Styler<Self, Style>;
+
+    fn styler(&self) -> Self::Styler {
+        self.styler
+            .clone()
+            .unwrap_or_else(|| (|s: &Self| s.theme.dialog().get(&s.theme_lens())).into())
+    }
+
+    fn style(&self) -> Self::Style {
+        self.styler().get(self)
+    }
+}
+
 impl<PMsg, C> View for Dialog<PMsg, C>
 where
     PMsg: 'static,
@@ -157,22 +172,17 @@ where
     type Output = Node<PMsg>;
 
     fn view(&self) -> Self::Output {
-        self.styled_view(
-            self.styler
-                .as_ref()
-                .map(|styler| styler.get(self))
-                .unwrap_or_else(|| self.theme.dialog().get(&self.theme_lens())),
-        )
+        self.styled_view(self.style())
     }
 }
+
+pub type ThemeStyler<'a> = Styler<DialogLens<'a>, Style>;
 
 impl<PMsg, C> StyledView for Dialog<PMsg, C>
 where
     PMsg: 'static,
     C: View<Output = Node<PMsg>>,
 {
-    type Style = Style;
-
     fn styled_view(&self, style: Style) -> Self::Output {
         let local_events = self.local_events.get();
         let events = self.events.get();
@@ -233,9 +243,6 @@ pub enum State {
     Opened,
 }
 
-pub type Styler<PMsg, C> = theme::Styler<Dialog<PMsg, C>, Style>;
-pub type ThemeStyler<'a> = theme::Styler<DialogLens<'a>, Style>;
-
 impl Msg {
     pub fn events_store<PMsg: 'static>(val: EventsStore<PMsg>) -> Self {
         Msg::EventsStore(Rc::new(val))
@@ -247,17 +254,29 @@ impl Msg {
         Msg::UpdateEventsStore(Rc::new(val))
     }
 
-    pub fn styler<PMsg: 'static, C: 'static>(val: Styler<PMsg, C>) -> Self {
+    pub fn styler<PMsg, C>(val: <Dialog<PMsg, C> as Stylable>::Styler) -> Self
+    where
+        PMsg: 'static,
+        C: View<Output = Node<PMsg>> + 'static,
+    {
         Msg::try_styler(Some(val))
     }
 
-    pub fn update_styler<PMsg: 'static, C: 'static>(
-        val: impl Fn(Styler<PMsg, C>) -> Styler<PMsg, C> + 'static,
-    ) -> Self {
+    pub fn update_styler<PMsg, C, F>(val: F) -> Self
+    where
+        PMsg: 'static,
+        C: View<Output = Node<PMsg>> + 'static,
+        F: Fn(<Dialog<PMsg, C> as Stylable>::Styler) -> <Dialog<PMsg, C> as Stylable>::Styler
+            + 'static,
+    {
         Msg::UpdateStyler(Rc::new(val))
     }
 
-    pub fn try_styler<PMsg: 'static, C: 'static>(val: Option<Styler<PMsg, C>>) -> Self {
+    pub fn try_styler<PMsg, C>(val: Option<<Dialog<PMsg, C> as Stylable>::Styler>) -> Self
+    where
+        PMsg: 'static,
+        C: View<Output = Node<PMsg>> + 'static,
+    {
         Msg::Styler(Rc::new(val))
     }
 

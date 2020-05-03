@@ -136,7 +136,7 @@ pub mod prelude {
         element::{AppElementExt, Element, HasConfig},
         msg_mapper::{MessageMapperExt, MsgMapper},
         orders_ext::OrdersExt,
-        view::{StyledView, View},
+        view::View,
     };
     pub use seed::prelude::{MessageMapper, Node, Orders, Url};
 }
