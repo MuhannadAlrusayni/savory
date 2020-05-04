@@ -1,21 +1,53 @@
 use crate::prelude::*;
-use seed::prelude::{cmds, CmdHandle};
+use seed::prelude::{cmds, streams, CmdHandle, StreamHandle};
+use std::future::Future;
 
 pub trait OrdersExt<Ms: 'static>: Orders<Ms> {
-    fn perform_cmd_after<MsU: 'static>(
+    fn stream_every<MsU: 'static>(
         &mut self,
         ms: u32,
         handler: impl FnOnce() -> MsU + Clone + 'static,
     ) -> &mut Self {
-        self.perform_cmd(cmds::timeout(ms, handler))
+        self.stream(streams::interval(ms, handler))
     }
 
-    fn perform_cmd_after_with_handle<MsU: 'static>(
+    fn stream_every_with_handle<MsU: 'static>(
+        &mut self,
+        ms: u32,
+        handler: impl FnOnce() -> MsU + Clone + 'static,
+    ) -> StreamHandle {
+        self.stream_with_handle(streams::interval(ms, handler))
+    }
+
+    fn send(&mut self, msg: Ms) -> &mut Self {
+        self.send_msg(msg)
+    }
+
+    fn async_send<MsU: 'static>(&mut self, cmd: impl Future<Output = MsU> + 'static) -> &mut Self {
+        self.perform_cmd(cmd)
+    }
+
+    fn async_send_with_handle<MsU: 'static>(
+        &mut self,
+        cmd: impl Future<Output = MsU> + 'static,
+    ) -> CmdHandle {
+        self.perform_cmd_with_handle(cmd)
+    }
+
+    fn send_after<MsU: 'static>(
+        &mut self,
+        ms: u32,
+        handler: impl FnOnce() -> MsU + Clone + 'static,
+    ) -> &mut Self {
+        self.async_send(cmds::timeout(ms, handler))
+    }
+
+    fn send_after_with_handle<MsU: 'static>(
         &mut self,
         ms: u32,
         handler: impl FnOnce() -> MsU + Clone + 'static,
     ) -> CmdHandle {
-        self.perform_cmd_with_handle(cmds::timeout(ms, handler))
+        self.async_send_with_handle(cmds::timeout(ms, handler))
     }
 
     fn proxy_with<ChildMs: 'static>(

@@ -58,7 +58,7 @@ impl<PMsg: 'static> Element<PMsg> for Toggle<PMsg> {
                 State::Closed | State::Closing => {
                     self.state = State::Opening;
                     match self.open_after {
-                        Action::AfterMs(ms) => orders.perform_cmd_after(ms, || Msg::Toggled(true)),
+                        Action::AfterMs(ms) => orders.send_after(ms, || Msg::Toggled(true)),
                         Action::AfterNextRender => orders.after_next_render(|_| Msg::Toggled(true)),
                     };
                 }
@@ -69,7 +69,7 @@ impl<PMsg: 'static> Element<PMsg> for Toggle<PMsg> {
                 State::Opened | State::Opening => {
                     self.state = State::Closing;
                     match self.close_after {
-                        Action::AfterMs(ms) => orders.perform_cmd_after(ms, || Msg::Toggled(false)),
+                        Action::AfterMs(ms) => orders.send_after(ms, || Msg::Toggled(false)),
                         Action::AfterNextRender => {
                             orders.after_next_render(|_| Msg::Toggled(false))
                         }
