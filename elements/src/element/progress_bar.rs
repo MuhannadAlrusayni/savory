@@ -249,14 +249,6 @@ pub enum Shape {
     Circle,
 }
 
-pub fn events<PMsg>() -> Events<PMsg> {
-    Events::default()
-}
-
-pub fn style() -> Style {
-    Style::default()
-}
-
 pub type ThemeStyler<'a> = Styler<ProgressBarLens<'a>, Style>;
 
 impl Msg {

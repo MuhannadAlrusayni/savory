@@ -392,14 +392,6 @@ fn dec_btn_config() -> button::Config<Msg> {
         .events(|| button::events().and_button(|conf| conf.click(|_| Msg::decrement())))
 }
 
-pub fn events<PMsg>() -> Events<PMsg> {
-    Events::default()
-}
-
-pub fn style() -> Style {
-    Style::default()
-}
-
 pub type ThemeStyler<'a> = Styler<SpinEntryLens<'a>, Style>;
 
 impl Msg {

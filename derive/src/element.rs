@@ -114,6 +114,10 @@ impl Element {
                         }
                     }
                 }
+
+                pub fn events<Msg>() -> Events<Msg> {
+                    Events::default()
+                }
             }
         } else {
             quote! {}
@@ -140,6 +144,10 @@ impl Element {
                         #[rich(write(style = compose), write)]
                         #fields
                     )*
+                }
+
+                pub fn style() -> Style {
+                    Style::default()
                 }
             }
         } else {

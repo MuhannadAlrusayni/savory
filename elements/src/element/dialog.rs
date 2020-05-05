@@ -227,14 +227,6 @@ where
     }
 }
 
-pub fn events<PMsg>() -> Events<PMsg> {
-    Events::default()
-}
-
-pub fn style() -> Style {
-    Style::default()
-}
-
 #[derive(Debug, Clone, Copy)]
 pub enum State {
     Closing,

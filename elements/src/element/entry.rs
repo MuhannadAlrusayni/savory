@@ -197,14 +197,6 @@ impl<PMsg: 'static> Config<PMsg> {
     }
 }
 
-pub fn events<PMsg>() -> Events<PMsg> {
-    Events::default()
-}
-
-pub fn style() -> Style {
-    Style::default()
-}
-
 impl Msg {
     pub fn events_store<PMsg: 'static>(val: EventsStore<PMsg>) -> Self {
         Msg::EventsStore(Rc::new(val))
