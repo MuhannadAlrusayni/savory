@@ -66,6 +66,7 @@ pub mod prelude {
             checkbox::{self, Checkbox},
             dialog::{self, Dialog},
             entry::{self, Entry},
+            helper::animator::{self, Animator},
             helper::toggle::{self, Toggle},
             popover::{self, Popover},
             progress_bar::{self, ProgressBar},

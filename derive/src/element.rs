@@ -55,6 +55,8 @@ struct Config {
     required: util::Flag,
     #[darling(default)]
     nested: util::Flag,
+    #[darling(default)]
+    no_fns: util::Flag,
 }
 
 uses_type_params!(Field, ty);
@@ -272,6 +274,9 @@ impl Element {
                     if config.default.is_some() {
                         panic!("`default` attribute cannot be used with `required` attribute")
                     }
+                    if config.no_fns.is_some() {
+                        panic!("`no_fns` attribute cannot be used with `required` attribute")
+                    }
 
                     pass_new_args.push(quote! { #field, });
                     struct_fields.push(quote! {
@@ -290,14 +295,24 @@ impl Element {
                                 quote! { (#expr).into() }
                             }
                         };
+                        new_fill.push(quote! { #field: #def_expr, });
+                        let setters = if config.no_fns.is_none() {
+                            quote! { #[rich(write, write(style = compose))] }
+                        } else {
+                            quote! {}
+                        };
                         struct_fields.push(quote! {
-                            #[rich(write, write(style = compose))]
+                            #setters
                             pub #field: #ty,
                         });
-                        new_fill.push(quote! { #field: #def_expr, });
                     } else {
+                        let setters = if config.no_fns.is_none() {
+                            quote! { #[rich(write, write(option), write(option, style = compose))] }
+                        } else {
+                            quote! {}
+                        };
                         struct_fields.push(quote! {
-                            #[rich(write, write(option), write(option, style = compose))]
+                            #setters
                             pub #field: Option<#ty>,
                         });
                         new_fill.push(quote! { #field: None, });

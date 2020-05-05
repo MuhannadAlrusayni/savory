@@ -587,7 +587,7 @@ impl<Msg> ElExt<Msg> for El<Msg> {
     }
 
     fn and_style(self, conf: impl FnOnce(Style) -> Style) -> Self {
-        self.set_style(conf(Style::default()))
+        self.add(conf(Style::default()))
     }
 
     fn set_attribute(mut self, val: Attribute) -> Self {

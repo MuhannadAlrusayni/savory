@@ -23,11 +23,11 @@ pub trait OrdersExt<Ms: 'static>: Orders<Ms> {
         self.send_msg(msg)
     }
 
-    fn async_send<MsU: 'static>(&mut self, cmd: impl Future<Output = MsU> + 'static) -> &mut Self {
+    fn cmd<MsU: 'static>(&mut self, cmd: impl Future<Output = MsU> + 'static) -> &mut Self {
         self.perform_cmd(cmd)
     }
 
-    fn async_send_with_handle<MsU: 'static>(
+    fn cmd_with_handle<MsU: 'static>(
         &mut self,
         cmd: impl Future<Output = MsU> + 'static,
     ) -> CmdHandle {
@@ -39,7 +39,7 @@ pub trait OrdersExt<Ms: 'static>: Orders<Ms> {
         ms: u32,
         handler: impl FnOnce() -> MsU + Clone + 'static,
     ) -> &mut Self {
-        self.async_send(cmds::timeout(ms, handler))
+        self.cmd(cmds::timeout(ms, handler))
     }
 
     fn send_after_with_handle<MsU: 'static>(
@@ -47,7 +47,7 @@ pub trait OrdersExt<Ms: 'static>: Orders<Ms> {
         ms: u32,
         handler: impl FnOnce() -> MsU + Clone + 'static,
     ) -> CmdHandle {
-        self.async_send_with_handle(cmds::timeout(ms, handler))
+        self.cmd_with_handle(cmds::timeout(ms, handler))
     }
 
     fn proxy_with<ChildMs: 'static>(
