@@ -165,6 +165,7 @@ macro_rules! event_creator{
                 trigger: impl Into<Ev>,
                 handler: impl FnOnce($ty) -> HandlerMs + 'static + Clone,
             ) -> EventHandler<Ms> {
+                // TODO: Supoort Option<Ms> as in Seed API
                 let msg_type = TypeId::of::<HandlerMs>();
                 if msg_type != TypeId::of::<Ms>() && msg_type != TypeId::of::<()>() {
                     panic!("Handler can return only Ms or ()!");
