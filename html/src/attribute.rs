@@ -241,7 +241,7 @@ create_attributes! {
         cite,
     }
 
-    #[derive(Debug, Clone, Display)]
+    #[derive(IntoIterator, Debug, Clone, Display, Eq, PartialEq)]
     #[display(fmt = "{}", "_0.join(\" \")")]
     Class(Vec<Cow<'static, str>>) {
         update_el: |class: Class| -> Option<String> {
@@ -997,6 +997,17 @@ impl From<Id> for For {
     }
 }
 
+impl Class {
+    pub fn contains(&self, class: &Class) -> bool {
+        class.0.iter().all(|c| self.0.iter().any(|s| s == c))
+    }
+
+    pub fn push(&mut self, class: impl Into<Class>) -> &mut Self {
+        self.0.extend(class.into());
+        self
+    }
+}
+
 impl From<Class> for Cow<'static, str> {
     fn from(source: Class) -> Self {
         source.0.join(" ").into()
@@ -1011,12 +1022,53 @@ impl Extend<Class> for Class {
     }
 }
 
+impl Extend<&'static str> for Class {
+    fn extend<T: IntoIterator<Item = &'static str>>(&mut self, iter: T) {
+        for class in iter {
+            let class = Class::from(class);
+            self.0.extend(class);
+        }
+    }
+}
+
+impl Extend<String> for Class {
+    fn extend<T: IntoIterator<Item = String>>(&mut self, iter: T) {
+        for class in iter {
+            let class = Class::from(class);
+            self.0.extend(class);
+        }
+    }
+}
+
+impl Extend<Option<&'static str>> for Class {
+    fn extend<T: IntoIterator<Item = Option<&'static str>>>(&mut self, iter: T) {
+        for class in iter {
+            let class = Class::from(class);
+            self.0.extend(class);
+        }
+    }
+}
+
+impl Extend<Option<String>> for Class {
+    fn extend<T: IntoIterator<Item = Option<String>>>(&mut self, iter: T) {
+        for class in iter {
+            let class = Class::from(class);
+            self.0.extend(class);
+        }
+    }
+}
+
 impl From<&'static str> for Class {
     fn from(source: &'static str) -> Self {
         if source.is_empty() {
             Class(vec![])
         } else {
-            Class(vec![source.into()])
+            Class(
+                source
+                    .split(char::is_whitespace)
+                    .map(|s| s.into())
+                    .collect(),
+            )
         }
     }
 }
@@ -1026,7 +1078,13 @@ impl From<String> for Class {
         if source.is_empty() {
             Class(vec![])
         } else {
-            Class(vec![source.into()])
+            Class(
+                source
+                    .split(char::is_whitespace)
+                    .map(|s| s.to_string())
+                    .map(|s| Cow::from(s))
+                    .collect::<Vec<_>>(),
+            )
         }
     }
 }
@@ -1034,7 +1092,7 @@ impl From<String> for Class {
 impl From<Option<&'static str>> for Class {
     fn from(source: Option<&'static str>) -> Self {
         match source {
-            Some(class) if !class.is_empty() => Class(vec![class.into()]),
+            Some(class) => class.into(),
             _ => Class(vec![]),
         }
     }
@@ -1043,7 +1101,7 @@ impl From<Option<&'static str>> for Class {
 impl From<Option<String>> for Class {
     fn from(source: Option<String>) -> Self {
         match source {
-            Some(class) if !class.is_empty() => Class(vec![class.into()]),
+            Some(class) => class.into(),
             _ => Class(vec![]),
         }
     }
@@ -1051,58 +1109,33 @@ impl From<Option<String>> for Class {
 
 impl From<Vec<&'static str>> for Class {
     fn from(source: Vec<&'static str>) -> Self {
-        Class(
-            source
-                .into_iter()
-                .filter_map(|c| {
-                    let c = c.to_string();
-                    if c.is_empty() {
-                        None
-                    } else {
-                        Some(c.into())
-                    }
-                })
-                .collect(),
-        )
+        let mut class = Class(vec![]);
+        class.extend(source);
+        class
     }
 }
 
 impl From<Vec<String>> for Class {
     fn from(source: Vec<String>) -> Self {
-        Class(
-            source
-                .into_iter()
-                .filter_map(|c| if c.is_empty() { None } else { Some(c.into()) })
-                .collect(),
-        )
+        let mut class = Class(vec![]);
+        class.extend(source);
+        class
     }
 }
 
 impl From<Vec<Option<&'static str>>> for Class {
     fn from(source: Vec<Option<&'static str>>) -> Self {
-        Class(
-            source
-                .into_iter()
-                .filter_map(|class| match class {
-                    Some(class) if !class.is_empty() => Some(class.into()),
-                    _ => None,
-                })
-                .collect(),
-        )
+        let mut class = Class(vec![]);
+        class.extend(source);
+        class
     }
 }
 
 impl From<Vec<Option<String>>> for Class {
     fn from(source: Vec<Option<String>>) -> Self {
-        Class(
-            source
-                .into_iter()
-                .filter_map(|class| match class {
-                    Some(class) if !class.is_empty() => Some(class.into()),
-                    _ => None,
-                })
-                .collect(),
-        )
+        let mut class = Class(vec![]);
+        class.extend(source);
+        class
     }
 }
 
