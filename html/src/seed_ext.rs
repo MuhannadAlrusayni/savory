@@ -5,7 +5,7 @@ use crate::{
     events::Events,
     prelude::*,
 };
-use seed::virtual_dom::style::Style as SeedStyle;
+use seed::{dom_entity_names::At, prelude::AtValue, virtual_dom::style::Style as SeedStyle};
 use std::borrow::Cow;
 
 pub trait AddForEl<T> {
@@ -510,8 +510,10 @@ pub trait ElExt<Msg> {
 
     // NOTE: method name overlab with `El::add_class()`
     // fn add_class(self, class: att::Class) -> Self;
+    fn get_class(&self) -> Option<att::Class>;
     fn class(self, class: impl Into<att::Class>) -> Self;
 
+    fn get_id(&self) -> Option<att::Id>;
     fn try_id(self, id: Option<impl Into<att::Id>>) -> Self;
     fn id(self, id: impl Into<att::Id>) -> Self;
 
@@ -525,6 +527,15 @@ pub trait ElExt<Msg> {
         _: impl FnOnce(El<Msg>) -> El<Msg>,
         _: impl FnOnce(El<Msg>) -> El<Msg>,
     ) -> Self;
+
+    // lookup methods
+    fn for_class(
+        self,
+        class: impl Into<att::Class>,
+        f: impl Fn(Node<Msg>) -> Node<Msg> + Copy,
+    ) -> Self;
+    fn for_id(self, id: impl Into<att::Id>, f: impl Fn(Node<Msg>) -> Node<Msg> + Copy) -> Self;
+    // fn for_selector(s: impl Into<Selector>, f: impl FnOnce(Node) -> Node<Msg>);
 }
 
 impl<Msg> ElExt<Msg> for El<Msg> {
@@ -558,7 +569,7 @@ impl<Msg> ElExt<Msg> for El<Msg> {
     }
 
     fn and_events(self, conf: impl FnOnce(Events<Msg>) -> Events<Msg>) -> Self {
-        self.set_events(&conf(Events::default()))
+        self.add_events(&conf(Events::default()))
     }
 
     fn try_add_style(self, val: Option<Style>) -> Self {
@@ -640,8 +651,22 @@ impl<Msg> ElExt<Msg> for El<Msg> {
         }
     }
 
+    fn get_class(&self) -> Option<att::Class> {
+        self.attrs.vals.get(&At::Class).and_then(|v| match v {
+            AtValue::Some(val) => Some(att::Class::from(val.clone())),
+            _ => None,
+        })
+    }
+
     fn class(self, class: impl Into<att::Class>) -> Self {
         self.set(class.into())
+    }
+
+    fn get_id(&self) -> Option<att::Id> {
+        self.attrs.vals.get(&At::Id).and_then(|v| match v {
+            AtValue::Some(val) => Some(att::Id::from(val.clone())),
+            _ => None,
+        })
     }
 
     fn try_id(self, id: Option<impl Into<att::Id>>) -> Self {
@@ -683,6 +708,40 @@ impl<Msg> ElExt<Msg> for El<Msg> {
         } else {
             false_conf(self)
         }
+    }
+
+    fn for_class(
+        mut self,
+        class: impl Into<att::Class>,
+        f: impl Fn(Node<Msg>) -> Node<Msg> + Copy,
+    ) -> Self {
+        let class = class.into();
+        self.children = self
+            .children
+            .into_iter()
+            .map(move |mut child| {
+                if child.get_class().map_or(false, |c| c.contains(&class)) {
+                    child = f(child);
+                }
+                child.for_class(class.clone(), f)
+            })
+            .collect();
+        self
+    }
+
+    fn for_id(mut self, id: impl Into<att::Id>, f: impl Fn(Node<Msg>) -> Node<Msg> + Copy) -> Self {
+        let id = id.into();
+        self.children = self
+            .children
+            .into_iter()
+            .map(move |mut child| {
+                if child.get_id().as_ref() == Some(&id) {
+                    child = f(child);
+                }
+                child.for_id(id.clone(), f)
+            })
+            .collect();
+        self
     }
 }
 
@@ -759,8 +818,24 @@ impl<Msg> ElExt<Msg> for Node<Msg> {
         self.and_element(|el| el.el_ref(reference))
     }
 
+    fn get_class(&self) -> Option<att::Class> {
+        if let Node::Element(ref el) = self {
+            el.get_class()
+        } else {
+            None
+        }
+    }
+
     fn class(self, class: impl Into<att::Class>) -> Self {
         self.and_element(|el| el.class(class))
+    }
+
+    fn get_id(&self) -> Option<att::Id> {
+        if let Node::Element(ref el) = self {
+            el.get_id()
+        } else {
+            None
+        }
     }
 
     fn try_id(self, id: Option<impl Into<att::Id>>) -> Self {
@@ -786,6 +861,18 @@ impl<Msg> ElExt<Msg> for Node<Msg> {
         false_conf: impl FnOnce(El<Msg>) -> El<Msg>,
     ) -> Self {
         self.and_element(|el| el.config_if_else(condition, true_conf, false_conf))
+    }
+
+    fn for_class(
+        self,
+        class: impl Into<att::Class>,
+        f: impl Fn(Node<Msg>) -> Node<Msg> + Copy,
+    ) -> Self {
+        self.and_element(|el| el.for_class(class, f))
+    }
+
+    fn for_id(self, id: impl Into<att::Id>, f: impl Fn(Node<Msg>) -> Node<Msg> + Copy) -> Self {
+        self.and_element(|el| el.for_id(id, f))
     }
 }
 
