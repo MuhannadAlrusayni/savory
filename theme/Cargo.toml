@@ -1,0 +1,18 @@
+[package]
+name = "savory-theme"
+description = "The official theme for Savory"
+version = "0.0.1"
+authors = ["Muhannad Alrusayni <Muhannad.Alrusayni@gmail.com>"]
+edition = "2018"
+readme = "../README.MD"
+keywords = ["web", "seed", "SPA", "wasm", "framework"]
+categories = ["gui", "wasm", "web-programming"]
+license = "MIT OR Apache-2.0"
+repository = "https://gitlab.com/MAlrusayni/savory/tree/master/theme"
+homepage = "https://gitlab.com/MAlrusayni/savory"
+documentation = "https://docs.rs/savory-theme"
+include = [ "src/**/*", "Cargo.toml", "README.MD" ]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]

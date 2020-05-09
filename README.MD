@@ -340,6 +340,8 @@ TODO
 - [`savory-html`] - Typed HTML for Savory
 - [`savory-elements`] - UI Elements based on Savory
 - [`savory-derive`] - Helper derives
+- [`savory-theme`] - Helper derives
+- [`savory-icons`] - Helper derives
 
 # License
 
@@ -357,3 +359,5 @@ dual licensed as above, without any additional terms or conditions.
 [`savory-html`]: https://gitlab.com/MAlrusayni/savory/tree/master/html
 [`savory-elements`]: https://gitlab.com/MAlrusayni/savory/tree/master/elements
 [`savory-derive`]: https://gitlab.com/MAlrusayni/savory/tree/master
+[`savory-theme`]: https://gitlab.com/MAlrusayni/savory/tree/master/theme
+[`savory-icons`]: https://gitlab.com/MAlrusayni/savory/tree/master/icons

@@ -4,6 +4,8 @@ members = [
   "core",
   "html",
   "elements",
+  "theme",
+  "icons",
   # helper crates
   "cli",
   "derive",
