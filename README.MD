@@ -325,9 +325,9 @@ use Savory elements as building block in your own element.
 
 first thing first, add savory crates into your `Cargo.toml` file:
 ``` toml
-savory-core = { git = "https://gitlab.com/MAlrusayni/savory/tree/master/core" }
-savory-elements = { git = "https://gitlab.com/MAlrusayni/savory/tree/master/elements" }
-savory-html = { git = "https://gitlab.com/MAlrusayni/savory/tree/master/html" }
+savory-core = "0.5.0"
+savory-html = "0.5.0"
+savory-elements = "0.5.0"
 wasm-bindgen = "0.2.55"
 ```
 
