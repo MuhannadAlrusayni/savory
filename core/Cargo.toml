@@ -19,7 +19,7 @@ maintenance = { status = "actively-developed" }
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-seed = { git = "https://github.com/David-OConnor/seed", version = "0.6.0" }
+seed = "0.7.0"
 
 [dev-dependencies]
 savory-html = { path = "../html" }

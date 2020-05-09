@@ -15,4 +15,3 @@ savory-core = { path = "../../core" }
 savory-elements = { path = "../../elements" }
 savory-html = { path = "../../html" }
 wasm-bindgen = "0.2.55"
-derive_rich = "0.4.1"
