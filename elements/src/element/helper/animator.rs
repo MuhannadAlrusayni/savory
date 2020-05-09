@@ -6,9 +6,7 @@ use std::{any::Any, ops::Deref};
 
 // TODO: add support for timeline, so we can repeate the animation.
 #[derive(Rich, Element)]
-pub struct Animator<PMsg, S> {
-    #[element(config(required))]
-    msg_mapper: MsgMapper<Msg, PMsg>,
+pub struct Animator<S> {
     #[element(config(required))]
     init_state: Box<S>,
     last_instant: Instant,
@@ -43,12 +41,12 @@ pub enum Msg {
     Playing(Cursor),
 }
 
-impl<PMsg: 'static, S: 'static> Element<PMsg> for Animator<PMsg, S> {
+impl<S: 'static> Element for Animator<S> {
     type Message = Msg;
+    type Config = Config<S>;
 
-    fn init(config: Self::Config, _: &mut impl Orders<PMsg>) -> Self {
+    fn init(config: Self::Config, _: &mut impl Orders<Msg>) -> Self {
         Self {
-            msg_mapper: config.msg_mapper,
             init_state: config.init_state,
             last_instant: Instant::now(),
             timeline: config.timeline,
@@ -57,8 +55,7 @@ impl<PMsg: 'static, S: 'static> Element<PMsg> for Animator<PMsg, S> {
         }
     }
 
-    fn update(&mut self, msg: Msg, orders: &mut impl Orders<PMsg>) {
-        let mut orders = orders.proxy_with(&self.msg_mapper);
+    fn update(&mut self, msg: Msg, orders: &mut impl Orders<Msg>) {
         match msg {
             Msg::Update(val) => {
                 if let Ok(val) = val.downcast::<S>() {
@@ -72,18 +69,18 @@ impl<PMsg: 'static, S: 'static> Element<PMsg> for Animator<PMsg, S> {
                     }
                 }
             }
-            Msg::Playing(cursor) => self.playing(cursor, &mut orders),
-            Msg::Replay => self.replay(false, &mut orders),
+            Msg::Playing(cursor) => self.playing(cursor, orders),
+            Msg::Replay => self.replay(false, orders),
             Msg::ReplayDelay(ms) => self.replay_delay = ms,
-            Msg::ReplayLoop => self.replay(true, &mut orders),
+            Msg::ReplayLoop => self.replay(true, orders),
             Msg::Stop => self.stop(),
             Msg::ResetTimeline => self.reset_timeline(),
         }
     }
 }
 
-impl<PMsg, S> Animator<PMsg, S> {
-    pub fn animate(
+impl<S> Animator<S> {
+    pub fn animate<PMsg>(
         &self,
         node: Node<PMsg>,
         styler: impl FnOnce(&S, css::Style) -> css::Style,
@@ -194,8 +191,8 @@ impl<PMsg, S> Animator<PMsg, S> {
     }
 }
 
-impl<PMsg: 'static, S: 'static> Config<PMsg, S> {
-    pub fn init(self, orders: &mut impl Orders<PMsg>) -> Animator<PMsg, S> {
+impl<S: 'static> Config<S> {
+    pub fn init(self, orders: &mut impl Orders<Msg>) -> Animator<S> {
         Animator::init(self, orders)
     }
 

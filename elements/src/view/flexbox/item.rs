@@ -49,6 +49,8 @@ pub struct Item<PMsg> {
     pub flatten: bool,
 }
 
+pub type ThemeStyler<'a> = Styler<ItemLens<'a>, Style>;
+
 impl<PMsg> Stylable for Item<PMsg> {
     type Style = Style;
     type Styler = Styler<Self, Style>;
@@ -64,16 +66,14 @@ impl<PMsg> Stylable for Item<PMsg> {
     }
 }
 
-impl<PMsg> View for Item<PMsg> {
-    type Output = Node<PMsg>;
-
-    fn view(&self) -> Self::Output {
+impl<PMsg> View<Node<PMsg>> for Item<PMsg> {
+    fn view(&self) -> Node<PMsg> {
         self.styled_view(self.style())
     }
 }
 
-impl<PMsg> StyledView for Item<PMsg> {
-    fn styled_view(&self, style: Style) -> Self::Output {
+impl<PMsg> StyledView<Node<PMsg>> for Item<PMsg> {
+    fn styled_view(&self, style: Style) -> Node<PMsg> {
         if self.is_flatten() {
             self.content.clone()
         } else {
@@ -111,19 +111,17 @@ impl<PMsg> From<Node<PMsg>> for Item<PMsg> {
     }
 }
 
-impl<'a, PMsg> From<&'a dyn View<Output = Node<PMsg>>> for Item<PMsg> {
-    fn from(source: &'a dyn View<Output = Node<PMsg>>) -> Self {
+impl<'a, PMsg> From<&'a dyn View<Node<PMsg>>> for Item<PMsg> {
+    fn from(source: &'a dyn View<Node<PMsg>>) -> Self {
         Self::from(source.view())
     }
 }
 
 impl<T, PMsg> From<&T> for Item<PMsg>
 where
-    T: View<Output = Node<PMsg>>,
+    T: View<Node<PMsg>>,
 {
     fn from(view: &T) -> Self {
         Self::from(view.view())
     }
 }
-
-pub type ThemeStyler<'a> = Styler<ItemLens<'a>, Style>;

@@ -4,9 +4,9 @@ use std::rc::Rc;
 /// Trait that makes the view more resuable by accepting `Self::Style`
 ///
 /// Reusable view should implement this trait.
-pub trait StyledView: View + Stylable {
+pub trait StyledView<Output>: View<Output> + Stylable {
     /// view with the passed styled
-    fn styled_view(&self, style: Self::Style) -> Self::Output;
+    fn styled_view(&self, style: Self::Style) -> Output;
 }
 
 /// Trait used to define view style and styler with getter functions
@@ -67,5 +67,33 @@ impl<E, S> Clone for Styler<E, S> {
 impl<E, S: Default> Default for Styler<E, S> {
     fn default() -> Self {
         Self(Rc::new(|_| S::default()))
+    }
+}
+
+pub struct UpdateStyler<E: Stylable>(Rc<dyn Fn(E::Styler) -> E::Styler>);
+
+impl<E: Stylable> UpdateStyler<E> {
+    pub fn new(styler: impl Fn(E::Styler) -> E::Styler + 'static) -> Self {
+        Self(Rc::new(styler))
+    }
+
+    pub fn update(&self, styler: E::Styler) -> E::Styler {
+        self.0(styler)
+    }
+}
+
+impl<E, T> From<T> for UpdateStyler<E>
+where
+    E: Stylable,
+    T: Fn(E::Styler) -> E::Styler + 'static,
+{
+    fn from(source: T) -> Self {
+        Self::new(source)
+    }
+}
+
+impl<E: Stylable> Clone for UpdateStyler<E> {
+    fn clone(&self) -> Self {
+        Self(Rc::clone(&self.0))
     }
 }

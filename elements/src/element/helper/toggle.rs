@@ -2,9 +2,7 @@ use crate::prelude::*;
 use savory_core::prelude::*;
 
 #[derive(Rich, Element)]
-pub struct Toggle<PMsg> {
-    #[element(config(required))]
-    msg_mapper: MsgMapper<Msg, PMsg>,
+pub struct Toggle {
     #[element(config(default = "State::Closed"))]
     #[rich(read(copy))]
     state: State,
@@ -14,10 +12,9 @@ pub struct Toggle<PMsg> {
     open_after: Action,
 }
 
-impl<PMsg> Clone for Toggle<PMsg> {
+impl Clone for Toggle {
     fn clone(&self) -> Self {
         Self {
-            msg_mapper: self.msg_mapper.clone(),
             state: self.state.clone(),
             close_after: self.close_after.clone(),
             open_after: self.open_after.clone(),
@@ -37,21 +34,19 @@ pub enum Msg {
     Toggle,
 }
 
-impl<PMsg: 'static> Element<PMsg> for Toggle<PMsg> {
+impl Element for Toggle {
     type Message = Msg;
+    type Config = Config;
 
-    fn init(config: Self::Config, _: &mut impl Orders<PMsg>) -> Self {
+    fn init(config: Self::Config, _: &mut impl Orders<Msg>) -> Self {
         Self {
-            msg_mapper: config.msg_mapper,
             state: config.state,
             close_after: config.close_after,
             open_after: config.open_after,
         }
     }
 
-    fn update(&mut self, msg: Msg, p_orders: &mut impl Orders<PMsg>) {
-        let mut orders = p_orders.proxy_with(&self.msg_mapper);
-
+    fn update(&mut self, msg: Msg, orders: &mut impl Orders<Msg>) {
         match msg {
             Msg::Toggled(true) => match self.state {
                 State::Opened => {}
@@ -80,8 +75,8 @@ impl<PMsg: 'static> Element<PMsg> for Toggle<PMsg> {
                 }
             },
             Msg::Toggle => match self.state {
-                State::Opened | State::Opening => self.update(Msg::Toggled(false), p_orders),
-                State::Closed | State::Closing => self.update(Msg::Toggled(true), p_orders),
+                State::Opened | State::Opening => self.update(Msg::Toggled(false), orders),
+                State::Closed | State::Closing => self.update(Msg::Toggled(true), orders),
             },
         }
     }
@@ -95,8 +90,8 @@ pub enum State {
     Closing,
 }
 
-impl<PMsg: 'static> Config<PMsg> {
-    pub fn init(self, orders: &mut impl Orders<PMsg>) -> Toggle<PMsg> {
+impl Config {
+    pub fn init(self, orders: &mut impl Orders<Msg>) -> Toggle {
         Toggle::init(self, orders)
     }
 
@@ -111,7 +106,7 @@ impl<PMsg: 'static> Config<PMsg> {
     }
 }
 
-impl<PMsg: 'static> Toggle<PMsg> {
+impl Toggle {
     pub fn is_toggled(&self) -> bool {
         match self.state {
             State::Opened | State::Opening => true,
@@ -119,11 +114,11 @@ impl<PMsg: 'static> Toggle<PMsg> {
         }
     }
 
-    pub fn toggle(&mut self, orders: &mut impl Orders<PMsg>) {
+    pub fn toggle(&mut self, orders: &mut impl Orders<Msg>) {
         self.update(Msg::Toggle, orders);
     }
 
-    pub fn toggled(&mut self, val: bool, orders: &mut impl Orders<PMsg>) {
+    pub fn toggled(&mut self, val: bool, orders: &mut impl Orders<Msg>) {
         self.update(Msg::Toggled(val), orders);
     }
 }

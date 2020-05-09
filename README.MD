@@ -45,7 +45,7 @@ write the same app but with styled and reusable element.
 
 ## Simple Counter
 
-``` rust
+```rust
 use savory_core::prelude::*;
 use savory_html::prelude::*;
 use wasm_bindgen::prelude::*;
@@ -59,12 +59,9 @@ pub enum Msg {
     Decrement,
 }
 
-impl HasConfig for Counter {
-    type Config = Url;
-}
-
-impl Element<Msg> for Counter {
+impl Element for Counter {
     type Message = Msg;
+    type Config = Url;
 
     // initialize the app in this function
     fn init(_: Url, _: &mut impl Orders<Msg>) -> Self {
@@ -80,11 +77,9 @@ impl Element<Msg> for Counter {
     }
 }
 
-impl View for Counter {
-    type Output = Node<Msg>;
-
+impl View<Node<Msg>> for Counter {
     // view the app
-    fn view(&self) -> Self::Output {
+    fn view(&self) -> Node<Msg> {
         let inc_btn = html::button()
             .add("Increment")
             .and_events(|events| events.click(|_| Msg::Increment));
@@ -117,7 +112,7 @@ Preview:
 Now we will make counter element and an app element this illustrate how to make
 parent and child element, and how to make resuable and stylable element.
 
-``` rust
+```rust
 use savory_core::prelude::*;
 use savory_elements::prelude::*;
 use savory_html::{
@@ -128,10 +123,7 @@ use wasm_bindgen::prelude::*;
 
 #[derive(Element)]
 #[element(style(inc_btn, dec_btn), events(inc_btn, dec_btn))]
-pub struct Counter<PMsg> {
-    #[element(config(required))]
-    msg_mapper: MsgMapper<Msg, PMsg>,
-    local_events: Events<Msg>,
+pub struct Counter {
     #[element(config(default = "10"))]
     value: i32,
 }
@@ -141,24 +133,17 @@ pub enum Msg {
     Decrement,
 }
 
-impl<PMsg: 'static> Element<PMsg> for Counter<PMsg> {
+impl Element for Counter {
     type Message = Msg;
+    type Config = Config;
 
-    fn init(config: Self::Config, _: &mut impl Orders<PMsg>) -> Self {
-        let local_events = Events::default()
-            // increment button events
-            .and_inc_btn(|conf| conf.click(|_| Msg::Increment))
-            // decrement button events
-            .and_dec_btn(|conf| conf.click(|_| Msg::Decrement));
-
+    fn init(config: Self::Config, _: &mut impl Orders<Msg>) -> Self {
         Self {
-            msg_mapper: config.msg_mapper,
-            local_events,
             value: config.value,
         }
     }
 
-    fn update(&mut self, msg: Msg, _: &mut impl Orders<PMsg>) {
+    fn update(&mut self, msg: Msg, _: &mut impl Orders<Msg>) {
         match msg {
             Msg::Increment => self.value += 1,
             Msg::Decrement => self.value -= 1,
@@ -166,10 +151,8 @@ impl<PMsg: 'static> Element<PMsg> for Counter<PMsg> {
     }
 }
 
-impl<PMsg: 'static> View for Counter<PMsg> {
-    type Output = Node<PMsg>;
-
-    fn view(&self) -> Self::Output {
+impl View<Node<Msg>> for Counter {
+    fn view(&self) -> Node<Msg> {
         // sharde style for buttons
         let style_btns = |conf: css::Style| {
             conf.add(St::Appearance, val::None)
@@ -189,14 +172,14 @@ impl<PMsg: 'static> View for Counter<PMsg> {
         let inc_btn = html::button()
             .class("inc-btn")
             .set(style.inc_btn)
-            .set(&self.local_events.inc_btn)
+            .and_events(|conf| conf.click(|_| Msg::Increment))
             .add("Increment");
 
         // decrement button node
         let dec_btn = html::button()
             .class("dec-btn")
             .set(style.dec_btn)
-            .set(&self.local_events.dec_btn)
+            .and_events(|conf| conf.click(|_| Msg::Decrement))
             .add("Decrement");
 
         // contianer node
@@ -204,14 +187,12 @@ impl<PMsg: 'static> View for Counter<PMsg> {
             .add(dec_btn)
             .add(self.value.to_string())
             .add(inc_btn)
-            // map the output node to the parent node
-            .map_msg_with(&self.msg_mapper)
     }
 }
 
 // convenient way to convert Config into Counter
-impl<PMsg: 'static> Config<PMsg> {
-    pub fn init(self, orders: &mut impl Orders<PMsg>) -> Counter<PMsg> {
+impl Config {
+    pub fn init(self, orders: &mut impl Orders<Msg>) -> Counter {
         Counter::init(self, orders)
     }
 }
@@ -223,38 +204,35 @@ pub enum AppMsg {
 }
 
 pub struct MyApp {
-    counter_element: Counter<AppMsg>,
+    counter_element: Counter,
 }
 
-impl HasConfig for MyApp {
-    type Config = Url;
-}
-
-impl Element<AppMsg> for MyApp {
+impl Element for MyApp {
     type Message = AppMsg;
+    type Config = Url;
 
     fn init(_: Url, orders: &mut impl Orders<AppMsg>) -> Self {
         Self {
-            counter_element: Counter::config(AppMsg::Counter)
+            counter_element: Counter::config()
                 // give it starting value. 10 will be used as default value if
                 // we didn't pass value
                 .value(100)
-                .init(orders),
+                .init(&mut orders.proxy(AppMsg::Counter)),
         }
     }
 
     fn update(&mut self, msg: AppMsg, orders: &mut impl Orders<AppMsg>) {
         match msg {
-            AppMsg::Counter(msg) => self.counter_element.update(msg, orders),
+            AppMsg::Counter(msg) => self
+                .counter_element
+                .update(msg, &mut orders.proxy(AppMsg::Counter)),
         }
     }
 }
 
-impl View for MyApp {
-    type Output = Node<AppMsg>;
-
-    fn view(&self) -> Self::Output {
-        self.counter_element.view()
+impl View<Node<AppMsg>> for MyApp {
+    fn view(&self) -> Node<AppMsg> {
+        self.counter_element.view().map_msg(AppMsg::Counter)
     }
 }
 
@@ -288,45 +266,42 @@ use savory_elements::prelude::*;
 use wasm_bindgen::prelude::*;
 
 pub struct MyApp {
-    spin_entry: SpinEntry<Msg>,
+    spin_entry: SpinEntry,
 }
 
 pub enum Msg {
     SpinEntry(spin_entry::Msg),
 }
 
-impl HasConfig for MyApp {
-    type Config = Url;
-}
-
-impl Element<Msg> for MyApp {
+impl Element for MyApp {
     type Message = Msg;
+    type Config = Url;
 
     fn init(_: Url, orders: &mut impl Orders<Msg>) -> Self {
-        let spin_entry = SpinEntry::config(Msg::SpinEntry)
+        let spin_entry = SpinEntry::config()
             .min(-40.)
             .placeholder(44.)
             .step(5.)
             .max(40.)
-            .init(orders);
+            .init(&mut orders.proxy(Msg::SpinEntry));
 
         Self { spin_entry }
     }
 
     fn update(&mut self, msg: Msg, orders: &mut impl Orders<Msg>) {
         match msg {
-            Msg::SpinEntry(msg) => self.spin_entry.update(msg, orders),
+            Msg::SpinEntry(msg) => self
+                .spin_entry
+                .update(msg, &mut orders.proxy(Msg::SpinEntry)),
         };
     }
 }
 
-impl View for MyApp {
-    type Output = Node<Msg>;
-
-    fn view(&self) -> Self::Output {
+impl View<Node<Msg>> for MyApp {
+    fn view(&self) -> Node<Msg> {
         Flexbox::new()
             .center()
-            .add(&self.spin_entry)
+            .add(self.spin_entry.view().map_msg(Msg::SpinEntry))
             .and_size(|conf| conf.full())
             .view()
     }

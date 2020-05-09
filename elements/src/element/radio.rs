@@ -2,58 +2,45 @@ use crate::prelude::*;
 use derive_rich::Rich;
 use savory_core::prelude::*;
 use savory_html::prelude::*;
-use std::{any::Any, borrow::Cow, rc::Rc};
+use std::borrow::Cow;
 
 #[derive(Rich, Element)]
 #[element(style(radio, button, label), events(radio, button, label))]
-pub struct Radio<PMsg> {
+pub struct Radio {
     // general element properties
     #[rich(read)]
     #[element(config)]
     id: Id,
     input_el_ref: ElRef<web_sys::HtmlInputElement>,
     label_el_ref: ElRef<web_sys::HtmlLabelElement>,
-    #[element(config(required))]
-    msg_mapper: MsgMapper<Msg, PMsg>,
     #[rich(read)]
-    local_events: EventsStore<Events<Msg>>,
-    #[rich(read)]
-    #[element(config(default))]
-    events: EventsStore<Events<PMsg>>,
+    events: EventsStore<Events<Msg>>,
     #[rich(read)]
     #[element(config)]
-    styler: Option<<Radio<PMsg> as Stylable>::Styler>,
+    styler: Option<<Radio as Stylable>::Styler>,
     #[rich(read)]
-    #[element(theme_lens, config(default))]
+    #[element(config(default))]
     theme: Theme,
 
     // radio element properties
     #[rich(read(copy, rename = is_toggled))]
-    #[element(theme_lens, config(default))]
+    #[element(config(default))]
     toggled: bool,
     #[rich(read)]
-    #[element(theme_lens, config)]
+    #[element(config)]
     label: Option<Cow<'static, str>>,
     #[rich(read(copy, rename = is_disabled))]
-    #[element(theme_lens, config(default))]
+    #[element(config(default))]
     disabled: bool,
     #[rich(read(copy, rename = is_focused))]
-    #[element(theme_lens)]
     focused: bool,
     #[rich(read(copy, rename = is_mouse_over))]
-    #[element(theme_lens)]
     mouse_over: bool,
 }
 
 pub enum Msg {
-    // EventsStore<Events<PMsg>>
-    EventsStore(Rc<dyn Any>),
-    // Box<dyn Fn(EventsStore<Events<PMsg>>) -> EventsStore<Events<PMsg>>>
-    UpdateEventsStore(Rc<dyn Any>),
-    // Option<<Self as Stylable>::Styler>
-    Styler(Rc<dyn Any>),
-    // Box<dyn Fn(<Self as Stylable>::Styler) -> <Self as Stylable>::Styler>
-    UpdateStyler(Rc<dyn Any>),
+    Styler(Option<<Radio as Stylable>::Styler>),
+    UpdateStyler(UpdateStyler<Radio>),
     Theme(Theme),
     Label(Option<Cow<'static, str>>),
     Toggled(bool),
@@ -63,14 +50,14 @@ pub enum Msg {
     MouseOver(bool),
 }
 
-impl<PMsg: 'static> Element<PMsg> for Radio<PMsg> {
+impl Element for Radio {
     type Message = Msg;
+    type Config = Config;
 
-    fn init(config: Self::Config, orders: &mut impl Orders<PMsg>) -> Self {
-        let mut orders = orders.proxy_with(&config.msg_mapper);
+    fn init(config: Self::Config, orders: &mut impl Orders<Msg>) -> Self {
         orders.subscribe(|theme: ThemeChanged| Msg::theme(theme.0));
 
-        let local_events = || {
+        let events = || {
             Events::default()
                 .and_radio(|conf| {
                     conf.focus(|_| Msg::focus(true))
@@ -91,9 +78,7 @@ impl<PMsg: 'static> Element<PMsg> for Radio<PMsg> {
             label_el_ref: ElRef::default(),
             theme: config.theme,
             styler: config.styler,
-            msg_mapper: config.msg_mapper,
-            local_events: local_events.into(),
-            events: config.events,
+            events: events.into(),
             label: config.label,
             disabled: config.disabled,
             toggled: config.toggled,
@@ -102,26 +87,13 @@ impl<PMsg: 'static> Element<PMsg> for Radio<PMsg> {
         }
     }
 
-    fn update(&mut self, msg: Msg, _: &mut impl Orders<PMsg>) {
+    fn update(&mut self, msg: Msg, _: &mut impl Orders<Msg>) {
         match msg {
-            Msg::EventsStore(val) => {
-                if let Ok(val) = val.downcast::<EventsStore<Events<PMsg>>>() {
-                    self.events = val.into();
-                }
-            }
-            Msg::UpdateEventsStore(val) => {
-                if let Ok(val) = val.downcast::<Box<dyn Fn(EventsStore<Events<PMsg>>) -> EventsStore<Events<PMsg>>>>() {
-                    self.events = val(self.events.clone());
-                }
-            }
-            Msg::Styler(val) => {
-                if let Ok(val) = val.downcast::<Option<<Self as Stylable>::Styler>>() {
-                    self.styler = val.as_ref().clone();
-                }
-            }
+            Msg::Styler(val) => self.styler = val,
             Msg::UpdateStyler(val) => {
-                if let Ok(val) = val.downcast::<Box<dyn Fn(<Self as Stylable>::Styler) -> <Self as Stylable>::Styler>>() {
-                    self.styler = Some(val(self.styler.clone().unwrap_or_else(Styler::default)));
+                self.styler = match self.styler.clone() {
+                    Some(styler) => Some(val.update(styler)),
+                    None => Some(val.update(self.theme.radio())),
                 }
             }
             Msg::Theme(val) => self.theme = val,
@@ -135,14 +107,14 @@ impl<PMsg: 'static> Element<PMsg> for Radio<PMsg> {
     }
 }
 
-impl<PMsg> Stylable for Radio<PMsg> {
+impl Stylable for Radio {
     type Style = Style;
     type Styler = Styler<Self, Style>;
 
     fn styler(&self) -> Self::Styler {
         self.styler
             .clone()
-            .unwrap_or_else(|| (|s: &Self| s.theme.radio().get(&s.theme_lens())).into())
+            .unwrap_or_else(|| (|s: &Self| s.theme.radio().get(s)).into())
     }
 
     fn style(&self) -> Self::Style {
@@ -150,25 +122,20 @@ impl<PMsg> Stylable for Radio<PMsg> {
     }
 }
 
-impl<PMsg: 'static> View for Radio<PMsg> {
-    type Output = Node<PMsg>;
-
-    fn view(&self) -> Self::Output {
+impl View<Node<Msg>> for Radio {
+    fn view(&self) -> Node<Msg> {
         self.styled_view(self.style())
     }
 }
 
-pub type ThemeStyler<'a> = Styler<RadioLens<'a>, Style>;
-
-impl<PMsg: 'static> StyledView for Radio<PMsg> {
-    fn styled_view(&self, style: Style) -> Self::Output {
+impl StyledView<Node<Msg>> for Radio {
+    fn styled_view(&self, style: Style) -> Node<Msg> {
         let Style {
             radio,
             button,
             label,
         } = style;
         let events = self.events.get();
-        let local_events = self.local_events.get();
 
         let radio = html::input()
             .class("radio")
@@ -176,18 +143,11 @@ impl<PMsg: 'static> StyledView for Radio<PMsg> {
             .set(att::checked(self.toggled))
             .set(att::Type::Radio)
             .set(radio)
-            .set(&local_events.radio)
-            .map_msg_with(&self.msg_mapper)
-            .add(&events.radio)
+            .set(&events.radio)
             .el_ref(&self.input_el_ref)
             // add button if the radio is toggled
             .config_if(self.is_toggled(), |conf| {
-                let button = html::div()
-                    .class("button")
-                    .set(button)
-                    .map_msg_with(&self.msg_mapper)
-                    .add(&events.button);
-                conf.add(button)
+                conf.add(html::div().class("button").set(button))
             });
 
         match self.label.as_ref() {
@@ -196,9 +156,7 @@ impl<PMsg: 'static> StyledView for Radio<PMsg> {
                 .id(self.id.clone())
                 .class("label")
                 .set(label)
-                .set(&local_events.label)
-                .map_msg_with(&self.msg_mapper)
-                .add(&events.label)
+                .set(&events.label)
                 .add(radio)
                 .add(lbl.clone())
                 .el_ref(&self.label_el_ref),
@@ -206,35 +164,23 @@ impl<PMsg: 'static> StyledView for Radio<PMsg> {
     }
 }
 
-impl<PMsg: 'static> Config<PMsg> {
-    pub fn init(self, orders: &mut impl Orders<PMsg>) -> Radio<PMsg> {
+impl Config {
+    pub fn init(self, orders: &mut impl Orders<Msg>) -> Radio {
         Radio::init(self, orders)
     }
 }
 
 impl Msg {
-    pub fn events_store<PMsg: 'static>(val: EventsStore<PMsg>) -> Self {
-        Msg::EventsStore(Rc::new(val))
-    }
-
-    pub fn update_events_store<PMsg: 'static>(
-        val: impl Fn(EventsStore<Events<PMsg>>) -> EventsStore<Events<PMsg>> + 'static,
-    ) -> Self {
-        Msg::UpdateEventsStore(Rc::new(val))
-    }
-
-    pub fn styler<PMsg: 'static>(val: <Radio<PMsg> as Stylable>::Styler) -> Self {
+    pub fn styler(val: <Radio as Stylable>::Styler) -> Self {
         Msg::try_styler(Some(val))
     }
 
-    pub fn update_styler<PMsg: 'static>(
-        val: impl Fn(<Radio<PMsg> as Stylable>::Styler) -> <Radio<PMsg> as Stylable>::Styler + 'static,
-    ) -> Self {
-        Msg::UpdateStyler(Rc::new(val))
+    pub fn update_styler(val: impl Into<UpdateStyler<Radio>>) -> Self {
+        Msg::UpdateStyler(val.into())
     }
 
-    pub fn try_styler<PMsg: 'static>(val: Option<<Radio<PMsg> as Stylable>::Styler>) -> Self {
-        Msg::Styler(Rc::new(val))
+    pub fn try_styler(val: Option<impl Into<<Radio as Stylable>::Styler>>) -> Self {
+        Msg::Styler(val.map(|s| s.into()))
     }
 
     pub fn theme(val: Theme) -> Self {

@@ -13,17 +13,13 @@
 //! use savory_html::{prelude::*, css::{Color, values as val}};
 //! use std::borrow::Cow;
 //!
-//! pub struct UserInfo<PMsg> {
+//! pub struct UserInfo {
 //!     pub username: Cow<'static, str>,
 //!     pub email: Cow<'static, str>,
-//!     // store the parent message type, so we can use it in `View` impl
-//!     phantom: std::marker::PhantomData<*const PMsg>,
 //! }
 //!
-//! impl<PMsg> View for UserInfo<PMsg> {
-//!     type Output = Node<PMsg>;
-//!
-//!     fn view(&self) -> Self::Output {
+//! impl<Msg> View<Node<Msg>> for UserInfo {
+//!     fn view(&self) -> Node<Msg> {
 //!         let style = css::Style::default()
 //!             .and_size(|conf| conf.full())
 //!             .display(val::Flex)
@@ -73,16 +69,15 @@
 //! }
 //! ```
 //!
-//! # `View` & `StyledView` traits vs Standalone functions
+//! # `View` trait vs Standalone functions
 //!
 //! **Traits approach** is pretty verbose for simple elements, but it works well
-//! with bigger elements, types that implement `View` can be storde as trait
-//! object, views that implement `StyledView` can be viewed with diffrent style
-//! thus we can reuse it in many other context.
+//! with bigger elements that needs a lot of arguments, types that implement
+//! `View` can be storde as trait object.
 //!
 //! **Standalone functions** are simple to write and read, but they become complex
 //! and hard to wrok with when the element get bigger or the function start to
-//! accept more and more parameters.
+//! accept more and more arguments.
 //!
 //! So, for simple element that is used in a few context in the application, I
 //! would suggest using standalone functions, otherwise I would suggest creating
@@ -92,10 +87,7 @@
 //! [`Node`]: crate::prelude::Node
 
 /// Main trait used to render view.
-pub trait View {
-    /// The returne type from `render` function
-    type Output;
-
+pub trait View<Output> {
     /// view method that returns Seed `Node`
-    fn view(&self) -> Self::Output;
+    fn view(&self) -> Output;
 }

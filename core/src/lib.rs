@@ -68,12 +68,9 @@
 //!     Decrement,
 //! }
 //!
-//! impl HasConfig for Counter {
-//!     type Config = Url;
-//! }
-//!
-//! impl Element<Msg> for Counter {
+//! impl Element for Counter {
 //!     type Message = Msg;
+//!     type Config = Url;
 //!
 //!     // initialize the app in this function
 //!     fn init(_: Url, _: &mut impl Orders<Msg>) -> Self {
@@ -89,11 +86,9 @@
 //!     }
 //! }
 //!
-//! impl View for Counter {
-//!     type Output = Node<Msg>;
-//!
+//! impl View<Node<Msg>> for Counter {
 //!     // view the app
-//!     fn view(&self) -> Self::Output {
+//!     fn view(&self) -> Node<Msg> {
 //!         let inc_btn = html::button()
 //!             .add("Increment")
 //!             .and_events(|events| events.click(|_| Msg::Increment));
@@ -126,15 +121,13 @@
 #![forbid(unsafe_code)]
 
 pub mod element;
-pub mod msg_mapper;
 pub mod orders_ext;
 pub mod view;
 
 /// savory prelude.
 pub mod prelude {
     pub use crate::{
-        element::{AppElementExt, Element, HasConfig},
-        msg_mapper::{MessageMapperExt, MsgMapper},
+        element::{AppElementExt, Element},
         orders_ext::OrdersExt,
         view::View,
     };

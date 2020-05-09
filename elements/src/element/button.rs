@@ -1,65 +1,51 @@
-use crate::{icon::IconLens, label::LabelLens, prelude::*};
+use crate::prelude::*;
 use derive_rich::Rich;
 use savory_core::prelude::*;
 use savory_html::prelude::*;
-use std::{any::Any, rc::Rc};
 
 #[derive(Rich, Element)]
 #[element(style(button, label(label::Style), icon(icon::Style)), events(button))]
-pub struct Button<PMsg> {
+pub struct Button {
     // general element properties
     #[rich(read)]
     #[element(config)]
     id: Id,
-    #[element(config(required))]
-    msg_mapper: MsgMapper<Msg, PMsg>,
     #[rich(read)]
-    local_events: EventsStore<Events<Msg>>,
-    #[rich(read)]
-    #[element(config(default))]
-    events: EventsStore<Events<PMsg>>,
+    events: EventsStore<Events<Msg>>,
     #[rich(read)]
     #[element(config)]
-    styler: Option<<Button<PMsg> as Stylable>::Styler>,
+    styler: Option<<Button as Stylable>::Styler>,
     #[rich(read)]
-    #[element(theme_lens, config(default))]
+    #[element(config(default))]
     theme: Theme,
 
     // button element properties
     #[rich(read)]
-    #[element(theme_lens(nested), config)]
-    label: Option<Label<Msg>>,
+    #[element(config)]
+    label: Option<Label>,
     #[rich(read)]
-    #[element(theme_lens(nested), config)]
+    #[element(config)]
     icon: Option<Icon<Msg>>,
     #[rich(read(copy))]
-    #[element(theme_lens, config)]
+    #[element(config)]
     kind: Option<Kind>,
     #[rich(read(copy))]
-    #[element(theme_lens, config(default = "false"))]
+    #[element(config(default = "false"))]
     ghost: bool,
     #[rich(read(copy, rename = is_disabled))]
-    #[element(theme_lens, config(default = "false"))]
+    #[element(config(default = "false"))]
     disabled: bool,
     #[rich(read(copy, rename = is_focused))]
-    #[element(theme_lens)]
     focused: bool,
     #[rich(read(copy, rename = is_mouse_over))]
-    #[element(theme_lens)]
     mouse_over: bool,
 }
 
 pub enum Msg {
-    // EventsStore<Events<PMsg>>
-    EventsStore(Rc<dyn Any>),
-    // Box<dyn Fn(EventsStore<Events<PMsg>>) -> EventsStore<Events<PMsg>>>
-    UpdateEventsStore(Rc<dyn Any>),
-    // Option<Styler<PMsg>>
-    Styler(Rc<dyn Any>),
-    // Box<dyn Fn(Styler<PMsg>) -> Styler<PMsg>>
-    UpdateStyler(Rc<dyn Any>),
+    Styler(Option<<Button as Stylable>::Styler>),
+    UpdateStyler(UpdateStyler<Button>),
     Theme(Theme),
-    Label(Option<Label<Msg>>),
+    Label(Option<Label>),
     Icon(Option<Icon<Msg>>),
     Kind(Option<Kind>),
     Ghost(bool),
@@ -68,14 +54,14 @@ pub enum Msg {
     MouseOver(bool),
 }
 
-impl<PMsg: 'static> Element<PMsg> for Button<PMsg> {
+impl Element for Button {
     type Message = Msg;
+    type Config = Config;
 
-    fn init(config: Self::Config, orders: &mut impl Orders<PMsg>) -> Self {
-        let mut orders = orders.proxy_with(&config.msg_mapper);
+    fn init(config: Self::Config, orders: &mut impl Orders<Msg>) -> Self {
         orders.subscribe(|theme: ThemeChanged| Msg::theme(theme.0));
 
-        let local_events = || {
+        let events = || {
             Events::default().and_button(|conf| {
                 conf.focus(|_| Msg::focus(true))
                     .blur(|_| Msg::focus(false))
@@ -88,9 +74,7 @@ impl<PMsg: 'static> Element<PMsg> for Button<PMsg> {
             id: config.id.unwrap_or_else(Id::generate),
             theme: config.theme,
             styler: config.styler,
-            msg_mapper: config.msg_mapper,
-            local_events: local_events.into(),
-            events: config.events,
+            events: events.into(),
             label: config.label,
             icon: config.icon,
             kind: config.kind,
@@ -101,29 +85,13 @@ impl<PMsg: 'static> Element<PMsg> for Button<PMsg> {
         }
     }
 
-    fn update(&mut self, msg: Msg, _: &mut impl Orders<PMsg>) {
+    fn update(&mut self, msg: Msg, _: &mut impl Orders<Msg>) {
         match msg {
-            Msg::EventsStore(val) => {
-                if let Ok(val) = val.downcast::<EventsStore<Events<PMsg>>>() {
-                    self.events = val.into();
-                }
-            }
-            Msg::UpdateEventsStore(val) => {
-                if let Ok(val) = val.downcast::<Box<dyn Fn(EventsStore<Events<PMsg>>) -> EventsStore<Events<PMsg>>>>() {
-                    self.events = val(self.events.clone());
-                }
-            }
-            Msg::Styler(val) => {
-                if let Ok(val) = val.downcast::<Option<<Self as Stylable>::Styler>>() {
-                    self.styler = val.as_ref().clone();
-                }
-            }
+            Msg::Styler(val) => self.styler = val,
             Msg::UpdateStyler(val) => {
-                if let Ok(val) = val.downcast::<Box<dyn Fn(<Self as Stylable>::Styler) -> <Self as Stylable>::Styler>>() {
-                    self.styler = Some(val(self
-                        .styler
-                        .clone()
-                        .unwrap_or_else(<Self as Stylable>::Styler::default)));
+                self.styler = match self.styler.clone() {
+                    Some(styler) => Some(val.update(styler)),
+                    None => Some(val.update(self.theme.button())),
                 }
             }
             Msg::Theme(val) => self.theme = val,
@@ -138,14 +106,20 @@ impl<PMsg: 'static> Element<PMsg> for Button<PMsg> {
     }
 }
 
-impl<PMsg> Stylable for Button<PMsg> {
+impl Config {
+    pub fn init(self, orders: &mut impl Orders<Msg>) -> Button {
+        Button::init(self, orders)
+    }
+}
+
+impl Stylable for Button {
     type Style = Style;
     type Styler = Styler<Self, Style>;
 
     fn styler(&self) -> Self::Styler {
         self.styler
             .clone()
-            .unwrap_or_else(|| (|s: &Self| s.theme.button().get(&s.theme_lens())).into())
+            .unwrap_or_else(|| (|s: &Self| s.theme.button().get(s)).into())
     }
 
     fn style(&self) -> Self::Style {
@@ -153,18 +127,14 @@ impl<PMsg> Stylable for Button<PMsg> {
     }
 }
 
-impl<PMsg: 'static> View for Button<PMsg> {
-    type Output = Node<PMsg>;
-
-    fn view(&self) -> Self::Output {
+impl View<Node<Msg>> for Button {
+    fn view(&self) -> Node<Msg> {
         self.styled_view(self.style())
     }
 }
 
-pub type ThemeStyler<'a> = Styler<ButtonLens<'a>, Style>;
-
-impl<PMsg: 'static> StyledView for Button<PMsg> {
-    fn styled_view(&self, style: Self::Style) -> Self::Output {
+impl StyledView<Node<Msg>> for Button {
+    fn styled_view(&self, style: Self::Style) -> Node<Msg> {
         let Style {
             button,
             label,
@@ -174,18 +144,10 @@ impl<PMsg: 'static> StyledView for Button<PMsg> {
             .class("button")
             .id(self.id.clone())
             .set(att::disabled(self.disabled))
-            .set(&self.local_events.get().button)
+            .set(&self.events.get().button)
             .set(button)
             .try_add(self.icon.as_ref().map(|el| el.styled_view(icon)))
             .try_add(self.label.as_ref().map(|el| el.styled_view(label)))
-            .map_msg_with(&self.msg_mapper)
-            .add(&self.events.get().button)
-    }
-}
-
-impl<PMsg: 'static> Config<PMsg> {
-    pub fn init(self, orders: &mut impl Orders<PMsg>) -> Button<PMsg> {
-        Button::init(self, orders)
     }
 }
 
@@ -199,39 +161,27 @@ pub enum Kind {
 }
 
 impl Msg {
-    pub fn events_store<PMsg: 'static>(val: EventsStore<PMsg>) -> Self {
-        Msg::EventsStore(Rc::new(val))
-    }
-
-    pub fn update_events_store<PMsg: 'static>(
-        val: impl Fn(EventsStore<Events<PMsg>>) -> EventsStore<Events<PMsg>> + 'static,
-    ) -> Self {
-        Msg::UpdateEventsStore(Rc::new(val))
-    }
-
-    pub fn styler<PMsg: 'static>(val: <Button<PMsg> as Stylable>::Styler) -> Self {
+    pub fn styler(val: <Button as Stylable>::Styler) -> Self {
         Msg::try_styler(Some(val))
     }
 
-    pub fn update_styler<PMsg: 'static>(
-        val: impl Fn(<Button<PMsg> as Stylable>::Styler) -> <Button<PMsg> as Stylable>::Styler + 'static,
-    ) -> Self {
-        Msg::UpdateStyler(Rc::new(val))
+    pub fn update_styler(val: impl Into<UpdateStyler<Button>>) -> Self {
+        Msg::UpdateStyler(val.into())
     }
 
-    pub fn try_styler<PMsg: 'static>(val: Option<<Button<PMsg> as Stylable>::Styler>) -> Self {
-        Msg::Styler(Rc::new(val))
+    pub fn try_styler(val: Option<impl Into<<Button as Stylable>::Styler>>) -> Self {
+        Msg::Styler(val.map(|v| v.into()))
     }
 
     pub fn theme(val: Theme) -> Self {
         Msg::Theme(val)
     }
 
-    pub fn label(val: Label<Msg>) -> Self {
+    pub fn label(val: Label) -> Self {
         Self::try_label(Some(val))
     }
 
-    pub fn try_label(val: Option<Label<Msg>>) -> Self {
+    pub fn try_label(val: Option<Label>) -> Self {
         Msg::Label(val)
     }
 

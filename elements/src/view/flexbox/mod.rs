@@ -19,8 +19,8 @@ pub struct Flexbox<PMsg> {
     pub events: Events<PMsg>,
     #[rich(write(style = compose))]
     pub styler: Option<Styler<Self, Style>>,
-    #[rich(write(rename = theme))]
     #[element(theme_lens)]
+    #[rich(write)]
     pub theme: Theme,
 
     #[rich(write(style = compose), write(rename = items))]
@@ -175,6 +175,8 @@ impl<PMsg> Flexbox<PMsg> {
     }
 }
 
+pub type ThemeStyler<'a> = Styler<FlexboxLens<'a>, Style>;
+
 impl<PMsg> Stylable for Flexbox<PMsg> {
     type Style = Style;
     type Styler = Styler<Self, Style>;
@@ -190,16 +192,14 @@ impl<PMsg> Stylable for Flexbox<PMsg> {
     }
 }
 
-impl<PMsg> View for Flexbox<PMsg> {
-    type Output = Node<PMsg>;
-
-    fn view(&self) -> Self::Output {
+impl<PMsg> View<Node<PMsg>> for Flexbox<PMsg> {
+    fn view(&self) -> Node<PMsg> {
         self.styled_view(self.style())
     }
 }
 
-impl<PMsg> StyledView for Flexbox<PMsg> {
-    fn styled_view(&self, style: Style) -> Self::Output {
+impl<PMsg> StyledView<Node<PMsg>> for Flexbox<PMsg> {
+    fn styled_view(&self, style: Style) -> Node<PMsg> {
         html::div()
             .try_id(self.id.clone())
             .class("flexbox")
@@ -226,7 +226,7 @@ impl<PMsg> ExtendBuilder<Item<PMsg>> for Flexbox<PMsg> {
 
 impl<'a, V: 'a, PMsg> ExtendBuilder<&'a V> for Flexbox<PMsg>
 where
-    V: View<Output = Node<PMsg>>,
+    V: View<Node<PMsg>>,
 {
     fn extend<T>(mut self, iter: T) -> Self
     where
@@ -237,14 +237,12 @@ where
     }
 }
 
-impl<'a, PMsg: 'static> ExtendBuilder<&'a dyn View<Output = Node<PMsg>>> for Flexbox<PMsg> {
+impl<'a, PMsg: 'static> ExtendBuilder<&'a dyn View<Node<PMsg>>> for Flexbox<PMsg> {
     fn extend<T>(mut self, iter: T) -> Self
     where
-        T: IntoIterator<Item = &'a dyn View<Output = Node<PMsg>>>,
+        T: IntoIterator<Item = &'a dyn View<Node<PMsg>>>,
     {
         self.items.extend(iter.into_iter().map(Item::from));
         self
     }
 }
-
-pub type ThemeStyler<'a> = Styler<FlexboxLens<'a>, Style>;

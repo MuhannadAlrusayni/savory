@@ -270,7 +270,7 @@ impl Element {
 
                 let nested_config_or_type = |ty| {
                     if config.nested.is_some() {
-                        quote! { <#ty as HasConfig>::Config }
+                        quote! { <#ty as Element>::Config }
                     } else {
                         quote! { #ty }
                     }
@@ -381,10 +381,6 @@ impl Element {
         let element_name = &self.ident;
 
         quote! {
-            impl #ty_impl HasConfig for #element_name #ty_gen #where_clause {
-                type Config = Config #gen_params;
-            }
-
             impl #ty_impl #element_name #ty_gen #where_clause {
                 pub fn config(#( #new_args )*) -> Config #gen_params {
                     Config::new(#( #pass_new_args )*)

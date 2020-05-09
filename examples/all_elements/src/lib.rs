@@ -1,6 +1,6 @@
 use savory_core::prelude::*;
 use savory_elements::prelude::*;
-use savory_html::css::unit::px;
+use savory_html::{css::unit::px, css::Color, prelude::*};
 use wasm_bindgen::prelude::*;
 
 pub enum Msg {
@@ -18,116 +18,148 @@ pub enum Msg {
 }
 
 pub struct MyApp {
-    button: Button<Msg>,
-    checkbox: Checkbox<Msg>,
-    radio: Radio<Msg>,
-    switch: Switch<Msg>,
-    entry: Entry<Msg>,
-    spin_entry: SpinEntry<Msg>,
-    dialog: Dialog<Msg, Modifier<Button<Msg>>>,
-    popover: Popover<Msg, Modifier<ProgressBar<Msg>>, Button<Msg>>,
+    button: Button,
+    checkbox: Checkbox,
+    radio: Radio,
+    switch: Switch,
+    entry: Entry,
+    spin_entry: SpinEntry,
+    dialog: Dialog,
+    dialog_child: Button,
+    popover: Popover,
+    popover_btn: Button,
+    progress_bar: ProgressBar,
 }
 
-impl HasConfig for MyApp {
-    type Config = Url;
-}
-
-impl Element<Msg> for MyApp {
+impl Element for MyApp {
     type Message = Msg;
+    type Config = Url;
 
     fn init(_: Url, orders: &mut impl Orders<Msg>) -> Self {
-        let dlg = Dialog::config(
-            Msg::Dialog,
-            Button::config(Msg::DialogChild)
-                .label("hmm")
-                .init(orders)
-                .and_margin(|conf| conf.y(px(15))),
-        )
-        .title("Title for dialog")
-        .subtitle("Some description here")
-        .and_toggle(|conf| conf.opened())
-        .init(orders);
+        let dlg = Dialog::config()
+            .title("Title for dialog")
+            .subtitle("Some description here")
+            .and_toggle(|conf| conf.opened())
+            .init(&mut orders.proxy(Msg::Dialog));
 
-        let button = Button::config(Msg::Button)
+        let dlg_child = Button::config()
+            .label("hmm")
+            .init(&mut orders.proxy(Msg::DialogChild));
+
+        let button = Button::config()
             .label("Click Here")
-            .events(|| {
-                button::events().and_button(|conf| {
-                    conf.click(|_| Msg::Dialog(dialog::Msg::open()))
-                        .click(|_| Msg::ProgressBar(progress_bar::Msg::increment(2.0)))
-                })
-            })
-            .init(orders);
+            .init(&mut orders.proxy(Msg::Button));
 
-        let progress = ProgressBar::config(Msg::ProgressBar)
+        let progress = ProgressBar::config()
             .failure()
             .min(10.)
             .max(25.)
             .value(15.)
-            .init(orders)
-            .and_size(|conf| conf.min_width(px(40)))
-            .and_margin(|conf| conf.all(px(4)));
+            .init(&mut orders.proxy(Msg::ProgressBar));
 
-        let pop_btn = Button::config(Msg::PopoverButton)
+        let pop_btn = Button::config()
             .label("Popover button")
-            .events(|| {
-                button::events()
-                    .and_button(|conf| conf.click(|_| Msg::Popover(popover::Msg::toggle())))
-            })
-            .init(orders);
+            .init(&mut orders.proxy(Msg::PopoverButton));
 
         Self {
             button,
-            checkbox: Checkbox::config(Msg::Checkbox)
+            checkbox: Checkbox::config()
                 .label("Checkbox element")
-                .init(orders),
-            radio: Radio::config(Msg::Radio).label("Radio element").init(orders),
-            switch: Switch::config(Msg::Switch).init(orders),
-            entry: Entry::config(Msg::Entry)
+                .init(&mut orders.proxy(Msg::Checkbox)),
+            radio: Radio::config()
+                .label("Radio element")
+                .init(&mut orders.proxy(Msg::Radio)),
+            switch: Switch::config().init(&mut orders.proxy(Msg::Switch)),
+            entry: Entry::config()
                 .placeholder("Ali Yousef")
-                .init(orders),
-            spin_entry: SpinEntry::config(Msg::SpinEntry).init(orders),
+                .init(&mut orders.proxy(Msg::Entry)),
+            spin_entry: SpinEntry::config().init(&mut orders.proxy(Msg::SpinEntry)),
             dialog: dlg,
-            popover: Popover::config(Msg::Popover, progress, pop_btn).init(orders),
+            dialog_child: dlg_child,
+            popover: Popover::config().init(&mut orders.proxy(Msg::Popover)),
+            popover_btn: pop_btn,
+            progress_bar: progress,
         }
     }
 
     fn update(&mut self, msg: Msg, orders: &mut impl Orders<Msg>) {
         match msg {
-            Msg::Button(msg) => self.button.update(msg, orders),
-            Msg::Checkbox(msg) => self.checkbox.update(msg, orders),
-            Msg::Radio(msg) => self.radio.update(msg, orders),
-            Msg::Switch(msg) => self.switch.update(msg, orders),
-            Msg::Entry(msg) => self.entry.update(msg, orders),
-            Msg::SpinEntry(msg) => self.spin_entry.update(msg, orders),
-            Msg::Dialog(msg) => self.dialog.update(msg, orders),
-            Msg::DialogChild(msg) => self.dialog.child.update(msg, orders),
-            Msg::ProgressBar(msg) => self.popover.child.update(msg, orders),
-            Msg::Popover(msg) => self.popover.update(msg, orders),
-            Msg::PopoverButton(msg) => self.popover.target.update(msg, orders),
+            Msg::Button(msg) => self.button.update(msg, &mut orders.proxy(Msg::Button)),
+            Msg::Checkbox(msg) => self.checkbox.update(msg, &mut orders.proxy(Msg::Checkbox)),
+            Msg::Radio(msg) => self.radio.update(msg, &mut orders.proxy(Msg::Radio)),
+            Msg::Switch(msg) => self.switch.update(msg, &mut orders.proxy(Msg::Switch)),
+            Msg::Entry(msg) => self.entry.update(msg, &mut orders.proxy(Msg::Entry)),
+            Msg::SpinEntry(msg) => self
+                .spin_entry
+                .update(msg, &mut orders.proxy(Msg::SpinEntry)),
+            Msg::Dialog(msg) => self.dialog.update(msg, &mut orders.proxy(Msg::Dialog)),
+            Msg::DialogChild(msg) => self
+                .dialog_child
+                .update(msg, &mut orders.proxy(Msg::DialogChild)),
+            Msg::ProgressBar(msg) => self
+                .progress_bar
+                .update(msg, &mut orders.proxy(Msg::ProgressBar)),
+            Msg::Popover(msg) => self.popover.update(msg, &mut orders.proxy(Msg::Popover)),
+            Msg::PopoverButton(msg) => self
+                .popover_btn
+                .update(msg, &mut orders.proxy(Msg::PopoverButton)),
         }
     }
 }
 
-impl View for MyApp {
-    type Output = Node<Msg>;
-
-    fn view(&self) -> Self::Output {
+impl View<Node<Msg>> for MyApp {
+    fn view(&self) -> Node<Msg> {
         Flexbox::new()
             .center()
             .column()
             .gap(px(4))
-            .extend(vec![
-                &self.button as &dyn View<Output = Node<Msg>>,
-                &self.popover,
-                &self.checkbox,
-                &self.radio,
-                &self.switch,
-                &self.entry,
-                &self.spin_entry,
-                &self.dialog,
-            ])
+            .add(self.button.view().map_msg(Msg::Button).and_events(|conf| {
+                conf.click(|_| Msg::Dialog(dialog::Msg::open()))
+                    .click(|_| Msg::ProgressBar(progress_bar::Msg::increment(2.0)))
+            }))
+            .add(
+                self.popover
+                    .view()
+                    .map_msg(Msg::Popover)
+                    .for_class("popover-target", |_| {
+                        self.popover_btn
+                            .view()
+                            .map_msg(Msg::PopoverButton)
+                            .and_events(|conf| conf.click(|_| Msg::Popover(popover::Msg::toggle())))
+                    })
+                    .for_class("popover-content", |_| {
+                        self.progress_bar
+                            .and_size(|conf| conf.min_width(px(40)))
+                            .and_margin(|conf| conf.all(px(4)))
+                            .view()
+                            .map_msg(Msg::ProgressBar)
+                    }),
+            )
+            .add(self.checkbox.view().map_msg(Msg::Checkbox))
+            .add(self.radio.view().map_msg(Msg::Radio))
+            .add(self.switch.view().map_msg(Msg::Switch))
+            .add(self.entry.view().map_msg(Msg::Entry))
+            .add(self.spin_entry.view().map_msg(Msg::SpinEntry))
+            .add(
+                self.dialog
+                    .view()
+                    .map_msg(Msg::Dialog)
+                    .for_class("dialog-content", |_| {
+                        self.dialog_child
+                            .and_margin(|conf| conf.y(px(15)))
+                            .view()
+                            .map_msg(Msg::DialogChild)
+                    }),
+            )
             .and_size(|conf| conf.full())
             .view()
+            .for_class("button", |node| {
+                node.and_style(|conf| conf.and_border(|conf| conf.solid().color(Color::Plum)))
+            })
+            .for_id("4", |node| {
+                node.and_style(|conf| conf.add("transform", "scale(2.8)"))
+                    .and_events(|conf| conf.click(|_| Msg::Checkbox(checkbox::Msg::toggle())))
+            })
     }
 }
 

@@ -3,7 +3,7 @@ use savory_core::prelude::*;
 use savory_html::prelude::*;
 
 #[derive(Rich)]
-pub struct Modifier<T> {
+pub struct Modifier<'a, Msg> {
     #[rich(write, write(style = compose))]
     pub padding: Option<css::Padding>,
     #[rich(write, write(style = compose))]
@@ -18,11 +18,11 @@ pub struct Modifier<T> {
     pub position: Option<css::Position>,
     #[rich(write, write(option))]
     pub opacity: Option<css::Opacity>,
-    pub target: T,
+    pub target: &'a dyn View<Node<Msg>>,
 }
 
-impl<T> Modifier<T> {
-    pub fn on(target: T) -> Self {
+impl<'a, Msg> Modifier<'a, Msg> {
+    pub fn on(target: &'a dyn View<Node<Msg>>) -> Self {
         Self {
             padding: None,
             margin: None,
@@ -36,34 +36,8 @@ impl<T> Modifier<T> {
     }
 }
 
-impl<T: HasConfig> HasConfig for Modifier<T> {
-    type Config = T::Config;
-}
-
-impl<T, PMsg> Element<PMsg> for Modifier<T>
-where
-    PMsg: 'static,
-    T: Element<PMsg>,
-{
-    type Message = T::Message;
-
-    fn init(config: Self::Config, orders: &mut impl Orders<PMsg>) -> Self {
-        let target = T::init(config, orders);
-        Self::on(target)
-    }
-
-    fn update(&mut self, msg: Self::Message, orders: &mut impl Orders<PMsg>) {
-        self.target.update(msg, orders)
-    }
-}
-
-impl<T, PMsg> View for Modifier<T>
-where
-    T: View<Output = Node<PMsg>>,
-{
-    type Output = Node<PMsg>;
-
-    fn view(&self) -> Self::Output {
+impl<'a, Msg> View<Node<Msg>> for Modifier<'a, Msg> {
+    fn view(&self) -> Node<Msg> {
         let style = css::Style::default()
             .try_padding(self.padding)
             .try_margin(self.margin)
@@ -77,76 +51,83 @@ where
     }
 }
 
-pub trait IntoModifier<T> {
-    fn and_padding(self, set_value: impl Fn(css::Padding) -> css::Padding) -> Modifier<T>;
-    fn and_margin(self, set_value: impl Fn(css::Margin) -> css::Margin) -> Modifier<T>;
-    fn and_size(self, set_value: impl Fn(css::Size) -> css::Size) -> Modifier<T>;
-    fn and_font(self, set_value: impl Fn(css::Font) -> css::Font) -> Modifier<T>;
-    fn and_border(self, set_value: impl Fn(css::Border) -> css::Border) -> Modifier<T>;
-    fn and_position(self, set_value: impl Fn(css::Position) -> css::Position) -> Modifier<T>;
+pub trait NodeModifier<'a, Msg> {
+    fn and_padding(&'a self, set_value: impl Fn(css::Padding) -> css::Padding)
+        -> Modifier<'a, Msg>;
+    fn and_margin(&'a self, set_value: impl Fn(css::Margin) -> css::Margin) -> Modifier<'a, Msg>;
+    fn and_size(&'a self, set_value: impl Fn(css::Size) -> css::Size) -> Modifier<'a, Msg>;
+    fn and_font(&'a self, set_value: impl Fn(css::Font) -> css::Font) -> Modifier<'a, Msg>;
+    fn and_border(&'a self, set_value: impl Fn(css::Border) -> css::Border) -> Modifier<'a, Msg>;
+    fn and_position(
+        &'a self,
+        set_value: impl Fn(css::Position) -> css::Position,
+    ) -> Modifier<'a, Msg>;
 
-    fn padding(self, value: impl Into<css::Padding>) -> Modifier<T>;
-    fn margin(self, value: impl Into<css::Margin>) -> Modifier<T>;
-    fn size(self, value: impl Into<css::Size>) -> Modifier<T>;
-    fn font(self, value: impl Into<css::Font>) -> Modifier<T>;
-    fn border(self, value: impl Into<css::Border>) -> Modifier<T>;
-    fn position(self, value: impl Into<css::Position>) -> Modifier<T>;
-    fn opacity(self, value: impl Into<css::Opacity>) -> Modifier<T>;
+    fn padding(&'a self, value: impl Into<css::Padding>) -> Modifier<'a, Msg>;
+    fn margin(&'a self, value: impl Into<css::Margin>) -> Modifier<'a, Msg>;
+    fn size(&'a self, value: impl Into<css::Size>) -> Modifier<'a, Msg>;
+    fn font(&'a self, value: impl Into<css::Font>) -> Modifier<'a, Msg>;
+    fn border(&'a self, value: impl Into<css::Border>) -> Modifier<'a, Msg>;
+    fn position(&'a self, value: impl Into<css::Position>) -> Modifier<'a, Msg>;
+    fn opacity(&'a self, value: impl Into<css::Opacity>) -> Modifier<'a, Msg>;
 }
 
-impl<T, PMsg> IntoModifier<T> for T
-where
-    T: View<Output = Node<PMsg>>,
-{
-    fn and_padding(self, set_value: impl Fn(css::Padding) -> css::Padding) -> Modifier<T> {
+impl<'a, Msg, T: View<Node<Msg>>> NodeModifier<'a, Msg> for T {
+    fn and_padding(
+        &'a self,
+        set_value: impl Fn(css::Padding) -> css::Padding,
+    ) -> Modifier<'a, Msg> {
         Modifier::on(self).and_padding(set_value)
     }
 
-    fn and_margin(self, set_value: impl Fn(css::Margin) -> css::Margin) -> Modifier<T> {
+    fn and_margin(&'a self, set_value: impl Fn(css::Margin) -> css::Margin) -> Modifier<'a, Msg> {
         Modifier::on(self).and_margin(set_value)
     }
 
-    fn and_size(self, set_value: impl Fn(css::Size) -> css::Size) -> Modifier<T> {
+    fn and_size(&'a self, set_value: impl Fn(css::Size) -> css::Size) -> Modifier<'a, Msg> {
         Modifier::on(self).and_size(set_value)
     }
 
-    fn and_font(self, set_value: impl Fn(css::Font) -> css::Font) -> Modifier<T> {
+    fn and_font(&'a self, set_value: impl Fn(css::Font) -> css::Font) -> Modifier<'a, Msg> {
         Modifier::on(self).and_font(set_value)
     }
 
-    fn and_border(self, set_value: impl Fn(css::Border) -> css::Border) -> Modifier<T> {
+    fn and_border(&'a self, set_value: impl Fn(css::Border) -> css::Border) -> Modifier<'a, Msg> {
         Modifier::on(self).and_border(set_value)
     }
 
-    fn and_position(self, set_value: impl Fn(css::Position) -> css::Position) -> Modifier<T> {
+    fn and_position(
+        &'a self,
+        set_value: impl Fn(css::Position) -> css::Position,
+    ) -> Modifier<'a, Msg> {
         Modifier::on(self).and_position(set_value)
     }
 
-    fn padding(self, value: impl Into<css::Padding>) -> Modifier<T> {
+    fn padding(&'a self, value: impl Into<css::Padding>) -> Modifier<'a, Msg> {
         Modifier::on(self).padding(value)
     }
 
-    fn margin(self, value: impl Into<css::Margin>) -> Modifier<T> {
+    fn margin(&'a self, value: impl Into<css::Margin>) -> Modifier<'a, Msg> {
         Modifier::on(self).margin(value)
     }
 
-    fn size(self, value: impl Into<css::Size>) -> Modifier<T> {
+    fn size(&'a self, value: impl Into<css::Size>) -> Modifier<'a, Msg> {
         Modifier::on(self).size(value)
     }
 
-    fn font(self, value: impl Into<css::Font>) -> Modifier<T> {
+    fn font(&'a self, value: impl Into<css::Font>) -> Modifier<'a, Msg> {
         Modifier::on(self).font(value)
     }
 
-    fn border(self, value: impl Into<css::Border>) -> Modifier<T> {
+    fn border(&'a self, value: impl Into<css::Border>) -> Modifier<'a, Msg> {
         Modifier::on(self).border(value)
     }
 
-    fn position(self, value: impl Into<css::Position>) -> Modifier<T> {
+    fn position(&'a self, value: impl Into<css::Position>) -> Modifier<'a, Msg> {
         Modifier::on(self).position(value)
     }
 
-    fn opacity(self, value: impl Into<css::Opacity>) -> Modifier<T> {
+    fn opacity(&'a self, value: impl Into<css::Opacity>) -> Modifier<'a, Msg> {
         Modifier::on(self).opacity(value)
     }
 }

@@ -4,6 +4,7 @@ pub mod button;
 pub mod checkbox;
 pub mod dialog;
 pub mod entry;
+pub mod header_bar;
 pub mod helper;
 pub mod popover;
 pub mod progress_bar;

@@ -17,7 +17,6 @@
 //! # TODO Helper types
 
 use crate::prelude::*;
-use seed::prelude::IntoNodes;
 
 /// Trait used to create element and handle element messages and update
 /// element state accordingly.
@@ -31,37 +30,30 @@ use seed::prelude::IntoNodes;
 ///
 /// [Seed]: https://seed-rs.org
 /// [`Orders`]: crate::prelude::Orders
-pub trait Element<PMsg: 'static>: HasConfig {
+pub trait Element {
     /// Element message
-    type Message;
+    type Message: 'static;
+    /// Configuration used to initialize this element
+    type Config;
 
     /// Create and initialize the element
     ///
     /// # Arguments
-    /// - `config` properties used to create the element.
+    /// - `config` configuration used to create the element.
     /// - `orders` used to interacte with the runtime.
-    fn init(config: Self::Config, orders: &mut impl Orders<PMsg>) -> Self;
+    fn init(config: Self::Config, orders: &mut impl Orders<Self::Message>) -> Self;
 
     /// update method that recive `Self::Message` and update the model state accordingly.
-    fn update(&mut self, _: Self::Message, _: &mut impl Orders<PMsg>);
-}
-
-/// Trait used to assign `Config` type for an Element, this is deriven using the
-/// `Element` derive macro.
-pub trait HasConfig {
-    /// Properties used to initialize this element
-    type Config;
+    fn update(&mut self, _: Self::Message, _: &mut impl Orders<Self::Message>);
 }
 
 /// Extension trait for `Element` when it's used on App element
 ///
 /// This trait provides functions that mounts the app element on HTML node by
 /// integrating app element with `seed::app::App`
-pub trait AppElementExt<Msg>: Element<Msg, Config = Url, Message = Msg>
+pub trait AppElementExt
 where
-    Msg: 'static,
-    Self: Sized + View,
-    Self::Output: IntoNodes<Self::Message> + 'static,
+    Self: Element<Config = Url> + View<Node<<Self as Element>::Message>> + Sized,
 {
     /// Start app element
     ///
@@ -76,12 +68,9 @@ where
     ///     FooMessage,
     /// }
     ///
-    /// impl HasConfig for MyApp {
-    ///     type Config = Url;
-    /// }
-    ///
-    /// impl Element<Msg> for MyApp {
+    /// impl Element for MyApp {
     ///     type Message = Msg;
+    ///     type Config = Url;
     ///
     ///     fn init(url: Url, orders: &mut impl Orders<Msg>) -> Self {
     ///         // initialize the app goes here
@@ -94,10 +83,8 @@ where
     ///     }
     /// }
     ///
-    /// impl View for MyApp {
-    ///     type Output = Node<Msg>;
-    ///
-    ///     fn view(&self) -> Self::Output {
+    /// impl View<Node<Msg>> for MyApp {
+    ///     fn view(&self) -> Node<Msg> {
     ///         // viewing the app goes here
     ///         todo!()
     ///     }
@@ -108,12 +95,12 @@ where
     ///     MyApp::start();
     /// }
     /// ```
-    fn start() -> seed::app::App<Self::Message, Self, Self::Output> {
+    fn start() -> seed::app::App<Self::Message, Self, Node<Self::Message>> {
         Self::start_at("app")
     }
 
     /// Start app element at specifec element that matchs the `id` passed
-    fn start_at(id: &str) -> seed::app::App<Self::Message, Self, Self::Output> {
+    fn start_at(id: &str) -> seed::app::App<Self::Message, Self, Node<Self::Message>> {
         seed::app::App::start(
             id,
             |url, orders| Self::init(url, orders),
@@ -123,10 +110,7 @@ where
     }
 }
 
-impl<Msg, T> AppElementExt<Msg> for T
-where
-    Msg: 'static,
-    Self: Element<Msg, Config = Url, Message = Msg> + View,
-    Self::Output: IntoNodes<Self::Message> + 'static,
+impl<T> AppElementExt for T where
+    Self: Element<Config = Url> + View<Node<<Self as Element>::Message>> + Sized
 {
 }

@@ -15,9 +15,9 @@ pub enum Icon<PMsg> {
     #[from]
     Svg(Svg<PMsg>),
     #[from]
-    Html(Html<PMsg>),
+    Html(Html),
     #[from]
-    Url(Url<PMsg>),
+    Url(Url),
 }
 
 #[derive(Clone, Debug, PartialEq, From)]
@@ -34,28 +34,8 @@ impl Default for Style {
     }
 }
 
-pub enum IconLens<'lens> {
-    Svg(svg::SvgLens<'lens>),
-    Html(html::HtmlLens<'lens>),
-    Url(url::UrlLens<'lens>),
-}
-
-impl<'lens, PMsg> crate::theme::ThemeLens<'lens> for Icon<PMsg> {
-    type Lens = IconLens<'lens>;
-
-    fn theme_lens(&'lens self) -> Self::Lens {
-        match self {
-            Self::Svg(svg) => IconLens::Svg(svg.theme_lens()),
-            Self::Html(html) => IconLens::Html(html.theme_lens()),
-            Self::Url(url) => IconLens::Url(url.theme_lens()),
-        }
-    }
-}
-
-impl<PMsg> View for Icon<PMsg> {
-    type Output = Node<PMsg>;
-
-    fn view(&self) -> Self::Output {
+impl<PMsg> View<Node<PMsg>> for Icon<PMsg> {
+    fn view(&self) -> Node<PMsg> {
         match self {
             Self::Svg(icon) => icon.view(),
             Self::Html(icon) => icon.view(),
@@ -81,8 +61,8 @@ impl<PMsg> Stylable for Icon<PMsg> {
     }
 }
 
-impl<PMsg> StyledView for Icon<PMsg> {
-    fn styled_view(&self, style: Self::Style) -> Self::Output {
+impl<PMsg> StyledView<Node<PMsg>> for Icon<PMsg> {
+    fn styled_view(&self, style: Self::Style) -> Node<PMsg> {
         match self {
             Self::Svg(icon) => {
                 if let Style::Svg(style) = style {
@@ -114,11 +94,11 @@ impl<PMsg> Icon<PMsg> {
         Svg::new(draw)
     }
 
-    pub fn html(html: impl Into<Cow<'static, str>>) -> Html<PMsg> {
+    pub fn html(html: impl Into<Cow<'static, str>>) -> Html {
         Html::new(html)
     }
 
-    pub fn url(url: impl Into<Cow<'static, str>>) -> Url<PMsg> {
+    pub fn url(url: impl Into<Cow<'static, str>>) -> Url {
         Url::new(url)
     }
 }

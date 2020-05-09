@@ -448,10 +448,10 @@ impl ThemeImpl for Ant {
 
     // fn grid(&self) -> Style;
 
-    fn popover<'a>(&self) -> popover::ThemeStyler<'a> {
+    fn popover(&self) -> <Popover as Stylable>::Styler {
         let border = self.border(false);
         let white = self.white();
-        let styler = move |lens: &popover::PopoverLens<'a>| {
+        let styler = move |el: &Popover| {
             popover::style()
                 .and_popover(|conf| conf.and_position(|conf| conf.relative()))
                 .and_panel(|conf| {
@@ -470,10 +470,10 @@ impl ThemeImpl for Ant {
                             .color(Hsla::new(138.9, 1.0, 0.69, 0.15))
                     })
                     .and_padding(|conf| conf.x(px(4.)).y(px(2)))
-                    .and_margin(|conf| conf.top(px(*lens.offset)))
+                    .and_margin(|conf| conf.top(px(el.offset())))
                     .config(|conf| {
                         use toggle::State::*;
-                        match lens.toggle.state() {
+                        match el.toggle().state() {
                             Closed => conf.display(val::None),
                             Opening => conf.opacity(0.0),
                             Opened => conf.opacity(1.0),
@@ -490,20 +490,20 @@ impl ThemeImpl for Ant {
         styler.into()
     }
 
-    fn html_icon<'a>(&self) -> icon::html::ThemeStyler<'a> {
-        let styler = |_: &icon::html::HtmlLens<'a>| icon::html::Style::default();
+    fn html_icon(&self) -> <icon::Html as Stylable>::Styler {
+        let styler = |_: &icon::Html| icon::html::Style::default();
         styler.into()
     }
 
-    fn url_icon<'a>(&self) -> icon::url::ThemeStyler<'a> {
-        let styler = |_: &icon::url::UrlLens<'a>| icon::url::Style::default();
+    fn url_icon(&self) -> <icon::Url as Stylable>::Styler {
+        let styler = |_: &icon::Url| icon::url::Style::default();
         styler.into()
     }
 
     // TODO: handle is_loading()
     // TODO: handle btn.is_block()
     // TODO: handle btn.is_ghost()
-    fn button<'a>(&self) -> button::ThemeStyler<'a> {
+    fn button(&self) -> <Button as Stylable>::Styler {
         let brand_400 = self.brand(Variant::L400);
         let brand_500 = self.brand(Variant::L500);
         let gray_200 = self.gray(Variant::L200);
@@ -523,9 +523,9 @@ impl ThemeImpl for Ant {
                 .text(fg)
                 .and_box_shadow(|conf| conf.y(px(2)).color(Hsla::new(0.0, 0.0, 0.0, 0.015)))
         };
-        let button_normal = move |lens: &button::ButtonLens<'a>| {
+        let button_normal = move |el: &Button| {
             // colors
-            let (fg, bg, border) = match (lens.disabled, lens.focused, lens.mouse_over) {
+            let (fg, bg, border) = match (el.is_disabled(), el.is_focused(), el.is_mouse_over()) {
                 // btn is disabled
                 (true, _, _) => (gray_200, disable, gray_400),
                 // btn is not focused or hovered
@@ -535,9 +535,9 @@ impl ThemeImpl for Ant {
             };
             common_button(fg, bg, border)
         };
-        let button_suggestion = move |lens: &button::ButtonLens<'a>| {
+        let button_suggestion = move |el: &Button| {
             // colors
-            let (fg, bg, border) = match (lens.disabled, lens.focused, lens.mouse_over) {
+            let (fg, bg, border) = match (el.is_disabled(), el.is_focused(), el.is_mouse_over()) {
                 // btn is disabled
                 (true, _, _) => (gray_200, disable, gray_400),
                 // btn is not focused or hovered
@@ -547,9 +547,9 @@ impl ThemeImpl for Ant {
             };
             common_button(fg, bg, border)
         };
-        let button_destructive = move |lens: &button::ButtonLens<'a>| {
+        let button_destructive = move |el: &Button| {
             // colors
-            let (fg, bg, border) = match (lens.disabled, lens.focused, lens.mouse_over) {
+            let (fg, bg, border) = match (el.is_disabled(), el.is_focused(), el.is_mouse_over()) {
                 // btn is disabled
                 (true, _, _) => (gray_200, disable, gray_400),
                 // btn is not focused or hovered
@@ -559,9 +559,9 @@ impl ThemeImpl for Ant {
             };
             common_button(fg, bg, border)
         };
-        let button_link = move |lens: &button::ButtonLens<'a>| {
+        let button_link = move |el: &Button| {
             // colors
-            let (bg, fg) = match (lens.disabled, lens.focused, lens.mouse_over) {
+            let (bg, fg) = match (el.is_disabled(), el.is_focused(), el.is_mouse_over()) {
                 (true, _, _) => (white, disable),
                 // btn is not focused or hovered
                 (false, false, false) => (white, brand_500),
@@ -574,15 +574,16 @@ impl ThemeImpl for Ant {
                 .and_border(|conf| conf.width(px(0.)).solid().radius(px(4.)).color(bg))
                 .background(bg)
         };
-        let button_dashed = move |lens: &button::ButtonLens<'a>| {
+        let button_dashed = move |el: &Button| {
             // colors
-            let (bg, fg, border_color) = match (lens.disabled, lens.focused, lens.mouse_over) {
-                (true, _, _) => (gray_200, disable, gray_400),
-                // btn is not focused or hovered
-                (false, false, false) => (white, primary_text, gray_600),
-                // btn is hovered or focused
-                _ => (white, brand_500, brand_500),
-            };
+            let (bg, fg, border_color) =
+                match (el.is_disabled(), el.is_focused(), el.is_mouse_over()) {
+                    (true, _, _) => (gray_200, disable, gray_400),
+                    // btn is not focused or hovered
+                    (false, false, false) => (white, primary_text, gray_600),
+                    // btn is hovered or focused
+                    _ => (white, brand_500, brand_500),
+                };
 
             // common_button(fg, bg, border_color).and_border(|conf| conf.dashed())
             css::Style::default()
@@ -597,20 +598,20 @@ impl ThemeImpl for Ant {
                 .and_box_shadow(|conf| conf.y(px(2)).color(Hsla::new(0.0, 0.0, 0.0, 0.015)))
         };
 
-        let styler = move |lens: &button::ButtonLens<'a>| {
-            let cursor: Cursor = if *lens.disabled {
+        let styler = move |el: &Button| {
+            let cursor: Cursor = if el.is_disabled() {
                 val::NotAllowed.into()
             } else {
                 val::Initial.into()
             };
 
             button::style().and_button(|_| {
-                match lens.kind {
-                    Some(button::Kind::Normal) | None => button_normal(lens),
-                    Some(button::Kind::Suggestion) => button_suggestion(lens),
-                    Some(button::Kind::Destructive) => button_destructive(lens),
-                    Some(button::Kind::Link) => button_link(lens),
-                    Some(button::Kind::Dashed) => button_dashed(lens),
+                match el.get_kind() {
+                    Some(button::Kind::Normal) | None => button_normal(el),
+                    Some(button::Kind::Suggestion) => button_suggestion(el),
+                    Some(button::Kind::Destructive) => button_destructive(el),
+                    Some(button::Kind::Link) => button_link(el),
+                    Some(button::Kind::Dashed) => button_dashed(el),
                 }
                 .and_padding(|conf| conf.x(px(15.)).y(px(0.)))
                 .and_size(|conf| conf.all_heights(px(32.)))
@@ -633,7 +634,7 @@ impl ThemeImpl for Ant {
         styler.into()
     }
 
-    fn switch<'a>(&self) -> switch::ThemeStyler<'a> {
+    fn switch(&self) -> <Switch as Stylable>::Styler {
         let brand_500 = self.brand(Variant::L500);
         let gray_500 = self.gray(Variant::L500);
         let white = self.white();
@@ -643,8 +644,8 @@ impl ThemeImpl for Ant {
         let top = 3. / 2.;
         let left = 3. / 2.;
 
-        let styler = move |lens: &switch::SwitchLens<'a>| {
-            let cursor: Cursor = if *lens.disabled {
+        let styler = move |el: &Switch| {
+            let cursor: Cursor = if el.is_disabled() {
                 val::NotAllowed.into()
             } else {
                 val::Initial.into()
@@ -652,8 +653,8 @@ impl ThemeImpl for Ant {
 
             switch::style()
                 .and_switch(|conf| {
-                    let bg_color = if *lens.toggled { brand_500 } else { gray_500 };
-                    conf.config_if(*lens.disabled, |conf| conf.opacity(0.4))
+                    let bg_color = if el.is_toggled() { brand_500 } else { gray_500 };
+                    conf.config_if(el.is_disabled(), |conf| conf.opacity(0.4))
                         .cursor(cursor)
                         .and_position(|conf| conf.relative())
                         .background(bg_color)
@@ -675,7 +676,7 @@ impl ThemeImpl for Ant {
                         .and_size(|conf| conf.all_heights(px(height)).all_widths(px(width)))
                 })
                 .and_button(|conf| {
-                    conf.config_if(*lens.toggled, |conf| {
+                    conf.config_if(el.is_toggled(), |conf| {
                         conf.add(St::Transform, format!("translateX({})", px(width / 2.)))
                     })
                     .and_position(|conf| conf.absolute().top(px(top)).left(px(left)))
@@ -696,7 +697,7 @@ impl ThemeImpl for Ant {
         styler.into()
     }
 
-    fn checkbox<'a>(&self) -> checkbox::ThemeStyler<'a> {
+    fn checkbox(&self) -> <Checkbox as Stylable>::Styler {
         let gray_200 = self.gray(Variant::L200);
         let gray_400 = self.gray(Variant::L400);
         let brand_500 = self.brand(Variant::L500);
@@ -704,13 +705,13 @@ impl ThemeImpl for Ant {
         let disable = self.disable(false);
         let border = self.border(false);
 
-        let styler = move |lens: &checkbox::CheckboxLens<'a>| {
-            let (bg, fg, border) = match (lens.disabled, lens.focused, lens.mouse_over) {
+        let styler = move |el: &Checkbox| {
+            let (bg, fg, border) = match (el.is_disabled(), el.is_focused(), el.is_mouse_over()) {
                 (true, _, _) => (gray_200, disable, gray_400),
-                (false, false, false) if *lens.toggled => (brand_500, white, brand_500),
-                (false, false, false) if !*lens.toggled => (white, white, border),
+                (false, false, false) if el.is_toggled() => (brand_500, white, brand_500),
+                (false, false, false) if !el.is_toggled() => (white, white, border),
                 _ => {
-                    if *lens.toggled {
+                    if el.is_toggled() {
                         (brand_500, white, brand_500)
                     } else {
                         (white, white, brand_500)
@@ -718,7 +719,7 @@ impl ThemeImpl for Ant {
                 }
             };
 
-            let cursor: Cursor = if *lens.disabled {
+            let cursor: Cursor = if el.is_disabled() {
                 val::NotAllowed.into()
             } else {
                 val::Initial.into()
@@ -742,7 +743,7 @@ impl ThemeImpl for Ant {
                     .text(fg)
                 })
                 .and_button(|conf| {
-                    conf.config_if(*lens.toggled, |conf| {
+                    conf.config_if(el.is_toggled(), |conf| {
                         conf.cursor(cursor)
                             .and_transition(|conf| {
                                 conf.duration(sec(0.3))
@@ -758,7 +759,7 @@ impl ThemeImpl for Ant {
                     })
                 })
                 .and_label(|conf| {
-                    conf.config_if(*lens.disabled, |conf| conf.text(disable))
+                    conf.config_if(el.is_disabled(), |conf| conf.text(disable))
                         .and_transition(|conf| {
                             conf.duration(sec(0.3))
                                 .cubic_bezier(0.645, 0.045, 0.355, 1.)
@@ -771,7 +772,7 @@ impl ThemeImpl for Ant {
         styler.into()
     }
 
-    fn radio<'a>(&self) -> radio::ThemeStyler<'a> {
+    fn radio(&self) -> <Radio as Stylable>::Styler {
         let disable = self.disable(false);
         let gray_200 = self.gray(Variant::L200);
         let gray_400 = self.gray(Variant::L400);
@@ -779,13 +780,13 @@ impl ThemeImpl for Ant {
         let brand_500 = self.brand(Variant::L500);
         let border = self.border(false);
 
-        let styler = move |lens: &radio::RadioLens<'a>| {
-            let (bg, fg, border) = match (lens.disabled, lens.focused, lens.mouse_over) {
+        let styler = move |el: &Radio| {
+            let (bg, fg, border) = match (el.is_disabled(), el.is_focused(), el.is_mouse_over()) {
                 (true, _, _) => (gray_200, disable, gray_400),
-                (false, false, false) if *lens.toggled => (white, brand_500, brand_500),
-                (false, false, false) if !*lens.toggled => (white, white, border),
+                (false, false, false) if el.is_toggled() => (white, brand_500, brand_500),
+                (false, false, false) if !el.is_toggled() => (white, white, border),
                 _ => {
-                    if *lens.toggled {
+                    if el.is_toggled() {
                         (white, brand_500, brand_500)
                     } else {
                         (white, white, brand_500)
@@ -793,7 +794,7 @@ impl ThemeImpl for Ant {
                 }
             };
 
-            let cursor: Cursor = if *lens.disabled {
+            let cursor: Cursor = if el.is_disabled() {
                 val::NotAllowed.into()
             } else {
                 val::Initial.into()
@@ -817,7 +818,7 @@ impl ThemeImpl for Ant {
                     .background(bg)
                 })
                 .and_button(|conf| {
-                    conf.config_if(*lens.toggled, |conf| {
+                    conf.config_if(el.is_toggled(), |conf| {
                         conf.cursor(cursor)
                             .and_size(|conf| conf.resize(0.6, 0.6))
                             .and_border(|conf| conf.none().radius(0.5))
@@ -829,7 +830,7 @@ impl ThemeImpl for Ant {
                     })
                 })
                 .and_label(|conf| {
-                    conf.config_if(*lens.disabled, |conf| conf.text(disable))
+                    conf.config_if(el.is_disabled(), |conf| conf.text(disable))
                         .and_transition(|conf| {
                             conf.duration(sec(0.3))
                                 .cubic_bezier(0.645, 0.045, 0.355, 1.)
@@ -843,7 +844,7 @@ impl ThemeImpl for Ant {
         styler.into()
     }
 
-    fn entry<'a>(&self) -> entry::ThemeStyler<'a> {
+    fn entry(&self) -> <Entry as Stylable>::Styler {
         let gray_200 = self.gray(Variant::L200);
         let gray_400 = self.gray(Variant::L400);
         let disable = self.disable(false);
@@ -862,14 +863,14 @@ impl ThemeImpl for Ant {
         let container_radius = 4;
         let container_border_width = 1;
 
-        let styler = move |lens: &entry::EntryLens<'a>| {
-            let (bg, fg, border) = match (lens.disabled, lens.focused, lens.mouse_over) {
+        let styler = move |el: &Entry| {
+            let (bg, fg, border) = match (el.is_disabled(), el.is_focused(), el.is_mouse_over()) {
                 (true, _, _) => (gray_200, disable, gray_400),
                 (false, false, false) => (white, primary_text, border),
                 _ => (white, primary_text, brand_500),
             };
 
-            let cursor: Cursor = if *lens.disabled {
+            let cursor: Cursor = if el.is_disabled() {
                 val::NotAllowed.into()
             } else {
                 val::Initial.into()
@@ -916,7 +917,7 @@ impl ThemeImpl for Ant {
         styler.into()
     }
 
-    fn spin_entry<'a>(&self) -> spin_entry::ThemeStyler<'a> {
+    fn spin_entry(&self) -> <SpinEntry as Stylable>::Styler {
         // colors
         let gray_200 = self.gray(Variant::L200);
         let gray_300 = self.gray(Variant::L300);
@@ -953,32 +954,32 @@ impl ThemeImpl for Ant {
                 .justify_content(val::Center)
         };
 
-        let styler = move |lens: &spin_entry::SpinEntryLens<'a>| {
-            let (bg, fg, border) = match (lens.disabled, lens.focused, lens.mouse_over) {
+        let styler = move |el: &SpinEntry| {
+            let (bg, fg, border) = match (el.is_disabled(), el.is_focused(), el.is_mouse_over()) {
                 (true, _, _) => (gray_200, disable, gray_400),
                 (false, false, false) => (white, primary_text, border),
                 _ => (white, primary_text, brand_500),
             };
 
-            let cursor: Cursor = if *lens.disabled {
+            let cursor: Cursor = if el.is_disabled() {
                 val::NotAllowed.into()
             } else {
                 val::Initial.into()
             };
 
             let (inc_btn_height, dec_btn_height) = match (
-                lens.increment_button.mouse_over,
-                lens.decrement_button.mouse_over,
+                el.increment_button().is_mouse_over(),
+                el.decrement_button().is_mouse_over(),
             ) {
                 (true, _) => (btn_mouse_over_height, btn_mouse_over_height_2),
                 (_, true) => (btn_mouse_over_height_2, btn_mouse_over_height),
                 (false, false) => (btn_height, btn_height),
             };
 
-            let btns_opacity = if *lens.focused
-                || *lens.mouse_over
-                || *lens.increment_button.focused
-                || *lens.decrement_button.focused
+            let btns_opacity = if el.is_focused()
+                || el.is_mouse_over()
+                || el.increment_button().is_focused()
+                || el.decrement_button().is_focused()
             {
                 1.0
             } else {
@@ -1067,11 +1068,11 @@ impl ThemeImpl for Ant {
         styler.into()
     }
 
-    fn dialog<'a>(&self) -> dialog::ThemeStyler<'a> {
+    fn dialog(&self) -> <Dialog as Stylable>::Styler {
         let primary_text = self.primary_text(false);
         let white = self.white();
 
-        let styler = move |lens: &dialog::DialogLens<'a>| {
+        let styler = move |el: &Dialog| {
             dialog::style()
                 .and_dialog_background(|conf| {
                     conf.and_position(|conf| {
@@ -1090,7 +1091,7 @@ impl ThemeImpl for Ant {
                     })
                     .config(|conf| {
                         use toggle::State::*;
-                        match lens.toggle.state() {
+                        match el.toggle().state() {
                             Closed => conf.display(val::None),
                             Opening => conf
                                 .display(val::Flex)
@@ -1128,7 +1129,7 @@ impl ThemeImpl for Ant {
         styler.into()
     }
 
-    fn header_bar<'a>(&self) -> header_bar::ThemeStyler<'a> {
+    fn header_bar(&self) -> <HeaderBar as Stylable>::Styler {
         // colors
         let secondary_text = self.secondary_text(false);
         let primary_text = self.primary_text(false);
@@ -1141,7 +1142,7 @@ impl ThemeImpl for Ant {
         let subtitle_font_size = 0.6;
         let title_container_padding = 1.;
 
-        let styler = move |lens: &header_bar::HeaderBarLens<'a>| {
+        let styler = move |el: &HeaderBar| {
             header_bar::Style::default()
                 .and_title(|conf| conf.and_label(|conf| conf.text(title)))
                 .and_subtitle(|conf| {
@@ -1163,8 +1164,8 @@ impl ThemeImpl for Ant {
                     conf.and_button(|conf| {
                         conf.and_size(|conf| conf.all(em(button_size)))
                             .config(|conf| {
-                                if let Some(ref btn) = lens.close_button {
-                                    if *btn.mouse_over {
+                                if let Some(ref btn) = el.get_close_button() {
+                                    if btn.is_mouse_over() {
                                         conf.text(primary_text)
                                     } else {
                                         conf.text(secondary_text)
@@ -1199,14 +1200,14 @@ impl ThemeImpl for Ant {
         styler.into()
     }
 
-    fn label<'a>(&self) -> label::ThemeStyler<'a> {
-        let styler = move |_: &label::LabelLens<'a>| {
+    fn label(&self) -> <Label as Stylable>::Styler {
+        let styler = move |_: &Label| {
             label::Style::default().and_label(|conf| conf.and_font(|conf| conf.size(em(1.))))
         };
         styler.into()
     }
 
-    fn progress_bar<'a>(&self) -> progress_bar::ThemeStyler<'a> {
+    fn progress_bar(&self) -> <ProgressBar as Stylable>::Styler {
         // colors
         let brand_500 = self.brand(Variant::L500);
         let gray_300 = self.gray(Variant::L300);
@@ -1220,7 +1221,7 @@ impl ThemeImpl for Ant {
         // percent units
         let width = 1.;
 
-        let styler = move |lens: &progress_bar::ProgressBarLens<'a>| {
+        let styler = move |el: &ProgressBar| {
             progress_bar::style()
                 .and_progress_bar(|conf| {
                     conf.and_border(|conf| conf.radius(em(radius)).none())
@@ -1233,8 +1234,8 @@ impl ThemeImpl for Ant {
                 .and_indicator(|conf| {
                     conf.and_border(|conf| conf.radius(em(radius)))
                         .config(|conf| {
-                            let color = lens.color.copied().unwrap_or_else(|| {
-                                match lens.state {
+                            let color = el.get_color().unwrap_or_else(|| {
+                                match el.state() {
                                     progress_bar::State::Normal => brand_500,
                                     progress_bar::State::Success => suggestion,
                                     progress_bar::State::Failure => destructive,
@@ -1249,7 +1250,7 @@ impl ThemeImpl for Ant {
                         })
                         .and_position(|conf| conf.absolute())
                         .and_size(|conf| {
-                            let width = (lens.value - lens.min).abs() / (lens.max - lens.min);
+                            let width = (el.value() - el.min()).abs() / (el.max() - el.min());
                             conf.width(width as f32).all_heights(em(height))
                         })
                 })

@@ -66,6 +66,7 @@ pub mod prelude {
             checkbox::{self, Checkbox},
             dialog::{self, Dialog},
             entry::{self, Entry},
+            header_bar::{self, HeaderBar},
             helper::animator::{self, Animator},
             helper::toggle::{self, Toggle},
             popover::{self, Popover},
@@ -75,15 +76,14 @@ pub mod prelude {
             switch::{self, Switch},
         },
         id::Id,
-        styled_view::{Stylable, StyledView, Styler},
+        styled_view::{Stylable, StyledView, Styler, UpdateStyler},
         theme::{self, Theme, ThemeChanged, ThemeLens},
         traits::ExtendBuilder,
         view::{
             flexbox::{self, Flexbox},
-            header_bar::{self, HeaderBar},
             icon::{self, Icon},
             label::{self, Label},
-            modifier::{IntoModifier, Modifier},
+            modifier::{Modifier, NodeModifier},
         },
     };
     pub use derive_rich::Rich;

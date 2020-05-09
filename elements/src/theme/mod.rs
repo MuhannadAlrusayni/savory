@@ -30,6 +30,10 @@ impl Deref for Theme {
 
 /// Trait used by theme types to generate elements/views styles.
 pub trait ThemeImpl {
+    // NOTE: generice views uses ThemeStyler<'a> to keep this trait as trait
+    // object safe. This is needed so we can store ThemeImpl in the Theme
+    // struct.
+
     // views
     fn flexbox<'a>(&self) -> flexbox::ThemeStyler<'a>;
 
@@ -37,32 +41,32 @@ pub trait ThemeImpl {
 
     fn svg_icon<'a>(&self) -> icon::svg::ThemeStyler<'a>;
 
-    fn html_icon<'a>(&self) -> icon::html::ThemeStyler<'a>;
+    fn html_icon(&self) -> <icon::Html as Stylable>::Styler;
 
-    fn url_icon<'a>(&self) -> icon::url::ThemeStyler<'a>;
+    fn url_icon(&self) -> <icon::Url as Stylable>::Styler;
 
-    fn header_bar<'a>(&self) -> header_bar::ThemeStyler<'a>;
-
-    fn label<'a>(&self) -> label::ThemeStyler<'a>;
+    fn label(&self) -> <Label as Stylable>::Styler;
 
     // elments
-    fn popover<'a>(&self) -> popover::ThemeStyler<'a>;
+    fn header_bar(&self) -> <HeaderBar as Stylable>::Styler;
 
-    fn button<'a>(&self) -> button::ThemeStyler<'a>;
+    fn popover(&self) -> <Popover as Stylable>::Styler;
 
-    fn switch<'a>(&self) -> switch::ThemeStyler<'a>;
+    fn button(&self) -> <Button as Stylable>::Styler;
 
-    fn checkbox<'a>(&self) -> checkbox::ThemeStyler<'a>;
+    fn switch(&self) -> <Switch as Stylable>::Styler;
 
-    fn radio<'a>(&self) -> radio::ThemeStyler<'a>;
+    fn checkbox(&self) -> <Checkbox as Stylable>::Styler;
 
-    fn entry<'a>(&self) -> entry::ThemeStyler<'a>;
+    fn radio(&self) -> <Radio as Stylable>::Styler;
 
-    fn spin_entry<'a>(&self) -> spin_entry::ThemeStyler<'a>;
+    fn entry(&self) -> <Entry as Stylable>::Styler;
 
-    fn dialog<'a>(&self) -> dialog::ThemeStyler<'a>;
+    fn spin_entry(&self) -> <SpinEntry as Stylable>::Styler;
 
-    fn progress_bar<'a>(&self) -> progress_bar::ThemeStyler<'a>;
+    fn dialog(&self) -> <Dialog as Stylable>::Styler;
+
+    fn progress_bar(&self) -> <ProgressBar as Stylable>::Styler;
 }
 
 /// Trait used to exteract element/view data that is needed by the theme to

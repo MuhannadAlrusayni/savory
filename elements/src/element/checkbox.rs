@@ -2,58 +2,45 @@ use crate::prelude::*;
 use derive_rich::Rich;
 use savory_core::prelude::*;
 use savory_html::prelude::*;
-use std::{any::Any, borrow::Cow, rc::Rc};
+use std::borrow::Cow;
 
 #[derive(Rich, Element)]
 #[element(style(checkbox, button, label), events(checkbox, button, label))]
-pub struct Checkbox<PMsg> {
+pub struct Checkbox {
     // general element properties
     #[rich(read)]
     #[element(config)]
     id: Id,
     input_el_ref: ElRef<web_sys::HtmlInputElement>,
     label_el_ref: ElRef<web_sys::HtmlLabelElement>,
-    #[element(config(required))]
-    msg_mapper: MsgMapper<Msg, PMsg>,
     #[rich(read)]
-    local_events: EventsStore<Events<Msg>>,
-    #[rich(read)]
-    #[element(config(default))]
-    events: EventsStore<Events<PMsg>>,
+    events: EventsStore<Events<Msg>>,
     #[rich(read)]
     #[element(config)]
-    styler: Option<<Checkbox<PMsg> as Stylable>::Styler>,
+    styler: Option<<Checkbox as Stylable>::Styler>,
     #[rich(read)]
-    #[element(theme_lens, config(default))]
+    #[element(config(default))]
     theme: Theme,
 
     // checkbox element properties
     #[rich(read(copy, rename = is_toggled))]
-    #[element(theme_lens, config(default))]
+    #[element(config(default))]
     toggled: bool,
     #[rich(read)]
-    #[element(theme_lens, config)]
+    #[element(config)]
     label: Option<Cow<'static, str>>,
     #[rich(read(copy, rename = is_disabled))]
-    #[element(theme_lens, config(default))]
+    #[element(config(default))]
     disabled: bool,
     #[rich(read(copy, rename = is_focused))]
-    #[element(theme_lens)]
     focused: bool,
     #[rich(read(copy, rename = is_mouse_over))]
-    #[element(theme_lens)]
     mouse_over: bool,
 }
 
 pub enum Msg {
-    // EventsStore<Events<PMsg>>
-    EventsStore(Rc<dyn Any>),
-    // Box<dyn Fn(EventsStore<Events<PMsg>>) -> EventsStore<Events<PMsg>>>
-    UpdateEventsStore(Rc<dyn Any>),
-    // Option<<Self as Stylable>::Styler>
-    Styler(Rc<dyn Any>),
-    // Box<dyn Fn(<Self as Stylable>::Styler) -> <Self as Stylable>::Styler>
-    UpdateStyler(Rc<dyn Any>),
+    Styler(Option<<Checkbox as Stylable>::Styler>),
+    UpdateStyler(UpdateStyler<Checkbox>),
     Theme(Theme),
     Label(Option<Cow<'static, str>>),
     Toggled(bool),
@@ -63,14 +50,14 @@ pub enum Msg {
     MouseOver(bool),
 }
 
-impl<PMsg: 'static> Element<PMsg> for Checkbox<PMsg> {
+impl Element for Checkbox {
     type Message = Msg;
+    type Config = Config;
 
-    fn init(config: Self::Config, orders: &mut impl Orders<PMsg>) -> Self {
-        let mut orders = orders.proxy_with(&config.msg_mapper);
+    fn init(config: Self::Config, orders: &mut impl Orders<Msg>) -> Self {
         orders.subscribe(|theme: ThemeChanged| Msg::theme(theme.0));
 
-        let local_events = || {
+        let events = || {
             Events::default()
                 .and_checkbox(|conf| {
                     conf.focus(|_| Msg::focus(true))
@@ -90,9 +77,7 @@ impl<PMsg: 'static> Element<PMsg> for Checkbox<PMsg> {
             input_el_ref: ElRef::default(),
             label_el_ref: ElRef::default(),
             theme: config.theme,
-            msg_mapper: config.msg_mapper,
-            local_events: local_events.into(),
-            events: config.events,
+            events: events.into(),
             label: config.label,
             styler: config.styler,
             disabled: config.disabled,
@@ -102,26 +87,13 @@ impl<PMsg: 'static> Element<PMsg> for Checkbox<PMsg> {
         }
     }
 
-    fn update(&mut self, msg: Msg, _orders: &mut impl Orders<PMsg>) {
+    fn update(&mut self, msg: Msg, _orders: &mut impl Orders<Msg>) {
         match msg {
-            Msg::EventsStore(val) => {
-                if let Ok(val) = val.downcast::<EventsStore<Events<PMsg>>>() {
-                    self.events = val.into();
-                }
-            }
-            Msg::UpdateEventsStore(val) => {
-                if let Ok(val) = val.downcast::<Box<dyn Fn(EventsStore<Events<PMsg>>) -> EventsStore<Events<PMsg>>>>() {
-                    self.events = val(self.events.clone());
-                }
-            }
-            Msg::Styler(val) => {
-                if let Ok(val) = val.downcast::<Option<<Self as Stylable>::Styler>>() {
-                    self.styler = val.as_ref().clone();
-                }
-            }
+            Msg::Styler(val) => self.styler = val,
             Msg::UpdateStyler(val) => {
-                if let Ok(val) = val.downcast::<Box<dyn Fn(<Self as Stylable>::Styler) -> <Self as Stylable>::Styler>>() {
-                    self.styler = Some(val(self.styler.clone().unwrap_or_else(Styler::default)));
+                self.styler = match self.styler.clone() {
+                    Some(styler) => Some(val.update(styler)),
+                    None => Some(val.update(self.theme.checkbox())),
                 }
             }
             Msg::Theme(val) => self.theme = val,
@@ -135,14 +107,14 @@ impl<PMsg: 'static> Element<PMsg> for Checkbox<PMsg> {
     }
 }
 
-impl<PMsg> Stylable for Checkbox<PMsg> {
+impl Stylable for Checkbox {
     type Style = Style;
     type Styler = Styler<Self, Style>;
 
     fn styler(&self) -> Self::Styler {
         self.styler
             .clone()
-            .unwrap_or_else(|| (|s: &Self| s.theme.checkbox().get(&s.theme_lens())).into())
+            .unwrap_or_else(|| (|s: &Self| s.theme.checkbox().get(s)).into())
     }
 
     fn style(&self) -> Self::Style {
@@ -150,26 +122,21 @@ impl<PMsg> Stylable for Checkbox<PMsg> {
     }
 }
 
-impl<PMsg: 'static> View for Checkbox<PMsg> {
-    type Output = Node<PMsg>;
-
-    fn view(&self) -> Self::Output {
+impl View<Node<Msg>> for Checkbox {
+    fn view(&self) -> Node<Msg> {
         self.styled_view(self.style())
     }
 }
 
-pub type ThemeStyler<'a> = Styler<CheckboxLens<'a>, Style>;
-
-impl<PMsg: 'static> StyledView for Checkbox<PMsg> {
+impl StyledView<Node<Msg>> for Checkbox {
     // TODO: use container block and assign the element id for it
-    fn styled_view(&self, style: Style) -> Self::Output {
+    fn styled_view(&self, style: Style) -> Node<Msg> {
         let Style {
             checkbox,
             button,
             label,
         } = style;
         let events = self.events.get();
-        let local_events = self.local_events.get();
 
         let checkbox = html::input()
             .class("checbox")
@@ -177,17 +144,11 @@ impl<PMsg: 'static> StyledView for Checkbox<PMsg> {
             .set(att::checked(self.toggled))
             .set(att::Type::Checkbox)
             .set(checkbox)
-            .set(&local_events.checkbox)
-            .map_msg_with(&self.msg_mapper)
-            .add(&events.checkbox)
+            .set(&events.checkbox)
             .el_ref(&self.input_el_ref)
             // add button if the checkbox is toggled
             .config_if(self.is_toggled(), |conf| {
-                let button = html::div()
-                    .class("button")
-                    .set(button)
-                    .map_msg_with(&self.msg_mapper)
-                    .add(&events.button);
+                let button = html::div().class("button").set(button);
                 conf.add(button)
             });
 
@@ -197,9 +158,7 @@ impl<PMsg: 'static> StyledView for Checkbox<PMsg> {
                 .id(self.id.clone())
                 .class("label")
                 .set(label)
-                .set(&local_events.label)
-                .map_msg_with(&self.msg_mapper)
-                .add(&events.label)
+                .set(&events.label)
                 .add(checkbox)
                 .add(lbl.clone())
                 .el_ref(&self.label_el_ref),
@@ -207,36 +166,23 @@ impl<PMsg: 'static> StyledView for Checkbox<PMsg> {
     }
 }
 
-impl<PMsg: 'static> Config<PMsg> {
-    pub fn init(self, orders: &mut impl Orders<PMsg>) -> Checkbox<PMsg> {
+impl Config {
+    pub fn init(self, orders: &mut impl Orders<Msg>) -> Checkbox {
         Checkbox::init(self, orders)
     }
 }
 
 impl Msg {
-    pub fn events_store<PMsg: 'static>(val: EventsStore<PMsg>) -> Self {
-        Msg::EventsStore(Rc::new(val))
-    }
-
-    pub fn update_events_store<PMsg: 'static>(
-        val: impl Fn(EventsStore<Events<PMsg>>) -> EventsStore<Events<PMsg>> + 'static,
-    ) -> Self {
-        Msg::UpdateEventsStore(Rc::new(val))
-    }
-
-    pub fn styler<PMsg: 'static>(val: <Checkbox<PMsg> as Stylable>::Styler) -> Self {
+    pub fn styler(val: <Checkbox as Stylable>::Styler) -> Self {
         Msg::try_styler(Some(val))
     }
 
-    pub fn update_styler<PMsg: 'static>(
-        val: impl Fn(<Checkbox<PMsg> as Stylable>::Styler) -> <Checkbox<PMsg> as Stylable>::Styler
-            + 'static,
-    ) -> Self {
-        Msg::UpdateStyler(Rc::new(val))
+    pub fn update_styler(val: impl Into<UpdateStyler<Checkbox>>) -> Self {
+        Msg::UpdateStyler(val.into())
     }
 
-    pub fn try_styler<PMsg: 'static>(val: Option<<Checkbox<PMsg> as Stylable>::Styler>) -> Self {
-        Msg::Styler(Rc::new(val))
+    pub fn try_styler(val: Option<impl Into<<Checkbox as Stylable>::Styler>>) -> Self {
+        Msg::Styler(val.map(|v| v.into()))
     }
 
     pub fn theme(val: Theme) -> Self {

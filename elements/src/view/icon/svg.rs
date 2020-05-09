@@ -36,6 +36,8 @@ impl<PMsg> Svg<PMsg> {
     }
 }
 
+pub type ThemeStyler<'a> = Styler<SvgLens<'a>, Style>;
+
 impl<PMsg> Stylable for Svg<PMsg> {
     type Style = Style;
     type Styler = Styler<Self, Style>;
@@ -51,16 +53,14 @@ impl<PMsg> Stylable for Svg<PMsg> {
     }
 }
 
-impl<PMsg> View for Svg<PMsg> {
-    type Output = Node<PMsg>;
-
-    fn view(&self) -> Self::Output {
+impl<PMsg> View<Node<PMsg>> for Svg<PMsg> {
+    fn view(&self) -> Node<PMsg> {
         self.styled_view(self.style())
     }
 }
 
-impl<PMsg> StyledView for Svg<PMsg> {
-    fn styled_view(&self, style: Self::Style) -> Self::Output {
+impl<PMsg> StyledView<Node<PMsg>> for Svg<PMsg> {
+    fn styled_view(&self, style: Self::Style) -> Node<PMsg> {
         html::svg()
             .try_id(self.id.clone())
             .class("svg-icon")
@@ -70,5 +70,3 @@ impl<PMsg> StyledView for Svg<PMsg> {
             .add(self.draw.clone())
     }
 }
-
-pub type ThemeStyler<'a> = Styler<SvgLens<'a>, Style>;

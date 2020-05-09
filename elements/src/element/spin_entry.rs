@@ -1,8 +1,7 @@
-use crate::{button::ButtonLens, prelude::*};
+use crate::prelude::*;
 use derive_rich::Rich;
 use savory_core::prelude::*;
 use savory_html::prelude::*;
-use std::{any::Any, rc::Rc};
 
 // TODO: add way to accept custom format (e.g. `100%`, `45$`)
 #[derive(Rich, Element)]
@@ -15,23 +14,16 @@ use std::{any::Any, rc::Rc};
     ),
     events(input, spin_entry)
 )]
-pub struct SpinEntry<PMsg> {
+pub struct SpinEntry {
     #[rich(read)]
     #[element(config)]
     id: Id,
     el_ref: ElRef<web_sys::HtmlInputElement>,
-    #[element(config(required))]
-    msg_mapper: MsgMapper<Msg, PMsg>,
-    #[rich(read)]
-    local_events: EventsStore<Events<Msg>>,
-    #[rich(read)]
-    #[element(config(default))]
-    events: EventsStore<Events<PMsg>>,
     #[rich(read)]
     #[element(config)]
-    styler: Option<<SpinEntry<PMsg> as Stylable>::Styler>,
+    styler: Option<<SpinEntry as Stylable>::Styler>,
     #[rich(read)]
-    #[element(theme_lens, config(default))]
+    #[element(config(default))]
     theme: Theme,
 
     #[rich(read(copy))]
@@ -52,33 +44,25 @@ pub struct SpinEntry<PMsg> {
     #[element(config)]
     placeholder: Option<f64>,
     #[rich(read(copy, rename = is_disabled))]
-    #[element(theme_lens, config(default))]
+    #[element(config(default))]
     disabled: bool,
     #[rich(read(copy, rename = is_focused))]
-    #[element(theme_lens)]
     focused: bool,
     #[rich(read(copy, rename = is_mouse_over))]
-    #[element(theme_lens)]
     mouse_over: bool,
 
     // children elements
     #[rich(read)]
-    #[element(theme_lens(nested), config(nested, default = "inc_btn_config()"))]
-    increment_button: Button<Msg>,
+    #[element(config(nested, default = "Button::config().label(\"+\")"))]
+    increment_button: Button,
     #[rich(read)]
-    #[element(theme_lens(nested), config(nested, default = "dec_btn_config()"))]
-    decrement_button: Button<Msg>,
+    #[element(config(nested, default = "Button::config().label(\"-\")"))]
+    decrement_button: Button,
 }
 
 pub enum Msg {
-    // EventsStore<Events<PMsg>>
-    EventsStore(Rc<dyn Any>),
-    // Box<dyn Fn(EventsStore<Events<PMsg>>) -> EventsStore<Events<PMsg>>>
-    UpdateEventsStore(Rc<dyn Any>),
-    // Option<<Self as Stylable>::Styler>
-    Styler(Rc<dyn Any>),
-    // Box<dyn Fn(<Self as Stylable>::Styler) -> <Self as Stylable>::Styler>
-    UpdateStyler(Rc<dyn Any>),
+    Styler(Option<<SpinEntry as Stylable>::Styler>),
+    UpdateStyler(UpdateStyler<SpinEntry>),
     Theme(Theme),
     Value(Option<f64>),
     Min(Option<f64>),
@@ -95,32 +79,16 @@ pub enum Msg {
     DecrementButton(button::Msg),
 }
 
-impl<PMsg: 'static> Element<PMsg> for SpinEntry<PMsg> {
+impl Element for SpinEntry {
     type Message = Msg;
+    type Config = Config;
 
-    fn init(config: Self::Config, orders: &mut impl Orders<PMsg>) -> Self {
-        let mut orders = orders.proxy_with(&config.msg_mapper);
+    fn init(config: Self::Config, orders: &mut impl Orders<Msg>) -> Self {
         orders.subscribe(|theme: ThemeChanged| Msg::Theme(theme.0));
-
-        let local_events = || {
-            events()
-                .and_input(|conf| {
-                    conf.input(|_| Msg::input())
-                        .focus(|_| Msg::focus(true))
-                        .blur(|_| Msg::focus(false))
-                })
-                .and_spin_entry(|conf| {
-                    conf.mouse_enter(|_| Msg::mouse_over(true))
-                        .mouse_leave(|_| Msg::mouse_over(false))
-                })
-        };
 
         let mut spin_entry = Self {
             id: config.id.unwrap_or_else(Id::generate),
             el_ref: ElRef::default(),
-            msg_mapper: config.msg_mapper,
-            local_events: local_events.into(),
-            events: config.events,
             styler: config.styler,
             theme: config.theme,
             value: config.value,
@@ -135,72 +103,65 @@ impl<PMsg: 'static> Element<PMsg> for SpinEntry<PMsg> {
             disabled: config.disabled,
             focused: false,
             mouse_over: false,
-            increment_button: config.increment_button.init(&mut orders),
-            decrement_button: config.decrement_button.init(&mut orders),
+            increment_button: config
+                .increment_button
+                .init(&mut orders.proxy(Msg::IncrementButton)),
+            decrement_button: config
+                .decrement_button
+                .init(&mut orders.proxy(Msg::DecrementButton)),
         };
 
         // Fix invalid values
-        spin_entry.try_set_max(config.max, &mut orders);
-        spin_entry.try_set_min(config.min, &mut orders);
-        spin_entry.try_set_value(config.value, &mut orders);
-        spin_entry.try_set_placeholder(config.placeholder, &mut orders);
+        spin_entry.try_set_max(config.max, orders);
+        spin_entry.try_set_min(config.min, orders);
+        spin_entry.try_set_value(config.value, orders);
+        spin_entry.try_set_placeholder(config.placeholder, orders);
         spin_entry
     }
 
-    fn update(&mut self, msg: Msg, orders: &mut impl Orders<PMsg>) {
-        let mut orders = orders.proxy_with(&self.msg_mapper);
-
+    fn update(&mut self, msg: Msg, orders: &mut impl Orders<Msg>) {
         match msg {
-            Msg::EventsStore(val) => {
-                if let Ok(val) = val.downcast::<EventsStore<Events<PMsg>>>() {
-                    self.events = val.into();
-                }
-            }
-            Msg::UpdateEventsStore(val) => {
-                if let Ok(val) = val.downcast::<Box<dyn Fn(EventsStore<Events<PMsg>>) -> EventsStore<Events<PMsg>>>>() {
-                    self.events = val(self.events.clone());
-                }
-            }
-            Msg::Styler(val) => {
-                if let Ok(val) = val.downcast::<Option<<Self as Stylable>::Styler>>() {
-                    self.styler = val.as_ref().clone();
-                }
-            }
+            Msg::Styler(val) => self.styler = val,
             Msg::UpdateStyler(val) => {
-                if let Ok(val) = val.downcast::<Box<dyn Fn(<Self as Stylable>::Styler) -> <Self as Stylable>::Styler>>() {
-                    self.styler = Some(val(self.styler.clone().unwrap_or_else(Styler::default)));
+                self.styler = match self.styler.clone() {
+                    Some(styler) => Some(val.update(styler)),
+                    None => Some(val.update(self.theme.spin_entry())),
                 }
             }
             Msg::Theme(val) => self.theme = val,
-            Msg::Value(val) => self.try_set_value(val, &mut orders),
-            Msg::Min(val) => self.try_set_min(val, &mut orders),
-            Msg::Max(val) => self.try_set_max(val, &mut orders),
-            Msg::Step(val) => self.set_step(val, &mut orders),
-            Msg::Placeholder(val) => self.try_set_placeholder(val, &mut orders),
+            Msg::Value(val) => self.try_set_value(val, orders),
+            Msg::Min(val) => self.try_set_min(val, orders),
+            Msg::Max(val) => self.try_set_max(val, orders),
+            Msg::Step(val) => self.set_step(val, orders),
+            Msg::Placeholder(val) => self.try_set_placeholder(val, orders),
             Msg::Disabled(val) => self.disabled = val,
             Msg::Focus(val) => self.focused = val,
             Msg::MouseOver(val) => self.mouse_over = val,
             Msg::Increment => {
-                self.try_set_value(Some(self.get_value_or_default() + self.step), &mut orders)
+                self.try_set_value(Some(self.get_value_or_default() + self.step), orders)
             }
             Msg::Decrement => {
-                self.try_set_value(Some(self.get_value_or_default() - self.step), &mut orders)
+                self.try_set_value(Some(self.get_value_or_default() - self.step), orders)
             }
-            Msg::Input => self.input(&mut orders),
-            Msg::IncrementButton(msg) => self.increment_button.update(msg, &mut orders),
-            Msg::DecrementButton(msg) => self.decrement_button.update(msg, &mut orders),
+            Msg::Input => self.input(orders),
+            Msg::IncrementButton(msg) => self
+                .increment_button
+                .update(msg, &mut orders.proxy(Msg::IncrementButton)),
+            Msg::DecrementButton(msg) => self
+                .decrement_button
+                .update(msg, &mut orders.proxy(Msg::DecrementButton)),
         }
     }
 }
 
-impl<PMsg> Stylable for SpinEntry<PMsg> {
+impl Stylable for SpinEntry {
     type Style = Style;
     type Styler = Styler<Self, Style>;
 
     fn styler(&self) -> Self::Styler {
         self.styler
             .clone()
-            .unwrap_or_else(|| (|s: &Self| s.theme.spin_entry().get(&s.theme_lens())).into())
+            .unwrap_or_else(|| (|s: &Self| s.theme.spin_entry().get(s)).into())
     }
 
     fn style(&self) -> Self::Style {
@@ -208,32 +169,33 @@ impl<PMsg> Stylable for SpinEntry<PMsg> {
     }
 }
 
-impl<PMsg: 'static> View for SpinEntry<PMsg> {
-    type Output = Node<PMsg>;
-
-    fn view(&self) -> Self::Output {
+impl View<Node<Msg>> for SpinEntry {
+    fn view(&self) -> Node<Msg> {
         self.styled_view(self.style())
     }
 }
 
-impl<PMsg: 'static> StyledView for SpinEntry<PMsg> {
-    fn styled_view(&self, style: Self::Style) -> Self::Output {
-        let local_events = self.local_events.get();
-        let events = self.events.get();
-
+impl StyledView<Node<Msg>> for SpinEntry {
+    fn styled_view(&self, style: Self::Style) -> Node<Msg> {
         let inc_btn = self
             .increment_button
             .styled_view(style.increment_button)
-            .map_msg_with(&self.msg_mapper);
+            .map_msg(Msg::IncrementButton)
+            .and_events(|conf| conf.click(|_| Msg::increment()));
         let dec_btn = self
             .decrement_button
             .styled_view(style.decrement_button)
-            .map_msg_with(&self.msg_mapper);
+            .map_msg(Msg::DecrementButton)
+            .and_events(|conf| conf.click(|_| Msg::decrement()));
 
         // input
         let input = html::input()
             .el_ref(&self.el_ref)
-            .set(&local_events.input)
+            .and_events(|conf| {
+                conf.input(|_| Msg::input())
+                    .focus(|_| Msg::focus(true))
+                    .blur(|_| Msg::focus(false))
+            })
             .set(style.input)
             .and_attributes(|conf| {
                 conf.class("input")
@@ -244,29 +206,28 @@ impl<PMsg: 'static> StyledView for SpinEntry<PMsg> {
                     .try_max(self.max)
                     .try_min(self.min)
                     .try_placeholder(self.placeholder.as_ref().map(ToString::to_string))
-            })
-            .map_msg_with(&self.msg_mapper)
-            .add(&events.input);
+            });
 
         // spin_entry
         html::div()
             .id(self.id.clone())
             .class("spin-entry")
             .set(style.spin_entry)
-            .set(&local_events.spin_entry)
-            .map_msg_with(&self.msg_mapper)
-            .add(&events.spin_entry)
+            .and_events(|conf| {
+                conf.mouse_enter(|_| Msg::mouse_over(true))
+                    .mouse_leave(|_| Msg::mouse_over(false))
+            })
             .add(vec![input, inc_btn, dec_btn])
     }
 }
 
-impl<PMsg: 'static> Config<PMsg> {
-    pub fn init(self, orders: &mut impl Orders<PMsg>) -> SpinEntry<PMsg> {
+impl Config {
+    pub fn init(self, orders: &mut impl Orders<Msg>) -> SpinEntry {
         SpinEntry::init(self, orders)
     }
 }
 
-impl<PMsg: 'static> SpinEntry<PMsg> {
+impl SpinEntry {
     fn try_set_value(&mut self, val: Option<f64>, _: &mut impl Orders<Msg>) {
         let val = match (val, self.min, self.max) {
             (Some(val), _, Some(max)) if val > max => Some(max),
@@ -380,44 +341,17 @@ impl<PMsg: 'static> SpinEntry<PMsg> {
     }
 }
 
-fn inc_btn_config() -> button::Config<Msg> {
-    Button::config(Msg::increment_button)
-        .label("+")
-        .events(|| button::events().and_button(|conf| conf.click(|_| Msg::increment())))
-}
-
-fn dec_btn_config() -> button::Config<Msg> {
-    Button::config(Msg::decrement_button)
-        .label("-")
-        .events(|| button::events().and_button(|conf| conf.click(|_| Msg::decrement())))
-}
-
-pub type ThemeStyler<'a> = Styler<SpinEntryLens<'a>, Style>;
-
 impl Msg {
-    pub fn events_store<PMsg: 'static>(val: EventsStore<PMsg>) -> Self {
-        Msg::EventsStore(Rc::new(val))
-    }
-
-    pub fn update_events_store<PMsg: 'static>(
-        val: impl Fn(EventsStore<Events<PMsg>>) -> EventsStore<Events<PMsg>> + 'static,
-    ) -> Self {
-        Msg::UpdateEventsStore(Rc::new(val))
-    }
-
-    pub fn styler<PMsg: 'static>(val: <SpinEntry<PMsg> as Stylable>::Styler) -> Self {
+    pub fn styler(val: <SpinEntry as Stylable>::Styler) -> Self {
         Msg::try_styler(Some(val))
     }
 
-    pub fn update_styler<PMsg: 'static>(
-        val: impl Fn(<SpinEntry<PMsg> as Stylable>::Styler) -> <SpinEntry<PMsg> as Stylable>::Styler
-            + 'static,
-    ) -> Self {
-        Msg::UpdateStyler(Rc::new(val))
+    pub fn update_styler(val: impl Into<UpdateStyler<SpinEntry>>) -> Self {
+        Msg::UpdateStyler(val.into())
     }
 
-    pub fn try_styler<PMsg: 'static>(val: Option<<SpinEntry<PMsg> as Stylable>::Styler>) -> Self {
-        Msg::Styler(Rc::new(val))
+    pub fn try_styler(val: Option<<SpinEntry as Stylable>::Styler>) -> Self {
+        Msg::Styler(val.map(|v| v.into()))
     }
 
     pub fn theme(val: Theme) -> Self {
@@ -484,15 +418,15 @@ impl Msg {
         Msg::Decrement
     }
 
-    fn input() -> Self {
+    pub fn input() -> Self {
         Msg::Input
     }
 
-    fn increment_button(val: button::Msg) -> Self {
+    pub fn increment_button(val: button::Msg) -> Self {
         Msg::IncrementButton(val)
     }
 
-    fn decrement_button(val: button::Msg) -> Self {
+    pub fn decrement_button(val: button::Msg) -> Self {
         Msg::DecrementButton(val)
     }
 }

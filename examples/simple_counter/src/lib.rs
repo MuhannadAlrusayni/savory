@@ -11,12 +11,9 @@ pub enum Msg {
     Decrement,
 }
 
-impl HasConfig for Counter {
-    type Config = Url;
-}
-
-impl Element<Msg> for Counter {
+impl Element for Counter {
     type Message = Msg;
+    type Config = Url;
 
     // initialize the app in this function
     fn init(_: Url, _: &mut impl Orders<Msg>) -> Self {
@@ -32,11 +29,9 @@ impl Element<Msg> for Counter {
     }
 }
 
-impl View for Counter {
-    type Output = Node<Msg>;
-
+impl View<Node<Msg>> for Counter {
     // view the app
-    fn view(&self) -> Self::Output {
+    fn view(&self) -> Node<Msg> {
         let inc_btn = html::button()
             .add("Increment")
             .and_events(|events| events.click(|_| Msg::Increment));
