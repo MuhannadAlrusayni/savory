@@ -17,7 +17,7 @@ include = [ "src/**/*", "Cargo.toml", "README.MD" ]
 maintenance = { status = "actively-developed" }
 
 [dependencies]
-savory-core = { verison = "0.5.0", path = "../core" }
+savory-core = { version = "0.5.1", path = "../core" }
 
 seed = "0.7.0"
 derive_rich = "0.4.3"
