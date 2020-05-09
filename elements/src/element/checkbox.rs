@@ -5,7 +5,7 @@ use savory_html::prelude::*;
 use std::borrow::Cow;
 
 #[derive(Rich, Element)]
-#[element(style(checkbox, button, label), events(checkbox, button, label))]
+#[element(style(checkbox, button, label))]
 pub struct Checkbox {
     // general element properties
     #[rich(read)]
@@ -13,8 +13,6 @@ pub struct Checkbox {
     id: Id,
     input_el_ref: ElRef<web_sys::HtmlInputElement>,
     label_el_ref: ElRef<web_sys::HtmlLabelElement>,
-    #[rich(read)]
-    events: EventsStore<Events<Msg>>,
     #[rich(read)]
     #[element(config)]
     styler: Option<<Checkbox as Stylable>::Styler>,
@@ -57,27 +55,11 @@ impl Element for Checkbox {
     fn init(config: Self::Config, orders: &mut impl Orders<Msg>) -> Self {
         orders.subscribe(|theme: ThemeChanged| Msg::theme(theme.0));
 
-        let events = || {
-            Events::default()
-                .and_checkbox(|conf| {
-                    conf.focus(|_| Msg::focus(true))
-                        .blur(|_| Msg::focus(false))
-                        .mouse_enter(|_| Msg::mouse_over(true))
-                        .mouse_leave(|_| Msg::mouse_over(false))
-                        .click(|_| Msg::toggle())
-                })
-                .and_label(|conf| {
-                    conf.mouse_enter(|_| Msg::mouse_over(true))
-                        .mouse_leave(|_| Msg::mouse_over(false))
-                })
-        };
-
         Self {
             id: config.id.unwrap_or_else(Id::generate),
             input_el_ref: ElRef::default(),
             label_el_ref: ElRef::default(),
             theme: config.theme,
-            events: events.into(),
             label: config.label,
             styler: config.styler,
             disabled: config.disabled,
@@ -136,21 +118,23 @@ impl StyledView<Node<Msg>> for Checkbox {
             button,
             label,
         } = style;
-        let events = self.events.get();
-
         let checkbox = html::input()
             .class("checbox")
             .set(att::disabled(self.disabled))
             .set(att::checked(self.toggled))
             .set(att::Type::Checkbox)
             .set(checkbox)
-            .set(&events.checkbox)
             .el_ref(&self.input_el_ref)
             // add button if the checkbox is toggled
             .config_if(self.is_toggled(), |conf| {
                 let button = html::div().class("button").set(button);
                 conf.add(button)
-            });
+            })
+            .on_focus(|_| Msg::focus(true))
+            .on_blur(|_| Msg::focus(false))
+            .on_mouse_enter(|_| Msg::mouse_over(true))
+            .on_mouse_leave(|_| Msg::mouse_over(false))
+            .on_click(|_| Msg::toggle());
 
         match self.label.as_ref() {
             None => checkbox.id(self.id.clone()),
@@ -158,10 +142,11 @@ impl StyledView<Node<Msg>> for Checkbox {
                 .id(self.id.clone())
                 .class("label")
                 .set(label)
-                .set(&events.label)
                 .add(checkbox)
                 .add(lbl.clone())
-                .el_ref(&self.label_el_ref),
+                .el_ref(&self.label_el_ref)
+                .on_mouse_enter(|_| Msg::mouse_over(true))
+                .on_mouse_leave(|_| Msg::mouse_over(false)),
         }
     }
 }

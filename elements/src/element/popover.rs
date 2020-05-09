@@ -5,7 +5,7 @@ use savory_html::prelude::*;
 
 // TODO: add placement property
 #[derive(Clone, Rich, Element)]
-#[element(style(panel, popover), events(panel, popover))]
+#[element(style(panel, popover))]
 pub struct Popover {
     #[rich(read)]
     #[element(config)]

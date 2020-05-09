@@ -4,14 +4,12 @@ use savory_core::prelude::*;
 use savory_html::prelude::*;
 
 #[derive(Rich, Element)]
-#[element(style(dialog, dialog_background), events(dialog, dialog_background))]
+#[element(style(dialog, dialog_background))]
 pub struct Dialog {
     // general element properties
     #[rich(read)]
     #[element(config)]
     id: Id,
-    #[rich(read)]
-    events: EventsStore<Events<Msg>>,
     #[rich(read)]
     #[element(config)]
     styler: Option<<Dialog as Stylable>::Styler>,
@@ -50,18 +48,8 @@ impl Element for Dialog {
     fn init(config: Self::Config, orders: &mut impl Orders<Msg>) -> Self {
         orders.subscribe(|theme: ThemeChanged| Msg::theme(theme.0));
 
-        let events = || {
-            events()
-                .and_dialog_background(|conf| conf.click(|_| Msg::clicked_out_side()))
-                .and_dialog(|conf| {
-                    conf.mouse_enter(|_| Msg::mouse_on_dialog(true))
-                        .mouse_leave(|_| Msg::mouse_on_dialog(false))
-                })
-        };
-
         Self {
             id: config.id.unwrap_or_else(Id::generate),
-            events: events.into(),
             styler: config.styler,
             theme: config.theme,
             header_bar: config.header_bar.init(&mut orders.proxy(Msg::HeaderBar)),
@@ -118,8 +106,6 @@ impl View<Node<Msg>> for Dialog {
 
 impl StyledView<Node<Msg>> for Dialog {
     fn styled_view(&self, style: Style) -> Node<Msg> {
-        let events = self.events.get();
-
         let dialog = html::div()
             .class("dialog")
             .set(style.dialog)
@@ -127,20 +113,19 @@ impl StyledView<Node<Msg>> for Dialog {
                 self.header_bar
                     .view()
                     .map_msg(Msg::HeaderBar)
-                    .for_class("button", |node| {
-                        node.and_events(|conf| conf.click(|_| Msg::close()))
-                    }),
+                    .for_class("button", |node| node.on_click(|_| Msg::close())),
             )
             // placeholder node
             .add(html::div().class("dialog-content"))
-            .add(&events.dialog);
+            .on_mouse_enter(|_| Msg::mouse_on_dialog(true))
+            .on_mouse_leave(|_| Msg::mouse_on_dialog(false));
 
         html::div()
             .id(self.id.clone())
             .class("dialog-background")
             .set(style.dialog_background)
-            .set(&events.dialog_background)
             .add(dialog)
+            .on_click(|_| Msg::clicked_out_side())
     }
 }
 

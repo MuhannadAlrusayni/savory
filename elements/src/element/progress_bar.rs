@@ -4,7 +4,7 @@ use savory_core::prelude::*;
 use savory_html::prelude::*;
 
 #[derive(Element, Rich)]
-#[element(style(indicator, progress_bar), events(indicator, progress_bar))]
+#[element(style(indicator, progress_bar))]
 pub struct ProgressBar {
     // general element properties
     #[rich(read)]

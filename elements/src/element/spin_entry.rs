@@ -5,15 +5,12 @@ use savory_html::prelude::*;
 
 // TODO: add way to accept custom format (e.g. `100%`, `45$`)
 #[derive(Rich, Element)]
-#[element(
-    style(
-        input,
-        spin_entry,
-        increment_button(button::Style),
-        decrement_button(button::Style),
-    ),
-    events(input, spin_entry)
-)]
+#[element(style(
+    input,
+    spin_entry,
+    increment_button(button::Style),
+    decrement_button(button::Style),
+))]
 pub struct SpinEntry {
     #[rich(read)]
     #[element(config)]
@@ -181,21 +178,16 @@ impl StyledView<Node<Msg>> for SpinEntry {
             .increment_button
             .styled_view(style.increment_button)
             .map_msg(Msg::IncrementButton)
-            .and_events(|conf| conf.click(|_| Msg::increment()));
+            .on_click(|_| Msg::increment());
         let dec_btn = self
             .decrement_button
             .styled_view(style.decrement_button)
             .map_msg(Msg::DecrementButton)
-            .and_events(|conf| conf.click(|_| Msg::decrement()));
+            .on_click(|_| Msg::decrement());
 
         // input
         let input = html::input()
             .el_ref(&self.el_ref)
-            .and_events(|conf| {
-                conf.input(|_| Msg::input())
-                    .focus(|_| Msg::focus(true))
-                    .blur(|_| Msg::focus(false))
-            })
             .set(style.input)
             .and_attributes(|conf| {
                 conf.class("input")
@@ -206,17 +198,18 @@ impl StyledView<Node<Msg>> for SpinEntry {
                     .try_max(self.max)
                     .try_min(self.min)
                     .try_placeholder(self.placeholder.as_ref().map(ToString::to_string))
-            });
+            })
+            .on_input(|_| Msg::input())
+            .on_focus(|_| Msg::focus(true))
+            .on_blur(|_| Msg::focus(false));
 
         // spin_entry
         html::div()
             .id(self.id.clone())
             .class("spin-entry")
             .set(style.spin_entry)
-            .and_events(|conf| {
-                conf.mouse_enter(|_| Msg::mouse_over(true))
-                    .mouse_leave(|_| Msg::mouse_over(false))
-            })
+            .on_mouse_enter(|_| Msg::mouse_over(true))
+            .on_mouse_leave(|_| Msg::mouse_over(false))
             .add(vec![input, inc_btn, dec_btn])
     }
 }

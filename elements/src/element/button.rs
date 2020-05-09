@@ -4,14 +4,12 @@ use savory_core::prelude::*;
 use savory_html::prelude::*;
 
 #[derive(Rich, Element)]
-#[element(style(button, label(label::Style), icon(icon::Style)), events(button))]
+#[element(style(button, label(label::Style), icon(icon::Style)))]
 pub struct Button {
     // general element properties
     #[rich(read)]
     #[element(config)]
     id: Id,
-    #[rich(read)]
-    events: EventsStore<Events<Msg>>,
     #[rich(read)]
     #[element(config)]
     styler: Option<<Button as Stylable>::Styler>,
@@ -61,20 +59,10 @@ impl Element for Button {
     fn init(config: Self::Config, orders: &mut impl Orders<Msg>) -> Self {
         orders.subscribe(|theme: ThemeChanged| Msg::theme(theme.0));
 
-        let events = || {
-            Events::default().and_button(|conf| {
-                conf.focus(|_| Msg::focus(true))
-                    .blur(|_| Msg::focus(false))
-                    .mouse_enter(|_| Msg::mouse_over(true))
-                    .mouse_leave(|_| Msg::mouse_over(false))
-            })
-        };
-
         Button {
             id: config.id.unwrap_or_else(Id::generate),
             theme: config.theme,
             styler: config.styler,
-            events: events.into(),
             label: config.label,
             icon: config.icon,
             kind: config.kind,
@@ -140,14 +128,18 @@ impl StyledView<Node<Msg>> for Button {
             label,
             icon,
         } = style;
+
         html::button()
             .class("button")
             .id(self.id.clone())
             .set(att::disabled(self.disabled))
-            .set(&self.events.get().button)
             .set(button)
             .try_add(self.icon.as_ref().map(|el| el.styled_view(icon)))
             .try_add(self.label.as_ref().map(|el| el.styled_view(label)))
+            .on_focus(|_| Msg::focus(true))
+            .on_blur(|_| Msg::focus(false))
+            .on_mouse_enter(|_| Msg::mouse_over(true))
+            .on_mouse_leave(|_| Msg::mouse_over(false))
     }
 }
 

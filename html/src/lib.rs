@@ -15,7 +15,7 @@ extern crate derive_more;
 pub mod prelude {
     pub use crate::{
         attribute as att, css,
-        events::EventsStore,
+        events::EventsApi,
         html,
         seed_ext::{AddForEl, ElExt, ElRefExt, NodeExt, SetForEl, TryAddForEl, TrySetForEl},
     };

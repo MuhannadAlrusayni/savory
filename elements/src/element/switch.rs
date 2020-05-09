@@ -4,14 +4,12 @@ use savory_core::prelude::*;
 use savory_html::prelude::*;
 
 #[derive(Rich, Element)]
-#[element(style(button, switch), events(button, switch))]
+#[element(style(button, switch))]
 pub struct Switch {
     // general element properties
     #[rich(read)]
     #[element(config)]
     id: Id,
-    #[rich(read)]
-    events: EventsStore<Events<Msg>>,
     #[rich(read)]
     #[element(config)]
     styler: Option<<Switch as Stylable>::Styler>,
@@ -50,20 +48,9 @@ impl Element for Switch {
     fn init(config: Self::Config, orders: &mut impl Orders<Msg>) -> Self {
         orders.subscribe(|theme: ThemeChanged| Msg::theme(theme.0));
 
-        let events = || {
-            Events::default().and_switch(|conf| {
-                conf.focus(|_| Msg::focus(true))
-                    .blur(|_| Msg::focus(false))
-                    .mouse_enter(|_| Msg::mouse_over(true))
-                    .mouse_leave(|_| Msg::mouse_over(false))
-                    .click(|_| Msg::toggle())
-            })
-        };
-
         Self {
             id: config.id.unwrap_or_else(Id::generate),
             theme: config.theme,
-            events: events.into(),
             styler: config.styler,
             disabled: config.disabled,
             toggled: config.toggled,
@@ -114,20 +101,19 @@ impl View<Node<Msg>> for Switch {
 
 impl StyledView<Node<Msg>> for Switch {
     fn styled_view(&self, style: Style) -> Node<Msg> {
-        let events = self.events.get();
-
-        let button = html::div()
-            .class("button")
-            .set(style.button)
-            .set(&events.button);
+        let button = html::div().class("button").set(style.button);
 
         html::button()
             .id(self.id.clone())
             .class("switch")
             .set(att::disabled(self.disabled))
             .set(style.switch)
-            .set(&events.switch)
             .add(button)
+            .on_focus(|_| Msg::focus(true))
+            .on_blur(|_| Msg::focus(false))
+            .on_mouse_enter(|_| Msg::mouse_over(true))
+            .on_mouse_leave(|_| Msg::mouse_over(false))
+            .on_click(|_| Msg::toggle())
     }
 }
 

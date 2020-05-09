@@ -5,7 +5,7 @@ use savory_html::prelude::*;
 use std::borrow::Cow;
 
 #[derive(Clone, Element, Rich)]
-#[element(style(html_icon), events(html_icon))]
+#[element(style(html_icon))]
 pub struct Html {
     #[rich(write)]
     pub id: Option<Id>,

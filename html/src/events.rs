@@ -1,159 +1,136 @@
 //! Types and functions for working with elements events.
 
-use crate::prelude::{El, UpdateEl};
-use seed::prelude::{ev, keyboard_ev, mouse_ev, pointer_ev, Ev, EventHandler, MessageMapper};
-use std::{
-    any::{Any, TypeId},
-    rc::Rc,
-};
+use crate::prelude::*;
+use seed::prelude::{ev, keyboard_ev, mouse_ev, pointer_ev, Ev, EventHandler};
+use std::any::{Any, TypeId};
 use wasm_bindgen::JsCast;
 
-pub struct Events<Msg> {
-    pub events: Vec<EventHandler<Msg>>,
-}
-
-impl<Ms: 'static, OtherMs: 'static> MessageMapper<Ms, OtherMs> for Events<Ms> {
-    type SelfWithOtherMs = Events<OtherMs>;
-
-    fn map_msg(self, f: impl FnOnce(Ms) -> OtherMs + 'static + Clone) -> Self::SelfWithOtherMs {
-        let mut events = vec![];
-        for event in self.events.into_iter() {
-            events.push(event.map_msg(f.clone()));
-        }
-        Events { events }
-    }
-}
-
-impl<Msg> Clone for Events<Msg> {
-    fn clone(&self) -> Self {
-        Self {
-            events: self.events.clone(),
-        }
-    }
-}
-
-impl<Msg> Default for Events<Msg> {
-    fn default() -> Self {
-        Self { events: vec![] }
-    }
-}
-
-impl<Msg> UpdateEl<Msg> for Events<Msg> {
-    fn update_el(self, el: &mut El<Msg>) {
-        self.events.update_el(el)
-    }
-}
-
-macro_rules! events_functions {
-    ( $( $event:ident: $ty:ty { $( $(#[$doc:meta])? $name:ident = $ev:expr $(,)? )* } $(,)? )* ) => {
-        $(
-            impl<Ms: 'static> Events<Ms> {
+macro_rules! events_api {
+    ( $( $event:ident: $ty:ty { $( $(#[$doc:meta])* $name:ident = $ev:expr $(,)? )* } $(,)? )* ) => {
+        pub trait EventsApi<Msg: 'static> {
+            $(
                 $(
-                    $( #[$doc] )?
-                    pub fn $name(
-                        mut self,
-                        handler: impl FnOnce($ty) -> Ms + 'static + Clone,
-                    ) -> Self {
-                        self.events.push($event($ev, handler));
+                    $( #[$doc] )*
+                    fn $name<EMsg: 'static>(self, handler: impl FnOnce($ty) -> EMsg + 'static + Clone) -> Self;
+                )*
+            )*
+        }
+
+        impl<Msg: 'static> EventsApi<Msg> for El<Msg> {
+            $(
+                $(
+                    fn $name<EMsg: 'static>(mut self, handler: impl FnOnce($ty) -> EMsg + 'static + Clone) -> Self {
+                        self.add_event_handler($event($ev, handler));
                         self
                     }
                 )*
-            }
-        )*
+            )*
+        }
+
+        impl<Msg: 'static> EventsApi<Msg> for Node<Msg> {
+            $(
+                $(
+                    fn $name<EMsg: 'static>(self, handler: impl FnOnce($ty) -> EMsg + 'static + Clone) -> Self {
+                        self.and_element(|el| el.$name(handler))
+                    }
+                )*
+            )*
+        }
     }
 }
 
-events_functions! {
+events_api! {
     ev: web_sys::Event {
-        scroll = Ev::Scroll,
-        after_print = Ev::AfterPrint,
-        before_print = Ev::BeforePrint,
-        app_installed = Ev::from("appinstalled"),
-        seeked = Ev::Seeked,
-        seeking = Ev::Seeking,
-        play = Ev::Play,
-        playing = Ev::Playing,
-        rate_change = Ev::RateChange,
-        can_play = Ev::CanPlay,
-        can_play_through = Ev::CanPlayThrough,
-        reset = Ev::from("reset"),
-        change = Ev::Change,
-        load = Ev::Load,
-        unload = Ev::Unload,
-        abort = Ev::Abort,
-        error = Ev::Error,
-        emptied = Ev::Emptied,
-        ended = Ev::Ended,
-        full_screen_change = Ev::FullScreenChange,
-        full_screen_error = Ev::FullScreenError,
-        invalid = Ev::from("invalid"),
-        offline = Ev::Offline,
-        online = Ev::Online,
-        select_start = Ev::from("selectstart"),
-        selectionchange = Ev::from("selectionchange"),
-        submit = Ev::Submit,
+        on_scroll = Ev::Scroll,
+        on_after_print = Ev::AfterPrint,
+        on_before_print = Ev::BeforePrint,
+        on_app_installed = Ev::from("appinstalled"),
+        on_seeked = Ev::Seeked,
+        on_seeking = Ev::Seeking,
+        on_play = Ev::Play,
+        on_playing = Ev::Playing,
+        on_rate_change = Ev::RateChange,
+        on_can_play = Ev::CanPlay,
+        on_can_play_through = Ev::CanPlayThrough,
+        on_reset = Ev::from("reset"),
+        on_change = Ev::Change,
+        on_load = Ev::Load,
+        on_unload = Ev::Unload,
+        on_abort = Ev::Abort,
+        on_error = Ev::Error,
+        on_emptied = Ev::Emptied,
+        on_ended = Ev::Ended,
+        on_full_screen_change = Ev::FullScreenChange,
+        on_full_screen_error = Ev::FullScreenError,
+        on_invalid = Ev::from("invalid"),
+        on_offline = Ev::Offline,
+        on_online = Ev::Online,
+        on_select_start = Ev::from("selectstart"),
+        on_selectionchange = Ev::from("selectionchange"),
+        on_submit = Ev::Submit,
     }
     focus_ev: web_sys::FocusEvent {
-        blur = Ev::Blur,
-        focus = Ev::Focus,
-        focus_in = Ev::from("focusin"),
-        focus_out = Ev::from("focusout"),
+        on_blur = Ev::Blur,
+        on_focus = Ev::Focus,
+        on_focus_in = Ev::from("focusin"),
+        on_focus_out = Ev::from("focusout"),
     }
     mouse_ev: web_sys::MouseEvent {
-        aux_click = Ev::AuxClick,
-        click = Ev::Click,
-        double_click = Ev::DblClick,
-        mouse_down = Ev::MouseDown,
-        mouse_enter = Ev::MouseEnter,
-        mouse_leave = Ev::MouseLeave,
-        mouse_move = Ev::MouseMove,
-        mouse_out = Ev::MouseOut,
-        mouse_over = Ev::MouseOver,
-        mouse_up = Ev::MouseUp,
-        context_menu = Ev::ContextMenu,
+        on_aux_click = Ev::AuxClick,
+        on_click = Ev::Click,
+        on_double_click = Ev::DblClick,
+        on_mouse_down = Ev::MouseDown,
+        on_mouse_enter = Ev::MouseEnter,
+        on_mouse_leave = Ev::MouseLeave,
+        on_mouse_move = Ev::MouseMove,
+        on_mouse_out = Ev::MouseOut,
+        on_mouse_over = Ev::MouseOver,
+        on_mouse_up = Ev::MouseUp,
+        on_context_menu = Ev::ContextMenu,
     }
     pointer_ev: web_sys::PointerEvent {
-        pointer_cancel = Ev::PointerCancel,
-        pointer_down = Ev::PointerDown,
-        pointer_enter = Ev::PointerEnter,
-        pointer_leave = Ev::PointerLeave,
-        pointer_move = Ev::PointerMove,
-        pointer_out = Ev::PointerOut,
-        pointer_over = Ev::PointerOver,
-        pointer_up = Ev::PointerUp,
-        lost_pointer_capture = Ev::LostPointerCapture,
-        got_pointer_capture = Ev::GotPointerCapture,
+        on_pointer_cancel = Ev::PointerCancel,
+        on_pointer_down = Ev::PointerDown,
+        on_pointer_enter = Ev::PointerEnter,
+        on_pointer_leave = Ev::PointerLeave,
+        on_pointer_move = Ev::PointerMove,
+        on_pointer_out = Ev::PointerOut,
+        on_pointer_over = Ev::PointerOver,
+        on_pointer_up = Ev::PointerUp,
+        on_lost_pointer_capture = Ev::LostPointerCapture,
+        on_got_pointer_capture = Ev::GotPointerCapture,
     }
     wheel_ev: web_sys::WheelEvent {
-        wheel = Ev::Wheel,
+        on_wheel = Ev::Wheel,
     }
     // NOTE: that `InputEvent` doesn't provied access to data property yet, use
-    // seed::browser::util::{get_value, set_value} access these value for now.
+    // seed::browser::util::{get_value, set_value} to access these value for
+    // now.
     input_ev: web_sys::InputEvent {
-        before_input = Ev::from("beforeinput")
-        input = Ev::Input,
+        on_before_input = Ev::from("beforeinput")
+        on_input = Ev::Input,
     }
     keyboard_ev: web_sys::KeyboardEvent {
-        key_down = Ev::KeyDown,
-        key_up = Ev::KeyUp,
+        on_key_down = Ev::KeyDown,
+        on_key_up = Ev::KeyUp,
     }
     composition_ev: web_sys::CompositionEvent {
-        composition_start = Ev::CompositionStart,
-        composition_update = Ev::CompositionUpdate,
-        composition_end = Ev::CompositionEnd,
+        on_composition_start = Ev::CompositionStart,
+        on_composition_update = Ev::CompositionUpdate,
+        on_composition_end = Ev::CompositionEnd,
     }
     drag_ev: web_sys::DragEvent {
-        drag = Ev::Drag,
-        drag_end = Ev::DragEnd,
-        drag_enter = Ev::DragEnter,
-        drag_leave = Ev::DragLeave,
-        drag_over = Ev::DragOver,
-        drag_start = Ev::DragStart,
-        drop = Ev::Drop,
+        on_drag = Ev::Drag,
+        on_drag_end = Ev::DragEnd,
+        on_drag_enter = Ev::DragEnter,
+        on_drag_leave = Ev::DragLeave,
+        on_drag_over = Ev::DragOver,
+        on_drag_start = Ev::DragStart,
+        on_drop = Ev::Drop,
     }
     ui_ev: web_sys::UiEvent {
-        resize = Ev::Resize,
-        select = Ev::Select,
+        on_resize = Ev::Resize,
+        on_select = Ev::Select,
     }
 }
 
@@ -194,51 +171,4 @@ event_creator! {
     input_ev(web_sys::InputEvent),
     /// create `EventHandler` with `web_sys::UiEvent`
     ui_ev(web_sys::UiEvent),
-}
-
-/// Type used to generate events when get called, this type hold function that
-/// return events.
-pub struct EventsStore<Ev>(Rc<dyn Fn() -> Ev>);
-
-impl<Ev> EventsStore<Ev> {
-    pub fn new(f: impl Fn() -> Ev + 'static) -> Self {
-        Self(Rc::new(f))
-    }
-
-    pub fn get(&self) -> Ev {
-        self.0()
-    }
-}
-
-impl<Ev> From<Rc<EventsStore<Ev>>> for EventsStore<Ev> {
-    fn from(val: Rc<EventsStore<Ev>>) -> Self {
-        Self(Rc::clone(&val.0))
-    }
-}
-
-impl<Ev> From<Rc<dyn Fn() -> Ev>> for EventsStore<Ev> {
-    fn from(val: Rc<dyn Fn() -> Ev>) -> Self {
-        Self(val)
-    }
-}
-
-impl<Ev, T> From<T> for EventsStore<Ev>
-where
-    T: Fn() -> Ev + 'static,
-{
-    fn from(val: T) -> Self {
-        Self(Rc::new(val))
-    }
-}
-
-impl<Ev> Clone for EventsStore<Ev> {
-    fn clone(&self) -> Self {
-        Self(Rc::clone(&self.0))
-    }
-}
-
-impl<Ev: Default> Default for EventsStore<Ev> {
-    fn default() -> Self {
-        Self(Rc::new(|| Ev::default()))
-    }
 }

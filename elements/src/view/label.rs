@@ -6,7 +6,7 @@ use savory_html::prelude::*;
 use std::borrow::Cow;
 
 #[derive(Rich, Clone, Element)]
-#[element(style(label), events(label))]
+#[element(style(label))]
 pub struct Label {
     #[rich(write)]
     pub id: Option<Id>,

@@ -113,10 +113,13 @@ impl View<Node<Msg>> for MyApp {
             .center()
             .column()
             .gap(px(4))
-            .add(self.button.view().map_msg(Msg::Button).and_events(|conf| {
-                conf.click(|_| Msg::Dialog(dialog::Msg::open()))
-                    .click(|_| Msg::ProgressBar(progress_bar::Msg::increment(2.0)))
-            }))
+            .add(
+                self.button
+                    .view()
+                    .map_msg(Msg::Button)
+                    .on_click(|_| Msg::Dialog(dialog::Msg::open()))
+                    .on_click(|_| Msg::ProgressBar(progress_bar::Msg::increment(2.0))),
+            )
             .add(
                 self.popover
                     .view()
@@ -125,7 +128,7 @@ impl View<Node<Msg>> for MyApp {
                         self.popover_btn
                             .view()
                             .map_msg(Msg::PopoverButton)
-                            .and_events(|conf| conf.click(|_| Msg::Popover(popover::Msg::toggle())))
+                            .on_click(|_| Msg::Popover(popover::Msg::toggle()))
                     })
                     .for_class("popover-content", |_| {
                         self.progress_bar
@@ -158,7 +161,7 @@ impl View<Node<Msg>> for MyApp {
             })
             .for_id("4", |node| {
                 node.and_style(|conf| conf.add("transform", "scale(2.8)"))
-                    .and_events(|conf| conf.click(|_| Msg::Checkbox(checkbox::Msg::toggle())))
+                    .on_click(|_| Msg::Checkbox(checkbox::Msg::toggle()))
             })
     }
 }

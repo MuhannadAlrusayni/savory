@@ -5,7 +5,7 @@ use savory_html::prelude::*;
 use std::borrow::Cow;
 
 #[derive(Rich, Element)]
-#[element(style(radio, button, label), events(radio, button, label))]
+#[element(style(radio, button, label))]
 pub struct Radio {
     // general element properties
     #[rich(read)]
@@ -13,8 +13,6 @@ pub struct Radio {
     id: Id,
     input_el_ref: ElRef<web_sys::HtmlInputElement>,
     label_el_ref: ElRef<web_sys::HtmlLabelElement>,
-    #[rich(read)]
-    events: EventsStore<Events<Msg>>,
     #[rich(read)]
     #[element(config)]
     styler: Option<<Radio as Stylable>::Styler>,
@@ -57,28 +55,12 @@ impl Element for Radio {
     fn init(config: Self::Config, orders: &mut impl Orders<Msg>) -> Self {
         orders.subscribe(|theme: ThemeChanged| Msg::theme(theme.0));
 
-        let events = || {
-            Events::default()
-                .and_radio(|conf| {
-                    conf.focus(|_| Msg::focus(true))
-                        .blur(|_| Msg::focus(false))
-                        .mouse_enter(|_| Msg::mouse_over(true))
-                        .mouse_leave(|_| Msg::mouse_over(false))
-                        .click(|_| Msg::toggle())
-                })
-                .and_label(|conf| {
-                    conf.mouse_enter(|_| Msg::mouse_over(true))
-                        .mouse_leave(|_| Msg::mouse_over(false))
-                })
-        };
-
         Self {
             id: config.id.unwrap_or_else(Id::generate),
             input_el_ref: ElRef::default(),
             label_el_ref: ElRef::default(),
             theme: config.theme,
             styler: config.styler,
-            events: events.into(),
             label: config.label,
             disabled: config.disabled,
             toggled: config.toggled,
@@ -135,7 +117,6 @@ impl StyledView<Node<Msg>> for Radio {
             button,
             label,
         } = style;
-        let events = self.events.get();
 
         let radio = html::input()
             .class("radio")
@@ -143,12 +124,16 @@ impl StyledView<Node<Msg>> for Radio {
             .set(att::checked(self.toggled))
             .set(att::Type::Radio)
             .set(radio)
-            .set(&events.radio)
             .el_ref(&self.input_el_ref)
             // add button if the radio is toggled
             .config_if(self.is_toggled(), |conf| {
                 conf.add(html::div().class("button").set(button))
-            });
+            })
+            .on_focus(|_| Msg::focus(true))
+            .on_blur(|_| Msg::focus(false))
+            .on_mouse_enter(|_| Msg::mouse_over(true))
+            .on_mouse_leave(|_| Msg::mouse_over(false))
+            .on_click(|_| Msg::toggle());
 
         match self.label.as_ref() {
             None => radio.id(self.id.clone()),
@@ -156,10 +141,11 @@ impl StyledView<Node<Msg>> for Radio {
                 .id(self.id.clone())
                 .class("label")
                 .set(label)
-                .set(&events.label)
                 .add(radio)
                 .add(lbl.clone())
-                .el_ref(&self.label_el_ref),
+                .el_ref(&self.label_el_ref)
+                .on_mouse_enter(|_| Msg::mouse_over(true))
+                .on_mouse_leave(|_| Msg::mouse_over(false)),
         }
     }
 }

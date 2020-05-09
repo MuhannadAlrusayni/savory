@@ -5,15 +5,13 @@ use savory_html::prelude::*;
 use std::borrow::Cow;
 
 #[derive(Rich, Element)]
-#[element(style(input, container), events(input, container))]
+#[element(style(input, container))]
 pub struct Entry {
     // general element properties
     #[rich(read)]
     #[element(config)]
     id: Id,
     el_ref: ElRef<web_sys::HtmlInputElement>,
-    #[rich(read)]
-    events: EventsStore<Events<Msg>>,
     #[rich(read)]
     #[element(config)]
     styler: Option<<Entry as Stylable>::Styler>,
@@ -60,20 +58,9 @@ impl Element for Entry {
     fn init(config: Self::Config, orders: &mut impl Orders<Msg>) -> Self {
         orders.subscribe(|theme: ThemeChanged| Msg::theme(theme.0));
 
-        let events = || {
-            Events::default().and_input(|conf| {
-                conf.focus(|_| Msg::focus(true))
-                    .blur(|_| Msg::focus(false))
-                    .mouse_enter(|_| Msg::mouse_over(true))
-                    .mouse_leave(|_| Msg::mouse_over(false))
-                    .input(|_| Msg::resync_text())
-            })
-        };
-
         Self {
             id: config.id.unwrap_or_else(Id::generate),
             el_ref: ElRef::default(),
-            events: events.into(),
             styler: config.styler,
             theme: config.theme,
             text: config.text,
@@ -133,10 +120,7 @@ impl View<Node<Msg>> for Entry {
 
 impl StyledView<Node<Msg>> for Entry {
     fn styled_view(&self, style: Style) -> Node<Msg> {
-        let events = self.events.get();
-
         let input = html::input()
-            .set(&events.input)
             .set(style.input)
             .and_attributes(|conf| {
                 conf.class("input")
@@ -144,13 +128,17 @@ impl StyledView<Node<Msg>> for Entry {
                     .try_value(self.text.clone())
                     .try_max_length(self.max_length)
                     .try_placeholder(self.placeholder.clone())
-            });
+            })
+            .on_focus(|_| Msg::focus(true))
+            .on_blur(|_| Msg::focus(false))
+            .on_mouse_enter(|_| Msg::mouse_over(true))
+            .on_mouse_leave(|_| Msg::mouse_over(false))
+            .on_input(|_| Msg::resync_text());
 
         html::div()
             .id(self.id.clone())
             .class("entry")
             .set(style.container)
-            .set(&events.container)
             .add(input)
     }
 }

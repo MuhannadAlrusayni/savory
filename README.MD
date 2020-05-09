@@ -80,13 +80,8 @@ impl Element for Counter {
 impl View<Node<Msg>> for Counter {
     // view the app
     fn view(&self) -> Node<Msg> {
-        let inc_btn = html::button()
-            .add("Increment")
-            .and_events(|events| events.click(|_| Msg::Increment));
-
-        let dec_btn = html::button()
-            .add("Decrement")
-            .and_events(|events| events.click(|_| Msg::Decrement));
+        let inc_btn = html::button().add("Increment").on_click(|_| Msg::Increment);
+        let dec_btn = html::button().add("Decrement").on_click(|_| Msg::Decrement);
 
         html::div()
             .add(inc_btn)
@@ -122,7 +117,7 @@ use savory_html::{
 use wasm_bindgen::prelude::*;
 
 #[derive(Element)]
-#[element(style(inc_btn, dec_btn), events(inc_btn, dec_btn))]
+#[element(style(inc_btn, dec_btn))]
 pub struct Counter {
     #[element(config(default = "10"))]
     value: i32,
@@ -172,14 +167,14 @@ impl View<Node<Msg>> for Counter {
         let inc_btn = html::button()
             .class("inc-btn")
             .set(style.inc_btn)
-            .and_events(|conf| conf.click(|_| Msg::Increment))
+            .on_click(|_| Msg::Increment)
             .add("Increment");
 
         // decrement button node
         let dec_btn = html::button()
             .class("dec-btn")
             .set(style.dec_btn)
-            .and_events(|conf| conf.click(|_| Msg::Decrement))
+            .on_click(|_| Msg::Decrement)
             .add("Decrement");
 
         // contianer node

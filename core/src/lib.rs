@@ -89,13 +89,8 @@
 //! impl View<Node<Msg>> for Counter {
 //!     // view the app
 //!     fn view(&self) -> Node<Msg> {
-//!         let inc_btn = html::button()
-//!             .add("Increment")
-//!             .and_events(|events| events.click(|_| Msg::Increment));
-//!
-//!         let dec_btn = html::button()
-//!             .add("Decrement")
-//!             .and_events(|events| events.click(|_| Msg::Decrement));
+//!         let inc_btn = html::button().add("Increment").on_click(|_| Msg::Increment);
+//!         let dec_btn = html::button().add("Decrement").on_click(|_| Msg::Decrement);
 //!
 //!         html::div()
 //!             .add(inc_btn)

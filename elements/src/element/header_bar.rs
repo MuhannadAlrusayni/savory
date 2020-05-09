@@ -4,16 +4,13 @@ use savory_core::prelude::*;
 use savory_html::prelude::*;
 
 #[derive(Rich, Element)]
-#[element(
-    style(
-        header_bar,
-        titles_container,
-        title(label::Style),
-        subtitle(label::Style),
-        close_button(button::Style),
-    ),
-    events(titles_container, header_bar)
-)]
+#[element(style(
+    header_bar,
+    titles_container,
+    title(label::Style),
+    subtitle(label::Style),
+    close_button(button::Style),
+))]
 pub struct HeaderBar {
     // general element properties
     #[rich(read)]

@@ -2,7 +2,6 @@
 use crate::{
     attribute::{Attribute, Attributes},
     css::Style,
-    events::Events,
     prelude::*,
 };
 use seed::{dom_entity_names::At, prelude::AtValue, virtual_dom::style::Style as SeedStyle};
@@ -25,28 +24,10 @@ pub trait TrySetForEl<T> {
 }
 
 // impl AddForEl
-impl<Msg> AddForEl<&Events<Msg>> for El<Msg> {
-    fn add(self, val: &Events<Msg>) -> Self {
-        self.add_events(val)
-    }
-}
-
-impl<Msg> AddForEl<&Events<Msg>> for Node<Msg> {
-    fn add(self, val: &Events<Msg>) -> Self {
-        self.and_element(|el| el.add(val))
-    }
-}
-
 impl<Msg> AddForEl<Style> for El<Msg> {
     fn add(mut self, val: Style) -> Self {
         val.update_el(&mut self);
         self
-        // if let Some(style) = val.into_seed_style() {
-        //     for (key, val) in style.vals.into_iter() {
-        //         self.add_style(key, val);
-        //     }
-        // }
-        // self
     }
 }
 
@@ -58,30 +39,6 @@ impl<Msg> AddForEl<Style> for Node<Msg> {
 
 // NOTE: Adding attribute need special handling for each attribute, thus we
 // cannot support this functionality yet
-
-// impl<T: Into<Attribute>, Msg> AddForEl<T> for El<Msg> {
-//     fn add(self, val: T) -> Self {
-//         self.add_attribute(val.into())
-//     }
-// }
-
-// impl<T: Into<Attribute>, Msg> AddForEl<T> for Node<Msg> {
-//     fn add(self, val: T) -> Self {
-//         self.and_element(|el| el.add(val))
-//     }
-// }
-
-// impl<Msg> AddForEl<Attributes> for El<Msg> {
-//     fn add(self, val: Attributes) -> Self {
-//         self.add_attributes(val)
-//     }
-// }
-
-// impl<Msg> AddForEl<Attributes> for Node<Msg> {
-//     fn add(self, val: Attributes) -> Self {
-//         self.and_element(|el| el.add(val))
-//     }
-// }
 
 impl<Msg> AddForEl<Node<Msg>> for El<Msg> {
     fn add(self, val: Node<Msg>) -> Self {
@@ -157,18 +114,6 @@ impl<Msg> AddForEl<att::Class> for Node<Msg> {
 }
 
 // impl TryAddForEl
-impl<Msg> TryAddForEl<Option<&Events<Msg>>> for El<Msg> {
-    fn try_add(self, val: Option<&Events<Msg>>) -> Self {
-        self.try_add_events(val)
-    }
-}
-
-impl<Msg> TryAddForEl<Option<&Events<Msg>>> for Node<Msg> {
-    fn try_add(self, val: Option<&Events<Msg>>) -> Self {
-        self.and_element(|el| el.try_add(val))
-    }
-}
-
 impl<Msg> TryAddForEl<Option<Style>> for El<Msg> {
     fn try_add(self, val: Option<Style>) -> Self {
         self.try_add_style(val)
@@ -183,18 +128,6 @@ impl<Msg> TryAddForEl<Option<Style>> for Node<Msg> {
 
 // NOTE: Adding attribute need special handling for each attribute, thus we
 // cannot support this functionality yet
-
-// impl<T: Into<Attribute>, Msg> TryAddForEl<Option<T>> for El<Msg> {
-//     fn try_add(self, val: Option<T>) -> Self {
-//         self.try_add_attribute(val.map(|val| val.into()))
-//     }
-// }
-
-// impl<T: Into<Attribute>, Msg> TryAddForEl<Option<T>> for Node<Msg> {
-//     fn try_add(self, val: Option<T>) -> Self {
-//         self.and_element(|el| el.try_add(val))
-//     }
-// }
 
 impl<Msg> TryAddForEl<Option<Node<Msg>>> for El<Msg> {
     fn try_add(self, val: Option<Node<Msg>>) -> Self {
@@ -273,18 +206,6 @@ impl<Msg> TryAddForEl<Option<att::Class>> for Node<Msg> {
 }
 
 // impl SetForEl
-impl<Msg> SetForEl<&Events<Msg>> for El<Msg> {
-    fn set(self, val: &Events<Msg>) -> Self {
-        self.set_events(val)
-    }
-}
-
-impl<Msg> SetForEl<&Events<Msg>> for Node<Msg> {
-    fn set(self, val: &Events<Msg>) -> Self {
-        self.and_element(|el| el.set(val))
-    }
-}
-
 impl<Msg> SetForEl<Style> for El<Msg> {
     fn set(self, val: Style) -> Self {
         self.set_style(val)
@@ -382,18 +303,6 @@ impl<Msg> SetForEl<Cow<'static, str>> for Node<Msg> {
 }
 
 // impl TrySetForEl
-impl<Msg> TrySetForEl<Option<&Events<Msg>>> for El<Msg> {
-    fn try_set(self, val: Option<&Events<Msg>>) -> Self {
-        self.try_set_events(val)
-    }
-}
-
-impl<Msg> TrySetForEl<Option<&Events<Msg>>> for Node<Msg> {
-    fn try_set(self, val: Option<&Events<Msg>>) -> Self {
-        self.and_element(|el| el.try_set(val))
-    }
-}
-
 impl<Msg> TrySetForEl<Option<Style>> for El<Msg> {
     fn try_set(self, val: Option<Style>) -> Self {
         self.try_set_style(val)
@@ -479,12 +388,6 @@ impl<Msg> TrySetForEl<Option<Cow<'static, str>>> for Node<Msg> {
 }
 
 pub trait ElExt<Msg> {
-    fn add_events(self, val: &Events<Msg>) -> Self;
-    fn try_add_events(self, val: Option<&Events<Msg>>) -> Self;
-    fn set_events(self, val: &Events<Msg>) -> Self;
-    fn try_set_events(self, val: Option<&Events<Msg>>) -> Self;
-    fn and_events(self, conf: impl FnOnce(Events<Msg>) -> Events<Msg>) -> Self;
-
     // NOTE: method name overlab with `El::add_style()`
     // fn add_style(self, style: Style) -> Self;
     fn try_add_style(self, val: Option<Style>) -> Self;
@@ -539,39 +442,6 @@ pub trait ElExt<Msg> {
 }
 
 impl<Msg> ElExt<Msg> for El<Msg> {
-    fn add_events(mut self, val: &Events<Msg>) -> Self {
-        for event in val.clone().events.into_iter() {
-            self.add_event_handler(event);
-        }
-        self
-    }
-
-    fn try_add_events(self, val: Option<&Events<Msg>>) -> Self {
-        if let Some(events) = val {
-            self.add_events(events)
-        } else {
-            self
-        }
-    }
-
-    fn set_events(mut self, val: &Events<Msg>) -> Self {
-        use seed::virtual_dom::event_handler_manager::EventHandlerManager;
-        self.event_handler_manager = EventHandlerManager::with_event_handlers(val.events.clone());
-        self
-    }
-
-    fn try_set_events(self, val: Option<&Events<Msg>>) -> Self {
-        if let Some(events) = val {
-            self.set_events(events)
-        } else {
-            self
-        }
-    }
-
-    fn and_events(self, conf: impl FnOnce(Events<Msg>) -> Events<Msg>) -> Self {
-        self.add_events(&conf(Events::default()))
-    }
-
     fn try_add_style(self, val: Option<Style>) -> Self {
         if let Some(val) = val {
             self.add(val)
@@ -746,26 +616,6 @@ impl<Msg> ElExt<Msg> for El<Msg> {
 }
 
 impl<Msg> ElExt<Msg> for Node<Msg> {
-    fn add_events(self, val: &Events<Msg>) -> Self {
-        self.and_element(|el| el.add_events(val))
-    }
-
-    fn try_add_events(self, val: Option<&Events<Msg>>) -> Self {
-        self.and_element(|el| el.try_add_events(val))
-    }
-
-    fn set_events(self, val: &Events<Msg>) -> Self {
-        self.and_element(|el| el.set_events(val))
-    }
-
-    fn try_set_events(self, val: Option<&Events<Msg>>) -> Self {
-        self.and_element(|el| el.try_set_events(val))
-    }
-
-    fn and_events(self, conf: impl FnOnce(Events<Msg>) -> Events<Msg>) -> Self {
-        self.and_element(|el| el.and_events(conf))
-    }
-
     fn try_add_style(self, val: Option<Style>) -> Self {
         self.and_element(|el| el.try_add_style(val))
     }

@@ -11,12 +11,10 @@ use savory_html::{
 use item::Item;
 
 #[derive(Element, Rich)]
-#[element(style(flexbox), events(flexbox))]
+#[element(style(flexbox))]
 pub struct Flexbox<PMsg> {
     #[rich(write)]
     pub id: Option<Id>,
-    #[rich(write(style = compose))]
-    pub events: Events<PMsg>,
     #[rich(write(style = compose))]
     pub styler: Option<Styler<Self, Style>>,
     #[element(theme_lens)]
@@ -64,7 +62,6 @@ impl<PMsg> Flexbox<PMsg> {
     pub fn new() -> Self {
         Self {
             id: None,
-            events: Events::default(),
             styler: None,
             theme: Theme::default(),
             items: vec![],
@@ -203,7 +200,6 @@ impl<PMsg> StyledView<Node<PMsg>> for Flexbox<PMsg> {
         html::div()
             .try_id(self.id.clone())
             .class("flexbox")
-            .set(&self.events.flexbox)
             .set(style.flexbox)
             .add(
                 self.items
