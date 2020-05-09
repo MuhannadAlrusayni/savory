@@ -340,8 +340,8 @@ TODO
 - [`savory-html`] - Typed HTML for Savory
 - [`savory-elements`] - UI Elements based on Savory
 - [`savory-derive`] - Helper derives
-- [`savory-theme`] - Helper derives
-- [`savory-icons`] - Helper derives
+- [`savory-theme`] - The official theme for Savory
+- [`savory-icons`] - Reusable icons for Savory
 
 # License
 
