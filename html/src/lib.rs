@@ -19,5 +19,5 @@ pub mod prelude {
         html,
         seed_ext::{AddForEl, ElExt, ElRefExt, NodeExt, SetForEl, TryAddForEl, TrySetForEl},
     };
-    pub use seed::prelude::{El, ElRef, Node, UpdateEl, UpdateElForIterator};
+    pub use seed::prelude::{streams, subs, El, ElRef, Ev, Node, UpdateEl, UpdateElForIterator};
 }

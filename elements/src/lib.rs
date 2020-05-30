@@ -67,8 +67,11 @@ pub mod prelude {
             dialog::{self, Dialog},
             entry::{self, Entry},
             header_bar::{self, HeaderBar},
-            helper::animator::{self, Animator},
-            helper::toggle::{self, Toggle},
+            helper::{
+                animator::{self, Animator},
+                screen_info_notifier::{self, NewScreenInfo, ScreenInfo, ScreenInfoNotifier},
+                toggle::{self, Toggle},
+            },
             popover::{self, Popover},
             progress_bar::{self, ProgressBar},
             radio::{self, Radio},

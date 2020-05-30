@@ -418,6 +418,29 @@ impl Ant {
 }
 
 impl ThemeImpl for Ant {
+    // from https://github.com/mdgriffith/elm-ui/blob/1.1.6/src/Element.elm#L1602
+    fn screen_info(&self, width: u32, height: u32) -> ScreenInfo {
+        use crate::element::helper::screen_info_notifier::*;
+
+        let long_side = width.max(height);
+        let short_side = width.min(height);
+
+        let class = match (short_side, long_side) {
+            (0..=599, _) => ScreenClass::Phone,
+            (_, 0..=1200) => ScreenClass::Tablet,
+            (_, 1201..=1920) => ScreenClass::Desktop,
+            (_, _) => ScreenClass::BigDesktop,
+        };
+
+        let orientation = if width < height {
+            ScreenOrientation::Portrait
+        } else {
+            ScreenOrientation::Landscape
+        };
+
+        ScreenInfo { class, orientation }
+    }
+
     fn flexbox<'a>(&self) -> flexbox::ThemeStyler<'a> {
         let styler = |lens: &flexbox::FlexboxLens<'a>| {
             flexbox::Style::default().and_flexbox(|conf| {

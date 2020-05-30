@@ -30,6 +30,8 @@ impl Deref for Theme {
 
 /// Trait used by theme types to generate elements/views styles.
 pub trait ThemeImpl {
+    fn screen_info(&self, width: u32, height: u32) -> ScreenInfo;
+
     // NOTE: generice views uses ThemeStyler<'a> to keep this trait as trait
     // object safe. This is needed so we can store ThemeImpl in the Theme
     // struct.
