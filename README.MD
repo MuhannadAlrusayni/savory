@@ -3,11 +3,11 @@
 
 [![master docs](https://img.shields.io/badge/docs-master-blue.svg)](https://malrusayni.gitlab.io/savory/savory_core/)
 &middot;
-[![crate info](https://img.shields.io/crates/v/savory.svg)](https://crates.io/crates/savory-core)
+[![crate info](https://img.shields.io/crates/v/savory-core.svg)](https://crates.io/crates/savory-core)
 &middot;
 [![pipeline](https://gitlab.com/MAlrusayni/savory/badges/master/pipeline.svg)](https://gitlab.com/MAlrusayni/savory/pipelines)
 &middot;
-[![rustc version](https://img.shields.io/badge/rustc-stable-green.svg)](https://crates.io/crates/savory)
+[![rustc version](https://img.shields.io/badge/rustc-stable-green.svg)](https://crates.io/crates/savory-core)
 &middot;
 [![unsafe forbidden](https://img.shields.io/badge/unsafe-forbidden-success.svg)](https://github.com/rust-secure-code/safety-dance/)
 
