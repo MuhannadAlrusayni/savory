@@ -38,6 +38,11 @@ Savory tries to make writing UI elements fun and boilerplate free.
 
 ![Screenshot](docs-resources/screenshot.png)
 
+# Get Started
+
+The quickest way to get started is by following the [**Savory Get
+Started**](https://gitlab.com/MAlrusayni/savory-quick-start) repo instruction.
+
 # Examples
 
 Here we will create the same counter app found in [Elm tutorial], then we will
@@ -98,7 +103,7 @@ pub fn view() {
 ```
 
 Preview:
-![Screenshot](docs-resources/simple-counter.webm)
+![Screenshot](docs-resources/simple-counter.png)
 
 [source code](https://gitlab.com/MAlrusayni/savory/-/tree/master/examples/simple_counter)
 
@@ -239,7 +244,7 @@ pub fn view() {
 ```
 
 Preview:
-![Screenshot](docs-resources/counter-element.webm)
+![Screenshot](docs-resources/counter-element.png)
 
 [source code](https://gitlab.com/MAlrusayni/savory/-/tree/master/examples/counter_element)
 
@@ -309,7 +314,7 @@ pub fn view() {
 ```
 
 Preview:
-![Screenshot](docs-resources/counter-using-savory-elements.webm)
+![Screenshot](docs-resources/counter-using-savory-elements.png)
 
 [source code](https://gitlab.com/MAlrusayni/savory/-/tree/master/examples/counter_using_savory_elements)
 
@@ -320,18 +325,6 @@ counter, and we used it in our example as simple as that, so Savory tries to
 provides you the most needed elements so you don't need to build every thing
 from scratch, even if you want build your own element in some way, you can still
 use Savory elements as building block in your own element.
-
-# Qucikstart
-
-first thing first, add savory crates into your `Cargo.toml` file:
-``` toml
-savory-core = "0.5.1"
-savory-html = "0.5.1"
-savory-elements = "0.5.1"
-wasm-bindgen = "0.2.55"
-```
-
-TODO
 
 # Ecosystem
 
