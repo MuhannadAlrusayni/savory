@@ -51,6 +51,7 @@ extern crate derive_more;
 
 pub mod element;
 pub mod id;
+pub mod layout;
 pub mod styled_view;
 pub mod theme;
 pub mod traits;
@@ -79,11 +80,11 @@ pub mod prelude {
             switch::{self, Switch},
         },
         id::Id,
+        layout::flexbox::{self, Flexbox},
         styled_view::{Stylable, StyledView, Styler, UpdateStyler},
         theme::{self, Theme, ThemeChanged, ThemeLens},
         traits::ExtendBuilder,
         view::{
-            flexbox::{self, Flexbox},
             icon::{self, Icon},
             label::{self, Label},
             modifier::{Modifier, NodeModifier},
