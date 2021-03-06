@@ -2,7 +2,7 @@
 
 /// Similar to `Extend` in standard library for builder like types.
 ///
-/// used mostly with views that containes multiple items such as `Flexbox`
+/// used mostly with views that containes multiple items such as `Flex`
 pub trait ExtendBuilder<A> {
     fn extend<T>(self, iter: T) -> Self
     where

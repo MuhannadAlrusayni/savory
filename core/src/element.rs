@@ -8,25 +8,24 @@
 //!
 //! ## App Element
 //!
-//! App element are normal elements but two main difference, the `Config` type is
-//! `Url` type, and the `PMsg` generic type have to be the same type as
-//! `Message` type, and this actully make sense becuase `PMsg` ment to hold the
-//! parent element message type and app elements doesn't have parent.
+//! App element are normal elements but have one main difference, the `Config`
+//! type is `Url` type, so the app can do routing logic on the initialization.
 //!
 //! # TODO Examples
 //! # TODO Helper types
 
 use crate::prelude::*;
+use seed::prelude::{Node, Orders, Url};
 
-/// Trait used to create element and handle element messages and update
-/// element state accordingly.
+/// Trait used to create element and handle element messages and update element
+/// state accordingly.
 ///
 /// Element messages can be emitted by HTML events or by other elements,
 /// handling these messages is done inside the method `update`, both `init`
 /// function and `update` method receive `orders` argument which provide many
 /// useful methods to interact with the runtime library [Seed], for example we
-/// can subscribe to messages of some type, we can send messages to other
-/// elemenrs, we can perform async blocks and many more things (see [`Orders`]).
+/// can subscribe to messages of some type, we can perform async blocks and many
+/// more things (see [`Orders`]).
 ///
 /// [Seed]: https://seed-rs.org
 /// [`Orders`]: crate::prelude::Orders
@@ -40,10 +39,11 @@ pub trait Element {
     ///
     /// # Arguments
     /// - `config` configuration used to create the element.
-    /// - `orders` used to interacte with the runtime.
+    /// - `orders` used to interacte with Seed runtime.
     fn init(config: Self::Config, orders: &mut impl Orders<Self::Message>) -> Self;
 
-    /// update method that recive `Self::Message` and update the model state accordingly.
+    /// update method that recive `Self::Message` and update the model state
+    /// accordingly.
     fn update(&mut self, _: Self::Message, _: &mut impl Orders<Self::Message>);
 }
 
@@ -59,8 +59,7 @@ where
     ///
     /// # Example
     /// ```
-    /// use savory_core::prelude::*;
-    /// use wasm_bindgen::prelude::*;
+    /// use savory::prelude::*;
     ///
     /// pub struct MyApp;
     ///

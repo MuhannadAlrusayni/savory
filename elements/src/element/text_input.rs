@@ -1,19 +1,21 @@
-//! Radio element
+//! TextInput element
 //!
-//! Radios are common elements in most apps, Savory ships radio element that
-//! covers common usages.
+//! Text input are core element in any app, Savory ships text input that covers
+//! the common usages for text input.
 //!
-//! Radio accept these values on it's initialization:
-//! - toggled: initial value
-//! - text: text descripe the radio
-//! - color: color used when the radio toggled
+//! TextInput accept 3 values on it's initialization:
+//! - text: initial value
+//! - placeholder
+//! - max length: this limits the numbers of characters in the input
+//! - color: changes the text input color
+//! - text color: changes the text color
 //!
-//! See [`Radio`] docs to find out more about its methods.
+//! See [`TextInput`] docs to find out more about its methods.
 //!
 //! # Usage
 //! TODO
 //!
-//! [`Radio`]: crate::prelude::Radio
+//! [`TextInput`]: crate::prelude::TextInput
 
 use crate::{id::Id, prelude::*};
 use derive_rich::Rich;
@@ -26,29 +28,30 @@ pub enum Msg {
     Focus(bool),
     MouseOver(bool),
     Disable(bool),
-    Toggled(bool),
-    Toggle,
+    Text(Cow<'static, str>),
+    Clear,
+    ResyncText,
 }
 
 #[derive(Rich, Element)]
-#[element(style_map(radio, check_sign, text))]
-pub struct Radio {
+pub struct TextInput {
     // general element properties
     #[rich(read)]
     #[element(config)]
     id: Option<Id>,
-    #[rich(read)]
-    #[element(config(default), data_lens)]
-    style: Style,
+    el_ref: ElRef<web_sys::HtmlInputElement>,
     design_system: DesignSystem,
 
-    // radio element properties
-    #[rich(read(copy, rename = is_toggled))]
-    #[element(config(default), data_lens(copy))]
-    toggled: bool,
+    // entry element properties
     #[rich(read)]
     #[element(config)]
     text: Option<Cow<'static, str>>,
+    #[rich(read(copy))]
+    #[element(config)]
+    max_length: Option<i32>,
+    #[rich(read)]
+    #[element(config)]
+    placeholder: Option<Cow<'static, str>>,
     #[rich(read(copy, rename = is_disabled))]
     #[element(config(default), data_lens(copy))]
     disabled: bool,
@@ -62,9 +65,12 @@ pub struct Radio {
     #[rich(read(copy))]
     #[element(config, data_lens(copy))]
     color: Option<style::Color>,
+    #[rich(read(copy))]
+    #[element(config, data_lens(copy))]
+    text_color: Option<style::Color>,
 }
 
-impl Element for Radio {
+impl Element for TextInput {
     type Message = Msg;
     type Config = Config;
 
@@ -73,14 +79,16 @@ impl Element for Radio {
 
         Self {
             id: config.id,
+            el_ref: ElRef::default(),
             design_system: DesignSystem::default(),
-            style: config.style,
             text: config.text,
-            toggled: config.toggled,
+            max_length: config.max_length,
+            placeholder: config.placeholder,
             disabled: config.disabled,
             focused: false,
             mouse_over: false,
             color: config.color,
+            text_color: config.text_color,
         }
     }
 
@@ -90,39 +98,34 @@ impl Element for Radio {
             Msg::MouseOver(val) => self.mouse_over = val,
             Msg::Focus(val) => self.focused = val,
             Msg::Disable(val) => self.disabled = val,
-            Msg::Toggled(val) => self.toggled = val,
-            Msg::Toggle => self.toggled = !self.toggled,
+            Msg::Clear => self.text = None,
+            Msg::Text(val) => self.text = Some(val),
+            Msg::ResyncText => {
+                if let Some(input) = self.el_ref.get() {
+                    self.text = Some(input.value().into());
+                }
+            }
         }
     }
 }
 
-impl View<Node<Msg>> for Radio {
+impl View<Node<Msg>> for TextInput {
     fn view(&self) -> Node<Msg> {
-        let style_map = self.design_system.radio(self.data_lens());
-        let radio = html::button()
-            .class("radio")
-            .style(style_map.radio)
+        let style = self.design_system.text_input(self.data_lens());
+
+        html::input()
+            .class("text-input")
+            .try_id(self.id.clone())
+            .style(style)
+            .class("input")
             .disabled(self.disabled)
-            // .checked(self.toggled)
-            // .type_("radio")
+            .try_value(self.text.clone())
+            .try_max_length(self.max_length)
+            .try_placeholder(self.placeholder.clone())
             .on_focus(|_| Msg::Focus(true))
             .on_blur(|_| Msg::Focus(false))
             .on_mouse_enter(|_| Msg::MouseOver(true))
             .on_mouse_leave(|_| Msg::MouseOver(false))
-            .on_click(|_| Msg::Toggle)
-            // push check-sign node
-            .set(html::div().class("check-sign").style(style_map.check_sign));
-
-        match self.text.as_ref() {
-            None => radio.try_id(self.id.clone()),
-            Some(lbl) => html::label()
-                .try_id(self.id.clone())
-                .class("text")
-                .style(style_map.text)
-                .push(radio)
-                .push(lbl.clone())
-                .on_mouse_enter(|_| Msg::MouseOver(true))
-                .on_mouse_leave(|_| Msg::MouseOver(false)),
-        }
+            .on_input(|_| Msg::ResyncText)
     }
 }

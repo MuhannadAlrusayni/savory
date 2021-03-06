@@ -1,5 +1,5 @@
 //! Reusable views
 
-pub mod icon;
-pub mod label;
-pub mod modifier;
+pub mod image;
+pub mod svg;
+pub mod text;

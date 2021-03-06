@@ -1,93 +1,78 @@
-//! Traits used to build HTML nodes.
+//! Traits used to build views.
 //!
 //! # Views
 //!
-//! Views are types that return Seed [`Node`] when we view them. Views can be
-//! created either by implementing [`View`] trait or by standalone function that
-//! returns Seed [`Node`].
+//! View is used to build HTML nodes, and since Savory is built on top of Seed,
+//! views should return Seed [`Node`], the returned type can be anything
+//! actually, but it's common to return single node (`Node<Msg>`) or collection
+//! of nodes (`Vec<Node<Msg>>`) depending on the view type.
 //!
-//! # Examples
+//! Views can be any type that implement `View` trait, here is an example of
+//! view type:
+//!
 //! Here is simple example on implementing [`View`] trait:
-//! ```
-//! use savory_core::prelude::*;
-//! use savory_html::{prelude::*, css::{Color, values as val}};
-//! use std::borrow::Cow;
+//! ```rust
+//! # use savory::prelude::*;
+//! struct HomePage;
 //!
-//! pub struct UserInfo {
-//!     pub username: Cow<'static, str>,
-//!     pub email: Cow<'static, str>,
-//! }
-//!
-//! impl<Msg> View<Node<Msg>> for UserInfo {
+//! impl<Msg> View<Node<Msg>> for HomePage {
 //!     fn view(&self) -> Node<Msg> {
-//!         let style = css::Style::default()
-//!             .and_size(|conf| conf.full())
-//!             .display(val::Flex)
-//!             .flex_direction(val::Column)
-//!             .justify_content(val::Center)
-//!             .align_content(val::Center)
-//!             .align_items(val::Center);
-//!
-//!         let username = html::h3().add(format!("Username: {}", self.username));
-//!         let email = html::h4().add(format!("Email: {}", self.email));
-//!
-//!         html::div()
-//!             .set(style)
-//!             .add(username)
-//!             .add(email)
+//!         html::div().push("Home page")
 //!     }
 //! }
 //! ```
 //!
-//! As we can see this way is a pretty verbose for simple elements, we can have
-//! the same element with standalone function:
-//! ```
-//! use savory_core::prelude::*;
-//! use savory_html::{prelude::*, css::{Color, values as val}};
-//! use std::borrow::Cow;
+//! # View Functions
 //!
-//! pub fn user_info<PMsg>(
-//!     username: Cow<'static, str>,
-//!     email: Cow<'static, str>,
-//! ) -> Node<PMsg> {
-//!     // creating element style
-//!     let style = css::Style::default()
-//!         .and_size(|conf| conf.full())
-//!         .display(val::Flex)
-//!         .flex_direction(val::Column)
-//!         .justify_content(val::Center)
-//!         .align_content(val::Center)
-//!         .align_items(val::Center);
+//! Function and closure can be used where [`View`] is expected, Savory have
+//! blanket implementation for `Fn() -> T`, so we can use closure as view type:
 //!
-//!     let username = html::h3().add(format!("Username: {}", username));
-//!     let email = html::h4().add(format!("Email: {}", email));
-//!
-//!     html::div()
-//!         .set(style)
-//!         .add(username)
-//!         .add(email)
-//! }
+//! ```rust
+//! # use savory::prelude::*;
+//! let greeting = "Hello";
+//! let greeting = || html::h1().push(greeting);
+//! let node: Node<()> = greeting.view();
 //! ```
 //!
-//! # `View` trait vs Standalone functions
+//! # View types and View functions
 //!
-//! **Traits approach** is pretty verbose for simple elements, but it works well
-//! with bigger elements that needs a lot of arguments, types that implement
-//! `View` can be storde as trait object.
-//!
-//! **Standalone functions** are simple to write and read, but they become complex
-//! and hard to wrok with when the element get bigger or the function start to
-//! accept more and more arguments.
-//!
-//! So, for simple element that is used in a few context in the application, I
-//! would suggest using standalone functions, otherwise I would suggest creating
-//! type for the element and implement [`View`] trait for it.
+//! View functions are simple to write and read and suitable for application
+//! code, while view types works well with reusable, complex elements.
 //!
 //! [`View`]: crate::prelude::View
 //! [`Node`]: crate::prelude::Node
+
+use crate::prelude::{html, Node};
 
 /// Main trait used to render view.
 pub trait View<Output> {
     /// view method that returns Seed `Node`
     fn view(&self) -> Output;
+}
+
+impl<T, F> View<T> for F
+where
+    F: Fn() -> T,
+{
+    fn view(&self) -> T {
+        self()
+    }
+}
+
+impl<Msg> View<Node<Msg>> for String {
+    fn view(&self) -> Node<Msg> {
+        html::text(self.clone())
+    }
+}
+
+impl<Msg> View<Node<Msg>> for &'static str {
+    fn view(&self) -> Node<Msg> {
+        html::text(*self)
+    }
+}
+
+impl<Msg> View<Node<Msg>> for std::borrow::Cow<'static, str> {
+    fn view(&self) -> Node<Msg> {
+        html::text(self.clone())
+    }
 }

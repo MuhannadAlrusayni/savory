@@ -1,8 +1,9 @@
 //! Savory is library for building user interface.
 //!
-//! [![master docs](https://img.shields.io/badge/docs-master-blue.svg)](https://malrusayni.gitlab.io/savory/savory-core/)
+//!
+//! [![master docs](https://img.shields.io/badge/docs-master-blue.svg)](https://malrusayni.gitlab.io/savory/savory/)
 //! &middot;
-//! [![crate info](https://img.shields.io/crates/v/savory.svg)](https://crates.io/crates/savory-core)
+//! [![crate info](https://img.shields.io/crates/v/savory.svg)](https://crates.io/crates/savory)
 //! &middot;
 //! [![pipeline](https://gitlab.com/MAlrusayni/savory/badges/master/pipeline.svg)](https://gitlab.com/MAlrusayni/savory/pipelines)
 //! &middot;
@@ -10,121 +11,122 @@
 //! &middot;
 //! [![unsafe forbidden](https://img.shields.io/badge/unsafe-forbidden-success.svg)](https://github.com/rust-secure-code/safety-dance/)
 //!
-//!
-//! # Features
-//!
-//! - **Views**: Views can be any type implement `View` trait or any standalone
-//!   function that returns `Node`, views can be trait object which make them very
-//!   composable.
-//! - **Elements**: Savory uses elements as core building unit when building
-//!   stateful UI. Elements owns thier state and handle user inputs via messages.
-//! - **Collection of UI elements**: Savory ships with collection of resuable and
-//!   themeable UI elements.
-//! - **Theme**: UI elements can be themed by any type that implement `ThemeImpl`
-//!   trait, themes have full control on the element appearance.
-//! - **Typed HTML**: Use typed CSS and HTML attributes, Savory try hard not to rely
-//!   on strings when creating CSS and HTML attributes since these can produce hard
-//!   to debug bugs.
-//! - **Enhance Seed API**: Enhancement on Seed API that makes working with `Node`,
-//!   `Orders` fun.
-//!
-//! Savory tries to make writing UI elements fun and boilerplate free.
-//!
-//! Savory crates:
-//! - `savory`: savory CLI
-//! - [`savory-core`]: Library for building user interface (this crate)
-//! - [`savory-html`]: Typed HTML for Savory
-//! - [`savory-elements`]: UI Elements based on Savory
-//! - [`savory-derive`]: Helper derives
-//!
 //! # Core Concept
 //!
-//! Savory have two main types **View** and **Element**, View types produce
-//! static HTML, while Element types produce interactive HTML, as simple as
-//! that.
+//! There are two main types in Savory, **Views** and **Elements**. View types
+//! produce static HTML nodes, while Element types produce dynamic HTML nodes,
+//! as simple as that.
 //!
-//! Elements types must implemente [`Element`] and [`View`] traits, which would
-//! make them interactive.
+//! # View types
 //!
-//! View types must implemente [`View`] trait, that would produce the static
-//! HTML.
+//! View types implements [`View`] trait, this trait have one method that
+//! generate the resulted HTML nodes, here is simple example:
 //!
-//! # Counter Example
+//! ```rust
+//! # use savory::prelude::*;
+//! struct HomePage;
 //!
-//! Here is very simple counter, that doesn't use all Savory features, but it's
-//! good as starting point for newcomers.
+//! impl<Msg> View<Node<Msg>> for HomePage {
+//!     fn view(&self) -> Node<Msg> {
+//!         html::div().push("Home page")
+//!     }
+//! }
+//! ```
 //!
-//! ``` rust
-//! use savory_core::prelude::*;
-//! use savory_html::prelude::*;
-//! use wasm_bindgen::prelude::*;
+//! # Element types
 //!
-//! // app element (the model)
-//! pub struct Counter(i32);
+//! Element types implements [`Element`] trait, most of the time elements have
+//! logic inside them, they commonly carry their state inside them, and since
+//! Savory follow Elm style we need message type and lastly we need config type
+//! that is used to config the element on it's initialization, here is simple
+//! example:
 //!
-//! // app message
-//! pub enum Msg {
-//!     Increment,
-//!     Decrement,
+//! ```rust
+//! # use savory::prelude::*;
+//! // Element module
+//! struct Counter(u32);
+//!
+//! enum Msg {
+//!     Increase,
+//!     Decrease,
 //! }
 //!
 //! impl Element for Counter {
+//!     type Config = u32;
 //!     type Message = Msg;
-//!     type Config = Url;
 //!
-//!     // initialize the app in this function
-//!     fn init(_: Url, _: &mut impl Orders<Msg>) -> Self {
-//!         Self(0)
+//!     fn init(config: u32, _orders: &mut impl Orders<Msg>) -> Self {
+//!         Counter(config)
 //!     }
 //!
-//!     // handle app messages
-//!     fn update(&mut self, msg: Msg, _: &mut impl Orders<Msg>) {
+//!     fn update(&mut self, msg: Self::Message, _orders: &mut impl Orders<Self::Message>) {
 //!         match msg {
-//!             Msg::Increment => self.0 += 1,
-//!             Msg::Decrement => self.0 -= 1,
+//!             Msg::Increase => self.0 += 1,
+//!             Msg::Decrease => self.0 -= 1,
 //!         }
 //!     }
 //! }
 //!
 //! impl View<Node<Msg>> for Counter {
-//!     // view the app
 //!     fn view(&self) -> Node<Msg> {
-//!         let inc_btn = html::button().add("Increment").on_click(|_| Msg::Increment);
-//!         let dec_btn = html::button().add("Decrement").on_click(|_| Msg::Decrement);
-//!
 //!         html::div()
-//!             .add(inc_btn)
-//!             .add(self.0.to_string())
-//!             .add(dec_btn)
+//!         .push(
+//!             html::button()
+//!                 .push("+")
+//!                 .on_click(|_| Msg::Increase)
+//!         )
+//!         .push(
+//!             html::button()
+//!                 .push("-")
+//!                 .on_click(|_| Msg::Decrease)
+//!         )
+//!         .push(html::h1().push(self.0.to_string()))
 //!     }
-//! }
-//!
-//! #[wasm_bindgen(start)]
-//! pub fn view() {
-//!     // mount and start the app at `app` element
-//!     Counter::start();
 //! }
 //! ```
 //!
-//! [`View`]: crate::prelude::View
+//! This example shows how to wirte counter element, so you can write your own
+//! elements.
+//!
+//! ## Ecosystem
+//!
+//! - `savory` (this crate) - Core library for building user interface
+//! - [`savory-router`] - Savory Router used to generate router for your app
+//! - [`savory-style`] - Typed CSS style for Savory
+//! - [`savory-elements`] - Collection of UI elements based on Savory
+//! - [`savory-elements-derive`] - Crate that provide `Element` derive
+//!
+//! [`savory-router`]: https://malrusayni.gitlab.io/savory/savory_router/index.html
+//! [`savory-style`]: https://malrusayni.gitlab.io/savory/savory_style/index.html
+//! [`savory-elements`]: https://malrusayni.gitlab.io/savory/savory_elements/index.html
+//! [`savory-elements-derive`]: https://malrusayni.gitlab.io/savory/savory_elements_derive/index.html
+//! [`View`]: crate::view
 //! [`Element`]: crate::prelude::Element
-//! [`savory-core`]: https://gitlab.com/MAlrusayni/savory/tree/master/core
-//! [`savory-html`]: https://gitlab.com/MAlrusayni/savory/tree/master/html
-//! [`savory-elements`]: https://gitlab.com/MAlrusayni/savory/tree/master/elements
-//! [`savory-derive`]: https://gitlab.com/MAlrusayni/savory/tree/master
 
 #![forbid(unsafe_code)]
 
+#[macro_use]
+pub extern crate seed;
+
 pub mod element;
-pub mod orders_ext;
+pub mod events;
+pub mod html;
+pub mod node;
+pub mod orders;
+pub mod traits;
 pub mod view;
 
-/// savory prelude.
+pub use web_sys;
+
 pub mod prelude {
     pub use crate::{
         element::{AppElementExt, Element},
-        orders_ext::OrdersExt,
+        events::*,
+        html,
+        node::*,
+        orders::*,
+        seed::prelude::{subs, wasm_bindgen, web_sys, ElRef, MessageMapper, Url},
+        traits::*,
         view::View,
     };
-    pub use seed::prelude::{MessageMapper, Node, Orders, Url};
 }

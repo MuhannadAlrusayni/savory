@@ -1,44 +1,71 @@
-use crate::prelude::*;
+//! Switch element
+//!
+//! Switchs are common elements in most apps, Savory ships switch element that covers
+//! common usages.
+//!
+//! Switch accept these values on it's initialization:
+//! - toggled: initial value
+//! - text: text descripe the switch
+//! - color: color used when the switch toggled
+//! - checkbox like: this tells the switch element to look like checkbox instead
+//!
+//! See [`Switch`] docs to find out more about its methods.
+//!
+//! # Usage
+//! TODO
+//!
+//! [`Switch`]: crate::prelude::Switch
+
+use crate::{id::Id, prelude::*};
 use derive_rich::Rich;
-use savory_core::prelude::*;
-use savory_html::prelude::*;
+use savory::prelude::*;
+use savory_style::{self as style, prelude::*};
+use std::borrow::Cow;
+
+pub enum Msg {
+    DesignSystem(DesignSystem),
+    Focus(bool),
+    MouseOver(bool),
+    Disable(bool),
+    Toggled(bool),
+    Toggle,
+}
 
 #[derive(Rich, Element)]
-#[element(style(button, switch))]
+#[element(style_map(switch, check_sign, text))]
 pub struct Switch {
     // general element properties
     #[rich(read)]
     #[element(config)]
-    id: Id,
+    id: Option<Id>,
     #[rich(read)]
-    #[element(config)]
-    styler: Option<<Switch as Stylable>::Styler>,
-    #[rich(read)]
-    #[element(config(default))]
-    theme: Theme,
+    #[element(config(default), data_lens)]
+    style: Style,
+    design_system: DesignSystem,
 
     // switch element properties
     #[rich(read(copy, rename = is_toggled))]
-    #[element(config(default = "false"))]
+    #[element(config(default), data_lens(copy))]
     toggled: bool,
+    #[rich(read)]
+    #[element(config)]
+    text: Option<Cow<'static, str>>,
     #[rich(read(copy, rename = is_disabled))]
-    #[element(config(default = "false"))]
+    #[element(config(default), data_lens(copy))]
     disabled: bool,
     #[rich(read(copy, rename = is_focused))]
+    #[element(data_lens(copy))]
     focused: bool,
     #[rich(read(copy, rename = is_mouse_over))]
+    #[element(data_lens(copy))]
     mouse_over: bool,
-}
 
-pub enum Msg {
-    Styler(Option<<Switch as Stylable>::Styler>),
-    UpdateStyler(UpdateStyler<Switch>),
-    Theme(Theme),
-    Toggled(bool),
-    Toggle,
-    Disabled(bool),
-    Focus(bool),
-    MouseOver(bool),
+    #[rich(read(copy))]
+    #[element(config, data_lens(copy))]
+    pub color: Option<style::Color>,
+    #[rich(write)]
+    #[element(config(default), data_lens(copy))]
+    pub checkbox_like: bool,
 }
 
 impl Element for Switch {
@@ -46,129 +73,61 @@ impl Element for Switch {
     type Config = Config;
 
     fn init(config: Self::Config, orders: &mut impl Orders<Msg>) -> Self {
-        orders.subscribe(|theme: ThemeChanged| Msg::theme(theme.0));
+        orders.subscribe(|ds: DesignSystemChanged| Msg::DesignSystem(ds.0));
 
         Self {
-            id: config.id.unwrap_or_else(Id::generate),
-            theme: config.theme,
-            styler: config.styler,
-            disabled: config.disabled,
+            id: config.id,
+            design_system: DesignSystem::default(),
+            text: config.text,
+            style: config.style,
             toggled: config.toggled,
+            disabled: config.disabled,
             focused: false,
             mouse_over: false,
+            color: config.color,
+            checkbox_like: config.checkbox_like,
         }
     }
 
-    fn update(&mut self, msg: Msg, _: &mut impl Orders<Msg>) {
+    fn update(&mut self, msg: Msg, _orders: &mut impl Orders<Msg>) {
         match msg {
-            Msg::Styler(val) => self.styler = val,
-            Msg::UpdateStyler(val) => {
-                self.styler = match self.styler.clone() {
-                    Some(styler) => Some(val.update(styler)),
-                    None => Some(val.update(self.theme.switch())),
-                }
-            }
-            Msg::Theme(val) => self.theme = val,
+            Msg::DesignSystem(val) => self.design_system = val,
+            Msg::MouseOver(val) => self.mouse_over = val,
+            Msg::Focus(val) => self.focused = val,
+            Msg::Disable(val) => self.disabled = val,
             Msg::Toggled(val) => self.toggled = val,
             Msg::Toggle => self.toggled = !self.toggled,
-            Msg::Disabled(val) => self.disabled = val,
-            Msg::Focus(val) => self.focused = val,
-            Msg::MouseOver(val) => self.mouse_over = val,
         }
-    }
-}
-
-impl Stylable for Switch {
-    type Style = Style;
-    type Styler = Styler<Self, Style>;
-
-    fn styler(&self) -> Self::Styler {
-        self.styler
-            .clone()
-            .unwrap_or_else(|| (|s: &Self| s.theme.switch().get(s)).into())
-    }
-
-    fn style(&self) -> Self::Style {
-        self.styler().get(self)
     }
 }
 
 impl View<Node<Msg>> for Switch {
     fn view(&self) -> Node<Msg> {
-        self.styled_view(self.style())
-    }
-}
-
-impl StyledView<Node<Msg>> for Switch {
-    fn styled_view(&self, style: Style) -> Node<Msg> {
-        let button = html::div().class("button").set(style.button);
-
-        html::button()
-            .id(self.id.clone())
+        let style_map = self.design_system.switch(self.data_lens());
+        let switch = html::button()
             .class("switch")
-            .set(att::disabled(self.disabled))
-            .set(style.switch)
-            .add(button)
-            .on_focus(|_| Msg::focus(true))
-            .on_blur(|_| Msg::focus(false))
-            .on_mouse_enter(|_| Msg::mouse_over(true))
-            .on_mouse_leave(|_| Msg::mouse_over(false))
-            .on_click(|_| Msg::toggle())
-    }
-}
+            .style(style_map.switch)
+            .disabled(self.disabled)
+            // .checked(self.toggled)
+            // .type_("switch")
+            .on_focus(|_| Msg::Focus(true))
+            .on_blur(|_| Msg::Focus(false))
+            .on_mouse_enter(|_| Msg::MouseOver(true))
+            .on_mouse_leave(|_| Msg::MouseOver(false))
+            .on_click(|_| Msg::Toggle)
+            // add `check-sign` node
+            .set(html::div().class("check-sign").style(style_map.check_sign));
 
-impl Config {
-    pub fn init(self, orders: &mut impl Orders<Msg>) -> Switch {
-        Switch::init(self, orders)
-    }
-}
-
-impl Msg {
-    pub fn styler(val: <Switch as Stylable>::Styler) -> Self {
-        Msg::try_styler(Some(val))
-    }
-
-    pub fn update_styler(val: impl Into<UpdateStyler<Switch>>) -> Self {
-        Msg::UpdateStyler(val.into())
-    }
-
-    pub fn try_styler(val: Option<impl Into<<Switch as Stylable>::Styler>>) -> Self {
-        Msg::Styler(val.map(|v| v.into()))
-    }
-
-    pub fn theme(val: Theme) -> Self {
-        Msg::Theme(val)
-    }
-
-    pub fn toggled(val: bool) -> Self {
-        Msg::Toggled(val)
-    }
-
-    pub fn toggle_ond() -> Self {
-        Msg::toggled(true)
-    }
-
-    pub fn toggle_off() -> Self {
-        Msg::toggled(false)
-    }
-
-    pub fn toggle() -> Self {
-        Msg::Toggle
-    }
-
-    pub fn disabled(val: bool) -> Self {
-        Msg::Disabled(val)
-    }
-
-    pub fn disable() -> Self {
-        Self::disabled(true)
-    }
-
-    pub fn focus(val: bool) -> Self {
-        Msg::Focus(val)
-    }
-
-    pub fn mouse_over(val: bool) -> Self {
-        Msg::MouseOver(val)
+        match self.text.as_ref() {
+            None => switch.try_id(self.id.clone()),
+            Some(lbl) => html::label()
+                .try_id(self.id.clone())
+                .class("text")
+                .style(style_map.text)
+                .push(switch)
+                .push(lbl.clone())
+                .on_mouse_enter(|_| Msg::MouseOver(true))
+                .on_mouse_leave(|_| Msg::MouseOver(false)),
+        }
     }
 }

@@ -1,0 +1,28 @@
+[package]
+name = "savory-router"
+description = "Savory Router used to generate router for your app"
+version = "0.6.0"
+authors = ["Muhannad Alrusayni <Muhannad.Alrusayni@gmail.com>"]
+edition = "2018"
+readme = "../README.MD"
+keywords = ["savory", "seed", "router", "route"]
+categories = ["gui", "wasm", "web-programming"]
+license = "MIT OR Apache-2.0"
+repository = "https://gitlab.com/MAlrusayni/savory/tree/master/router"
+homepage = "https://gitlab.com/MAlrusayni/savory"
+documentation = "https://docs.rs/savory-router"
+include = [ "src/**/*", "Cargo.toml" ]
+
+[badges]
+maintenance = { status = "actively-developed" }
+
+[lib]
+proc-macro = true
+
+[dependencies]
+darling = "0.11.0"
+syn = "1.0.56"
+quote = "1.0.8"
+proc-macro2 = "1.0.24"
+convert_case = "0.4.0"
+ident_case = "1.0.1"

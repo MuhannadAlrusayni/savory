@@ -1,55 +1,91 @@
-use crate::prelude::*;
-use derive_rich::Rich;
-use savory_core::prelude::*;
-use savory_html::prelude::*;
+//! Button element
+//!
+//! Buttons are core element in any app, Savory ships a powerfull button that
+//! cover 4 kinds of button:
+//! - Default Button
+//! - Dashed Button
+//! - Text Button
+//! - Link Button
+//!
+//! Button also can have `Suggestion` or `Destructive` (aka `Primary` and
+//! `Danger` in web UI World), button can also go ghost.
+//!
+//! See [`Button`] docs to find out more about its methods.
+//!
+//! # Usage
+//! TODO
+//!
+//! [`Button`]: crate::prelude::Button
 
+use crate::{id::Id, prelude::*};
+use derive_rich::Rich;
+use savory::prelude::*;
+use savory_style::prelude::*;
+use std::borrow::Cow;
+
+pub enum Msg {
+    DesignSystem(DesignSystem),
+    Focus(bool),
+    MouseOver(bool),
+    Disable(bool),
+}
+
+/// Button element
 #[derive(Rich, Element)]
-#[element(style(button, label(label::Style), icon(icon::Style)))]
 pub struct Button {
     // general element properties
     #[rich(read)]
     #[element(config)]
-    id: Id,
-    #[rich(read)]
-    #[element(config)]
-    styler: Option<<Button as Stylable>::Styler>,
-    #[rich(read)]
-    #[element(config(default))]
-    theme: Theme,
+    id: Option<Id>,
+    design_system: DesignSystem,
 
     // button element properties
     #[rich(read)]
     #[element(config)]
-    label: Option<Label>,
+    text: Option<Cow<'static, str>>,
     #[rich(read)]
     #[element(config)]
-    icon: Option<Icon<Msg>>,
-    #[rich(read(copy))]
-    #[element(config)]
-    kind: Option<Kind>,
-    #[rich(read(copy))]
-    #[element(config(default = "false"))]
-    ghost: bool,
+    icon: Option<Svg<Msg>>,
     #[rich(read(copy, rename = is_disabled))]
-    #[element(config(default = "false"))]
+    #[element(config(default), data_lens(copy))]
     disabled: bool,
     #[rich(read(copy, rename = is_focused))]
+    #[element(data_lens(copy))]
     focused: bool,
     #[rich(read(copy, rename = is_mouse_over))]
+    #[element(data_lens(copy))]
     mouse_over: bool,
+
+    #[rich(read(copy))]
+    #[element(config, data_lens(copy))]
+    color: Option<palette::Hsl>,
+    #[rich(read(copy))]
+    #[element(config, data_lens(copy))]
+    text_color: Option<palette::Hsl>,
+    #[rich(read(copy))]
+    #[element(config(default = "ActionType::Default"), data_lens(copy))]
+    action_type: ActionType,
+    #[rich(read(copy))]
+    #[element(config(default = "Kind::Default"), data_lens(copy))]
+    kind: Kind,
+    #[rich(read(copy, rename = is_ghost))]
+    #[element(config(default, no_pub), data_lens(copy))]
+    ghost: bool,
 }
 
-pub enum Msg {
-    Styler(Option<<Button as Stylable>::Styler>),
-    UpdateStyler(UpdateStyler<Button>),
-    Theme(Theme),
-    Label(Option<Label>),
-    Icon(Option<Icon<Msg>>),
-    Kind(Option<Kind>),
-    Ghost(bool),
-    Disabled(bool),
-    Focus(bool),
-    MouseOver(bool),
+#[derive(Debug, Copy, Eq, PartialEq, Clone)]
+pub enum ActionType {
+    Default,
+    Suggested,
+    Destructive,
+}
+
+#[derive(Debug, Copy, Eq, PartialEq, Clone)]
+pub enum Kind {
+    Default,
+    Dashed,
+    TextButton,
+    LinkButton,
 }
 
 impl Element for Button {
@@ -57,167 +93,79 @@ impl Element for Button {
     type Config = Config;
 
     fn init(config: Self::Config, orders: &mut impl Orders<Msg>) -> Self {
-        orders.subscribe(|theme: ThemeChanged| Msg::theme(theme.0));
+        orders.subscribe(|ds: DesignSystemChanged| Msg::DesignSystem(ds.0));
 
         Button {
-            id: config.id.unwrap_or_else(Id::generate),
-            theme: config.theme,
-            styler: config.styler,
-            label: config.label,
+            id: config.id,
+            design_system: DesignSystem::default(),
+            text: config.text,
             icon: config.icon,
-            kind: config.kind,
-            ghost: config.ghost,
             disabled: config.disabled,
             focused: false,
             mouse_over: false,
+            color: config.color,
+            text_color: config.text_color,
+            action_type: config.action_type,
+            kind: config.kind,
+            ghost: config.ghost,
         }
     }
 
     fn update(&mut self, msg: Msg, _: &mut impl Orders<Msg>) {
         match msg {
-            Msg::Styler(val) => self.styler = val,
-            Msg::UpdateStyler(val) => {
-                self.styler = match self.styler.clone() {
-                    Some(styler) => Some(val.update(styler)),
-                    None => Some(val.update(self.theme.button())),
-                }
-            }
-            Msg::Theme(val) => self.theme = val,
-            Msg::Label(val) => self.label = val,
-            Msg::Icon(val) => self.icon = val,
-            Msg::Kind(val) => self.kind = val,
-            Msg::Ghost(val) => self.ghost = val,
-            Msg::Disabled(val) => self.disabled = val,
-            Msg::Focus(val) => self.focused = val,
+            Msg::DesignSystem(val) => self.design_system = val,
             Msg::MouseOver(val) => self.mouse_over = val,
+            Msg::Focus(val) => self.focused = val,
+            Msg::Disable(val) => self.disabled = val,
         }
-    }
-}
-
-impl Config {
-    pub fn init(self, orders: &mut impl Orders<Msg>) -> Button {
-        Button::init(self, orders)
-    }
-}
-
-impl Stylable for Button {
-    type Style = Style;
-    type Styler = Styler<Self, Style>;
-
-    fn styler(&self) -> Self::Styler {
-        self.styler
-            .clone()
-            .unwrap_or_else(|| (|s: &Self| s.theme.button().get(s)).into())
-    }
-
-    fn style(&self) -> Self::Style {
-        self.styler().get(self)
     }
 }
 
 impl View<Node<Msg>> for Button {
     fn view(&self) -> Node<Msg> {
-        self.styled_view(self.style())
-    }
-}
-
-impl StyledView<Node<Msg>> for Button {
-    fn styled_view(&self, style: Self::Style) -> Node<Msg> {
-        let Style {
-            button,
-            label,
-            icon,
-        } = style;
-
+        let style = self.design_system.button(self.data_lens());
         html::button()
             .class("button")
-            .id(self.id.clone())
-            .set(att::disabled(self.disabled))
-            .set(button)
-            .try_add(self.icon.as_ref().map(|el| el.styled_view(icon)))
-            .try_add(self.label.as_ref().map(|el| el.styled_view(label)))
-            .on_focus(|_| Msg::focus(true))
-            .on_blur(|_| Msg::focus(false))
-            .on_mouse_enter(|_| Msg::mouse_over(true))
-            .on_mouse_leave(|_| Msg::mouse_over(false))
+            .try_id(self.id.clone())
+            .disabled(self.disabled)
+            .style(style)
+            .on_focus(|_| Msg::Focus(true))
+            .on_blur(|_| Msg::Focus(false))
+            .on_mouse_over(|_| Msg::MouseOver(true))
+            .on_mouse_leave(|_| Msg::MouseOver(false))
+            .try_push(self.icon.as_ref().map(|el| el.view()))
+            .try_push(self.text.clone())
     }
 }
 
-#[derive(Debug, Copy, Eq, PartialEq, Clone)]
-pub enum Kind {
-    Normal,
-    Suggestion,
-    Destructive,
-    Link,
-    Dashed,
-}
-
-impl Msg {
-    pub fn styler(val: <Button as Stylable>::Styler) -> Self {
-        Msg::try_styler(Some(val))
+impl Config {
+    pub fn suggestion(mut self) -> Self {
+        self.action_type = ActionType::Suggested;
+        self
     }
 
-    pub fn update_styler(val: impl Into<UpdateStyler<Button>>) -> Self {
-        Msg::UpdateStyler(val.into())
+    pub fn destructive(mut self) -> Self {
+        self.action_type = ActionType::Destructive;
+        self
     }
 
-    pub fn try_styler(val: Option<impl Into<<Button as Stylable>::Styler>>) -> Self {
-        Msg::Styler(val.map(|v| v.into()))
+    pub fn dashed(mut self) -> Self {
+        self.kind = Kind::Dashed;
+        self
     }
 
-    pub fn theme(val: Theme) -> Self {
-        Msg::Theme(val)
+    pub fn text_button(mut self) -> Self {
+        self.kind = Kind::TextButton;
+        self
     }
 
-    pub fn label(val: Label) -> Self {
-        Self::try_label(Some(val))
+    pub fn link_button(mut self) -> Self {
+        self.kind = Kind::LinkButton;
+        self
     }
 
-    pub fn try_label(val: Option<Label>) -> Self {
-        Msg::Label(val)
-    }
-
-    pub fn icon(val: Icon<Msg>) -> Self {
-        Self::try_icon(Some(val))
-    }
-
-    pub fn try_icon(val: Option<Icon<Msg>>) -> Self {
-        Msg::Icon(val)
-    }
-
-    pub fn kind(val: Kind) -> Self {
-        Self::try_kind(Some(val))
-    }
-
-    pub fn try_kind(val: Option<Kind>) -> Self {
-        Msg::Kind(val)
-    }
-
-    pub fn ghost(val: bool) -> Self {
-        Msg::Ghost(val)
-    }
-
-    pub fn ghost_on() -> Self {
-        Self::ghost(true)
-    }
-
-    pub fn ghost_off() -> Self {
-        Self::ghost(false)
-    }
-
-    pub fn disabled(val: bool) -> Self {
-        Msg::Disabled(val)
-    }
-
-    pub fn disable() -> Self {
-        Self::disabled(true)
-    }
-
-    pub fn focus(val: bool) -> Self {
-        Msg::Focus(val)
-    }
-
-    pub fn mouse_over(val: bool) -> Self {
-        Msg::MouseOver(val)
+    pub fn ghost(mut self) -> Self {
+        self.ghost = true;
+        self
     }
 }

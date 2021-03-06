@@ -1,7 +1,7 @@
 [package]
 name = "savory-elements"
-description = "UI Elements built using Savory"
-version = "0.5.1"
+description = "Collection of UI elements based on Savory"
+version = "0.6.0"
 authors = ["Muhannad Alrusayni <Muhannad.Alrusayni@gmail.com>"]
 edition = "2018"
 readme = "../README.MD"
@@ -11,27 +11,16 @@ license = "MIT OR Apache-2.0"
 repository = "https://gitlab.com/MAlrusayni/savory/tree/master/elements"
 homepage = "https://gitlab.com/MAlrusayni/savory"
 documentation = "https://docs.rs/savory-elements"
-include = [ "src/**/*", "Cargo.toml", "README.MD" ]
+include = [ "src/**/*", "Cargo.toml" ]
 
 [badges]
 maintenance = { status = "actively-developed" }
 
 [dependencies]
-savory-core = { version = "0.5.1", path = "../core" }
-savory-html = { version = "0.5.1", path = "../html" }
-savory-derive = { version = "0.5.1", path = "../derive" }
+savory = { version = "0.6.0", path = "../core" }
+savory-style = { version = "0.6.0", path = "../style" }
+savory-elements-derive = { version = "0.6.0", path = "../elements-derive" }
 
-derive_rich = "0.4.3"
-derive_more = "0.99.2"
-palette = "0.4.1"
-seed = "0.7.0"
-instant = { version = "0.1.3", features = [ "now", "wasm-bindgen" ] }
-wasm-bindgen = "0.2.63"
-
-[dependencies.web-sys]
-version = "^0.3.35"
-features = [
-    "WheelEvent", "CompositionEvent", "HtmlInputElement", "InputEvent",
-    "FocusEvent", "DragEvent", "DomRect", "Element", "HtmlLabelElement",
-    "UiEvent"
-]
+palette = "0.5.0"
+derive_more = "0.99.11"
+derive_rich = "0.4.4"

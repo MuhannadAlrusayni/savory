@@ -2,16 +2,9 @@
 members = [
   # crates
   "core",
-  "html",
+  "style",
   "elements",
-  "theme",
-  "icons",
-  # helper crates
-  "cli",
-  "derive",
-  # examples
-  "examples/simple_counter",
-  "examples/counter_element",
-  "examples/counter_using_elements",
-  "examples/all_elements",
+  # macro crates
+  "elements-derive",
+  "router",
 ]

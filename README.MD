@@ -1,34 +1,37 @@
 # Savory
 **Rust / Wasm frontend library for building user interfaces.**
 
-[![master docs](https://img.shields.io/badge/docs-master-blue.svg)](https://malrusayni.gitlab.io/savory/savory_core/)
+[![master docs](https://img.shields.io/badge/docs-master-blue.svg)](https://malrusayni.gitlab.io/savory/savory/)
 &middot;
-[![crate info](https://img.shields.io/crates/v/savory-core.svg)](https://crates.io/crates/savory-core)
+[![crate info](https://img.shields.io/crates/v/savory.svg)](https://crates.io/crates/savory)
 &middot;
 [![pipeline](https://gitlab.com/MAlrusayni/savory/badges/master/pipeline.svg)](https://gitlab.com/MAlrusayni/savory/pipelines)
 &middot;
-[![rustc version](https://img.shields.io/badge/rustc-stable-green.svg)](https://crates.io/crates/savory-core)
+[![rustc version](https://img.shields.io/badge/rustc-stable-green.svg)](https://crates.io/crates/savory)
 &middot;
 [![unsafe forbidden](https://img.shields.io/badge/unsafe-forbidden-success.svg)](https://github.com/rust-secure-code/safety-dance/)
 
 Savory is library for building user interface based on [Seed]
 
-[Documentation](https://malrusayni.gitlab.io/savory/savory_core/)
+[Documentation](https://malrusayni.gitlab.io/savory/savory/)
 
 # Features
 
-- **Views**: Views can be any type implement `View` trait or any standalone
-  function that returns `Node`, views can be trait object which make them very
-  composable.
-- **Elements**: Savory uses elements as core building unit when building
-  stateful UI. Elements owns thier state and handle user inputs via messages.
-- **Collection of UI elements**: Savory ships with collection of resuable and
-  themeable UI elements.
-- **Theme**: UI elements can be themed by any type that implement `ThemeImpl`
-  trait, themes have full control on the element appearance.
+- **Design System**: Elements are fully styled using `DesignSystem`.
+- **Reusability**: Elements are highly reusable/composable.
+- **Decoupled Developemnt**: Design Systems can be developed in seprate crate
+  without even touching elements code, and the same for elements developemnt,
+  the are developed sepratedly from the design system, thanks to
+  `DesignSystemImpl` trait.
+- **Clean View**: build your view in a clean and declarative way, no more macros at
+  all.
+- **Trait Based**: embrace Rust trait system, all savory elements implments
+  `Element` and/or `View` trait.
 - **Typed HTML**: Use typed CSS and HTML attributes, Savory try hard not to rely
   on strings when creating CSS and HTML attributes since these can produce hard
   to debug bugs.
+- **Collection of UI elements**: Savory ships with collection of resuable and
+  themeable UI elements.
 - **Enhance Seed API**: Enhancement on Seed API that makes working with `Node`,
   `Orders` fun.
 
@@ -51,9 +54,7 @@ write the same app but with styled and reusable element.
 ## Simple Counter
 
 ```rust
-use savory_core::prelude::*;
-use savory_html::prelude::*;
-use wasm_bindgen::prelude::*;
+use savory::prelude::*;
 
 // app element (the model)
 pub struct Counter(i32);
@@ -85,13 +86,13 @@ impl Element for Counter {
 impl View<Node<Msg>> for Counter {
     // view the app
     fn view(&self) -> Node<Msg> {
-        let inc_btn = html::button().add("Increment").on_click(|_| Msg::Increment);
-        let dec_btn = html::button().add("Decrement").on_click(|_| Msg::Decrement);
+        let inc_btn = html::button().push("Increment").on_click(|_| Msg::Increment);
+        let dec_btn = html::button().push("Decrement").on_click(|_| Msg::Decrement);
 
         html::div()
-            .add(inc_btn)
-            .add(self.0.to_string())
-            .add(dec_btn)
+            .push(inc_btn)
+            .push(self.0.to_string())
+            .push(dec_btn)
     }
 }
 
@@ -113,16 +114,14 @@ Now we will make counter element and an app element this illustrate how to make
 parent and child element, and how to make resuable and stylable element.
 
 ```rust
-use savory_core::prelude::*;
+use savory::prelude::*;
 use savory_elements::prelude::*;
-use savory_html::{
+use savory_style::{
     css::{unit::px, values as val, Color, St},
     prelude::*,
 };
-use wasm_bindgen::prelude::*;
 
 #[derive(Element)]
-#[element(style(inc_btn, dec_btn))]
 pub struct Counter {
     #[element(config(default = "10"))]
     value: i32,
@@ -155,7 +154,7 @@ impl View<Node<Msg>> for Counter {
     fn view(&self) -> Node<Msg> {
         // sharde style for buttons
         let style_btns = |conf: css::Style| {
-            conf.add(St::Appearance, val::None)
+            conf.push(St::Appearance, val::None)
                 .background(Color::SlateBlue)
                 .text(Color::White)
                 .and_border(|conf| conf.none().radius(px(4)))
@@ -163,30 +162,25 @@ impl View<Node<Msg>> for Counter {
                 .padding(px(4))
         };
 
-        // create style
-        let style = Style::default()
-            .and_inc_btn(style_btns)
-            .and_dec_btn(style_btns);
-
         // increment button node
         let inc_btn = html::button()
             .class("inc-btn")
-            .set(style.inc_btn)
+            .and_style(style_btns)
             .on_click(|_| Msg::Increment)
-            .add("Increment");
+            .push("Increment");
 
         // decrement button node
         let dec_btn = html::button()
             .class("dec-btn")
-            .set(style.dec_btn)
+            .and_style(style_btns)
             .on_click(|_| Msg::Decrement)
-            .add("Decrement");
+            .push("Decrement");
 
         // contianer node
         html::div()
-            .add(dec_btn)
-            .add(self.value.to_string())
-            .add(inc_btn)
+            .push(dec_btn)
+            .push(self.value.to_string())
+            .push(inc_btn)
     }
 }
 
@@ -260,81 +254,15 @@ the app.
 Savory ships with collections of elements, and we will use them to build counter
 app and see what features Savory elements gives us.
 
-``` rust
-use savory_core::prelude::*;
-use savory_elements::prelude::*;
-use wasm_bindgen::prelude::*;
-
-pub struct MyApp {
-    spin_entry: SpinEntry,
-}
-
-pub enum Msg {
-    SpinEntry(spin_entry::Msg),
-}
-
-impl Element for MyApp {
-    type Message = Msg;
-    type Config = Url;
-
-    fn init(_: Url, orders: &mut impl Orders<Msg>) -> Self {
-        let spin_entry = SpinEntry::config()
-            .min(-40.)
-            .placeholder(44.)
-            .step(5.)
-            .max(40.)
-            .init(&mut orders.proxy(Msg::SpinEntry));
-
-        Self { spin_entry }
-    }
-
-    fn update(&mut self, msg: Msg, orders: &mut impl Orders<Msg>) {
-        match msg {
-            Msg::SpinEntry(msg) => self
-                .spin_entry
-                .update(msg, &mut orders.proxy(Msg::SpinEntry)),
-        };
-    }
-}
-
-impl View<Node<Msg>> for MyApp {
-    fn view(&self) -> Node<Msg> {
-        Flexbox::new()
-            .center()
-            .add(self.spin_entry.view().map_msg(Msg::SpinEntry))
-            .and_size(|conf| conf.full())
-            .view()
-    }
-}
-
-#[wasm_bindgen(start)]
-pub fn view() {
-    MyApp::start();
-}
-```
-
-Preview:
-![Screenshot](docs-resources/counter-using-savory-elements.png)
-
-[source code](https://gitlab.com/MAlrusayni/savory/-/tree/master/examples/counter_using_savory_elements)
-
-As you can see this example have less lines and more features, what a neat.
-
-It happens that Savory elements have `SpinEntry` element, which work just like
-counter, and we used it in our example as simple as that, so Savory tries to
-provides you the most needed elements so you don't need to build every thing
-from scratch, even if you want build your own element in some way, you can still
-use Savory elements as building block in your own element.
+TODO: add example
 
 # Ecosystem
 
-- `savory` - savory CLI
-- [`savory-core`] - Library for building user interface
-- [`savory-html`] - Typed HTML for Savory
-- [`savory-elements`] - UI Elements based on Savory
-- [`savory-derive`] - Helper derives
-- [`savory-theme`] - The official theme for Savory
-- [`savory-icons`] - Reusable icons for Savory
+- [`savory`] - Core library for building user interface
+- [`savory-router`] - Savory Router used to generate router for your app
+- [`savory-style`] - Typed CSS style for Savory
+- [`savory-elements`] - Collection of UI elements based on Savory
+- [`savory-elements-derive`] - Crate that provide `Element` derive
 
 # License
 
@@ -348,9 +276,8 @@ dual licensed as above, without any additional terms or conditions.
 
 [Seed]: https://seed-rs.org/
 [Elm tutorial]: https://guide.elm-lang.org/
-[`savory-core`]: https://gitlab.com/MAlrusayni/savory/tree/master/core
-[`savory-html`]: https://gitlab.com/MAlrusayni/savory/tree/master/html
+[`savory`]: https://gitlab.com/MAlrusayni/savory/tree/master/core
+[`savory-router`]: https://gitlab.com/MAlrusayni/savory/tree/master/router
+[`savory-style`]: https://gitlab.com/MAlrusayni/savory/tree/master/style
 [`savory-elements`]: https://gitlab.com/MAlrusayni/savory/tree/master/elements
-[`savory-derive`]: https://gitlab.com/MAlrusayni/savory/tree/master
-[`savory-theme`]: https://gitlab.com/MAlrusayni/savory/tree/master/theme
-[`savory-icons`]: https://gitlab.com/MAlrusayni/savory/tree/master/icons
+[`savory-elements-derive`]: https://gitlab.com/MAlrusayni/savory/tree/master/elements-derive

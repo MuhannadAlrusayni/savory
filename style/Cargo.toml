@@ -1,0 +1,26 @@
+[package]
+name = "savory-style"
+description = "Typed CSS style for Savory"
+version = "0.6.0"
+authors = ["Muhannad Alrusayni <Muhannad.Alrusayni@gmail.com>"]
+edition = "2018"
+readme = "../README.MD"
+keywords = ["savory", "seed", "css", "theme", "style"]
+categories = ["gui", "css", "web-programming"]
+license = "MIT OR Apache-2.0"
+repository = "https://gitlab.com/MAlrusayni/savory/tree/master/style"
+homepage = "https://gitlab.com/MAlrusayni/savory"
+documentation = "https://docs.rs/savory-style"
+include = [ "src/**/*", "Cargo.toml" ]
+
+[badges]
+maintenance = { status = "actively-developed" }
+
+[dependencies]
+savory = { version = "0.6", path = "../core" }
+
+indexmap = "1.6.1"
+derive_rich = "0.4.4"
+derive_more = "0.99.11"
+paste = "1.0.4"
+palette = "0.5.0"
