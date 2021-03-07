@@ -4,9 +4,26 @@
 use crate::prelude::*;
 use paste::paste;
 use seed::prelude::{At, AtValue};
-use std::borrow::Cow;
 
 pub use seed::prelude::{El, Node};
+
+impl<Msg, T> PushOwned<T> for El<Msg>
+where
+    T: View<Node<Msg>>,
+{
+    fn push(self, val: T) -> Self {
+        self.push(val.view())
+    }
+}
+
+impl<Msg, T> PushOwned<T> for Node<Msg>
+where
+    T: View<Node<Msg>>,
+{
+    fn push(self, val: T) -> Self {
+        self.and_el(|el| el.push(val))
+    }
+}
 
 impl<Msg> PushOwned<Node<Msg>> for El<Msg> {
     fn push(self, val: Node<Msg>) -> Self {
@@ -33,43 +50,25 @@ impl<Msg> PushOwned<Vec<Node<Msg>>> for Node<Msg> {
     }
 }
 
-impl<Msg> PushOwned<&'static str> for El<Msg> {
-    fn push(self, val: &'static str) -> Self {
-        self.push(html::text(val))
-    }
-}
-
-impl<Msg> PushOwned<&'static str> for Node<Msg> {
-    fn push(self, val: &'static str) -> Self {
-        self.and_el(|el| el.push(val))
-    }
-}
-
-impl<Msg> PushOwned<String> for El<Msg> {
-    fn push(self, val: String) -> Self {
-        self.push(html::text(val))
-    }
-}
-
-impl<Msg> PushOwned<String> for Node<Msg> {
-    fn push(self, val: String) -> Self {
-        self.and_el(|el| el.push(val))
-    }
-}
-
-impl<Msg> PushOwned<Cow<'static, str>> for El<Msg> {
-    fn push(self, val: Cow<'static, str>) -> Self {
-        self.push(html::text(val))
-    }
-}
-
-impl<Msg> PushOwned<Cow<'static, str>> for Node<Msg> {
-    fn push(self, val: Cow<'static, str>) -> Self {
-        self.and_el(|el| el.push(val))
-    }
-}
-
 // impl SetOwned
+impl<Msg, T> SetOwned<T> for El<Msg>
+where
+    T: View<Node<Msg>>,
+{
+    fn set(self, val: T) -> Self {
+        self.set(val.view())
+    }
+}
+
+impl<Msg, T> SetOwned<T> for Node<Msg>
+where
+    T: View<Node<Msg>>,
+{
+    fn set(self, val: T) -> Self {
+        self.and_el(|el| el.set(val))
+    }
+}
+
 impl<Msg> SetOwned<Node<Msg>> for El<Msg> {
     fn set(self, val: Node<Msg>) -> Self {
         self.set(vec![val])
@@ -91,42 +90,6 @@ impl<Msg> SetOwned<Vec<Node<Msg>>> for El<Msg> {
 
 impl<Msg> SetOwned<Vec<Node<Msg>>> for Node<Msg> {
     fn set(self, val: Vec<Node<Msg>>) -> Self {
-        self.and_el(|el| el.set(val))
-    }
-}
-
-impl<Msg> SetOwned<&'static str> for El<Msg> {
-    fn set(self, val: &'static str) -> Self {
-        self.set(html::text(val))
-    }
-}
-
-impl<Msg> SetOwned<&'static str> for Node<Msg> {
-    fn set(self, val: &'static str) -> Self {
-        self.and_el(|el| el.set(val))
-    }
-}
-
-impl<Msg> SetOwned<String> for El<Msg> {
-    fn set(self, val: String) -> Self {
-        self.set(html::text(val))
-    }
-}
-
-impl<Msg> SetOwned<String> for Node<Msg> {
-    fn set(self, val: String) -> Self {
-        self.and_el(|el| el.set(val))
-    }
-}
-
-impl<Msg> SetOwned<Cow<'static, str>> for El<Msg> {
-    fn set(self, val: Cow<'static, str>) -> Self {
-        self.set(html::text(val))
-    }
-}
-
-impl<Msg> SetOwned<Cow<'static, str>> for Node<Msg> {
-    fn set(self, val: Cow<'static, str>) -> Self {
         self.and_el(|el| el.set(val))
     }
 }
