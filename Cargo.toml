@@ -7,4 +7,9 @@ members = [
   # macro crates
   "elements-derive",
   "router",
+  # example
+  "examples/simple_counter",
+  "examples/counter_element",
+  "examples/counter_using_elements",
+  "examples/router",
 ]
