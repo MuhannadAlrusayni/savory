@@ -50,10 +50,10 @@ Started**](https://gitlab.com/MAlrusayni/savory-quick-start) repo instruction.
 
 Check out [examples](./examples) for full list of examples.
 
+## Simple Counter
+
 Here we will create the same counter app found in [Elm tutorial], then we will
 write the same app but with styled and reusable element.
-
-## Simple Counter
 
 ```rust
 use savory::prelude::*;
