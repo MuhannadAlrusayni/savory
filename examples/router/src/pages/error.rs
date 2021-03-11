@@ -11,7 +11,7 @@ impl Element for Error {
     type Config = Config;
     type Message = ();
 
-    fn init(config: Self::Config, _orders: &mut impl Orders<Self::Message>) -> Self {
+    fn init(config: Self::Config, _orders: &mut impl Orders<Self::Message>, _: &Env) -> Self {
         Error {
             error: config.error,
         }

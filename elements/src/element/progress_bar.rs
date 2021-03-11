@@ -68,7 +68,7 @@ impl Element for ProgressBar {
     type Message = Msg;
     type Config = Config;
 
-    fn init(config: Self::Config, orders: &mut impl Orders<Msg>) -> Self {
+    fn init(config: Self::Config, orders: &mut impl Orders<Msg>, _: &Env) -> Self {
         orders.subscribe(|ds: DesignSystemChanged| Msg::DesignSystem(ds.0));
 
         Self {

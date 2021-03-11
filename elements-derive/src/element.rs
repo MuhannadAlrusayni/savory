@@ -251,10 +251,11 @@ impl Element {
 
         // FIXME: I think view shoudn't have Config struct, therefor we shoudn't
         // generate any code realted to Config or even the Config struct it self
+        // for views
         let config_init_method = if self.view.is_none() {
             quote! {
-                pub fn init(self, orders: &mut impl Orders<<#element_name #ty_gen as Element>::Message>) -> #element_name #ty_gen #where_clause {
-                    #element_name::init(self, orders)
+                pub fn init(self, orders: &mut impl Orders<<#element_name #ty_gen as Element>::Message>, env: &Env) -> #element_name #ty_gen #where_clause {
+                    #element_name::init(self, orders, env)
                 }
             }
         } else {

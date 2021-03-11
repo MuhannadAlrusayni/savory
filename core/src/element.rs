@@ -40,7 +40,7 @@ pub trait Element {
     /// # Arguments
     /// - `config` configuration used to create the element.
     /// - `orders` used to interacte with Seed runtime.
-    fn init(config: Self::Config, orders: &mut impl Orders<Self::Message>) -> Self;
+    fn init(config: Self::Config, orders: &mut impl Orders<Self::Message>, env: &Env) -> Self;
 
     /// update method that recive `Self::Message` and update the model state
     /// accordingly.
@@ -71,7 +71,7 @@ where
     ///     type Message = Msg;
     ///     type Config = Url;
     ///
-    ///     fn init(url: Url, orders: &mut impl Orders<Msg>) -> Self {
+    ///     fn init(url: Url, orders: &mut impl Orders<Msg>, env: &Env) -> Self {
     ///         // initialize the app goes here
     ///         todo!()
     ///     }
@@ -102,7 +102,7 @@ where
     fn start_at(id: &str) -> seed::app::App<Self::Message, Self, Node<Self::Message>> {
         seed::app::App::start(
             id,
-            |url, orders| Self::init(url, orders),
+            |url, orders| Self::init(url, orders, &Env::base_branch()),
             |msg, app, orders| app.update(msg, orders),
             |app| app.view(),
         )

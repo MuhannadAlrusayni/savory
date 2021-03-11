@@ -8,7 +8,7 @@ impl Element for Home {
     type Config = Config;
     type Message = ();
 
-    fn init(_config: Self::Config, _orders: &mut impl Orders<Self::Message>) -> Self {
+    fn init(_config: Self::Config, _orders: &mut impl Orders<Self::Message>, _: &Env) -> Self {
         Home
     }
 

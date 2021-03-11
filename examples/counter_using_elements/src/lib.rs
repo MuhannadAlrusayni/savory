@@ -20,16 +20,16 @@ impl Element for MyApp {
     type Message = Msg;
     type Config = Url;
 
-    fn init(_: Url, orders: &mut impl Orders<Msg>) -> Self {
+    fn init(_: Url, orders: &mut impl Orders<Msg>, env: &Env) -> Self {
         Self {
             ds: DesignSystem::default(),
             value: 10,
             inc: Button::config()
                 .text("Increment")
-                .init(&mut orders.proxy(Msg::IncBtn)),
+                .init(&mut orders.proxy(Msg::IncBtn), &env),
             dec: Button::config()
                 .text("Increment")
-                .init(&mut orders.proxy(Msg::DecBtn)),
+                .init(&mut orders.proxy(Msg::DecBtn), &env),
         }
     }
 

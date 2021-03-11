@@ -55,7 +55,7 @@
 //!     type Config = u32;
 //!     type Message = Msg;
 //!
-//!     fn init(config: u32, _orders: &mut impl Orders<Msg>) -> Self {
+//!     fn init(config: u32, _orders: &mut impl Orders<Msg>, env: &Env) -> Self {
 //!         Counter(config)
 //!     }
 //!
@@ -109,6 +109,7 @@
 pub extern crate seed;
 
 pub mod element;
+pub mod env;
 pub mod events;
 pub mod html;
 pub mod node;
@@ -121,6 +122,7 @@ pub use web_sys;
 pub mod prelude {
     pub use crate::{
         element::{AppElementExt, Element},
+        env::Env,
         events::*,
         html,
         node::*,

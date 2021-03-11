@@ -17,7 +17,7 @@ impl Element for ScreenInfoNotifier {
     type Message = Msg;
     type Config = Config;
 
-    fn init(config: Self::Config, orders: &mut impl Orders<Msg>) -> Self {
+    fn init(config: Self::Config, orders: &mut impl Orders<Msg>, env: &Env) -> Self {
         orders
             .subscribe(|ds: DesignSystemChanged| Msg::DesignSystemChanged(ds.0))
             .stream(streams::window_event(Ev::Resize, |_| Msg::SizeChanged));
