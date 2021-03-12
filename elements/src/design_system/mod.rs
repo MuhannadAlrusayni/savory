@@ -6,10 +6,6 @@ use crate::prelude::*;
 use savory_style as style;
 use std::{ops::Deref, rc::Rc};
 
-/// Subscribe to design system changes
-#[derive(Clone)]
-pub struct DesignSystemChanged(pub DesignSystem);
-
 /// Type that hold `DesignSystemImpl` trait
 #[derive(Clone)]
 pub struct DesignSystem(Rc<dyn DesignSystemImpl>);
@@ -58,9 +54,9 @@ pub trait DesignSystemImpl {
     /// Generate needed styles for `Button` view
     fn button(&self, class: button::ButtonLens) -> style::Style;
     /// Generate needed styles for `Switch` view
-    fn switch(&self, class: switch::SwitchLens<'_>) -> switch::StyleMap;
+    fn switch(&self, class: switch::SwitchLens) -> switch::StyleMap;
     /// Generate needed styles for `Radio` view
-    fn radio(&self, class: radio::RadioLens<'_>) -> radio::StyleMap;
+    fn radio(&self, class: radio::RadioLens) -> radio::StyleMap;
     /// Generate needed styles for `TextInput` view
     fn text_input(&self, class: text_input::TextInputLens) -> style::Style;
     /// Generate needed styles for `ProgressBar` view

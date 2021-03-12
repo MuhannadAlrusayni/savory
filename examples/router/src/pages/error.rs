@@ -5,15 +5,17 @@ use savory_elements::prelude::*;
 pub struct Error {
     #[element(config(required))]
     error: String,
+    env: Env,
 }
 
 impl Element for Error {
     type Config = Config;
     type Message = ();
 
-    fn init(config: Self::Config, _orders: &mut impl Orders<Self::Message>, _: &Env) -> Self {
+    fn init(config: Self::Config, _orders: &mut impl Orders<Self::Message>, env: Env) -> Self {
         Error {
             error: config.error,
+            env,
         }
     }
 
@@ -24,9 +26,8 @@ impl Element for Error {
 
 impl View<Node<()>> for Error {
     fn view(&self) -> Node<()> {
-        let ds = DesignSystem::default();
         Flex::column()
-            .push(&Text::new(self.error.clone(), ds.clone()))
+            .push(&Text::new(self.error.clone(), self.env.branch()))
             .view()
     }
 }

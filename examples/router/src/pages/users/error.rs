@@ -7,16 +7,18 @@ pub struct Error {
     error: String,
     #[element(config(required))]
     id: usize,
+    env: Env,
 }
 
 impl Element for Error {
     type Config = Config;
     type Message = ();
 
-    fn init(config: Self::Config, _orders: &mut impl Orders<Self::Message>, _: &Env) -> Self {
+    fn init(config: Self::Config, _orders: &mut impl Orders<Self::Message>, env: Env) -> Self {
         Error {
             error: config.error,
             id: config.id,
+            env,
         }
     }
 
@@ -27,11 +29,10 @@ impl Element for Error {
 
 impl View<Node<()>> for Error {
     fn view(&self) -> Node<()> {
-        let ds = DesignSystem::default();
         Flex::column()
             .push(&Text::new(
                 format!("User {} - {}", self.id, self.error),
-                ds.clone(),
+                self.env.branch(),
             ))
             .view()
     }

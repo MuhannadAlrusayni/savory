@@ -3,41 +3,41 @@ use savory::prelude::*;
 
 #[derive(Rich, Element)]
 pub struct ScreenInfoNotifier {
-    design_system: DesignSystem,
+    env: Env,
     #[rich(read)]
     current_screen_info: ScreenInfo,
 }
 
 pub enum Msg {
     SizeChanged,
-    DesignSystemChanged(DesignSystem),
+    Rerender,
 }
 
 impl Element for ScreenInfoNotifier {
     type Message = Msg;
     type Config = Config;
 
-    fn init(config: Self::Config, orders: &mut impl Orders<Msg>, env: &Env) -> Self {
+    fn init(config: Self::Config, orders: &mut impl Orders<Msg>, env: Env) -> Self {
         orders
-            .subscribe(|ds: DesignSystemChanged| Msg::DesignSystemChanged(ds.0))
+            .subscribe(|_: RerenderRequested| Msg::Rerender)
             .stream(streams::window_event(Ev::Resize, |_| Msg::SizeChanged));
 
         let (width, height) = Self::get_screen_size();
-        let screen_info = config.design_system.screen_info(width, height);
+        let screen_info = env.ds().screen_info(width, height);
         orders.notify(NewScreenInfo(screen_info));
 
         Self {
             current_screen_info: screen_info,
-            design_system: DesignSystem::default(),
+            env,
         }
     }
 
     fn update(&mut self, msg: Msg, orders: &mut impl Orders<Msg>) {
         match msg {
-            Msg::DesignSystemChanged(val) => self.design_system = val,
+            Msg::Rerender => {}
             Msg::SizeChanged => {
                 let (width, height) = Self::get_screen_size();
-                let new_screen_info = self.design_system.screen_info(width, height);
+                let new_screen_info = self.env.ds().screen_info(width, height);
                 if self.current_screen_info != new_screen_info {
                     self.current_screen_info = new_screen_info;
                     orders.notify(NewScreenInfo(new_screen_info));

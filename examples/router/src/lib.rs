@@ -14,7 +14,7 @@ impl Element for App {
     type Message = Msg;
     type Config = Url;
 
-    fn init(url: Self::Config, orders: &mut impl Orders<Self::Message>, env: &Env) -> Self {
+    fn init(url: Self::Config, orders: &mut impl Orders<Self::Message>, env: Env) -> Self {
         let pages = pages::Config { url }.init(&mut orders.proxy(Msg::Pages), env);
         App { pages }
     }

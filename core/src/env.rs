@@ -1,39 +1,34 @@
 use std::{cell::RefCell, rc::Rc};
 use type_map::TypeMap;
 
-type EnvMap = Rc<RefCell<TypeMap>>;
+type Branch = Rc<RefCell<TypeMap>>;
 
+#[derive(Clone)]
 pub struct Env {
-    current: EnvMap,
+    branch: Branch,
     parent: Option<Box<Env>>,
 }
 
 impl Env {
-    fn private_clone(&self) -> Self {
-        Env {
-            current: self.current.clone(),
-            parent: self
-                .parent
-                .as_ref()
-                .map(|env| Box::new(env.private_clone())),
-        }
-    }
-
     pub fn base_branch() -> Self {
         Env {
-            current: Rc::default(),
+            branch: Rc::default(),
             parent: None,
         }
     }
 
     pub fn branch(&self) -> Self {
         let mut res = Self::base_branch();
-        res.parent = Some(Box::new(self.private_clone()));
+        res.parent = Some(Box::new(self.clone()));
         res
     }
 
+    pub fn share(&self) -> Self {
+        self.clone()
+    }
+
     pub fn get<T: Clone + 'static>(&self) -> Option<T> {
-        self.current
+        self.branch
             .borrow()
             .get::<T>()
             .cloned()
@@ -41,7 +36,7 @@ impl Env {
     }
 
     pub fn contains<T: 'static>(&self) -> bool {
-        self.current.borrow().contains::<T>()
+        self.branch.borrow().contains::<T>()
     }
 
     /// Set a new variable in current environment branch.
@@ -65,7 +60,7 @@ impl Env {
         } else {
             // panic if the type value is already exists
             panic!(
-                "Env::set(..) failed, type {} already exists in the environment",
+                "Env::set(..) failed, type {} already exists in the current environment branch",
                 std::any::type_name::<T>()
             )
         }
@@ -77,17 +72,13 @@ impl Env {
     /// already exists.
     pub fn try_set<T: 'static>(self, val: T) -> Self {
         if !self.contains::<T>() {
-            self.current.borrow_mut().insert(val);
+            self.branch.borrow_mut().insert(val);
         }
         self
     }
 
     pub fn set_and_update<T: 'static, F: FnOnce(T) -> T>(self, val: T, f: F) -> Self {
-        if !self.contains::<T>() {
-            self.current.borrow_mut().insert(val);
-        }
-
-        self.update(f)
+        self.try_set(val).update(f)
     }
 
     /// Update environment variable
@@ -97,39 +88,39 @@ impl Env {
     /// this method will panic if the passed type value is not initialized, you
     /// can use `try_update` for non-panicing version or use `set_and_update` if
     /// you want to initialize the value if it's not initialized.
-    pub fn update<T: 'static, F: FnOnce(T) -> T>(mut self, f: F) -> Self {
+    pub fn update<T: 'static, F: FnOnce(T) -> T>(self, f: F) -> Self {
         // update current environment
-        let val = { self.current.borrow_mut().remove::<T>() };
+        let val = { self.branch.borrow_mut().remove::<T>() };
         if let Some(val) = val {
-            self.current.borrow_mut().insert(f(val));
+            self.branch.borrow_mut().insert(f(val));
             return self;
         }
 
-        // or update parent environment
-        if let Some(parent_env) = self.parent {
-            self.parent = Some(Box::new(parent_env.update(f)));
-            return self;
-        }
+        // // or update parent environment
+        // if let Some(parent_env) = self.parent {
+        //     self.parent = Some(Box::new(parent_env.update(f)));
+        //     return self;
+        // }
 
         // panic if type value doesn't exists
         panic!(
-            "Env::update(..) failed, type {} doesn't exists in environment",
+            "Env::update(..) failed, type {} doesn't exists in current environment branch",
             std::any::type_name::<T>()
         )
     }
 
-    pub fn try_update<T: 'static, F: FnOnce(T) -> T>(mut self, f: F) -> Self {
+    pub fn try_update<T: 'static, F: FnOnce(T) -> T>(self, f: F) -> Self {
         // update current environment
-        let val = { self.current.borrow_mut().remove::<T>() };
+        let val = { self.branch.borrow_mut().remove::<T>() };
         if let Some(val) = val {
-            self.current.borrow_mut().insert(f(val));
+            self.branch.borrow_mut().insert(f(val));
             return self;
         }
 
-        // or update parent environment
-        if let Some(parent_env) = self.parent {
-            self.parent = Some(Box::new(parent_env.try_update(f)));
-        }
+        // // or update parent environment
+        // if let Some(parent_env) = self.parent {
+        //     self.parent = Some(Box::new(parent_env.try_update(f)));
+        // }
         self
     }
 }
@@ -163,5 +154,12 @@ mod tests {
         assert_eq!(base.get::<String>(), Some("Hi There".to_owned()));
         assert_eq!(branch.get::<DarkTheme>(), Some(DarkTheme(true)));
         assert_eq!(branch.get::<String>(), Some("Hi There".to_owned()));
+
+        let base_2 = base.share().update(|_: DarkTheme| DarkTheme(false));
+
+        assert_eq!(base.get::<DarkTheme>(), Some(DarkTheme(false)));
+        assert_eq!(base.get::<String>(), Some("Hi There".to_owned()));
+        assert_eq!(base_2.get::<DarkTheme>(), Some(DarkTheme(false)));
+        assert_eq!(base_2.get::<String>(), Some("Hi There".to_owned()));
     }
 }

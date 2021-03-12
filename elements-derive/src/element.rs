@@ -254,7 +254,7 @@ impl Element {
         // for views
         let config_init_method = if self.view.is_none() {
             quote! {
-                pub fn init(self, orders: &mut impl Orders<<#element_name #ty_gen as Element>::Message>, env: &Env) -> #element_name #ty_gen #where_clause {
+                pub fn init(self, orders: &mut impl Orders<<#element_name #ty_gen as Element>::Message>, env: Env) -> #element_name #ty_gen #where_clause {
                     #element_name::init(self, orders, env)
                 }
             }

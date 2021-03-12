@@ -217,7 +217,7 @@ impl Router {
                                 #params_ident: self.#params_ident.clone(),
                             )*
                         };
-                        self.error = Some(config.init(&mut orders.proxy(Msg::Error), &self.internal.env));
+                        self.error = Some(config.init(&mut orders.proxy(Msg::Error), self.internal.env.clone()));
                         self.internal.index = Index::Error;
                     }
                 }
@@ -309,7 +309,7 @@ impl Router {
                                 #( #params_ident: self.#params_ident.clone(), )*
                                 #subroute_param
                             };
-                            self.#route_ident = Some(config.init(&mut orders.proxy(Msg::#route_ident_pascal), &self.internal.env));
+                            self.#route_ident = Some(config.init(&mut orders.proxy(Msg::#route_ident_pascal), self.internal.env.clone()));
                         } #else_subroute_use_switch_msg
                         self.internal.index = Index::#route_ident_pascal;
                     },
@@ -319,7 +319,7 @@ impl Router {
                             #( #params_ident: self.#params_ident.clone(), )*
                             #subroute_param
                         };
-                        self.#route_ident = Some(config.init(&mut orders.proxy(Msg::#route_ident_pascal), &self.internal.env));
+                        self.#route_ident = Some(config.init(&mut orders.proxy(Msg::#route_ident_pascal), self.internal.env.clone()));
                         self.internal.index = Index::#route_ident_pascal;
                     },
                     (false, true) => quote! {
@@ -331,7 +331,7 @@ impl Router {
                                 #( #params_in_path: #params_in_path.parse().map_err(|_| "failed to parse param-in-path to switch to route-name route".to_string())?, )*
                                 #subroute_param
                             };
-                            self.#route_ident = Some(config.init(&mut orders.proxy(Msg::#route_ident_pascal), &self.internal.env));
+                            self.#route_ident = Some(config.init(&mut orders.proxy(Msg::#route_ident_pascal), self.internal.env.clone()));
                             self.internal.#slugs_field = new_slugs;
                         } #else_subroute_use_switch_msg
                         self.internal.index = Index::#route_ident_pascal;
@@ -343,7 +343,7 @@ impl Router {
                             #( #params_in_path: #params_in_path.parse().map_err(|_| "failed to parse param-in-path to switch to route-name route".to_string())?, )*
                             #subroute_param
                         };
-                        self.#route_ident = Some(config.init(&mut orders.proxy(Msg::#route_ident_pascal), &self.internal.env));
+                        self.#route_ident = Some(config.init(&mut orders.proxy(Msg::#route_ident_pascal), self.internal.env.clone()));
                         self.internal.index = Index::#route_ident_pascal;
                     },
                 };
@@ -389,7 +389,7 @@ impl Router {
                 type Message = Msg;
                 type Config = Config;
 
-                fn init(config: Self::Config, orders: &mut impl Orders<Self::Message>, env: &Env) -> Self {
+                fn init(config: Self::Config, orders: &mut impl Orders<Self::Message>, env: Env) -> Self {
                     #subscribe_url_changes_if_root
 
                     let mut router = #router_ident {
@@ -402,7 +402,7 @@ impl Router {
                         )*
                         error: None,
                         internal: Internal {
-                            env: env.branch(),
+                            env,
                             index: #def_index_val,
                             #(
                                 #slugs: vec![],

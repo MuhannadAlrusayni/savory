@@ -24,7 +24,7 @@ use savory_style::prelude::*;
 use std::borrow::Cow;
 
 pub enum Msg {
-    DesignSystem(DesignSystem),
+    Rerender,
     Focus(bool),
     MouseOver(bool),
     Disable(bool),
@@ -37,7 +37,7 @@ pub struct Button {
     #[rich(read)]
     #[element(config)]
     id: Option<Id>,
-    design_system: DesignSystem,
+    env: Env,
 
     // button element properties
     #[rich(read)]
@@ -92,12 +92,12 @@ impl Element for Button {
     type Message = Msg;
     type Config = Config;
 
-    fn init(config: Self::Config, orders: &mut impl Orders<Msg>, _: &Env) -> Self {
-        orders.subscribe(|ds: DesignSystemChanged| Msg::DesignSystem(ds.0));
+    fn init(config: Self::Config, orders: &mut impl Orders<Msg>, env: Env) -> Self {
+        orders.subscribe(|_: RerenderRequested| Msg::Rerender);
 
         Button {
             id: config.id,
-            design_system: DesignSystem::default(),
+            env,
             text: config.text,
             icon: config.icon,
             disabled: config.disabled,
@@ -113,7 +113,7 @@ impl Element for Button {
 
     fn update(&mut self, msg: Msg, _: &mut impl Orders<Msg>) {
         match msg {
-            Msg::DesignSystem(val) => self.design_system = val,
+            Msg::Rerender => {}
             Msg::MouseOver(val) => self.mouse_over = val,
             Msg::Focus(val) => self.focused = val,
             Msg::Disable(val) => self.disabled = val,
@@ -123,7 +123,7 @@ impl Element for Button {
 
 impl View<Node<Msg>> for Button {
     fn view(&self) -> Node<Msg> {
-        let style = self.design_system.button(self.data_lens());
+        let style = self.env.ds().button(self.data_lens());
         html::button()
             .class("button")
             .try_id(self.id.clone())

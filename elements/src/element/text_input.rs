@@ -24,7 +24,7 @@ use savory_style::{self as style, prelude::*};
 use std::borrow::Cow;
 
 pub enum Msg {
-    DesignSystem(DesignSystem),
+    Rerender,
     Focus(bool),
     MouseOver(bool),
     Disable(bool),
@@ -40,7 +40,7 @@ pub struct TextInput {
     #[element(config)]
     id: Option<Id>,
     el_ref: ElRef<web_sys::HtmlInputElement>,
-    design_system: DesignSystem,
+    env: Env,
 
     // entry element properties
     #[rich(read)]
@@ -74,13 +74,13 @@ impl Element for TextInput {
     type Message = Msg;
     type Config = Config;
 
-    fn init(config: Self::Config, orders: &mut impl Orders<Msg>, _: &Env) -> Self {
-        orders.subscribe(|ds: DesignSystemChanged| Msg::DesignSystem(ds.0));
+    fn init(config: Self::Config, orders: &mut impl Orders<Msg>, env: Env) -> Self {
+        orders.subscribe(|_: RerenderRequested| Msg::Rerender);
 
         Self {
             id: config.id,
             el_ref: ElRef::default(),
-            design_system: DesignSystem::default(),
+            env,
             text: config.text,
             max_length: config.max_length,
             placeholder: config.placeholder,
@@ -94,7 +94,7 @@ impl Element for TextInput {
 
     fn update(&mut self, msg: Msg, _: &mut impl Orders<Msg>) {
         match msg {
-            Msg::DesignSystem(val) => self.design_system = val,
+            Msg::Rerender => {}
             Msg::MouseOver(val) => self.mouse_over = val,
             Msg::Focus(val) => self.focused = val,
             Msg::Disable(val) => self.disabled = val,
@@ -111,7 +111,7 @@ impl Element for TextInput {
 
 impl View<Node<Msg>> for TextInput {
     fn view(&self) -> Node<Msg> {
-        let style = self.design_system.text_input(self.data_lens());
+        let style = self.env.ds().text_input(self.data_lens());
 
         html::input()
             .class("text-input")

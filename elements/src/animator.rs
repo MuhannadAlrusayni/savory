@@ -46,7 +46,7 @@ impl<S: 'static> Element for Animator<S> {
     type Message = Msg;
     type Config = Config<S>;
 
-    fn init(config: Self::Config, _: &mut impl Orders<Msg>, env: &Env) -> Self {
+    fn init(config: Self::Config, _: &mut impl Orders<Msg>, _: Env) -> Self {
         Self {
             init_state: config.init_state,
             last_instant: Instant::now(),

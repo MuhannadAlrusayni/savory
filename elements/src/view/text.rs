@@ -35,7 +35,7 @@ pub struct Text {
     #[rich(write)]
     pub id: Option<Id>,
     #[rich(write)]
-    pub design_system: DesignSystem,
+    pub env: Env,
     #[rich(write, write(option), value_fns = {
         rtl = Direction::Rtl,
         ltr = Direction::Ltr,
@@ -132,7 +132,7 @@ pub enum Direction {
 
 impl<Msg> View<Node<Msg>> for Text {
     fn view(&self) -> Node<Msg> {
-        let style = self.design_system.text(self.data_lens());
+        let style = self.env.ds().text(self.data_lens());
         html::p()
             .config(|p| match self.direction {
                 Some(Direction::Rtl) => p.dir("rtl"),
@@ -148,10 +148,10 @@ impl<Msg> View<Node<Msg>> for Text {
 }
 
 impl Text {
-    pub fn new(text: impl Into<Cow<'static, str>>, ds: DesignSystem) -> Self {
+    pub fn new(text: impl Into<Cow<'static, str>>, env: Env) -> Self {
         Text {
             id: None,
-            design_system: ds,
+            env,
             direction: None,
             text: text.into(),
             disabled: false,

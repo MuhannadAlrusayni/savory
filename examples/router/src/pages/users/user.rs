@@ -5,14 +5,15 @@ use savory_elements::prelude::*;
 pub struct User {
     #[element(config(required))]
     id: usize,
+    env: Env,
 }
 
 impl Element for User {
     type Config = Config;
     type Message = ();
 
-    fn init(config: Self::Config, _orders: &mut impl Orders<Self::Message>, _: &Env) -> Self {
-        User { id: config.id }
+    fn init(config: Self::Config, _orders: &mut impl Orders<Self::Message>, env: Env) -> Self {
+        User { id: config.id, env }
     }
 
     fn update(&mut self, _: (), _: &mut impl Orders<Self::Message>) {
@@ -22,12 +23,14 @@ impl Element for User {
 
 impl View<Node<()>> for User {
     fn view(&self) -> Node<()> {
-        let ds = DesignSystem::default();
         Flex::column()
-            .push(&Text::new(format!("User {}, Welcome", self.id), ds.clone()))
+            .push(&Text::new(
+                format!("User {}, Welcome", self.id),
+                self.env.branch(),
+            ))
             .push(
                 html::a()
-                    .push(Text::new("Go to Home", ds.clone()).view())
+                    .push(Text::new("Go to Home", self.env.branch()).view())
                     .href("/"),
             )
             .view()

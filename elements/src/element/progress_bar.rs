@@ -15,7 +15,7 @@ use savory::prelude::*;
 use savory_style::{self as style, prelude::*};
 
 pub enum Msg {
-    DesignSystem(DesignSystem),
+    Rerender,
     Disable(bool),
     Value(f32),
 }
@@ -27,7 +27,7 @@ pub struct ProgressBar {
     #[rich(read)]
     #[element(config)]
     id: Option<Id>,
-    design_system: DesignSystem,
+    env: Env,
 
     #[rich(read(copy))]
     #[element(config(default = "0.0", no_pub), data_lens(copy))]
@@ -68,12 +68,12 @@ impl Element for ProgressBar {
     type Message = Msg;
     type Config = Config;
 
-    fn init(config: Self::Config, orders: &mut impl Orders<Msg>, _: &Env) -> Self {
-        orders.subscribe(|ds: DesignSystemChanged| Msg::DesignSystem(ds.0));
+    fn init(config: Self::Config, orders: &mut impl Orders<Msg>, env: Env) -> Self {
+        orders.subscribe(|_: RerenderRequested| Msg::Rerender);
 
         Self {
             id: config.id,
-            design_system: DesignSystem::default(),
+            env,
             value: config.value,
             max: config.max,
             min: config.min,
@@ -84,7 +84,7 @@ impl Element for ProgressBar {
 
     fn update(&mut self, msg: Self::Message, orders: &mut impl Orders<Msg>) {
         match msg {
-            Msg::DesignSystem(val) => self.design_system = val,
+            Msg::Rerender => {}
             Msg::Disable(val) => self.disabled = val,
             Msg::Value(val) => self.set_value(val, orders),
         }
@@ -93,7 +93,7 @@ impl Element for ProgressBar {
 
 impl View<Node<Msg>> for ProgressBar {
     fn view(&self) -> Node<Msg> {
-        let style_map = self.design_system.progress_bar(self.data_lens());
+        let style_map = self.env.ds().progress_bar(self.data_lens());
         let indicator = html::div().class("indicator").style(style_map.indicator);
 
         html::div()

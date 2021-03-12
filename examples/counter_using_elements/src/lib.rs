@@ -3,7 +3,7 @@ use savory_elements::prelude::*;
 use savory_style::prelude::*;
 
 pub struct MyApp {
-    ds: DesignSystem,
+    env: Env,
     value: usize,
     inc: Button,
     dec: Button,
@@ -20,16 +20,16 @@ impl Element for MyApp {
     type Message = Msg;
     type Config = Url;
 
-    fn init(_: Url, orders: &mut impl Orders<Msg>, env: &Env) -> Self {
+    fn init(_: Url, orders: &mut impl Orders<Msg>, env: Env) -> Self {
         Self {
-            ds: DesignSystem::default(),
+            env: env.clone(),
             value: 10,
             inc: Button::config()
                 .text("Increment")
-                .init(&mut orders.proxy(Msg::IncBtn), &env),
+                .init(&mut orders.proxy(Msg::IncBtn), env.branch()),
             dec: Button::config()
                 .text("Increment")
-                .init(&mut orders.proxy(Msg::DecBtn), &env),
+                .init(&mut orders.proxy(Msg::DecBtn), env.branch()),
         }
     }
 
@@ -53,7 +53,7 @@ impl View<Node<Msg>> for MyApp {
                     .map_msg(Msg::IncBtn)
                     .on_click(|_| Msg::Increment),
             )
-            .push(&Text::new(self.value.to_string(), self.ds.clone()))
+            .push(&Text::new(self.value.to_string(), self.env.branch()))
             .push(
                 self.dec
                     .view()

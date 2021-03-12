@@ -22,7 +22,7 @@ use savory_style::{self as style, prelude::*};
 use std::borrow::Cow;
 
 pub enum Msg {
-    DesignSystem(DesignSystem),
+    Rerender,
     Focus(bool),
     MouseOver(bool),
     Disable(bool),
@@ -37,10 +37,7 @@ pub struct Radio {
     #[rich(read)]
     #[element(config)]
     id: Option<Id>,
-    #[rich(read)]
-    #[element(config(default), data_lens)]
-    style: Style,
-    design_system: DesignSystem,
+    env: Env,
 
     // radio element properties
     #[rich(read(copy, rename = is_toggled))]
@@ -68,13 +65,12 @@ impl Element for Radio {
     type Message = Msg;
     type Config = Config;
 
-    fn init(config: Self::Config, orders: &mut impl Orders<Msg>, _: &Env) -> Self {
-        orders.subscribe(|ds: DesignSystemChanged| Msg::DesignSystem(ds.0));
+    fn init(config: Self::Config, orders: &mut impl Orders<Msg>, env: Env) -> Self {
+        orders.subscribe(|_: RerenderRequested| Msg::Rerender);
 
         Self {
             id: config.id,
-            design_system: DesignSystem::default(),
-            style: config.style,
+            env,
             text: config.text,
             toggled: config.toggled,
             disabled: config.disabled,
@@ -86,7 +82,7 @@ impl Element for Radio {
 
     fn update(&mut self, msg: Msg, _: &mut impl Orders<Msg>) {
         match msg {
-            Msg::DesignSystem(val) => self.design_system = val,
+            Msg::Rerender => {}
             Msg::MouseOver(val) => self.mouse_over = val,
             Msg::Focus(val) => self.focused = val,
             Msg::Disable(val) => self.disabled = val,
@@ -98,7 +94,7 @@ impl Element for Radio {
 
 impl View<Node<Msg>> for Radio {
     fn view(&self) -> Node<Msg> {
-        let style_map = self.design_system.radio(self.data_lens());
+        let style_map = self.env.ds().radio(self.data_lens());
         let radio = html::button()
             .class("radio")
             .style(style_map.radio)

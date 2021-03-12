@@ -14,7 +14,7 @@ impl Element for Counter {
     type Config = Url;
 
     // initialize the app in this function
-    fn init(_: Url, _: &mut impl Orders<Msg>, _: &Env) -> Self {
+    fn init(_: Url, _: &mut impl Orders<Msg>, _: Env) -> Self {
         Self(0)
     }
 

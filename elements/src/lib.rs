@@ -55,6 +55,8 @@ pub mod element;
 pub mod id;
 pub mod layout;
 // pub mod screen_info_notifier;
+pub mod env;
+pub mod rerender;
 pub mod traits;
 pub mod view;
 
@@ -67,7 +69,7 @@ pub use self::prelude::*;
 /// savory_elements prelude
 pub mod prelude {
     pub use super::{
-        design_system::{self, DesignSystem, DesignSystemChanged},
+        design_system::{self, DesignSystem},
         // animator::{self, Animator},
         // screen_info_notifier::{self, NewScreenInfo, ScreenInfo, ScreenInfoNotifier},
         element::{
@@ -77,8 +79,10 @@ pub mod prelude {
             switch::{self, Switch},
             text_input::{self, TextInput},
         },
+        env::EnvExt,
         // id::Id,
         layout::flex::{self, Flex},
+        rerender::RerenderRequested,
         traits::ExtendBuilder,
         view::{
             image::{self, Image},

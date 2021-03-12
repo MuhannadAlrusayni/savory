@@ -17,7 +17,7 @@ impl Element for Counter {
     type Message = Msg;
     type Config = Config;
 
-    fn init(config: Self::Config, _: &mut impl Orders<Msg>, _: &Env) -> Self {
+    fn init(config: Self::Config, _: &mut impl Orders<Msg>, _: Env) -> Self {
         Self {
             value: config.value,
         }
@@ -79,13 +79,13 @@ impl Element for MyApp {
     type Message = AppMsg;
     type Config = Url;
 
-    fn init(_: Url, orders: &mut impl Orders<AppMsg>, env: &Env) -> Self {
+    fn init(_: Url, orders: &mut impl Orders<AppMsg>, env: Env) -> Self {
         Self {
             counter_element: Counter::config()
                 // give it starting value. 10 will be used as default value if
                 // we didn't pass value
                 .value(100)
-                .init(&mut orders.proxy(AppMsg::Counter), &env),
+                .init(&mut orders.proxy(AppMsg::Counter), env),
         }
     }
 

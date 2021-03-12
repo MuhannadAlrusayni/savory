@@ -318,7 +318,7 @@ impl DesignSystemImpl for SavoryDS {
             .config_if(lens.ghost, |c| c.background(Color::Transparent))
     }
 
-    fn switch(&self, lens: switch::SwitchLens<'_>) -> switch::StyleMap {
+    fn switch(&self, lens: switch::SwitchLens) -> switch::StyleMap {
         let theme = self.current_theme();
         if lens.checkbox_like {
             let size = 16.0;
@@ -442,7 +442,7 @@ impl DesignSystemImpl for SavoryDS {
         }
     }
 
-    fn radio(&self, lens: radio::RadioLens<'_>) -> radio::StyleMap {
+    fn radio(&self, lens: radio::RadioLens) -> radio::StyleMap {
         let theme = self.current_theme();
         let size = 16.0;
         let radio = Style::default()

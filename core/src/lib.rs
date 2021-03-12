@@ -55,7 +55,7 @@
 //!     type Config = u32;
 //!     type Message = Msg;
 //!
-//!     fn init(config: u32, _orders: &mut impl Orders<Msg>, env: &Env) -> Self {
+//!     fn init(config: u32, _orders: &mut impl Orders<Msg>, env: Env) -> Self {
 //!         Counter(config)
 //!     }
 //!
