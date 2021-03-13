@@ -50,7 +50,7 @@ pub trait DesignSystemImpl {
     //     ScreenInfo { class, orientation }
     // }
     /// Generate needed styles for `Text` view
-    fn text(&self, class: text::TextLens<'_>) -> style::Style;
+    fn text(&self, class: text::TextLens) -> style::Style;
     /// Generate needed styles for `Button` view
     fn button(&self, class: button::ButtonLens) -> style::Style;
     /// Generate needed styles for `Switch` view

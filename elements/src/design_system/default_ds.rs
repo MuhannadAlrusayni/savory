@@ -175,31 +175,43 @@ impl Default for SavoryDS {
 }
 
 impl DesignSystemImpl for SavoryDS {
-    fn text(&self, lens: text::TextLens<'_>) -> Style {
+    fn text(&self, lens: text::TextLens) -> Style {
         let theme = self.current_theme();
+        let text::TextLens {
+            color,
+            letter_spacing,
+            word_spacing,
+            lines_spacing,
+            align,
+            justify_by,
+            indent,
+            wrap,
+            shadow,
+            size,
+            style,
+            small_caps,
+            weight,
+            disabled,
+        } = lens;
         Style::default()
             .and_text(|t| {
-                t.color(lens.color.unwrap_or(theme.text.into()))
-                    .try_letter_spacing(lens.letter_spacing.cloned())
-                    .try_word_spacing(lens.word_spacing.cloned())
-                    .line_height(
-                        lens.lines_spacing
-                            .cloned()
-                            .unwrap_or(theme.line_height.clone()),
-                    )
-                    .try_align(lens.align)
-                    .try_justify(lens.justify_by)
-                    .try_indent(lens.indent.cloned())
-                    .config_if(lens.wrap, |c| c.word_wrap(val::BreakWord))
-                    .try_shadow(lens.shadow.cloned())
+                t.color(color.unwrap_or(theme.text.into()))
+                    .try_letter_spacing(letter_spacing)
+                    .try_word_spacing(word_spacing)
+                    .line_height(lines_spacing.unwrap_or(theme.line_height.clone()))
+                    .try_align(align)
+                    .try_justify(justify_by)
+                    .try_indent(indent)
+                    .config_if(wrap, |c| c.word_wrap(val::BreakWord))
+                    .try_shadow(shadow)
             })
             .and_font(|f| {
-                f.size(lens.size.cloned().unwrap_or(theme.font_size.clone().into()))
-                    .try_style(lens.style)
-                    .config_if(lens.small_caps, |f| f.variant(val::SmallCaps))
-                    .try_weight(lens.weight)
+                f.size(size.unwrap_or(theme.font_size.clone().into()))
+                    .try_style(style)
+                    .config_if(small_caps, |f| f.variant(val::SmallCaps))
+                    .try_weight(weight)
             })
-            .config_if(lens.disabled, |c| {
+            .config_if(disabled, |c| {
                 c.cursor(val::NotAllowed)
                     .text(theme.disabled_text)
                     .push(St::UserSelect, val::None)

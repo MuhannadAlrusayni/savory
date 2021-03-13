@@ -55,6 +55,7 @@ pub mod element;
 pub mod id;
 pub mod layout;
 // pub mod screen_info_notifier;
+pub mod data_lens;
 pub mod env;
 pub mod rerender;
 pub mod traits;
@@ -69,6 +70,7 @@ pub use self::prelude::*;
 /// savory_elements prelude
 pub mod prelude {
     pub use super::{
+        data_lens::DataLens,
         design_system::{self, DesignSystem},
         // animator::{self, Animator},
         // screen_info_notifier::{self, NewScreenInfo, ScreenInfo, ScreenInfoNotifier},

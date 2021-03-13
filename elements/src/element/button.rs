@@ -47,29 +47,29 @@ pub struct Button {
     #[element(config)]
     icon: Option<Svg<Msg>>,
     #[rich(read(copy, rename = is_disabled))]
-    #[element(config(default), data_lens(copy))]
+    #[element(config(default), data_lens)]
     disabled: bool,
     #[rich(read(copy, rename = is_focused))]
-    #[element(data_lens(copy))]
+    #[element(data_lens)]
     focused: bool,
     #[rich(read(copy, rename = is_mouse_over))]
-    #[element(data_lens(copy))]
+    #[element(data_lens)]
     mouse_over: bool,
 
     #[rich(read(copy))]
-    #[element(config, data_lens(copy))]
+    #[element(config, data_lens)]
     color: Option<palette::Hsl>,
     #[rich(read(copy))]
-    #[element(config, data_lens(copy))]
+    #[element(config, data_lens)]
     text_color: Option<palette::Hsl>,
     #[rich(read(copy))]
-    #[element(config(default = "ActionType::Default"), data_lens(copy))]
+    #[element(config(default = "ActionType::Default"), data_lens)]
     action_type: ActionType,
     #[rich(read(copy))]
-    #[element(config(default = "Kind::Default"), data_lens(copy))]
+    #[element(config(default = "Kind::Default"), data_lens)]
     kind: Kind,
     #[rich(read(copy, rename = is_ghost))]
-    #[element(config(default, no_pub), data_lens(copy))]
+    #[element(config(default, no_pub), data_lens)]
     ghost: bool,
 }
 

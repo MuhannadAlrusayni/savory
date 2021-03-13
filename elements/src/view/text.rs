@@ -46,7 +46,7 @@ pub struct Text {
     #[rich(write)]
     pub text: Cow<'static, str>,
     #[rich(write, read(copy, rename = is_disabled))]
-    #[element(data_lens(copy))]
+    #[element(data_lens)]
     pub disabled: bool,
 
     #[rich(write, write(option), value_fns = {
@@ -59,16 +59,16 @@ pub struct Text {
         smaller = val::Smaller,
         larger = val::Larger,
     })]
-    #[element(data_lens)]
+    #[element(data_lens(clone))]
     pub size: Option<Size>,
     #[rich(write, write(option), value_fns = {
         italic = val::Italic,
         oblique = val::Oblique,
     })]
-    #[element(data_lens(copy))]
+    #[element(data_lens)]
     pub style: Option<FontStyle>,
     #[rich(write)]
-    #[element(data_lens(copy))]
+    #[element(data_lens)]
     pub small_caps: bool,
     #[rich(write, write(option), value_fns = {
         thin_weight        = Weight::L100,
@@ -82,19 +82,19 @@ pub struct Text {
         ultra_bold_weight  = Weight::L800,
         heavy_weight       = Weight::L900,
     })]
-    #[element(data_lens(copy))]
+    #[element(data_lens)]
     pub weight: Option<Weight>,
     #[rich(write, write(option))]
-    #[element(data_lens(copy))]
+    #[element(data_lens)]
     pub color: Option<Color>,
     #[rich(write, write(option))]
-    #[element(data_lens)]
+    #[element(data_lens(clone))]
     pub letter_spacing: Option<unit::Length>,
     #[rich(write, write(option))]
-    #[element(data_lens)]
+    #[element(data_lens(clone))]
     pub word_spacing: Option<unit::Length>,
     #[rich(write, write(option))]
-    #[element(data_lens)]
+    #[element(data_lens(clone))]
     pub lines_spacing: Option<LineHeight>,
     #[rich(write, write(option), value_fns = {
         start = val::Start,
@@ -104,22 +104,22 @@ pub struct Text {
         center = val::Center,
         justify = val::Justify,
     })]
-    #[element(data_lens(copy))]
+    #[element(data_lens)]
     pub align: Option<TextAlign>,
     #[rich(write, write(option), value_fns = {
         justify_by_word = val::InterWord,
         justify_by_character = val::InterCharacter,
     })]
-    #[element(data_lens(copy))]
+    #[element(data_lens)]
     pub justify_by: Option<TextJustify>,
     #[rich(write, write(option))]
-    #[element(data_lens)]
+    #[element(data_lens(clone))]
     pub indent: Option<TextIndent>,
     #[rich(write)]
-    #[element(data_lens(copy))]
+    #[element(data_lens)]
     pub wrap: bool,
     #[rich(write, write(option), write(style = compose))]
-    #[element(data_lens)]
+    #[element(data_lens(clone))]
     pub shadow: Option<TextShadow>,
 }
 

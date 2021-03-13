@@ -42,26 +42,26 @@ pub struct Switch {
 
     // switch element properties
     #[rich(read(copy, rename = is_toggled))]
-    #[element(config(default), data_lens(copy))]
+    #[element(config(default), data_lens)]
     toggled: bool,
     #[rich(read)]
     #[element(config)]
     text: Option<Cow<'static, str>>,
     #[rich(read(copy, rename = is_disabled))]
-    #[element(config(default), data_lens(copy))]
+    #[element(config(default), data_lens)]
     disabled: bool,
     #[rich(read(copy, rename = is_focused))]
-    #[element(data_lens(copy))]
+    #[element(data_lens)]
     focused: bool,
     #[rich(read(copy, rename = is_mouse_over))]
-    #[element(data_lens(copy))]
+    #[element(data_lens)]
     mouse_over: bool,
 
     #[rich(read(copy))]
-    #[element(config, data_lens(copy))]
+    #[element(config, data_lens)]
     pub color: Option<style::Color>,
     #[rich(write)]
-    #[element(config(default), data_lens(copy))]
+    #[element(config(default), data_lens)]
     pub checkbox_like: bool,
 }
 

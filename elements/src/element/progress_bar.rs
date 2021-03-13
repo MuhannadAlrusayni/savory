@@ -30,19 +30,19 @@ pub struct ProgressBar {
     env: Env,
 
     #[rich(read(copy))]
-    #[element(config(default = "0.0", no_pub), data_lens(copy))]
+    #[element(config(default = "0.0", no_pub), data_lens)]
     value: f32,
     #[rich(read(copy))]
-    #[element(config(default = "100.0", no_pub), data_lens(copy))]
+    #[element(config(default = "100.0", no_pub), data_lens)]
     max: f32,
     #[rich(read(copy))]
-    #[element(config(default = "0.0", no_pub), data_lens(copy))]
+    #[element(config(default = "0.0", no_pub), data_lens)]
     min: f32,
     #[rich(read(copy, rename = is_disabled))]
-    #[element(config(default), data_lens(copy))]
+    #[element(config(default), data_lens)]
     disabled: bool,
 
-    #[element(config, data_lens(copy))]
+    #[element(config, data_lens)]
     color: Option<style::Color>,
 }
 

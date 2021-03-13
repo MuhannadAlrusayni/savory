@@ -40,7 +40,7 @@ struct Lens {
     #[darling(default)]
     nested: util::Flag,
     #[darling(default)]
-    copy: util::Flag,
+    clone: util::Flag,
 }
 
 #[derive(Debug, Default, Clone)]
@@ -336,92 +336,69 @@ impl Element {
                                 Some(ty) => {
                                     let struct_lens_name = format_ident!("{}Lens", ty.name());
                                     if data_lens.nested.is_some() {
-                                        if data_lens.copy.is_some() {
-                                            panic!("nested lens cannot be copyable");
+                                        if data_lens.clone.is_some() {
+                                            panic!("clone cannot be used with nested data lens");
                                         }
-                                        let field_def = quote! { pub #name: Option<#struct_lens_name<'lens>>, };
+                                        let field_def = quote! { pub #name: Option<#struct_lens_name>, };
                                         let field_in_new_fn = quote! { #name: self.#name.as_ref().map(|val| val.data_lens()), };
                                         (field_def, field_in_new_fn)
                                     } else {
-                                        if data_lens.copy.is_some() {
+                                        if data_lens.clone.is_some() {
                                             let field_def = quote! { pub #name: Option<#ty>, };
-                                            let field_in_new_fn = quote! { #name: self.#name, };
+                                            let field_in_new_fn = quote! { #name: self.#name.clone(), };
                                             (field_def, field_in_new_fn)
                                         } else {
-                                            let field_def = quote! { pub #name: Option<&'lens #ty>, };
-                                            let field_in_new_fn = quote! { #name: self.#name.as_ref(), };
+                                            let field_def = quote! { pub #name: Option<#ty>, };
+                                            let field_in_new_fn = quote! { #name: self.#name, };
                                             (field_def, field_in_new_fn)
                                         }
                                     }
                                 }
                                 None => {
                                     if data_lens.nested.is_some() {
-                                        if data_lens.copy.is_some() {
-                                            panic!("nested lens cannot be copyable");
+                                        if data_lens.clone.is_some() {
+                                            panic!("clone cannot be used with nested data lens");
                                         }
                                         let struct_lens_name = format_ident!("{}Lens", ty.name());
                                         let field_def =
-                                            quote! { pub #name: #struct_lens_name<'lens>, };
+                                            quote! { pub #name: #struct_lens_name, };
                                         let field_in_new_fn =
                                             quote! { #name: self.#name.data_lens(), };
                                         (field_def, field_in_new_fn)
                                     } else {
-                                        if data_lens.copy.is_some() {
+                                        if data_lens.clone.is_some() {
                                             let field_def = quote! { pub #name: #ty, };
-                                            let field_in_new_fn = quote! { #name: self.#name, };
+                                            let field_in_new_fn = quote! { #name: self.#name.clone(), };
                                             (field_def, field_in_new_fn)
                                         } else {
-                                            let field_def = quote! { pub #name: &'lens #ty, };
-                                            let field_in_new_fn = quote! { #name: &self.#name, };
+                                            let field_def = quote! { pub #name: #ty, };
+                                            let field_in_new_fn = quote! { #name: self.#name, };
                                             (field_def, field_in_new_fn)
                                         }
                                     }
                                 }
-                            }                        })
+                            }
+                        })
                 })
                 .unzip::<_, _, Vec<_>, Vec<_>>();
 
-        let mut generics = self.generics.clone();
-        let (lens_lifetime, plain_lens_lifetime) = if !lens_fields.iter().all(|f| {
-            f.data_lens
-                .as_ref()
-                .map_or(false, |dl| dl.clone().unwrap_or_default().copy.is_some())
-        }) {
-            generics.params.push(
-                syn::LifetimeDef::new(syn::Lifetime::new("'lens", proc_macro2::Span::call_site()))
-                    .into(),
-            );
-            (quote! { <'lens> }, quote! { 'lens })
-        } else {
-            (quote! {}, quote! {})
-        };
-        let (impl_generics, ..) = generics.split_for_impl();
-        let (.., ty_generics, where_clause) = self.generics.split_for_impl();
-
+        let (impl_generics, ty_generics, where_clause) = self.generics.split_for_impl();
         let struct_name = &self.ident;
         let lens_struct_name = format_ident!("{}Lens", &self.ident);
         quote! {
-            pub struct #lens_struct_name #lens_lifetime {
+            pub struct #lens_struct_name {
                 #( #fields_def )*
             }
 
-            impl #impl_generics #struct_name #ty_generics #where_clause {
-                fn data_lens(& #plain_lens_lifetime self) -> #lens_struct_name #lens_lifetime {
+            impl #impl_generics DataLens for #struct_name #ty_generics #where_clause {
+                type Data = #lens_struct_name;
+
+                fn data_lens(&self) -> #lens_struct_name {
                     #lens_struct_name {
                         #( #fields_in_new_fn )*
                     }
                 }
             }
-
-            // impl #impl_generics ThemeLens<'lens> for #struct_name #ty_generics #where_clause {
-            //     type Lens = #lens_struct_name<'lens>;
-
-            //     fn data_lens(&'lens self) -> #lens_struct_name<'lens> {
-            //         #lens_struct_name {
-            //             #( #fields_in_new_fn )*
-            //         }
-            //     }
-            // }
         }
     }
 }

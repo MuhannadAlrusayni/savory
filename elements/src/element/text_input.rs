@@ -53,20 +53,20 @@ pub struct TextInput {
     #[element(config)]
     placeholder: Option<Cow<'static, str>>,
     #[rich(read(copy, rename = is_disabled))]
-    #[element(config(default), data_lens(copy))]
+    #[element(config(default), data_lens)]
     disabled: bool,
     #[rich(read(copy, rename = is_focused))]
-    #[element(data_lens(copy))]
+    #[element(data_lens)]
     focused: bool,
     #[rich(read(copy, rename = is_mouse_over))]
-    #[element(data_lens(copy))]
+    #[element(data_lens)]
     mouse_over: bool,
 
     #[rich(read(copy))]
-    #[element(config, data_lens(copy))]
+    #[element(config, data_lens)]
     color: Option<style::Color>,
     #[rich(read(copy))]
-    #[element(config, data_lens(copy))]
+    #[element(config, data_lens)]
     text_color: Option<style::Color>,
 }
 
