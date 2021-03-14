@@ -32,6 +32,7 @@ pub enum Msg {
 
 /// Button element
 #[derive(Rich, Element)]
+#[element(style_map)]
 pub struct Button {
     // general element properties
     #[rich(read)]

@@ -71,7 +71,7 @@ pub use self::prelude::*;
 pub mod prelude {
     pub use super::{
         data_lens::DataLens,
-        design_system::{self, DesignSystem},
+        design_system::{self, DesignSystem, ViewStyle},
         // animator::{self, Animator},
         // screen_info_notifier::{self, NewScreenInfo, ScreenInfo, ScreenInfoNotifier},
         element::{

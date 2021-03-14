@@ -30,7 +30,7 @@ use std::borrow::Cow;
 ///
 /// see the [module docs](crate::prelude::text)
 #[derive(Rich, Clone, Element)]
-#[element(view)]
+#[element(view, style_map)]
 pub struct Text {
     #[rich(write)]
     pub id: Option<Id>,

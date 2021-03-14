@@ -34,6 +34,7 @@ pub enum Msg {
 }
 
 #[derive(Rich, Element)]
+#[element(style_map)]
 pub struct TextInput {
     // general element properties
     #[rich(read)]

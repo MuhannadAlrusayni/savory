@@ -17,7 +17,7 @@ pub(crate) struct Element {
     generics: syn::Generics,
     data: ast::Data<util::Ignored, Field>,
     #[darling(default)]
-    style_map: Option<Style>,
+    style_map: Option<Override<Style>>,
     #[darling(default)]
     config_bound: Option<Vec<syn::WherePredicate>>,
     #[darling(default)]
@@ -80,25 +80,42 @@ impl ToTokens for Element {
 impl Element {
     fn get_style_map_impl(&self) -> TokenStream {
         if let Some(ref style) = self.style_map {
-            let fields = style
-                .fields
-                .iter()
-                .map(|(name, ty)| {
-                    let name = syn::Ident::new(name, proc_macro2::Span::call_site());
-                    let ty = ty
-                        .as_ref()
-                        .map(|ty| quote! { #ty })
-                        .unwrap_or_else(|| quote! { savory_style::Style });
-                    quote! { pub #name: #ty, }
-                })
-                .collect::<Vec<_>>();
+            let style_map_ty = match style.as_ref() {
+                Override::Inherit => {
+                    quote! { pub type StyleMap = savory_style::Style; }
+                }
+                Override::Explicit(style) => {
+                    let fields = style
+                        .fields
+                        .iter()
+                        .map(|(name, ty)| {
+                            let name = syn::Ident::new(name, proc_macro2::Span::call_site());
+                            let ty = ty
+                                .as_ref()
+                                .map(|ty| quote! { #ty })
+                                .unwrap_or_else(|| quote! { savory_style::Style });
+                            quote! { pub #name: #ty, }
+                        })
+                        .collect::<Vec<_>>();
+                    quote! {
+                        #[derive(Clone, Debug, Default, PartialEq, Rich)]
+                        pub struct StyleMap {
+                            #(
+                                #[rich(write(style = compose), write)]
+                                #fields
+                            )*
+                        }
+                    }
+                }
+            };
+
+            let (impl_generics, ty_generics, where_clause) = self.generics.split_for_impl();
+            let struct_name = &self.ident;
             quote! {
-                #[derive(Clone, Debug, Default, PartialEq, Rich)]
-                pub struct StyleMap {
-                    #(
-                        #[rich(write(style = compose), write)]
-                        #fields
-                    )*
+                #style_map_ty
+
+                impl #impl_generics ViewStyle for #struct_name #ty_generics #where_clause {
+                    type StyleMap = StyleMap;
                 }
             }
         } else {
