@@ -55,15 +55,20 @@ impl Env {
     /// This method will panic if the value type already exists in the current
     /// environment branche.
     pub fn set<T: 'static>(self, val: T) -> Self {
-        if !self.contains::<T>() {
-            self.try_set(val)
-        } else {
-            // panic if the type value is already exists
+        // panic if the type value is already exists
+        if self.contains::<T>() {
             panic!(
                 "Env::set(..) failed, type {} already exists in the current environment branch",
                 std::any::type_name::<T>()
             )
         }
+        self.branch.borrow_mut().insert(val);
+        self
+    }
+
+    pub fn overwrite<T: 'static>(self, val: T) -> Self {
+        self.branch.borrow_mut().insert(val);
+        self
     }
 
     /// Set a new variable in current environment branch without panicing.
