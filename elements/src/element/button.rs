@@ -124,7 +124,10 @@ impl Element for Button {
 
 impl View<Node<Msg>> for Button {
     fn view(&self) -> Node<Msg> {
-        let style = self.env.ds().button(self.data_lens());
+        let style = self
+            .env
+            .designer::<Button>()
+            .design(self.data_lens(), &self.env);
         html::button()
             .class("button")
             .try_id(self.id.clone())

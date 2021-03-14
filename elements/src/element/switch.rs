@@ -99,7 +99,10 @@ impl Element for Switch {
 
 impl View<Node<Msg>> for Switch {
     fn view(&self) -> Node<Msg> {
-        let style_map = self.env.ds().switch(self.data_lens());
+        let style_map = self
+            .env
+            .designer::<Switch>()
+            .design(self.data_lens(), &self.env);
         let switch = html::button()
             .class("switch")
             .style(style_map.switch)

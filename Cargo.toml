@@ -4,6 +4,7 @@ members = [
   "core",
   "style",
   "elements",
+  "design-system",
   # macro crates
   "elements-derive",
   "router",

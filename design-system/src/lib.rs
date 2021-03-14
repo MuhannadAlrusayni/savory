@@ -1,12 +1,13 @@
-use crate::{design_system::DesignSystemImpl, prelude::*};
 use palette::{Hsla, LinSrgb, LinSrgba};
-use savory::prelude::DeclarativeConfig;
+use savory::prelude::{DeclarativeConfig, Env};
+use savory_elements::prelude::*;
 use savory_style::{
     calc::calc,
     text::LineHeight,
     unit::{px, sec, Length},
     values as val, Color, St, Style,
 };
+use std::rc::Rc;
 
 pub struct SavoryDS {
     default_theme: Theme,
@@ -68,6 +69,16 @@ pub struct Theme {
 }
 
 impl SavoryDS {
+    pub fn push_to_environment(self, env: Env) {
+        let ds = Rc::new(self);
+        env.overwrite_designer::<Text>(ds.clone())
+            .overwrite_designer::<Button>(ds.clone())
+            .overwrite_designer::<Switch>(ds.clone())
+            .overwrite_designer::<Radio>(ds.clone())
+            .overwrite_designer::<TextInput>(ds.clone())
+            .overwrite_designer::<ProgressBar>(ds.clone());
+    }
+
     pub fn current_theme(&self) -> &Theme {
         match self.current_theme {
             ThemeName::Default => &self.default_theme,
@@ -174,8 +185,8 @@ impl Default for SavoryDS {
     }
 }
 
-impl DesignSystemImpl for SavoryDS {
-    fn text(&self, lens: text::TextLens) -> Style {
+impl Design<Text> for SavoryDS {
+    fn design(&self, lens: text::TextLens, _: &Env) -> text::StyleMap {
         let theme = self.current_theme();
         let text::TextLens {
             color,
@@ -217,8 +228,10 @@ impl DesignSystemImpl for SavoryDS {
                     .push(St::UserSelect, val::None)
             })
     }
+}
 
-    fn button(&self, lens: button::ButtonLens) -> Style {
+impl Design<Button> for SavoryDS {
+    fn design(&self, lens: button::ButtonLens, _: &Env) -> button::StyleMap {
         use button::{ActionType, Kind};
         let theme = self.current_theme();
         let kind = lens.kind;
@@ -329,8 +342,10 @@ impl DesignSystemImpl for SavoryDS {
             // for ghost buttons only
             .config_if(lens.ghost, |c| c.background(Color::Transparent))
     }
+}
 
-    fn switch(&self, lens: switch::SwitchLens) -> switch::StyleMap {
+impl Design<Switch> for SavoryDS {
+    fn design(&self, lens: switch::SwitchLens, _: &Env) -> switch::StyleMap {
         let theme = self.current_theme();
         if lens.checkbox_like {
             let size = 16.0;
@@ -376,7 +391,9 @@ impl DesignSystemImpl for SavoryDS {
                 .and_size(|s| s.width(px(size)).height(px(size / 2.0)))
                 .push(St::Transition, "all .2s cubic-bezier(.12,.4,.29,1.46) .1s")
                 .push(St::Transform, "rotate(-45deg) translate(25%, 25%)")
-                .config_if(lens.disabled, |c| c.border(theme.disabled_text));
+                .config_if(lens.disabled, |c| {
+                    c.border(theme.disabled_text).cursor(val::NotAllowed)
+                });
             let text = Style::default()
                 .display(val::InlineFlex)
                 .align_items(val::Center)
@@ -453,8 +470,10 @@ impl DesignSystemImpl for SavoryDS {
             }
         }
     }
+}
 
-    fn radio(&self, lens: radio::RadioLens) -> radio::StyleMap {
+impl Design<Radio> for SavoryDS {
+    fn design(&self, lens: radio::RadioLens, _: &Env) -> radio::StyleMap {
         let theme = self.current_theme();
         let size = 16.0;
         let radio = Style::default()
@@ -523,8 +542,10 @@ impl DesignSystemImpl for SavoryDS {
             text,
         }
     }
+}
 
-    fn text_input(&self, lens: text_input::TextInputLens) -> Style {
+impl Design<TextInput> for SavoryDS {
+    fn design(&self, lens: text_input::TextInputLens, _: &Env) -> text_input::StyleMap {
         let theme = self.current_theme();
         Style::default()
             .push(St::Appearance, val::None)
@@ -557,8 +578,10 @@ impl DesignSystemImpl for SavoryDS {
                     .cursor(val::NotAllowed)
             })
     }
+}
 
-    fn progress_bar(&self, lens: progress_bar::ProgressBarLens) -> progress_bar::StyleMap {
+impl Design<ProgressBar> for SavoryDS {
+    fn design(&self, lens: progress_bar::ProgressBarLens, _: &Env) -> progress_bar::StyleMap {
         let theme = self.current_theme();
         let height = 8.0;
         let progress_bar = Style::default()

@@ -132,7 +132,10 @@ pub enum Direction {
 
 impl<Msg> View<Node<Msg>> for Text {
     fn view(&self) -> Node<Msg> {
-        let style = self.env.ds().text(self.data_lens());
+        let style = self
+            .env
+            .designer::<Text>()
+            .design(self.data_lens(), &self.env);
         html::p()
             .config(|p| match self.direction {
                 Some(Direction::Rtl) => p.dir("rtl"),

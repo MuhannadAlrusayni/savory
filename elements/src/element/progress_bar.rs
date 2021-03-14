@@ -93,7 +93,10 @@ impl Element for ProgressBar {
 
 impl View<Node<Msg>> for ProgressBar {
     fn view(&self) -> Node<Msg> {
-        let style_map = self.env.ds().progress_bar(self.data_lens());
+        let style_map = self
+            .env
+            .designer::<ProgressBar>()
+            .design(self.data_lens(), &self.env);
         let indicator = html::div().class("indicator").style(style_map.indicator);
 
         html::div()

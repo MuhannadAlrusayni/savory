@@ -112,7 +112,10 @@ impl Element for TextInput {
 
 impl View<Node<Msg>> for TextInput {
     fn view(&self) -> Node<Msg> {
-        let style = self.env.ds().text_input(self.data_lens());
+        let style = self
+            .env
+            .designer::<TextInput>()
+            .design(self.data_lens(), &self.env);
 
         html::input()
             .class("text-input")

@@ -1,17 +1,64 @@
-use crate::prelude::DesignSystem;
+use crate::prelude::{DataLens, Design, Designer, ViewStyle};
 use savory::prelude::Env;
+use std::rc::Rc;
 
 pub trait EnvExt {
-    /// return design system from the environment
-    ///
-    /// # panic
-    /// panic if design system isn't found
-    fn ds(&self) -> DesignSystem;
+    fn set_designer<T>(self, designer: Rc<dyn Design<T>>) -> Self
+    where
+        T: DataLens + ViewStyle + 'static;
+
+    fn overwrite_designer<T>(self, designer: Rc<dyn Design<T>>) -> Self
+    where
+        T: DataLens + ViewStyle + 'static;
+
+    fn update_designer<T, F>(self, f: F) -> Self
+    where
+        T: DataLens + ViewStyle + 'static,
+        F: FnOnce(Designer<T>) -> Rc<dyn Design<T>>;
+
+    fn set_and_update_designer<T, F>(self, designer: Rc<dyn Design<T>>, f: F) -> Self
+    where
+        T: DataLens + ViewStyle + 'static,
+        F: FnOnce(Designer<T>) -> Rc<dyn Design<T>>;
+
+    fn designer<T: 'static>(&self) -> Designer<T>;
 }
 
 impl EnvExt for Env {
-    fn ds(&self) -> DesignSystem {
-        self.get::<DesignSystem>()
-            .expect("Design System isn't found in the environment")
+    fn set_designer<T>(self, designer: Rc<dyn Design<T>>) -> Self
+    where
+        T: DataLens + ViewStyle + 'static,
+    {
+        self.set(Designer::from(designer))
+    }
+
+    fn overwrite_designer<T>(self, designer: Rc<dyn Design<T>>) -> Self
+    where
+        T: DataLens + ViewStyle + 'static,
+    {
+        self.overwrite(Designer::from(designer))
+    }
+
+    fn update_designer<T, F>(self, f: F) -> Self
+    where
+        T: DataLens + ViewStyle + 'static,
+        F: FnOnce(Designer<T>) -> Rc<dyn Design<T>>,
+    {
+        self.update(|d: Designer<T>| Designer::from(f(d)))
+    }
+
+    fn set_and_update_designer<T, F>(self, designer: Rc<dyn Design<T>>, f: F) -> Self
+    where
+        T: DataLens + ViewStyle + 'static,
+        F: FnOnce(Designer<T>) -> Rc<dyn Design<T>>,
+    {
+        self.try_set(Designer::from(designer)).update_designer(f)
+    }
+
+    fn designer<T: 'static>(&self) -> Designer<T> {
+        self.get::<Designer<T>>().expect(&format!(
+            "{} isn't found in the environment",
+            std::any::type_name::<Designer<T>>()
+        ))
     }
 }

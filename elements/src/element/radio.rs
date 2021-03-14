@@ -94,7 +94,10 @@ impl Element for Radio {
 
 impl View<Node<Msg>> for Radio {
     fn view(&self) -> Node<Msg> {
-        let style_map = self.env.ds().radio(self.data_lens());
+        let style_map = self
+            .env
+            .designer::<Radio>()
+            .design(self.data_lens(), &self.env);
         let radio = html::button()
             .class("radio")
             .style(style_map.radio)
