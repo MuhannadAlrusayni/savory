@@ -24,47 +24,47 @@ pub enum ThemeName {
 #[derive(Clone)]
 pub struct Theme {
     // base colors
-    red: LinSrgb,
-    volcano: LinSrgb,
-    orange: LinSrgb,
-    gold: LinSrgb,
-    yellow: LinSrgb,
-    lime: LinSrgb,
-    green: LinSrgb,
-    cyan: LinSrgb,
-    blue: LinSrgb,
-    geek_blue: LinSrgb,
-    purple: LinSrgb,
-    magenta: LinSrgb,
+    pub red: LinSrgb,
+    pub volcano: LinSrgb,
+    pub orange: LinSrgb,
+    pub gold: LinSrgb,
+    pub yellow: LinSrgb,
+    pub lime: LinSrgb,
+    pub green: LinSrgb,
+    pub cyan: LinSrgb,
+    pub blue: LinSrgb,
+    pub geek_blue: LinSrgb,
+    pub purple: LinSrgb,
+    pub magenta: LinSrgb,
 
     // colors
-    info: LinSrgb,
-    success: LinSrgb,
-    processing: LinSrgb,
-    error: LinSrgb,
-    highlight: LinSrgb,
-    warning: LinSrgb,
-    normal: LinSrgb,
-    white: LinSrgb,
-    black: LinSrgb,
+    pub info: LinSrgb,
+    pub success: LinSrgb,
+    pub processing: LinSrgb,
+    pub error: LinSrgb,
+    pub highlight: LinSrgb,
+    pub warning: LinSrgb,
+    pub normal: LinSrgb,
+    pub white: LinSrgb,
+    pub black: LinSrgb,
 
     // elements colors
-    bg: LinSrgb,
-    body_bg: LinSrgb,
-    element_bg: LinSrgb,
-    border: LinSrgb,
-    border_split: LinSrgb,
-    text: LinSrgba,
-    text_secondary: LinSrgba,
-    disabled_bg: LinSrgb,
-    disabled_text: LinSrgba,
+    pub bg: LinSrgb,
+    pub body_bg: LinSrgb,
+    pub element_bg: LinSrgb,
+    pub border: LinSrgb,
+    pub border_split: LinSrgb,
+    pub text: LinSrgba,
+    pub text_secondary: LinSrgba,
+    pub disabled_bg: LinSrgb,
+    pub disabled_text: LinSrgba,
 
     // base sizes & lengths
-    font_size: Length,
-    line_height: LineHeight,
-    border_radius: Length,
-    border_width: Length,
-    height: Length,
+    pub font_size: Length,
+    pub line_height: LineHeight,
+    pub border_radius: Length,
+    pub border_width: Length,
+    pub height: Length,
     // minmum_padding: Length,
 }
 
@@ -98,6 +98,10 @@ impl SavoryDS {
                 colors::generate(color, opts)
             }
         }
+    }
+
+    pub fn primary(&self) -> LinSrgb {
+        self.primary
     }
 }
 
