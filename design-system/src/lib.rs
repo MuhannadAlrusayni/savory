@@ -600,7 +600,8 @@ impl Design<ProgressBar> for SavoryDS {
             .push(St::BoxSizing, val::BorderBox)
             .background(theme.processing)
             .and_border(|b| b.radius(px(100)))
-            .and_size(|s| s.width(lens.value / lens.max).height(px(height)));
+            .and_size(|s| s.width(lens.value / lens.max).height(px(height)))
+            .config_if(lens.disabled, |c| c.background(theme.disabled_bg));
 
         progress_bar::StyleMap {
             progress_bar,
