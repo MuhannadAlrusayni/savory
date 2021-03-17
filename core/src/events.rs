@@ -3,7 +3,7 @@
 
 use crate::prelude::*;
 use seed::prelude::{
-    ev, keyboard_ev, mouse_ev, pointer_ev, web_sys, El, EventHandler, JsCast, Node,
+    ev, keyboard_ev, mouse_ev, pointer_ev, touch_ev, web_sys, El, EventHandler, JsCast, Node,
 };
 use std::any::{Any, TypeId};
 
@@ -135,6 +135,12 @@ events_api! {
     ui_ev: web_sys::UiEvent {
         on_resize = Ev::Resize,
         on_select = Ev::Select,
+    }
+    touch_ev: web_sys::TouchEvent {
+        on_touch_start = Ev::TouchStart,
+        on_touch_end = Ev::TouchEnd,
+        on_touch_cancel = Ev::TouchCancel,
+        on_touch_move = Ev::TouchMove,
     }
 }
 
