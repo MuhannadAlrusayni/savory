@@ -39,7 +39,7 @@ impl Env {
         self.branch.borrow().contains::<T>()
     }
 
-    /// Set a new variable in current environment branch.
+    /// Insert a value in to the environment.
     ///
     /// # Accessibility
     ///
@@ -48,25 +48,9 @@ impl Env {
     /// they don't know that it's even exists.
     ///
     /// this method won't overwrite existing values in predecessors branches, it
-    /// only shadow them!.
-    ///
-    /// # panic
-    ///
-    /// This method will panic if the value type already exists in the current
-    /// environment branche.
-    pub fn set<T: 'static>(self, val: T) -> Self {
-        // panic if the type value is already exists
-        if self.contains::<T>() {
-            panic!(
-                "Env::set(..) failed, type {} already exists in the current environment branch",
-                std::any::type_name::<T>()
-            )
-        }
-        self.branch.borrow_mut().insert(val);
-        self
-    }
-
-    pub fn overwrite<T: 'static>(self, val: T) -> Self {
+    /// will only shadow them!. In case this value type already exists in the
+    /// current environment it will be replaced.
+    pub fn insert<T: 'static>(self, val: T) -> Self {
         self.branch.borrow_mut().insert(val);
         self
     }
@@ -75,15 +59,11 @@ impl Env {
     ///
     /// Same as `set()` but it won't panic, it will set nothing if type value
     /// already exists.
-    pub fn try_set<T: 'static>(self, val: T) -> Self {
+    pub fn try_insert<T: 'static>(self, val: T) -> Self {
         if !self.contains::<T>() {
             self.branch.borrow_mut().insert(val);
         }
         self
-    }
-
-    pub fn set_and_update<T: 'static, F: FnOnce(T) -> T>(self, val: T, f: F) -> Self {
-        self.try_set(val).update(f)
     }
 
     /// Update environment variable
@@ -91,8 +71,7 @@ impl Env {
     /// # panic
     ///
     /// this method will panic if the passed type value is not initialized, you
-    /// can use `try_update` for non-panicing version or use `set_and_update` if
-    /// you want to initialize the value if it's not initialized.
+    /// can use `try_update` for non-panicing version.
     pub fn update<T: 'static, F: FnOnce(T) -> T>(self, f: F) -> Self {
         // update current environment
         let val = { self.branch.borrow_mut().remove::<T>() };
@@ -100,12 +79,6 @@ impl Env {
             self.branch.borrow_mut().insert(f(val));
             return self;
         }
-
-        // // or update parent environment
-        // if let Some(parent_env) = self.parent {
-        //     self.parent = Some(Box::new(parent_env.update(f)));
-        //     return self;
-        // }
 
         // panic if type value doesn't exists
         panic!(
@@ -121,11 +94,6 @@ impl Env {
             self.branch.borrow_mut().insert(f(val));
             return self;
         }
-
-        // // or update parent environment
-        // if let Some(parent_env) = self.parent {
-        //     self.parent = Some(Box::new(parent_env.try_update(f)));
-        // }
         self
     }
 }
@@ -141,12 +109,12 @@ mod tests {
         struct DarkTheme(bool);
 
         let base = Env::base_branch()
-            .set("Hi There".to_owned())
-            .set(DarkTheme(true));
+            .insert("Hi There".to_owned())
+            .insert(DarkTheme(true));
         assert_eq!(base.get::<DarkTheme>(), Some(DarkTheme(true)));
         assert_eq!(base.get::<String>(), Some("Hi There".to_owned()));
 
-        let branch = base.branch().set(DarkTheme(false));
+        let branch = base.branch().insert(DarkTheme(false));
 
         assert_eq!(base.get::<DarkTheme>(), Some(DarkTheme(true)));
         assert_eq!(base.get::<String>(), Some("Hi There".to_owned()));

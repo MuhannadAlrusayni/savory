@@ -3,11 +3,11 @@ use savory::prelude::Env;
 use std::rc::Rc;
 
 pub trait EnvExt {
-    fn set_designer<T>(self, designer: Rc<dyn Design<T>>) -> Self
+    fn insert_designer<T>(self, designer: Rc<dyn Design<T>>) -> Self
     where
         T: DataLens + ViewStyle + 'static;
 
-    fn overwrite_designer<T>(self, designer: Rc<dyn Design<T>>) -> Self
+    fn try_insert_designer<T>(self, designer: Rc<dyn Design<T>>) -> Self
     where
         T: DataLens + ViewStyle + 'static;
 
@@ -16,7 +16,7 @@ pub trait EnvExt {
         T: DataLens + ViewStyle + 'static,
         F: FnOnce(Designer<T>) -> Rc<dyn Design<T>>;
 
-    fn set_and_update_designer<T, F>(self, designer: Rc<dyn Design<T>>, f: F) -> Self
+    fn try_update_designer<T, F>(self, f: F) -> Self
     where
         T: DataLens + ViewStyle + 'static,
         F: FnOnce(Designer<T>) -> Rc<dyn Design<T>>;
@@ -25,18 +25,18 @@ pub trait EnvExt {
 }
 
 impl EnvExt for Env {
-    fn set_designer<T>(self, designer: Rc<dyn Design<T>>) -> Self
+    fn insert_designer<T>(self, designer: Rc<dyn Design<T>>) -> Self
     where
         T: DataLens + ViewStyle + 'static,
     {
-        self.set(Designer::from(designer))
+        self.insert(Designer::from(designer))
     }
 
-    fn overwrite_designer<T>(self, designer: Rc<dyn Design<T>>) -> Self
+    fn try_insert_designer<T>(self, designer: Rc<dyn Design<T>>) -> Self
     where
         T: DataLens + ViewStyle + 'static,
     {
-        self.overwrite(Designer::from(designer))
+        self.try_insert(Designer::from(designer))
     }
 
     fn update_designer<T, F>(self, f: F) -> Self
@@ -47,12 +47,12 @@ impl EnvExt for Env {
         self.update(|d: Designer<T>| Designer::from(f(d)))
     }
 
-    fn set_and_update_designer<T, F>(self, designer: Rc<dyn Design<T>>, f: F) -> Self
+    fn try_update_designer<T, F>(self, f: F) -> Self
     where
         T: DataLens + ViewStyle + 'static,
         F: FnOnce(Designer<T>) -> Rc<dyn Design<T>>,
     {
-        self.try_set(Designer::from(designer)).update_designer(f)
+        self.try_update(|d: Designer<T>| Designer::from(f(d)))
     }
 
     fn designer<T: 'static>(&self) -> Designer<T> {

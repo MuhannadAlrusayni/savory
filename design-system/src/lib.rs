@@ -71,12 +71,12 @@ pub struct Theme {
 impl SavoryDS {
     pub fn push_to_environment(self, env: Env) {
         let ds = Rc::new(self);
-        env.overwrite_designer::<Text>(ds.clone())
-            .overwrite_designer::<Button>(ds.clone())
-            .overwrite_designer::<Switch>(ds.clone())
-            .overwrite_designer::<Radio>(ds.clone())
-            .overwrite_designer::<TextInput>(ds.clone())
-            .overwrite_designer::<ProgressBar>(ds.clone());
+        env.insert_designer::<Text>(ds.clone())
+            .insert_designer::<Button>(ds.clone())
+            .insert_designer::<Switch>(ds.clone())
+            .insert_designer::<Radio>(ds.clone())
+            .insert_designer::<TextInput>(ds.clone())
+            .insert_designer::<ProgressBar>(ds.clone());
     }
 
     pub fn current_theme(&self) -> &Theme {
