@@ -594,7 +594,7 @@ impl Design<ProgressBar> for SavoryDS {
             .push(St::BoxSizing, val::BorderBox)
             .background(theme.bg)
             .and_border(|b| b.radius(px(100)))
-            .and_size(|s| s.width(1.0).height(px(height)));
+            .and_size(|s| s.width(1.0).min_width(px(50)).height(px(height)));
 
         let indicator = Style::default()
             .push(St::BoxSizing, val::BorderBox)
