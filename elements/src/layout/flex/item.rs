@@ -59,6 +59,23 @@ impl<Msg> Item<Msg> {
     }
 }
 
+impl<Msg: 'static, OtherMsg: 'static> MessageMapper<Msg, OtherMsg> for Item<Msg> {
+    type SelfWithOtherMs = Item<OtherMsg>;
+
+    fn map_msg(self, f: impl FnOnce(Msg) -> OtherMsg + 'static + Clone) -> Self::SelfWithOtherMs {
+        Item {
+            content: self.content.map_msg(f),
+            id: self.id,
+            order: self.order,
+            grow: self.grow,
+            shrink: self.shrink,
+            basis: self.basis,
+            align_self: self.align_self,
+            flatten: self.flatten,
+        }
+    }
+}
+
 impl<Msg> From<Node<Msg>> for Item<Msg> {
     fn from(node: Node<Msg>) -> Self {
         Self {

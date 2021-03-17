@@ -70,6 +70,15 @@ impl<Msg> Flex<Msg> {
         item.into()
     }
 
+    pub fn push_maped<T, F, CMsg: 'static>(self, item: T, f: F) -> Self
+    where
+        T: Into<Item<CMsg>>,
+        F: FnOnce(CMsg) -> Msg + 'static + Clone,
+        Msg: 'static,
+    {
+        self.push(item.into().map_msg(f))
+    }
+
     pub fn normal(self) -> Self {
         self.justify_content(val::Normal)
             .align_content(val::Normal)
