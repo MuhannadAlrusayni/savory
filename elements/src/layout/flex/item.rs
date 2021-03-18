@@ -39,6 +39,7 @@ impl<Msg> View<Node<Msg>> for Item<Msg> {
                 .try_flex_shrink(self.shrink)
                 .try_flex_basis(self.basis.clone())
                 .try_align_self(self.align_self)
+                .and_size(|s| s.width(1.0))
         };
 
         if self.is_flatten() {
