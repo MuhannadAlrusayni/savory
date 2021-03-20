@@ -78,6 +78,7 @@ pub mod prelude {
             button::{self, Button},
             progress_bar::{self, ProgressBar},
             radio::{self, Radio},
+            slider::{self, Slider},
             switch::{self, Switch},
             text_input::{self, TextInput},
         },

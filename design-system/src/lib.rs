@@ -76,7 +76,8 @@ impl SavoryDS {
             .insert_designer::<Switch>(ds.clone())
             .insert_designer::<Radio>(ds.clone())
             .insert_designer::<TextInput>(ds.clone())
-            .insert_designer::<ProgressBar>(ds.clone());
+            .insert_designer::<ProgressBar>(ds.clone())
+            .insert_designer::<Slider>(ds.clone());
     }
 
     pub fn current_theme(&self) -> &Theme {
@@ -581,6 +582,80 @@ impl Design<TextInput> for SavoryDS {
                     .border(theme.border)
                     .cursor(val::NotAllowed)
             })
+    }
+}
+
+impl Design<Slider> for SavoryDS {
+    fn design(&self, lens: slider::SliderLens, _: &Env) -> slider::StyleMap {
+        let theme = self.current_theme();
+
+        let primary = self.generate(self.primary);
+        let width = 1.0;
+        let min_width = 80;
+        let height = 14;
+        let slider = Style::default()
+            .push(St::UserSelect, val::None)
+            .push(St::BoxSizing, val::BorderBox)
+            .display(val::Flex)
+            .and_size(|s| s.height(px(height)).width(width).min_width(px(min_width)))
+            .cursor(val::Inherit)
+            .position(val::Relative)
+            .config_if(lens.disabled, |c| c.cursor(val::NotAllowed));
+
+        let bar = Style::default()
+            .position(val::Absolute)
+            .push(St::UserSelect, val::None)
+            .push(St::BoxSizing, val::BorderBox)
+            .align_self(val::Center)
+            .cursor(val::Inherit)
+            .background(theme.bg)
+            .and_border(|b| b.radius(px(100)))
+            .and_size(|s| s.width(width).height(px(3)))
+            .push(St::Transition, "background-color .3s")
+            .config_if(lens.mouse_over, |c| {
+                c.background(LinSrgb::new(0.88, 0.88, 0.88))
+            });
+
+        let indicator = Style::default()
+            .position(val::Absolute)
+            .push(St::UserSelect, val::None)
+            .push(St::BoxSizing, val::BorderBox)
+            .align_self(val::Center)
+            .cursor(val::Inherit)
+            .background(primary[2])
+            .and_border(|b| b.radius(px(100)))
+            .and_size(|s| s.width(lens.value / lens.max).height(px(3)))
+            .push(St::Transition, "background-color .3s")
+            .config_if(lens.mouse_over, |c| c.background(primary[3]))
+            .config_if(lens.disabled, |c| c.background(theme.disabled_text));
+
+        let button = Style::default()
+            .push(St::UserSelect, val::None)
+            .push(St::BoxSizing, val::BorderBox)
+            .align_self(val::Center)
+            .cursor(val::Inherit)
+            .background(theme.white)
+            .and_border(|b| b.solid().radius(0.5).width(px(2)).color(primary[2]))
+            .size(px(height))
+            .push(St::Transition, "border-color .3s,box-shadow .6s,transform .3s cubic-bezier(.18,.89,.32,1.28),-webkit-box-shadow .6s,-webkit-transform .3s cubic-bezier(.18,.89,.32,1.28)")
+            .and_position(|p: savory_style::Position| {
+                p.position(val::Absolute).left(lens.value / lens.max)
+            })
+            .align_self(val::Center)
+            .push(St::Transform, "translateX(-50%)")
+            .config_if(lens.mouse_over | lens.focused, |c| {
+                c.border(primary[5])
+            })
+            .config_if(lens.disabled, |c| {
+                c.border(theme.disabled_text)
+            });
+
+        slider::StyleMap {
+            button,
+            slider,
+            bar,
+            indicator,
+        }
     }
 }
 

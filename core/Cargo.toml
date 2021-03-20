@@ -24,9 +24,7 @@ type-map = "0.5.0"
 [dependencies.web-sys]
 version = "^0.3.45"
 features = [
-    "WheelEvent", "CompositionEvent", "HtmlInputElement", "InputEvent",
-    "FocusEvent", "DragEvent", "DomRect", "Element", "HtmlLabelElement",
-    "UiEvent"
+    "FocusEvent", "CompositionEvent", "WheelEvent",
 ]
 
 [dev-dependencies]
